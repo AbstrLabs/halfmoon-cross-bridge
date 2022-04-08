@@ -1,15 +1,12 @@
 import { Request, Response } from 'express';
 
+import { ensureString } from './utils/helper';
 import express from 'express';
+import { init_near_acc } from './txn/init';
+import { loadDotEnv } from './utils/dotenv';
 import { mint } from './txn/mint_handler';
 
-/* helper */
-function ensure_string(value: any): string {
-  if (typeof value !== 'string') {
-    throw new Error('value is not string type');
-  }
-  return value as string;
-}
+loadDotEnv();
 
 /* route */
 const app = express();
@@ -36,17 +33,17 @@ apiRouter
   .route('/mint')
   .get((req: Request, res: Response) => {
     const [from, to, amount] = [
-      ensure_string(req.query.from),
-      ensure_string(req.query.to),
-      parseFloat(ensure_string(req.query.amount)),
+      ensureString(req.query.from),
+      ensureString(req.query.to),
+      parseFloat(ensureString(req.query.amount)),
     ];
     mintResp(from, to, amount, res);
   })
   .post((req: Request, res: Response) => {
     // res.json(req.body);
     const [from, to, amount] = [
-      ensure_string(req.body['mint_from']),
-      ensure_string(req.body['mint_to']),
+      ensureString(req.body['mint_from']),
+      ensureString(req.body['mint_to']),
       req.body['mint_amount'],
     ];
     mintResp(from, to, amount, res);
@@ -64,8 +61,11 @@ apiRouter
 //     );
 //   })
 //   .post('/api/burn', (req: Request, res: Response) => {});
-
+function test() {
+  init_near_acc();
+}
 app.get('/', (req: Request, res: Response) => {
+  test();
   res.sendFile('example-frontend.html', { root: __dirname });
 });
 
@@ -74,6 +74,8 @@ app.use(express.urlencoded({ extended: true })); // parse application/x-www-form
 app.use(express.json()); // parse application/json
 
 app.use('/api', apiRouter);
-app.listen(3000, () => {
-  console.log('Application started on port 3000! http://localhost:3000/');
+app.listen(process.env.PORT, () => {
+  console.log(
+    `Application started on port ${process.env.PORT}! http://localhost:${process.env.PORT}/`
+  );
 });
