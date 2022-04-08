@@ -2,6 +2,6 @@
 // options: winston / morgan
 
 export { log };
-function log(args: any): void {
+function log(...args: any): void {
   console.log(...args);
 }
