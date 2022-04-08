@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 
 import { ensureString } from './utils/helper';
 import express from 'express';
-import { init_near_acc } from './txn/init';
+import { init_near_acc } from './blockchain/init';
 import { loadDotEnv } from './utils/dotenv';
-import { mint } from './txn/mint_handler';
+import { mint } from './blockchain/mint_handler';
 
 loadDotEnv();
 
@@ -61,11 +61,11 @@ apiRouter
 //     );
 //   })
 //   .post('/api/burn', (req: Request, res: Response) => {});
-function test() {
-  init_near_acc();
+async function test() {
+  await init_near_acc();
 }
-app.get('/', (req: Request, res: Response) => {
-  test();
+app.get('/', async (req: Request, res: Response) => {
+  await test();
   res.sendFile('example-frontend.html', { root: __dirname });
 });
 
