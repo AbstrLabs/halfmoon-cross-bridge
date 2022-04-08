@@ -5,7 +5,7 @@ import express from 'express';
 const app = express();
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Application works!');
+  res.sendFile('example-frontend.html', { root: __dirname });
 });
 
 app.listen(3000, () => {
