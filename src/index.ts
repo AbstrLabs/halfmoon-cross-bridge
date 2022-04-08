@@ -2,11 +2,12 @@ import { Request, Response } from 'express';
 
 import { ensureString } from './utils/helper';
 import express from 'express';
-import { init_near_acc } from './blockchain/init';
+import { genAlgoAcc } from './blockchain/init';
 import { loadDotEnv } from './utils/dotenv';
 import { mint } from './blockchain/mint_handler';
 
 loadDotEnv();
+async function test() {}
 
 /* route */
 const app = express();
@@ -61,9 +62,7 @@ apiRouter
 //     );
 //   })
 //   .post('/api/burn', (req: Request, res: Response) => {});
-async function test() {
-  await init_near_acc();
-}
+
 app.get('/', async (req: Request, res: Response) => {
   await test();
   res.sendFile('example-frontend.html', { root: __dirname });

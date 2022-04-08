@@ -1,9 +1,10 @@
 /* This file initialize blockchain related things */
+
+import * as algosdk from 'algosdk';
 import * as nearAPI from 'near-api-js';
+export { initNearAcc, initAlgoAcc, genAlgoAcc };
 
-export { init_near_acc };
-
-async function init_near_acc() {
+async function initNearAcc() {
   // key store
   const { keyStores, KeyPair } = nearAPI;
   const keyStore = new keyStores.InMemoryKeyStore();
@@ -35,4 +36,17 @@ async function init_near_acc() {
   // wallet
   // const { WalletConnection } = nearAPI;
   // const wallet = new WalletConnection(near);
+}
+
+async function initAlgoAcc() {}
+
+async function genAlgoAcc() {
+  const algoAcc = algosdk.generateAccount();
+  console.log('Account Address = ' + algoAcc.addr);
+  let account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
+  console.log('Account Mnemonic = ' + account_mnemonic);
+  console.log('Account created. Save off Mnemonic and address');
+  console.log('Add funds to account using the TestNet Dispenser: ');
+  console.log('https://dispenser.testnet.aws.algodev.network/ ');
+  return algoAcc;
 }
