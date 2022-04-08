@@ -16,13 +16,14 @@ const app = express();
 const apiRouter = express.Router();
 
 function mint_show_result(
+  // TODO: Should use a page - logger.
   from: string,
   to: string,
   amount: number,
   res: Response
 ): void {
   try {
-    for (let mintResult of mint(from, to, amount)) {
+    for (let mintResult of mint(from, to, amount, 'fake_hash')) {
       res.write(mintResult);
       res.write('\n');
     }
@@ -53,21 +54,23 @@ apiRouter
   });
 
 /* burn */
-app
-  .get('/api/burn', (req: Request, res: Response) => {
-    if (!req.query.amount || !req.query.to || !req.query.from) {
-      return res.status(400).send('Missing required query params');
-    }
-    // TODO: burn logic
-    res.send(
-      `Burning ${req.query.amount} goNEAR from ${req.query.from}(ALGO) to ${req.query.to}(NEAR)`
-    );
-  })
-  .post('/api/burn', (req: Request, res: Response) => {});
+// app
+//   .get('/api/burn', (req: Request, res: Response) => {
+//     if (!req.query.amount || !req.query.to || !req.query.from) {
+//       return res.status(400).send('Missing required query params');
+//     }
+//     // TODO: burn logic
+//     res.send(
+//       `Burning ${req.query.amount} goNEAR from ${req.query.from}(ALGO) to ${req.query.to}(NEAR)`
+//     );
+//   })
+//   .post('/api/burn', (req: Request, res: Response) => {});
 
-app.get('/', (req: Request, res: Response) => {
-  res.sendFile('example-frontend.html', { root: __dirname });
-});
+// app.get('/', (req: Request, res: Response) => {
+//   res.sendFile('example-frontend.html', { root: __dirname });
+// });
+
+/* Express setup */
 app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 app.use(express.json()); // parse application/json
 
