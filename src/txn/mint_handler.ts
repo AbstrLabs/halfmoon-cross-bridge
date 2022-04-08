@@ -5,54 +5,50 @@ import {
   type nearTxHash,
   type algoTxnId,
   type TxID,
+  TxType,
 } from '.';
+import { log } from '../utils/logger';
 export { mint };
 
-function* mint(
+async function mint(
   from: nearAddr,
   to: algoAddr,
   amount: number,
   hash: nearTxHash
-): Generator<string> {
+): Promise<void> {
   if (!from || !to || !amount) {
     throw new Error('Missing required params');
   }
   // const amount = +amount;
-  yield `Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`;
-  // yield* await bridge_txn_maker(
-  //   from,
-  //   to,
-  //   amount,
-  //   hash,
-  //   'mint' /* TODO: literal -> enum */
-  // );
-  yield 'fake mint success';
+  log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
+  await bridge_txn_maker(from, to, amount, hash, TxType.Mint);
+  log('fake mint success');
   return;
 }
 
-function* burn(
-  from: algoAddr,
-  to: nearAddr,
-  amount: number
-): Generator<string> {
-  if (!from || !to || !amount) {
-    throw new Error('Missing required params');
-  }
-  // const amount = +amount;
-  yield `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;
-  yield 'fake burn success';
-  return;
-}
+// function* burn(
+//   from: algoAddr,
+//   to: nearAddr,
+//   amount: number
+// ): Generator<string> {
+//   if (!from || !to || !amount) {
+//     throw new Error('Missing required params');
+//   }
+//   // const amount = +amount;
+//   yield `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;
+//   yield 'fake burn success';
+//   return;
+// }
 
-async function* bridge_txn_maker(
+async function bridge_txn_maker(
   from: addr,
   to: addr,
   amount: number,
   hash: TxID,
-  txnType: 'mint' | 'burn'
-): AsyncGenerator<string> {
-  yield `${txnType} transaction is being made`;
-  if (txnType == 'mint') {
+  txType: TxType
+): Promise<void> {
+  log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
+  if (txType == 'mint') {
     let indexer = algorandIndexer;
     await indexer.confirm_tx(hash);
   }

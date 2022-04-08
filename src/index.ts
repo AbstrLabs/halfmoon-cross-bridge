@@ -15,7 +15,7 @@ function ensure_string(value: any): string {
 const app = express();
 const apiRouter = express.Router();
 
-function mint_show_result(
+function mintResp(
   // TODO: Should use a page - logger.
   from: string,
   to: string,
@@ -23,10 +23,9 @@ function mint_show_result(
   res: Response
 ): void {
   try {
-    for (let mintResult of mint(from, to, amount, 'fake_hash')) {
-      res.write(mintResult);
-      res.write('\n');
-    }
+    mint(from, to, amount, 'fake_hash');
+    res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
+    res.write(`Will redirect to "history" after transaction confirmed. \n`);
     res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');
@@ -41,7 +40,7 @@ apiRouter
       ensure_string(req.query.to),
       parseFloat(ensure_string(req.query.amount)),
     ];
-    mint_show_result(from, to, amount, res);
+    mintResp(from, to, amount, res);
   })
   .post((req: Request, res: Response) => {
     // res.json(req.body);
@@ -50,7 +49,7 @@ apiRouter
       ensure_string(req.body['mint_to']),
       req.body['mint_amount'],
     ];
-    mint_show_result(from, to, amount, res);
+    mintResp(from, to, amount, res);
   });
 
 /* burn */
@@ -66,9 +65,9 @@ apiRouter
 //   })
 //   .post('/api/burn', (req: Request, res: Response) => {});
 
-// app.get('/', (req: Request, res: Response) => {
-//   res.sendFile('example-frontend.html', { root: __dirname });
-// });
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile('example-frontend.html', { root: __dirname });
+});
 
 /* Express setup */
 app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
