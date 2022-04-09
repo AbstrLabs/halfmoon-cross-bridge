@@ -1,7 +1,9 @@
-import { Indexer } from '.';
-import { nearAddr, type nearTxHash } from '..';
-import { log } from '../../utils/logger';
 import { providers, utils } from 'near-api-js';
+
+import { type nearAddr, type nearTxHash } from '../';
+import { ENV } from '../../utils/dotenv';
+import { log } from '../../utils/logger';
+import { Indexer } from './';
 
 export { NearIndexer };
 
@@ -31,7 +33,7 @@ class NearIndexer extends Indexer {
     const confirmed = new Promise<boolean>((resolve) => {
       setTimeout(() => {
         resolve(false);
-      }, +(process.env.NEAR_CONFIRM_TIMEOUT_SEC as string) * 1000);
+      }, ENV.NEAR_CONFIRM_TIMEOUT_SEC * 1000);
       setInterval(async () => {
         let txReceipt = await NearIndexer.getTxnStatus(txId, from);
         if (correctnessCheck(txReceipt, to, from, amount)) {
@@ -39,7 +41,7 @@ class NearIndexer extends Indexer {
         } else {
           resolve(false);
         }
-      }, +(process.env.NEAR_CONFIRM_INTERVAL_SEC as string) * 1000);
+      }, ENV.NEAR_CONFIRM_INTERVAL_SEC * 1000);
     });
     return await confirmed;
   }
