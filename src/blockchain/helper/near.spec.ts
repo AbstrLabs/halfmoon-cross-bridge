@@ -9,7 +9,8 @@ describe('NearIndexer', () => {
     expect(NearIndexer).toBeDefined();
   });
   it('get txn status', async () => {
-    expect(await NearIndexer.getTxnStatus(exampleTxId, exampleFrom)).resolves;
+    expect(await NearIndexer.getTxnStatus(exampleTxId, exampleFrom))
+      .toBeDefined;
   });
   it('confirm transaction', async () => {
     expect(
@@ -19,6 +20,6 @@ describe('NearIndexer', () => {
         exampleAmount,
         exampleTxId
       )
-    ).resolves.toBe(true);
+    ).toBe(true);
   });
 });

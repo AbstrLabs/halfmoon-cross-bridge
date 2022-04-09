@@ -2,6 +2,7 @@ import { providers, utils } from 'near-api-js';
 
 import { type nearAddr, type nearTxHash } from '../';
 import { ENV } from '../../utils/dotenv';
+import { setImmediateInterval } from '../../utils/helper';
 import { log } from '../../utils/logger';
 import { Indexer } from './';
 
@@ -31,14 +32,21 @@ class NearIndexer extends Indexer {
     log('nearIndexer', 'confirmStatus()', 'txHash'); //verbose
 
     const confirmed = new Promise<boolean>((resolve) => {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         resolve(false);
       }, ENV.NEAR_CONFIRM_TIMEOUT_SEC * 1000);
-      setInterval(async () => {
+
+      const interval = setImmediateInterval(async () => {
+        console.log('itv run : '); // DEV_LOG_TO_REMOVE
+
         let txReceipt = await NearIndexer.getTxnStatus(txId, from);
         if (correctnessCheck(txReceipt, to, from, amount)) {
+          clearTimeout(timeout);
+          clearInterval(interval);
           resolve(true);
         } else {
+          clearTimeout(timeout);
+          clearInterval(interval);
           resolve(false);
         }
       }, ENV.NEAR_CONFIRM_INTERVAL_SEC * 1000);
@@ -65,9 +73,10 @@ const correctnessCheck = (
   if (txReceipt.status instanceof Object) {
     // txReceipt.status = txReceipt.status as providers.FinalExecutionStatus;
     if (
-      txReceipt.status.Failure !== undefined ||
+      txReceipt.status.Failure !== undefined &&
       txReceipt.status.Failure !== null
     ) {
+      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Filure'); //debug
       return false;
     }
   } else {
@@ -75,15 +84,22 @@ const correctnessCheck = (
       txReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
       txReceipt.status === providers.FinalExecutionStatusBasic.Failure
     ) {
+      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Filure'); //debug
       return false;
     }
   }
   // from
   if (txReceipt.transaction.signer_id !== from) {
+    log('nearIndexer', 'correctnessCheck()', 'txReceipt.transaction.signer_id'); //debug
     return false;
   } // maybe signer != sender?
   // to
   if (txReceipt.transaction.receiver_id !== to) {
+    log(
+      'nearIndexer',
+      'correctnessCheck()',
+      'txReceipt.transaction.receiver_id'
+    ); //debug
     return false;
   }
   // amount
@@ -91,6 +107,11 @@ const correctnessCheck = (
     txReceipt.transaction.actions[0].Transfer.deposit !==
     utils.format.parseNearAmount(`${amount}`)
   ) {
+    log(
+      'nearIndexer',
+      'correctnessCheck()',
+      'txReceipt.transaction.actions[0].Transfer.deposit'
+    ); //debug
     return false;
   }
   //TODO: amount should be string // 10^24 > 2^53.
