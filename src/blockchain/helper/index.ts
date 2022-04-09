@@ -1,11 +1,13 @@
-import { TxID, nearAddr } from '..';
+import { type TxID, type addr } from '..';
 
 export { Indexer };
 
 abstract class Indexer {
   static confirmTransaction(
-    txId: TxID,
-    senderAddr: nearAddr
+    from: addr,
+    to: addr,
+    amount: number,
+    txId: TxID
   ): Promise<boolean> {
     throw new Error('not implemented!');
   }
