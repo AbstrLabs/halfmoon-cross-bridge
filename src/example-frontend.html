@@ -37,50 +37,58 @@
     </header>
 
     <div id="app">
+      <div id="btn-group">
+        <button id="near-connect-btn">Connect NEAR Wallet</button>
+      </div>
+      <div id="txn">
 
-      <div>
-        <h2>Mint</h2>
-        <form action="/api/mint" method="post">
-          <label>
-            From (NEAR public address)
-            <input type="text" name="mint_from" id="mint_from" value="abstrlabs-test.testnet" />
-          </label>
-          <br />
-          <label>
-            To (Algorand public address)
-            <input type="text" name="mint_to" value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA" />
-          </label>
-          <br />
-          <label>
-            Amount
-            <input type="number" name="mint_amount" value="456.789" />
-          </label>
-          <button>MINT</button>
-        </form>
+        <div>
+          <h2>Mint</h2>
+          <form action="/api/mint" method="post">
+            <label>
+              From (NEAR public address)
+              <input type="text" name="mint_from" id="mint_from" value="abstrlabs-test.testnet" />
+            </label>
+            <br />
+            <label>
+              To (Algorand public address)
+              <input type="text" name="mint_to" value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA" />
+            </label>
+            <br />
+            <label>
+              Amount
+              <input type="number" name="mint_amount" value="456.789" />
+            </label>
+            <button>MINT</button>
+          </form>
+          <button>before MINT</button>
+        </div>
+
+        <div>
+          <h2>Burn</h2>
+          <form action="/api/mint" method="post">
+            <label>
+              From (Algorand public address)
+              <input type="text" name="burn_from" value="abstrlabs-test.testnet" />
+            </label>
+            <br />
+            <label>
+              To (NEAR public address)
+              <input type="text" name="burn_to" value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA" />
+            </label>
+            <br />
+            <label>
+              Amount
+              <input type="number" name="burn_amount" value="987.654" />
+            </label>
+            <button>BURN</button>
+          </form>
+        </div>
       </div>
 
-      <div>
-        <h2>Burn</h2>
-        <form action="/api/mint" method="post">
-          <label>
-            From (Algorand public address)
-            <input type="text" name="burn_from" value="abstrlabs-test.testnet"/>
-          </label>
-          <br />
-          <label>
-            To (NEAR public address)
-            <input type="text" name="burn_to" value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA"/>
-          </label>
-          <br />
-          <label>
-            Amount
-            <input type="number" name="burn_amount" value="987.654"/>
-          </label>
-          <button>BURN</button>
-        </form>
-      </div>
-
-      <a href="https://dispenser.testnet.aws.algodev.network/?account=JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE">testnet dispense algorand main acc</a>
+      <a
+        href="https://dispenser.testnet.aws.algodev.network/?account=JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE">testnet
+        dispense algorand main acc</a>
       <p>Some log should come here.</p>
     </div>
 
@@ -134,5 +142,56 @@
       </table>
     </footer>
   </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
+  <script>
+    /* NEAR CONNECT */
+
+    // modified from https://docs.near.org/docs/faq/naj-faq
+    // connect to NEAR
+    const near = new nearApi.Near({
+      keyStore: new nearApi.keyStores.BrowserLocalStorageKeyStore(),
+      networkId: 'testnet',
+      nodeUrl: 'https://rpc.testnet.near.org',
+      walletUrl: 'https://wallet.testnet.near.org'
+    });
+
+    // connect to the NEAR Wallet
+    const nearWallet = new nearApi.WalletConnection(near, 'my-app');
+    // connect to a NEAR smart contract
+    // const contract = new nearApi.Contract(wallet.account(), 'guest-book.testnet', {
+    //   viewMethods: ['getMessages'],
+    //   changeMethods: ['addMessage']
+    // });
+
+    const nearConnectButton = document.getElementById('near-connect-btn');
+    if (nearWallet.isSignedIn()) {
+      nearConnectButton.textContent = 'NEAR Wallet Connected!'
+    }
+
+    // call the getMessages view method
+    // contract.getMessages()
+    //   .then(messages => {
+    //     const ul = document.getElementById('messages');
+    //     messages.forEach(message => {
+    //       const li = document.createElement('li');
+    //       li.textContent = `${message.sender} - ${message.text}`;
+    //       ul.appendChild(li);
+    //     })
+    //   });
+
+    // Either sign in or call the addMessage change method on button click
+    document.getElementById('near-connect-btn').addEventListener('click', () => {
+      // if (wallet.isSignedIn()) {
+      //   contract.addMessage({
+      //     args: { text: document.getElementById('text').value },
+      //     amount: nearApi.utils.format.parseNearAmount('1')
+      //   })
+      // } else {
+      nearWallet.requestSignIn({});
+      // }
+    });
+
+  </script>
 
 </html>
