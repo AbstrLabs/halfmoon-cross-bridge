@@ -14,14 +14,14 @@ async function mint(
   from: nearAddr,
   to: algoAddr,
   amount: number,
-  hash: nearTxHash
+  txId: nearTxHash
 ): Promise<void> {
   if (!from || !to || !amount) {
     throw new Error('Missing required params');
   }
   // const amount = +amount;
   log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
-  await bridge_txn_maker(from, to, amount, hash, TxType.Mint);
+  await bridge_txn_maker(from, to, amount, txId, TxType.Mint);
   log('fake mint success');
   return;
 }

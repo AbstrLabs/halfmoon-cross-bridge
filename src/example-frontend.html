@@ -59,9 +59,11 @@
               Amount
               <input type="number" name="mint_amount" value="456.789" />
             </label>
+            <label>Transaction ID
+              <input type="text" name="mint_txid">
+            </label>
             <button>MINT</button>
           </form>
-          <button>before MINT</button>
         </div>
 
         <div>
@@ -80,6 +82,9 @@
             <label>
               Amount
               <input type="number" name="burn_amount" value="987.654" />
+            </label>
+            <label>Transaction ID
+              <input type="text" name="burn_txid">
             </label>
             <button>BURN</button>
           </form>
@@ -145,7 +150,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
   <script>
-    /* NEAR CONNECT */
+    /* NEAR wallet CONNECT */
 
     // modified from https://docs.near.org/docs/faq/naj-faq
     // connect to NEAR

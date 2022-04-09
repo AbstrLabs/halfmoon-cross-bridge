@@ -18,11 +18,13 @@ function mintResp(
   from: string,
   to: string,
   amount: number,
+  txId: string,
   res: Response
 ): void {
   try {
     mint(from, to, amount, 'fake_hash');
     res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
+    res.write(`Mint stake with transaction ID [fake_hash](NEAR).\n`);
     res.write(`Will redirect to "history" after transaction confirmed. \n`);
     res.end();
   } catch (e) {
@@ -33,21 +35,23 @@ function mintResp(
 apiRouter
   .route('/mint')
   .get((req: Request, res: Response) => {
-    const [from, to, amount] = [
+    const [from, to, amount, txId] = [
       ensureString(req.query.from),
       ensureString(req.query.to),
       parseFloat(ensureString(req.query.amount)),
+      ensureString(req.query.txId),
     ];
-    mintResp(from, to, amount, res);
+    mintResp(from, to, amount, txId, res);
   })
   .post((req: Request, res: Response) => {
     // res.json(req.body);
-    const [from, to, amount] = [
+    const [from, to, amount, txId] = [
       ensureString(req.body['mint_from']),
       ensureString(req.body['mint_to']),
       req.body['mint_amount'],
+      ensureString(req.body['mint_txId']),
     ];
-    mintResp(from, to, amount, res);
+    mintResp(from, to, amount, txId, res);
   });
 
 /* burn */
