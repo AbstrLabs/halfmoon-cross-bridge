@@ -1,4 +1,5 @@
 import { providers, utils } from 'near-api-js';
+import * as nearAPI from 'near-api-js';
 
 import { type nearAddr, type nearTxHash } from '../';
 import { BridgeTxnParam } from '../..';
@@ -7,7 +8,7 @@ import { setImmediateInterval } from '../../utils/helper';
 import { log } from '../../utils/logger';
 import { Indexer } from './';
 
-export { NearIndexer };
+export { NearIndexer, initNearAcc };
 
 class NearIndexer extends Indexer {
   static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
@@ -115,3 +116,40 @@ const correctnessCheck = (
   //TODO: amount should be string // 10^24 > 2^53.
   return true;
 };
+
+/* Functions below are designed to run once */
+
+/* unused, not tested */
+async function initNearAcc() {
+  // key store
+  const { keyStores, KeyPair } = nearAPI;
+  const keyStore = new keyStores.InMemoryKeyStore();
+  // const PRIVATE_KEY =
+  //   'by8kdJoJHu7uUkKfoaLd2J2Dp1q1TigeWMG123pHdu9UREqPcshCM223kWadm';
+  // // creates a public / private key pair using the provided private key
+  // const keyPair = KeyPair.fromString(PRIVATE_KEY);
+  // // adds the keyPair you created to keyStore
+  // await keyStore.setKey('testnet', 'example-account.testnet', keyPair);
+
+  // connect
+  const { connect } = nearAPI;
+  const config = {
+    networkId: 'testnet',
+    keyStore,
+    headers: {
+      // 'Access-Control-Allow-Origin': '*',
+      // 'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+      // 'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token',
+      // 'Content-Type': 'application/json',
+    },
+    nodeUrl: 'https://rpc.testnet.near.org',
+    walletUrl: 'https://wallet.testnet.near.org',
+    helperUrl: 'https://helper.testnet.near.org',
+    explorerUrl: 'https://explorer.testnet.near.org',
+  };
+  const near = await connect(config);
+
+  // wallet
+  // const { WalletConnection } = nearAPI;
+  // const wallet = new WalletConnection(near);
+}

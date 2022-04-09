@@ -11,3 +11,5 @@ abstract class Indexer {
     throw new Error('not implemented!');
   }
 }
+
+abstract class Account {}
