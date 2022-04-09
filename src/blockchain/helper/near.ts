@@ -1,6 +1,7 @@
 import { providers, utils } from 'near-api-js';
 
 import { type nearAddr, type nearTxHash } from '../';
+import { BridgeTxnParam } from '../..';
 import { ENV } from '../../utils/dotenv';
 import { setImmediateInterval } from '../../utils/helper';
 import { log } from '../../utils/logger';
@@ -24,13 +25,10 @@ class NearIndexer extends Indexer {
     return result;
   }
   static async confirmTransaction(
-    from: nearAddr,
-    to: nearAddr,
-    amount: number,
-    txId: nearTxHash
+    bridgeTxnParam: BridgeTxnParam
   ): Promise<boolean> {
     log('nearIndexer', 'confirmStatus()', 'txHash'); //verbose
-
+    const { from, to, amount, txId } = bridgeTxnParam;
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
@@ -67,7 +65,7 @@ const correctnessCheck = (
   txReceipt: providers.FinalExecutionOutcome,
   to: nearAddr,
   from: nearAddr,
-  amount: number
+  amount: string
 ): boolean => {
   // status check
   if (txReceipt.status instanceof Object) {
@@ -76,7 +74,7 @@ const correctnessCheck = (
       txReceipt.status.Failure !== undefined &&
       txReceipt.status.Failure !== null
     ) {
-      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Filure'); //debug
+      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Failure'); //debug
       return false;
     }
   } else {
@@ -84,7 +82,7 @@ const correctnessCheck = (
       txReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
       txReceipt.status === providers.FinalExecutionStatusBasic.Failure
     ) {
-      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Filure'); //debug
+      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Failure'); //debug
       return false;
     }
   }

@@ -1,14 +1,10 @@
 import { type TxID, type addr } from '..';
+import { BridgeTxnParam } from '../..';
 
 export { Indexer };
 
 abstract class Indexer {
-  static confirmTransaction(
-    from: addr,
-    to: addr,
-    amount: number,
-    txId: TxID
-  ): Promise<boolean> {
+  static confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
     throw new Error('not implemented!');
   }
   static getRecentTransactions(limit: number): Promise<TxID[]> {

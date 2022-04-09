@@ -7,85 +7,28 @@ import {
   type TxID,
   TxType,
 } from '.';
+import { BridgeTxnParam } from '..';
+import { sleep } from '../utils/helper';
 import { log } from '../utils/logger';
+import { bridge_txn_handler } from './bridge_txn_handler';
 export { mint };
 
-async function mint(
-  from: nearAddr,
-  to: algoAddr,
-  amount: number,
-  txId: nearTxHash
-): Promise<void> {
-  if (!from || !to || !amount) {
+async function mint(bridgeTxnParam: BridgeTxnParam): Promise<void> {
+  const { from, to, amount, txId } = bridgeTxnParam;
+
+  if (
+    from === undefined ||
+    to === undefined ||
+    amount === undefined ||
+    txId === undefined
+  ) {
     throw new Error('Missing required params');
   }
   // const amount = +amount;
   log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
-  await bridge_txn_maker(from, to, amount, txId, TxType.Mint);
+  await bridge_txn_handler(bridgeTxnParam, TxType.Mint);
   log('fake mint success');
   return;
 }
 
-// function* burn(
-//   from: algoAddr,
-//   to: nearAddr,
-//   amount: number
-// ): Generator<string> {
-//   if (!from || !to || !amount) {
-//     throw new Error('Missing required params');
-//   }
-//   // const amount = +amount;
-//   yield `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;
-//   yield 'fake burn success';
-//   return;
-// }
-
-async function bridge_txn_maker(
-  from: addr,
-  to: addr,
-  amount: number,
-  hash: TxID,
-  txType: TxType
-): Promise<void> {
-  log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
-  if (txType == 'mint') {
-    let indexer = algorandIndexer;
-    await indexer.confirm_tx(hash);
-  }
-  return;
-  // check indexer with hash
-}
-
-/* general helper */
-
-const sleep = (milliseconds: number) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
-
-/* Tmp helper */
-
-function* fakeConfirmTx(hash: TxID): Generator<boolean> {
-  console.log('hash : ', hash); // DEV_LOG_TO_REMOVE
-
-  yield false;
-  sleep(500);
-  yield false;
-  sleep(500);
-  yield false;
-  sleep(500);
-  yield true;
-  return;
-}
-
-class algorandIndexer {
-  static *confirm_tx(hash: TxID): Generator<boolean> {
-    yield* fakeConfirmTx(hash);
-    return;
-  }
-}
-class nearIndexer {
-  static *confirm_tx(hash: TxID): Generator<boolean> {
-    yield* fakeConfirmTx(hash);
-    return;
-  }
-}
+// `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;

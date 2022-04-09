@@ -4,6 +4,7 @@ import * as algosdk from 'algosdk';
 import * as nearAPI from 'near-api-js';
 export { initNearAcc, initAlgoAcc, genAlgoAcc };
 
+/* unused, not tested */
 async function initNearAcc() {
   // key store
   const { keyStores, KeyPair } = nearAPI;
@@ -40,6 +41,7 @@ async function initNearAcc() {
 
 async function initAlgoAcc() {}
 
+/* unused, tested */
 async function genAlgoAcc() {
   const algoAcc = algosdk.generateAccount();
   console.log('Account Address = ' + algoAcc.addr);
