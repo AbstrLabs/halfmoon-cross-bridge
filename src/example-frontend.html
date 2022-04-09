@@ -111,16 +111,23 @@
           <td></td>
         </tr>
         <tr>
-          <td>/api/mint?from=${MINT_FROM}&to=${MINT_TO}&amount=${MINT_AMOUNT}</td>
+          <td>/api/mint?from=${MINT_FROM}&to=${MINT_TO}&amount=${MINT_AMOUNT}&txid=${TXID}</td>
           <td>Mint API (POST)</td>
-          <td></td>
+          <td>from,to,amount,txid</td>
           <td></td>
           <td></td>
         </tr>
         <tr>
-          <td>/api/burn?from=${BURN_FROM}&to=${BURN_TO}&amount=${BURN_AMOUNT}</td>
+          <td>/api/burn?from=${BURN_FROM}&to=${BURN_TO}&amount=${BURN_AMOUNT}&txid=${TXID}</td>
           <td>Burn API (POST)</td>
+          <td>from,to,amount,txid</td>
           <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>/history</td>
+          <td>History</td>
+          <td>[txid]</td>
           <td></td>
           <td></td>
         </tr>
