@@ -1,5 +1,4 @@
 import { providers, utils } from 'near-api-js';
-import * as nearAPI from 'near-api-js';
 
 import { type nearAddr, type nearTxHash } from '../';
 import { BridgeTxnParam } from '../..';
@@ -8,7 +7,7 @@ import { setImmediateInterval } from '../../utils/helper';
 import { log } from '../../utils/logger';
 import { Indexer } from './';
 
-export { NearIndexer, initNearAcc };
+export { NearIndexer };
 
 class NearIndexer extends Indexer {
   static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
@@ -120,7 +119,7 @@ const correctnessCheck = (
 /* Functions below are designed to run once */
 
 /* unused, not tested */
-async function initNearAcc() {
+/* async function initNearAcc() {
   // key store
   const { keyStores, KeyPair } = nearAPI;
   const keyStore = new keyStores.InMemoryKeyStore();
@@ -152,4 +151,4 @@ async function initNearAcc() {
   // wallet
   // const { WalletConnection } = nearAPI;
   // const wallet = new WalletConnection(near);
-}
+} */
