@@ -7,9 +7,9 @@ import { setImmediateInterval } from '../utils/helper';
 import { log } from '../utils/logger';
 import { Blockchain } from '.';
 
-export { NearIndexer };
+export { NearBlockchain };
 
-class NearIndexer extends Blockchain {
+class NearBlockchain extends Blockchain {
   static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
@@ -19,7 +19,7 @@ class NearIndexer extends Blockchain {
     from: nearAddr
   ): Promise<providers.FinalExecutionOutcome> {
     log('nearIndexer', 'getTxnStatus()'); //verbose
-    const result = await NearIndexer.provider.txStatus(txId, from);
+    const result = await NearBlockchain.provider.txStatus(txId, from);
     log(result);
     // log((result.receipts_outcome[0] as any).proof!);
     return result;
@@ -37,7 +37,7 @@ class NearIndexer extends Blockchain {
       const interval = setImmediateInterval(async () => {
         console.log('itv run : '); // DEV_LOG_TO_REMOVE
 
-        let txReceipt = await NearIndexer.getTxnStatus(txId, from);
+        let txReceipt = await NearBlockchain.getTxnStatus(txId, from);
         if (correctnessCheck(txReceipt, to, from, amount)) {
           clearTimeout(timeout);
           clearInterval(interval);

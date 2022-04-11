@@ -2,8 +2,8 @@ export { bridge_txn_handler };
 import { type addr, type TxID, TxType } from '.';
 import { BridgeTxnParam } from '..';
 import { log } from '../utils/logger';
-import { AlgorandIndexer } from './algorand';
-import { NearIndexer } from './near';
+import { AlgorandBlockchain } from './algorand';
+import { NearBlockchain } from './near';
 
 async function bridge_txn_handler(
   bridgeTxnParam: BridgeTxnParam,
@@ -16,12 +16,12 @@ async function bridge_txn_handler(
   const { from, to, amount, txId } = bridgeTxnParam;
   log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
   if (txType === TxType.Mint) {
-    receiving_indexer = NearIndexer;
-    sending_indexer = AlgorandIndexer;
+    receiving_indexer = NearBlockchain;
+    sending_indexer = AlgorandBlockchain;
     sending_account = AlgorandAcc;
   } else if (txType === TxType.Burn) {
-    receiving_indexer = AlgorandIndexer;
-    sending_indexer = NearIndexer;
+    receiving_indexer = AlgorandBlockchain;
+    sending_indexer = NearBlockchain;
     sending_account = NearAcc;
   } else {
     throw new Error('Unknown txType');

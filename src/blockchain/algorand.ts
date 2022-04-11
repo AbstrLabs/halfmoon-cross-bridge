@@ -1,4 +1,10 @@
-export { AlgorandIndexer, initAlgoAcc, genAlgoAcc, algodClient, createGoNear };
+export {
+  AlgorandBlockchain,
+  initAlgoAcc,
+  genAlgoAcc,
+  algodClient,
+  createGoNear,
+};
 
 import * as algosdk from 'algosdk';
 
@@ -29,7 +35,7 @@ interface AsaConfig {
 
 type NoParamAsaConfig = Omit<AsaConfig, 'suggestedParams'>;
 
-class AlgorandIndexer extends Blockchain {
+class AlgorandBlockchain extends Blockchain {
   static async getTxnStatus(hash: string): Promise<string> {
     return 'finished';
   }

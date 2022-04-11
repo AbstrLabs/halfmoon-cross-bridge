@@ -1,21 +1,21 @@
-import { NearIndexer } from './near';
+import { NearBlockchain } from './near';
 
 const exampleFrom = 'abstrlabs-test.testnet';
 const exampleTo = 'abstrlabs.testnet';
 const exampleAmount = '1';
 const exampleTxId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7';
-describe('NearIndexer', () => {
+describe('NearBlockchain', () => {
   it.skip('should be defined', () => {
-    expect(NearIndexer).toBeDefined();
+    expect(NearBlockchain).toBeDefined();
   });
   it('get txn status', async () => {
     expect(
-      await NearIndexer.getTxnStatus(exampleTxId, exampleFrom)
+      await NearBlockchain.getTxnStatus(exampleTxId, exampleFrom)
     ).toBeDefined();
   });
   it('confirm transaction', async () => {
     expect(
-      await NearIndexer.confirmTransaction({
+      await NearBlockchain.confirmTransaction({
         from: exampleFrom,
         to: exampleTo,
         amount: exampleAmount,
