@@ -14,18 +14,19 @@ const default_ENV = {
 };
 
 const secret_ENV = {
-  NEAR_MASTER_ADDR: 'undefined',
-  NEAR_MASTER_PRIV: 'undefined',
-  NEAR_MASTER_PASS: 'undefined',
-  ALGO_MASTER_ADDR: 'undefined',
-  ALGO_MASTER_PRIV: 'undefined',
-  ALGO_MASTER_PASS: 'undefined',
-  NEAR_EXAMPL_ADDR: 'undefined',
-  NEAR_EXAMPL_PRIV: 'undefined',
-  NEAR_EXAMPL_PASS: 'undefined',
-  ALGO_EXAMPL_ADDR: 'undefined',
-  ALGO_EXAMPL_PRIV: 'undefined',
-  ALGO_EXAMPL_PASS: 'undefined',
+  NEAR_MASTER_ADDR: 'not_loaded_from_env',
+  NEAR_MASTER_PRIV: 'not_loaded_from_env',
+  NEAR_MASTER_PASS: 'not_loaded_from_env',
+  ALGO_MASTER_ADDR: 'not_loaded_from_env',
+  ALGO_MASTER_PRIV: 'not_loaded_from_env',
+  ALGO_MASTER_PASS: 'not_loaded_from_env',
+  NEAR_EXAMPL_ADDR: 'not_loaded_from_env',
+  NEAR_EXAMPL_PRIV: 'not_loaded_from_env',
+  NEAR_EXAMPL_PASS: 'not_loaded_from_env',
+  ALGO_EXAMPL_ADDR: 'not_loaded_from_env',
+  ALGO_EXAMPL_PRIV: 'not_loaded_from_env',
+  ALGO_EXAMPL_PASS: 'not_loaded_from_env',
+  PURE_STAKE_API_KEY: 'not_loaded_from_env',
 };
-
+loadDotEnv();
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env };
