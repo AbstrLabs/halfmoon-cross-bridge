@@ -1,18 +1,18 @@
 export { bridge_txn_handler };
 import { type Addr, type TxID, TxType, Blockchain } from '..';
-import { GeneralTxInfo } from '../..';
+import { GenericTxInfo } from '../..';
 import { log } from '../../utils/logger';
 import { algoBlockchain } from '../algorand';
 import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
-  bridgeTxnParam: GeneralTxInfo,
+  genericTxInfo: GenericTxInfo,
   txType: TxType
 ): Promise<void> {
   /* CONFIG */
   let receivingBlockchain: Blockchain;
   let sendingBlockchain: Blockchain;
-  const { from, to, amount, txId } = bridgeTxnParam;
+  const { from, to, amount, txId } = genericTxInfo;
   log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
   if (txType === TxType.Mint) {
     receivingBlockchain = nearBlockchain;
@@ -26,33 +26,33 @@ async function bridge_txn_handler(
 
   /* MAKE TRANSACTION */
   await receivingBlockchain.confirmTransaction({
-    ...bridgeTxnParam,
+    ...genericTxInfo,
     to: 'abstrlabs.testnet',
   });
   await sendingBlockchain.makeTransaction({
-    ...bridgeTxnParam,
+    ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
   await sendingBlockchain.confirmTransaction({
-    ...bridgeTxnParam,
+    ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
   return;
   // check indexer with hash
 }
 
-const fake_makeTransaction = async (bridgeTxnParam: GeneralTxInfo) => {
+const fake_makeTransaction = async (genericTxInfo: GenericTxInfo) => {
   throw new Error('not implemented!');
 };
 
 class AlgorandAcc {
-  static makeTransaction(bridgeTxnParam: GeneralTxInfo) {
-    fake_makeTransaction(bridgeTxnParam);
+  static makeTransaction(genericTxInfo: GenericTxInfo) {
+    fake_makeTransaction(genericTxInfo);
   }
 }
 
 class NearAcc {
-  static makeTransaction(bridgeTxnParam: GeneralTxInfo) {
-    fake_makeTransaction(bridgeTxnParam);
+  static makeTransaction(genericTxInfo: GenericTxInfo) {
+    fake_makeTransaction(genericTxInfo);
   }
 }

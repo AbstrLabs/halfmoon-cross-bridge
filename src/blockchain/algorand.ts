@@ -3,21 +3,22 @@ export { algoBlockchain, createGoNearWithAdmin };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAddr, AlgoMnemonic, AlgoTxnId, NearAddr } from '.';
+import { AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
+import { Algodv2 as AlgodClient, SuggestedParams } from 'algosdk';
 import {
   AsaConfig,
   NoParamAsaConfig,
   noParamGoNearConfig,
 } from '../utils/config/asa';
 
-import { Algodv2 as AlgodClient } from 'algosdk';
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
-import { GeneralTxInfo } from '..';
+import { GenericTxInfo } from '..';
 import { log } from '../utils/logger';
 
 class AlgorandBlockchain implements Blockchain {
   readonly client: AlgodClient;
+  readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   constructor() {
     const pure_stake_client = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
@@ -27,15 +28,16 @@ class AlgorandBlockchain implements Blockchain {
     const algoClientParamSource = pure_stake_client;
     const { token, server, port } = algoClientParamSource;
     this.client = new AlgodClient(token, server, port);
+    this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
   async getTxnStatus(txnId: AlgoTxnId): Promise<string> {
     return 'finished';
   }
-  async confirmTransaction(bridgeTxnParam: GeneralTxInfo): Promise<boolean> {
+  async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
     throw new Error('not implemented!');
   }
-  async makeTransaction(bridgeTxnParam: GeneralTxInfo): Promise<AlgoTxnId> {
+  async makeTransaction(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
     throw new Error('not implemented!');
   }
 
@@ -60,7 +62,7 @@ class AlgorandBlockchain implements Blockchain {
   ) {
     const asaConfigWithSuggestedParams: AsaConfig = {
       ...noParamAsaConfig,
-      suggestedParams: await this.client.getTransactionParams().do(),
+      suggestedParams: await this.defaultTxnParamsPromise,
     };
     let createTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
       asaConfigWithSuggestedParams
@@ -99,6 +101,6 @@ async function createGoNearWithAdmin() {
   await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
 }
 
-const fake_makeTransaction = async (bridgeTxnParam: GeneralTxInfo) => {
+const fake_makeTransaction = async (genericTxInfo: GenericTxInfo) => {
   throw new Error('not implemented!');
 };

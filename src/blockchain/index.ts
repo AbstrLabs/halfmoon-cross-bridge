@@ -12,7 +12,7 @@ export {
   Blockchain,
 };
 
-import { type GeneralTxInfo } from '..';
+import { type GenericTxInfo } from '..';
 
 type NearAddr = string;
 type AlgoAddr = string;
@@ -31,7 +31,7 @@ enum TxType {
 }
 
 interface Blockchain {
-  confirmTransaction(bridgeTxnParam: GeneralTxInfo): Promise<boolean>;
-  makeTransaction(bridgeTxnParam: GeneralTxInfo): Promise<GeneralReceipt>;
+  confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
+  makeTransaction(genericTxInfo: GenericTxInfo): Promise<GeneralReceipt>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

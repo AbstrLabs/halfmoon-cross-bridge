@@ -5,7 +5,7 @@ import express, { Request, Response } from 'express';
 import { mint } from './blockchain/bridge/mint_handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
-import { type GeneralTxInfo } from '.';
+import { type GenericTxInfo } from '.';
 
 async function homePageTest() {
   /* Used once code */
@@ -27,8 +27,8 @@ function startServer() {
         ensureString(req.query.amount),
         ensureString(req.query.txId),
       ];
-      const bridgeTxnParam: GeneralTxInfo = { from, to, amount, txId };
-      mintResp(bridgeTxnParam, res);
+      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
+      mintResp(genericTxInfo, res);
     })
     .post((req: Request, res: Response) => {
       // res.json(req.body);
@@ -38,8 +38,8 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txId']),
       ];
-      const bridgeTxnParam: GeneralTxInfo = { from, to, amount, txId };
-      mintResp(bridgeTxnParam, res);
+      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
+      mintResp(genericTxInfo, res);
     });
 
   /* burn */
@@ -80,10 +80,10 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(bridgeTxnParam: GeneralTxInfo, res: Response): void {
-  const { from, to, amount, txId } = bridgeTxnParam;
+function mintResp(genericTxInfo: GenericTxInfo, res: Response): void {
+  const { from, to, amount, txId } = genericTxInfo;
   try {
-    mint(bridgeTxnParam);
+    mint(genericTxInfo);
     res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
     res.write(`Mint stake with transaction ID [${txId}](NEAR).\n`);
     res.write(`Will redirect to "history" after transaction finished. \n`);

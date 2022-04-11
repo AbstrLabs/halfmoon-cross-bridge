@@ -1,9 +1,9 @@
-export { type GeneralTxInfo };
+export { type GenericTxInfo };
 import { startServer } from './server';
 
 startServer();
 
-interface GeneralTxInfo {
+interface GenericTxInfo {
   from: string;
   to: string;
   amount: string; // i18n. in some cases 1/2 = 0,5

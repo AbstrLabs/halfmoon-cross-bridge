@@ -5,7 +5,7 @@ export { nearBlockchain, NearBlockchain };
 import { providers, utils } from 'near-api-js';
 
 import { AlgoTxnId, type NearAddr, type NearTxHash } from '.';
-import { GeneralTxInfo } from '..';
+import { GenericTxInfo } from '..';
 import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
 import { log } from '../utils/logger';
@@ -28,9 +28,9 @@ class NearBlockchain implements Blockchain {
     // log((result.receipts_outcome[0] as any).proof!);
     return result;
   }
-  async confirmTransaction(bridgeTxnParam: GeneralTxInfo): Promise<boolean> {
+  async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
     log('nearIndexer', 'confirmStatus()', 'txHash'); //verbose
-    const { from, to, amount, txId } = bridgeTxnParam;
+    const { from, to, amount, txId } = genericTxInfo;
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
@@ -54,7 +54,7 @@ class NearBlockchain implements Blockchain {
     return await confirmed;
   }
 
-  async makeTransaction(bridgeTxnParam: GeneralTxInfo): Promise<AlgoTxnId> {
+  async makeTransaction(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
     throw new Error('not implemented!');
   }
   static async getRecentTransactions(limit: number): Promise<NearTxHash[]> {
