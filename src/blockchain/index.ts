@@ -7,7 +7,10 @@ export {
   type TxID,
   type algoMnemonic,
   TxType,
+  Blockchain,
 };
+
+import { type BridgeTxnParam } from '..';
 
 type nearAddr = string;
 type algoAddr = string;
@@ -21,3 +24,14 @@ enum TxType {
   Mint = 'mint',
   Burn = 'burn',
 }
+
+abstract class Blockchain {
+  static confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
+    throw new Error('not implemented!');
+  }
+  static getRecentTransactions(limit: number): Promise<TxID[]> {
+    throw new Error('not implemented!');
+  }
+}
+
+abstract class Account {}

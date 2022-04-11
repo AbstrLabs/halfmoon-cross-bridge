@@ -2,8 +2,8 @@ export { bridge_txn_handler };
 import { type addr, type TxID, TxType } from '.';
 import { BridgeTxnParam } from '..';
 import { log } from '../utils/logger';
-import { AlgorandIndexer } from './helper/algorand';
-import { NearIndexer } from './helper/near';
+import { AlgorandIndexer } from './algorand';
+import { NearIndexer } from './near';
 
 async function bridge_txn_handler(
   bridgeTxnParam: BridgeTxnParam,

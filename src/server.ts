@@ -6,7 +6,7 @@ import { mint } from './blockchain/mint_handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type BridgeTxnParam } from '.';
-import { createGoNear } from './blockchain/helper/algorand';
+import { createGoNear } from './blockchain/algorand';
 
 async function homePageTest() {
   /* Used once code */

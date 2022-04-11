@@ -2,13 +2,13 @@ export { AlgorandIndexer, initAlgoAcc, genAlgoAcc, algodClient, createGoNear };
 
 import * as algosdk from 'algosdk';
 
-import { algoAddr, algoMnemonic, nearAddr } from '..';
+import { algoAddr, algoMnemonic, nearAddr } from '.';
 
 import { Algodv2 as AlgodClient } from 'algosdk';
-import { ENV } from '../../utils/dotenv';
-import { Indexer } from '.';
+import { Blockchain } from '.';
+import { ENV } from '../utils/dotenv';
 import { SuggestedParams } from 'algosdk';
-import { log } from '../../utils/logger';
+import { log } from '../utils/logger';
 
 interface AsaConfig {
   from: string;
@@ -29,7 +29,7 @@ interface AsaConfig {
 
 type NoParamAsaConfig = Omit<AsaConfig, 'suggestedParams'>;
 
-class AlgorandIndexer extends Indexer {
+class AlgorandIndexer extends Blockchain {
   static async getTxnStatus(hash: string): Promise<string> {
     return 'finished';
   }

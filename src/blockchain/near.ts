@@ -1,15 +1,15 @@
 import { providers, utils } from 'near-api-js';
 
-import { type nearAddr, type nearTxHash } from '../';
-import { BridgeTxnParam } from '../..';
-import { ENV } from '../../utils/dotenv';
-import { setImmediateInterval } from '../../utils/helper';
-import { log } from '../../utils/logger';
-import { Indexer } from './';
+import { type nearAddr, type nearTxHash } from '.';
+import { BridgeTxnParam } from '..';
+import { ENV } from '../utils/dotenv';
+import { setImmediateInterval } from '../utils/helper';
+import { log } from '../utils/logger';
+import { Blockchain } from '.';
 
 export { NearIndexer };
 
-class NearIndexer extends Indexer {
+class NearIndexer extends Blockchain {
   static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
