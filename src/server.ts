@@ -6,8 +6,12 @@ import { mint } from './blockchain/mint_handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type BridgeTxnParam } from '.';
+import { createGoNear } from './blockchain/helper/algorand';
 
-async function test() {}
+async function homePageTest() {
+  /* Used once code */
+  // await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
+}
 
 function startServer() {
   loadDotEnv();
@@ -54,7 +58,13 @@ function startServer() {
   //   .post('/api/burn', (req: Request, res: Response) => {});
 
   app.get('/', async (req: Request, res: Response) => {
-    if (process.env.NODE_ENV === 'development') await test();
+    if (
+      // TODO: use TS version
+      process.env.NODE_ENV === undefined ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      await homePageTest();
+    }
     res.sendFile('example-frontend.html', { root: __dirname });
   });
 

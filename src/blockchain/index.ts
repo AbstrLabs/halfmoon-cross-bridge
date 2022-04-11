@@ -5,6 +5,7 @@ export {
   type nearTxHash,
   type algoTxnId,
   type TxID,
+  type algoMnemonic,
   TxType,
 };
 
@@ -14,6 +15,7 @@ type addr = nearAddr | algoAddr;
 type nearTxHash = string;
 type algoTxnId = string;
 type TxID = nearTxHash | algoTxnId;
+type algoMnemonic = string;
 
 enum TxType {
   Mint = 'mint',

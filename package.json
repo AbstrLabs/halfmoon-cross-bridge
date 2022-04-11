@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "yarn tsnd --respawn src/index.ts",
+    "dev": "yarn tsnd --respawn src/index.ts --inspect --debug",
     "test": "jest"
   }
 }
