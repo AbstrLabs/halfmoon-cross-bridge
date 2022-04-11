@@ -16,10 +16,9 @@ import { BridgeTxnParam } from '..';
 import { ENV } from '../utils/dotenv';
 import { log } from '../utils/logger';
 
-class AlgorandBlockchain extends Blockchain {
-  client: AlgodClient;
+class AlgorandBlockchain implements Blockchain {
+  readonly client: AlgodClient;
   constructor() {
-    super();
     const pure_stake_client = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
       server: 'https://testnet-algorand.api.purestake.io/ps2',
@@ -29,10 +28,14 @@ class AlgorandBlockchain extends Blockchain {
     const { token, server, port } = algoClientParamSource;
     this.client = new AlgodClient(token, server, port);
   }
+
   async getTxnStatus(txnId: algoTxnId): Promise<string> {
     return 'finished';
   }
-  async confirmTransaction() {
+  async confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
+    throw new Error('not implemented!');
+  }
+  async makeTransaction(bridgeTxnParam: BridgeTxnParam): Promise<algoTxnId> {
     throw new Error('not implemented!');
   }
 

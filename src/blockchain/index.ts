@@ -21,17 +21,17 @@ type nearTxHash = string;
 type algoTxnId = string;
 type TxID = nearTxHash | algoTxnId;
 type algoMnemonic = string;
+type AlgoReceipt = any;
+type NearReceipt = any;
+type GeneralReceipt = AlgoReceipt | NearReceipt;
 
 enum TxType {
   Mint = 'mint',
   Burn = 'burn',
 }
 
-abstract class Blockchain {
-  static confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
-    throw new Error('not implemented!');
-  }
-  static getRecentTransactions(limit: number): Promise<TxID[]> {
-    throw new Error('not implemented!');
-  }
+interface Blockchain {
+  confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean>;
+  makeTransaction(bridgeTxnParam: BridgeTxnParam): Promise<GeneralReceipt>;
+  // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

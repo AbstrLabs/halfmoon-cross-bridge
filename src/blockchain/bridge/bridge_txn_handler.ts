@@ -1,42 +1,39 @@
 export { bridge_txn_handler };
-import { type addr, type TxID, TxType } from '..';
+import { type addr, type TxID, TxType, Blockchain } from '..';
 import { BridgeTxnParam } from '../..';
 import { log } from '../../utils/logger';
 import { algoBlockchain } from '../algorand';
-import { NearBlockchain } from '../near';
+import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
   bridgeTxnParam: BridgeTxnParam,
   txType: TxType
 ): Promise<void> {
   /* CONFIG */
-  let receiving_indexer;
-  let sending_indexer;
-  let sending_account;
+  let receivingBlockchain: Blockchain;
+  let sendingBlockchain: Blockchain;
   const { from, to, amount, txId } = bridgeTxnParam;
   log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
   if (txType === TxType.Mint) {
-    receiving_indexer = NearBlockchain;
-    sending_indexer = algoBlockchain;
-    sending_account = AlgorandAcc;
+    receivingBlockchain = nearBlockchain;
+    sendingBlockchain = algoBlockchain;
   } else if (txType === TxType.Burn) {
-    receiving_indexer = algoBlockchain;
-    sending_indexer = NearBlockchain;
-    sending_account = NearAcc;
+    receivingBlockchain = algoBlockchain;
+    sendingBlockchain = nearBlockchain;
   } else {
     throw new Error('Unknown txType');
   }
 
   /* MAKE TRANSACTION */
-  await receiving_indexer.confirmTransaction({
+  await receivingBlockchain.confirmTransaction({
     ...bridgeTxnParam,
     to: 'abstrlabs.testnet',
   });
-  await sending_account.makeTransaction({
+  await sendingBlockchain.makeTransaction({
     ...bridgeTxnParam,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
-  await sending_indexer.confirmTransaction({
+  await sendingBlockchain.confirmTransaction({
     ...bridgeTxnParam,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });

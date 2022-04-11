@@ -4,21 +4,19 @@ export { nearBlockchain, NearBlockchain };
 
 import { providers, utils } from 'near-api-js';
 
-import { type nearAddr, type nearTxHash } from '.';
+import { algoTxnId, type nearAddr, type nearTxHash } from '.';
 import { BridgeTxnParam } from '..';
 import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
 import { log } from '../utils/logger';
 import { Blockchain } from '.';
 
-class NearBlockchain extends Blockchain {
-  provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
+class NearBlockchain implements Blockchain {
+  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
 
-  constructor() {
-    super();
-  }
+  constructor() {}
 
   async getTxnStatus(
     txId: nearTxHash,
@@ -56,6 +54,9 @@ class NearBlockchain extends Blockchain {
     return await confirmed;
   }
 
+  async makeTransaction(bridgeTxnParam: BridgeTxnParam): Promise<algoTxnId> {
+    throw new Error('not implemented!');
+  }
   static async getRecentTransactions(limit: number): Promise<nearTxHash[]> {
     log('nearIndexer', 'getRecentTransactions()', 'limit'); //verbose
     throw new Error('Not implemented');
