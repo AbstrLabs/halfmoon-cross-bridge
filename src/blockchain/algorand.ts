@@ -1,3 +1,4 @@
+/* Algorand functionalities wrapped up with our centralized account */
 export { algoBlockchain, createGoNearWithAdmin };
 
 import * as algosdk from 'algosdk';

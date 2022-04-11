@@ -1,3 +1,5 @@
+/* All blockchain functionalities wrapped up with our centralized account */
+
 export {
   type nearAddr,
   type algoAddr,

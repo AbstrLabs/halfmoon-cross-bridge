@@ -1,3 +1,7 @@
+/* NEAR functionalities wrapped up with our centralized account */
+
+export { NearBlockchain };
+
 import { providers, utils } from 'near-api-js';
 
 import { type nearAddr, type nearTxHash } from '.';
@@ -6,8 +10,6 @@ import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
 import { log } from '../utils/logger';
 import { Blockchain } from '.';
-
-export { NearBlockchain };
 
 class NearBlockchain extends Blockchain {
   static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(

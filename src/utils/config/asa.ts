@@ -1,6 +1,9 @@
+/* This file stores the config of all used ASA: Algorand Standard Asset(s) */
+
 export { type AsaConfig, type NoParamAsaConfig, noParamGoNearConfig };
 
 import { SuggestedParams } from 'algosdk';
+
 import { nearAddr } from '../../blockchain';
 import { ENV } from '../dotenv';
 
