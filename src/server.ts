@@ -6,11 +6,9 @@ import { mint } from './blockchain/mint_handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type BridgeTxnParam } from '.';
-import { createGoNear } from './blockchain/algorand';
 
 async function homePageTest() {
   /* Used once code */
-  // await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
 }
 
 function startServer() {

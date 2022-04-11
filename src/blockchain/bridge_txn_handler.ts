@@ -2,7 +2,7 @@ export { bridge_txn_handler };
 import { type addr, type TxID, TxType } from '.';
 import { BridgeTxnParam } from '..';
 import { log } from '../utils/logger';
-import { AlgorandBlockchain } from './algorand';
+import { algoBlockchain } from './algorand';
 import { NearBlockchain } from './near';
 
 async function bridge_txn_handler(
@@ -17,10 +17,10 @@ async function bridge_txn_handler(
   log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
   if (txType === TxType.Mint) {
     receiving_indexer = NearBlockchain;
-    sending_indexer = AlgorandBlockchain;
+    sending_indexer = algoBlockchain;
     sending_account = AlgorandAcc;
   } else if (txType === TxType.Burn) {
-    receiving_indexer = AlgorandBlockchain;
+    receiving_indexer = algoBlockchain;
     sending_indexer = NearBlockchain;
     sending_account = NearAcc;
   } else {

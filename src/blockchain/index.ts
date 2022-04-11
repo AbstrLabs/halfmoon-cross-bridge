@@ -33,5 +33,3 @@ abstract class Blockchain {
     throw new Error('not implemented!');
   }
 }
-
-abstract class Account {}
