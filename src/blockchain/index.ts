@@ -1,26 +1,26 @@
 /* All blockchain functionalities wrapped up with our centralized account */
 
 export {
-  type nearAddr,
-  type algoAddr,
-  type addr,
-  type nearTxHash,
-  type algoTxnId,
+  type NearAddr,
+  type AlgoAddr,
+  type Addr,
+  type NearTxHash,
+  type AlgoTxnId,
   type TxID,
-  type algoMnemonic,
+  type AlgoMnemonic,
   TxType,
   Blockchain,
 };
 
-import { type BridgeTxnParam } from '..';
+import { type GeneralTxInfo } from '..';
 
-type nearAddr = string;
-type algoAddr = string;
-type addr = nearAddr | algoAddr;
-type nearTxHash = string;
-type algoTxnId = string;
-type TxID = nearTxHash | algoTxnId;
-type algoMnemonic = string;
+type NearAddr = string;
+type AlgoAddr = string;
+type Addr = NearAddr | AlgoAddr;
+type NearTxHash = string;
+type AlgoTxnId = string;
+type TxID = NearTxHash | AlgoTxnId;
+type AlgoMnemonic = string;
 type AlgoReceipt = any;
 type NearReceipt = any;
 type GeneralReceipt = AlgoReceipt | NearReceipt;
@@ -31,7 +31,7 @@ enum TxType {
 }
 
 interface Blockchain {
-  confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean>;
-  makeTransaction(bridgeTxnParam: BridgeTxnParam): Promise<GeneralReceipt>;
+  confirmTransaction(bridgeTxnParam: GeneralTxInfo): Promise<boolean>;
+  makeTransaction(bridgeTxnParam: GeneralTxInfo): Promise<GeneralReceipt>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

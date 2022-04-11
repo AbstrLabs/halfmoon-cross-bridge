@@ -5,7 +5,7 @@ import express, { Request, Response } from 'express';
 import { mint } from './blockchain/bridge/mint_handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
-import { type BridgeTxnParam } from '.';
+import { type GeneralTxInfo } from '.';
 
 async function homePageTest() {
   /* Used once code */
@@ -27,7 +27,7 @@ function startServer() {
         ensureString(req.query.amount),
         ensureString(req.query.txId),
       ];
-      const bridgeTxnParam: BridgeTxnParam = { from, to, amount, txId };
+      const bridgeTxnParam: GeneralTxInfo = { from, to, amount, txId };
       mintResp(bridgeTxnParam, res);
     })
     .post((req: Request, res: Response) => {
@@ -38,7 +38,7 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txId']),
       ];
-      const bridgeTxnParam: BridgeTxnParam = { from, to, amount, txId };
+      const bridgeTxnParam: GeneralTxInfo = { from, to, amount, txId };
       mintResp(bridgeTxnParam, res);
     });
 
@@ -80,7 +80,7 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(bridgeTxnParam: BridgeTxnParam, res: Response): void {
+function mintResp(bridgeTxnParam: GeneralTxInfo, res: Response): void {
   const { from, to, amount, txId } = bridgeTxnParam;
   try {
     mint(bridgeTxnParam);

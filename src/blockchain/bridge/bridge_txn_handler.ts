@@ -1,12 +1,12 @@
 export { bridge_txn_handler };
-import { type addr, type TxID, TxType, Blockchain } from '..';
-import { BridgeTxnParam } from '../..';
+import { type Addr, type TxID, TxType, Blockchain } from '..';
+import { GeneralTxInfo } from '../..';
 import { log } from '../../utils/logger';
 import { algoBlockchain } from '../algorand';
 import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
-  bridgeTxnParam: BridgeTxnParam,
+  bridgeTxnParam: GeneralTxInfo,
   txType: TxType
 ): Promise<void> {
   /* CONFIG */
@@ -41,18 +41,18 @@ async function bridge_txn_handler(
   // check indexer with hash
 }
 
-const fake_makeTransaction = async (bridgeTxnParam: BridgeTxnParam) => {
+const fake_makeTransaction = async (bridgeTxnParam: GeneralTxInfo) => {
   throw new Error('not implemented!');
 };
 
 class AlgorandAcc {
-  static makeTransaction(bridgeTxnParam: BridgeTxnParam) {
+  static makeTransaction(bridgeTxnParam: GeneralTxInfo) {
     fake_makeTransaction(bridgeTxnParam);
   }
 }
 
 class NearAcc {
-  static makeTransaction(bridgeTxnParam: BridgeTxnParam) {
+  static makeTransaction(bridgeTxnParam: GeneralTxInfo) {
     fake_makeTransaction(bridgeTxnParam);
   }
 }

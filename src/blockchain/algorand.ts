@@ -3,17 +3,17 @@ export { algoBlockchain, createGoNearWithAdmin };
 
 import * as algosdk from 'algosdk';
 
+import { AlgoAddr, AlgoMnemonic, AlgoTxnId, NearAddr } from '.';
 import {
   AsaConfig,
   NoParamAsaConfig,
   noParamGoNearConfig,
 } from '../utils/config/asa';
-import { algoAddr, algoMnemonic, algoTxnId, nearAddr } from '.';
 
 import { Algodv2 as AlgodClient } from 'algosdk';
 import { Blockchain } from '.';
-import { BridgeTxnParam } from '..';
 import { ENV } from '../utils/dotenv';
+import { GeneralTxInfo } from '..';
 import { log } from '../utils/logger';
 
 class AlgorandBlockchain implements Blockchain {
@@ -29,13 +29,13 @@ class AlgorandBlockchain implements Blockchain {
     this.client = new AlgodClient(token, server, port);
   }
 
-  async getTxnStatus(txnId: algoTxnId): Promise<string> {
+  async getTxnStatus(txnId: AlgoTxnId): Promise<string> {
     return 'finished';
   }
-  async confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
+  async confirmTransaction(bridgeTxnParam: GeneralTxInfo): Promise<boolean> {
     throw new Error('not implemented!');
   }
-  async makeTransaction(bridgeTxnParam: BridgeTxnParam): Promise<algoTxnId> {
+  async makeTransaction(bridgeTxnParam: GeneralTxInfo): Promise<AlgoTxnId> {
     throw new Error('not implemented!');
   }
 
@@ -56,7 +56,7 @@ class AlgorandBlockchain implements Blockchain {
   async createAsaWithMnemonic(
     // tested, used once
     noParamAsaConfig: NoParamAsaConfig,
-    creatorMnemonic: algoMnemonic
+    creatorMnemonic: AlgoMnemonic
   ) {
     const asaConfigWithSuggestedParams: AsaConfig = {
       ...noParamAsaConfig,
@@ -82,7 +82,7 @@ const algoBlockchain = new AlgorandBlockchain();
 
 /* Functions below are designed to run once */
 
-async function createGoNear(creatorMnemonic: algoMnemonic, admin?: algoAddr) {
+async function createGoNear(creatorMnemonic: AlgoMnemonic, admin?: AlgoAddr) {
   return await algoBlockchain.createAsaWithMnemonic(
     {
       ...noParamGoNearConfig,
@@ -99,6 +99,6 @@ async function createGoNearWithAdmin() {
   await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
 }
 
-const fake_makeTransaction = async (bridgeTxnParam: BridgeTxnParam) => {
+const fake_makeTransaction = async (bridgeTxnParam: GeneralTxInfo) => {
   throw new Error('not implemented!');
 };

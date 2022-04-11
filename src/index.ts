@@ -1,9 +1,9 @@
-export { type BridgeTxnParam };
+export { type GeneralTxInfo };
 import { startServer } from './server';
 
 startServer();
 
-interface BridgeTxnParam {
+interface GeneralTxInfo {
   from: string;
   to: string;
   amount: string; // i18n. in some cases 1/2 = 0,5

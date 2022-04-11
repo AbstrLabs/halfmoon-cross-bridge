@@ -1,20 +1,20 @@
 export { mint };
 
 import {
-  type algoAddr,
-  type nearAddr,
-  type addr,
-  type nearTxHash,
-  type algoTxnId,
+  type AlgoAddr,
+  type NearAddr,
+  type Addr,
+  type NearTxHash,
+  type AlgoTxnId,
   type TxID,
   TxType,
 } from '..';
-import { BridgeTxnParam } from '../..';
+import { GeneralTxInfo } from '../..';
 import { sleep } from '../../utils/helper';
 import { log } from '../../utils/logger';
 import { bridge_txn_handler } from './bridge_txn_handler';
 
-async function mint(bridgeTxnParam: BridgeTxnParam): Promise<void> {
+async function mint(bridgeTxnParam: GeneralTxInfo): Promise<void> {
   const { from, to, amount, txId } = bridgeTxnParam;
 
   if (

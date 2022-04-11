@@ -4,7 +4,7 @@ export { type AsaConfig, type NoParamAsaConfig, noParamGoNearConfig };
 
 import { SuggestedParams } from 'algosdk';
 
-import { nearAddr } from '../../blockchain';
+import { NearAddr } from '../../blockchain';
 import { ENV } from '../dotenv';
 
 interface AsaConfig {
@@ -16,10 +16,10 @@ interface AsaConfig {
   assetURL: string;
   suggestedParams: SuggestedParams;
   note?: Uint8Array;
-  manager?: nearAddr;
-  reserve?: nearAddr;
-  freeze?: nearAddr;
-  clawback?: nearAddr;
+  manager?: NearAddr;
+  reserve?: NearAddr;
+  freeze?: NearAddr;
+  clawback?: NearAddr;
   defaultFrozen: boolean;
   assetId?: number; // uint
 }
