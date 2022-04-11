@@ -1,6 +1,6 @@
 /* NEAR functionalities wrapped up with our centralized account */
 
-export { NearBlockchain };
+export { nearBlockchain, NearBlockchain };
 
 import { providers, utils } from 'near-api-js';
 
@@ -12,23 +12,25 @@ import { log } from '../utils/logger';
 import { Blockchain } from '.';
 
 class NearBlockchain extends Blockchain {
-  static provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
+  provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
 
-  static async getTxnStatus(
+  constructor() {
+    super();
+  }
+
+  async getTxnStatus(
     txId: nearTxHash,
     from: nearAddr
   ): Promise<providers.FinalExecutionOutcome> {
     log('nearIndexer', 'getTxnStatus()'); //verbose
-    const result = await NearBlockchain.provider.txStatus(txId, from);
+    const result = await this.provider.txStatus(txId, from);
     log(result);
     // log((result.receipts_outcome[0] as any).proof!);
     return result;
   }
-  static async confirmTransaction(
-    bridgeTxnParam: BridgeTxnParam
-  ): Promise<boolean> {
+  async confirmTransaction(bridgeTxnParam: BridgeTxnParam): Promise<boolean> {
     log('nearIndexer', 'confirmStatus()', 'txHash'); //verbose
     const { from, to, amount, txId } = bridgeTxnParam;
     const confirmed = new Promise<boolean>((resolve) => {
@@ -39,7 +41,7 @@ class NearBlockchain extends Blockchain {
       const interval = setImmediateInterval(async () => {
         console.log('itv run : '); // DEV_LOG_TO_REMOVE
 
-        let txReceipt = await NearBlockchain.getTxnStatus(txId, from);
+        let txReceipt = await this.getTxnStatus(txId, from);
         if (correctnessCheck(txReceipt, to, from, amount)) {
           clearTimeout(timeout);
           clearInterval(interval);
@@ -60,6 +62,8 @@ class NearBlockchain extends Blockchain {
     return [];
   }
 }
+
+const nearBlockchain = new NearBlockchain();
 
 /* helper */
 
@@ -105,7 +109,7 @@ const correctnessCheck = (
   // amount
   if (
     txReceipt.transaction.actions[0].Transfer.deposit !==
-    utils.format.parseNearAmount(`${amount}`)
+    utils.format.parseNearAmount(amount)
   ) {
     log(
       'nearIndexer',
@@ -120,7 +124,7 @@ const correctnessCheck = (
 
 /* Functions below are designed to run once */
 
-/* unused, not tested */
+/* not used, not tested */
 /* async function initNearAcc() {
   // key store
   const { keyStores, KeyPair } = nearAPI;

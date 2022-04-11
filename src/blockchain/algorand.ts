@@ -12,6 +12,7 @@ import { algoAddr, algoMnemonic, algoTxnId, nearAddr } from '.';
 
 import { Algodv2 as AlgodClient } from 'algosdk';
 import { Blockchain } from '.';
+import { BridgeTxnParam } from '..';
 import { ENV } from '../utils/dotenv';
 import { log } from '../utils/logger';
 
@@ -94,3 +95,7 @@ async function createGoNear(creatorMnemonic: algoMnemonic, admin?: algoAddr) {
 async function createGoNearWithAdmin() {
   await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
 }
+
+const fake_makeTransaction = async (bridgeTxnParam: BridgeTxnParam) => {
+  throw new Error('not implemented!');
+};
