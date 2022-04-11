@@ -1,3 +1,5 @@
+export { mint };
+
 import {
   type algoAddr,
   type nearAddr,
@@ -6,12 +8,11 @@ import {
   type algoTxnId,
   type TxID,
   TxType,
-} from '.';
-import { BridgeTxnParam } from '..';
-import { sleep } from '../utils/helper';
-import { log } from '../utils/logger';
+} from '..';
+import { BridgeTxnParam } from '../..';
+import { sleep } from '../../utils/helper';
+import { log } from '../../utils/logger';
 import { bridge_txn_handler } from './bridge_txn_handler';
-export { mint };
 
 async function mint(bridgeTxnParam: BridgeTxnParam): Promise<void> {
   const { from, to, amount, txId } = bridgeTxnParam;

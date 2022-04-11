@@ -1,9 +1,9 @@
 export { bridge_txn_handler };
-import { type addr, type TxID, TxType } from '.';
-import { BridgeTxnParam } from '..';
-import { log } from '../utils/logger';
-import { algoBlockchain } from './algorand';
-import { NearBlockchain } from './near';
+import { type addr, type TxID, TxType } from '..';
+import { BridgeTxnParam } from '../..';
+import { log } from '../../utils/logger';
+import { algoBlockchain } from '../algorand';
+import { NearBlockchain } from '../near';
 
 async function bridge_txn_handler(
   bridgeTxnParam: BridgeTxnParam,
