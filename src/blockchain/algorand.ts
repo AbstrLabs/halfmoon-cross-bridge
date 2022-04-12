@@ -4,9 +4,14 @@ export { algoBlockchain, createGoNearWithAdmin };
 import * as algosdk from 'algosdk';
 
 import { AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
-import { Algodv2 as AlgodClient, SuggestedParams } from 'algosdk';
+import {
+  Algodv2 as AlgodClient,
+  AssetTransferTxn,
+  SuggestedParams,
+} from 'algosdk';
 import {
   AsaConfig,
+  GO_NEAR_DECIMAL,
   NoParamAsaConfig,
   noParamGoNearConfig,
 } from '../utils/config/asa';
@@ -19,6 +24,9 @@ import { log } from '../utils/logger';
 class AlgorandBlockchain implements Blockchain {
   readonly client: AlgodClient;
   readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
+  protected readonly creatorAccount = algosdk.mnemonicToSecretKey(
+    ENV.ALGO_MASTER_PASS
+  );
   constructor() {
     const pure_stake_client = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
@@ -37,8 +45,53 @@ class AlgorandBlockchain implements Blockchain {
   async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
     throw new Error('not implemented!');
   }
-  async makeTransaction(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
-    throw new Error('not implemented!');
+  async makeTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
+    if (/* TODO: user not Opted-in */ false) {
+      // make a 0 amount txn to opt in and log, and add to db.
+    }
+    return this.makeGenericTransaction(genericTxInfo, this.creatorAccount);
+  }
+  async makeGenericTransaction(
+    genericTxInfo: GenericTxInfo,
+    senderAccount: algosdk.Account
+  ): Promise<AlgoTxnId> {
+    // modified from https://developer.algorand.org/docs/sdks/javascript/#build-first-transaction
+    let params = await this.defaultTxnParamsPromise;
+    // comment out the next two lines to use suggested fee
+    // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
+    // params.flatFee = true;
+
+    genericTxInfo;
+
+    // const enc = new TextEncoder();
+    // const note = enc.encode('Hello World');
+    const txnConfig = {
+      ...genericTxInfo, // to, from
+      amount:
+        BigInt(genericTxInfo.amount) * BigInt(10) ** BigInt(GO_NEAR_DECIMAL),
+      note: undefined, // maybe write the incoming txId here
+      suggestedParams: params,
+      assetIndex: ENV.TEST_NET_GO_NEAR_ASSET_ID,
+      revocationTarget: undefined,
+      closeRemainderTo: undefined,
+    };
+
+    let txn =
+      algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(txnConfig);
+
+    let rawSignedTxn = txn.signTxn(senderAccount.sk);
+    let xtx = await this.client.sendRawTransaction(rawSignedTxn).do();
+    // Wait for confirmation
+    const confirmedTxn = await algosdk.waitForConfirmation(
+      this.client,
+      xtx.txId,
+      4
+    );
+    //Get the completed Transaction
+    console.log(
+      `Transaction from ${genericTxInfo.from} to ${genericTxInfo.to} of amount ${genericTxInfo.amount} with id ${xtx.txId} confirmed in round ${confirmedTxn['confirmed-round']}`
+    );
+    return xtx.txId;
   }
 
   /* Methods below are designed to run once */
@@ -57,6 +110,7 @@ class AlgorandBlockchain implements Blockchain {
 
   async createAsaWithMnemonic(
     // tested, used once
+    // modified from https://developer.algorand.org/docs/get-details/asa/
     noParamAsaConfig: NoParamAsaConfig,
     creatorMnemonic: AlgoMnemonic
   ) {

@@ -54,7 +54,7 @@ class NearBlockchain implements Blockchain {
     return await confirmed;
   }
 
-  async makeTransaction(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
+  async makeTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
     throw new Error('not implemented!');
   }
   static async getRecentTransactions(limit: number): Promise<NearTxHash[]> {

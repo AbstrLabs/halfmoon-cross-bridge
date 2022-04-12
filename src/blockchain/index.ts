@@ -32,6 +32,6 @@ enum TxType {
 
 interface Blockchain {
   confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
-  makeTransaction(genericTxInfo: GenericTxInfo): Promise<GeneralReceipt>;
+  makeTxn(genericTxInfo: GenericTxInfo): Promise<GeneralReceipt>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }
