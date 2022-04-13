@@ -3,7 +3,7 @@ export { algoBlockchain, createGoNearWithAdmin };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
+import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
 import {
   Algodv2 as AlgodClient,
   AssetTransferTxn,
@@ -21,13 +21,14 @@ import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
 import { log } from '../utils/logger';
 
-class AlgorandBlockchain implements Blockchain {
+class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
   readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
-  protected readonly creatorAccount = algosdk.mnemonicToSecretKey(
+  protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
   constructor() {
+    super();
     const pure_stake_client = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
       server: 'https://testnet-algorand.api.purestake.io/ps2',
@@ -49,11 +50,11 @@ class AlgorandBlockchain implements Blockchain {
     if (/* TODO: user not Opted-in */ false) {
       // make a 0 amount txn to opt in and log, and add to db.
     }
-    return this.makeGenericTransaction(genericTxInfo, this.creatorAccount);
+    return this.makeGenericTransaction(genericTxInfo, this.centralizedAcc);
   }
   async makeGenericTransaction(
     genericTxInfo: GenericTxInfo,
-    senderAccount: algosdk.Account
+    senderAccount: AlgoAcc
   ): Promise<AlgoTxnId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#build-first-transaction
     let params = await this.defaultTxnParamsPromise;

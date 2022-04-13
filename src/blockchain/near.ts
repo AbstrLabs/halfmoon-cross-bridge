@@ -11,12 +11,15 @@ import { setImmediateInterval } from '../utils/helper';
 import { log } from '../utils/logger';
 import { Blockchain } from '.';
 
-class NearBlockchain implements Blockchain {
+class NearBlockchain extends Blockchain {
+  protected readonly centralizedAcc = undefined;
   readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
 
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   async getTxnStatus(
     txId: NearTxHash,
