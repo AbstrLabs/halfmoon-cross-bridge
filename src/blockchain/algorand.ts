@@ -46,33 +46,46 @@ class AlgorandBlockchain extends Blockchain {
   async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
     throw new Error('not implemented!');
   }
-  async makeTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
-    if (/* TODO: user not Opted-in */ false) {
-      // make a 0 amount txn to opt in and log, and add to db.
-    }
-    return this.makeGenericTransaction(genericTxInfo, this.centralizedAcc);
+  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
+    // abstract class implementation.
+    // TODO! make sure amount is atomic unit!
+    return await this._makeGoNearTxnFromAdmin(
+      genericTxInfo.to,
+      genericTxInfo.amount
+    );
   }
-  async makeGenericTransaction(
-    genericTxInfo: GenericTxInfo,
-    senderAccount: AlgoAcc
+  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, amount: string) {
+    return await this._makeAsaTxn(
+      to,
+      this.centralizedAcc.addr,
+      // TODO: use correct amount precision. first BigInt will round up.
+      BigInt(amount) * BigInt(10) ** BigInt(GO_NEAR_DECIMAL),
+      this.centralizedAcc,
+      ENV.TEST_NET_GO_NEAR_ASSET_ID
+    );
+  }
+  // TODO: makeAsaTxn needs an err handler.
+  protected async _makeAsaTxn(
+    to: AlgoAddr,
+    from: AlgoAddr,
+    amountInAtomic: number | bigint,
+    senderAccount: AlgoAcc,
+    asaId: number
   ): Promise<AlgoTxnId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#build-first-transaction
     let params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
     // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
     // params.flatFee = true;
-
-    genericTxInfo;
-
     // const enc = new TextEncoder();
     // const note = enc.encode('Hello World');
     const txnConfig = {
-      ...genericTxInfo, // to, from
-      amount:
-        BigInt(genericTxInfo.amount) * BigInt(10) ** BigInt(GO_NEAR_DECIMAL),
+      to,
+      from,
+      amount: amountInAtomic,
       note: undefined, // maybe write the incoming txId here
       suggestedParams: params,
-      assetIndex: ENV.TEST_NET_GO_NEAR_ASSET_ID,
+      assetIndex: asaId,
       revocationTarget: undefined,
       closeRemainderTo: undefined,
     };
@@ -89,8 +102,8 @@ class AlgorandBlockchain extends Blockchain {
       4
     );
     //Get the completed Transaction
-    console.log(
-      `Transaction from ${genericTxInfo.from} to ${genericTxInfo.to} of amount ${genericTxInfo.amount} with id ${xtx.txId} confirmed in round ${confirmedTxn['confirmed-round']}`
+    log(
+      `Transaction from ${from} to ${to} of amount ${amountInAtomic} (atomic unit) with id ${xtx.txId} confirmed in round ${confirmedTxn['confirmed-round']}`
     );
     return xtx.txId;
   }

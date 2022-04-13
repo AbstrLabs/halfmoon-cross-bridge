@@ -33,13 +33,15 @@ type NearAcc = undefined;
 type GenericAcc = AlgoAcc | NearAcc;
 
 enum TxType {
-  Mint = 'mint',
-  Burn = 'burn',
+  Mint = 'MINT',
+  Burn = 'BURN',
 }
 
 abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
-  abstract makeTxn(genericTxInfo: GenericTxInfo): Promise<GeneralReceipt>;
+  abstract makeOutgoingTxn(
+    genericTxInfo: GenericTxInfo
+  ): Promise<GeneralReceipt>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }
