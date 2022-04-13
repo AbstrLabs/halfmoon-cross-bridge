@@ -15,9 +15,9 @@ describe('AlgorandBlockchain', () => {
     expect(ENV.ALGO_MASTER_ADDR).not.toBe('NOT_LOADED_FROM_ENV');
     expect(typeof ENV.TEST_NET_GO_NEAR_ASSET_ID).toBe('number');
   });
-
-  it('make a txn, 1 goNEAR, acc -> example acc', async () => {
-    jest.setTimeout(30000); // 30sec
+  // it.skip('user not opted in', () => {});
+  it.only('make a txn, 1 AU goNEAR, central acc -> example acc', async () => {
+    // jest.setTimeout(30000); // 30sec
     const txnId = await algoBlockchain.makeOutgoingTxn({
       from: UNUSED,
       txId: UNUSED,
@@ -26,5 +26,5 @@ describe('AlgorandBlockchain', () => {
     });
     console.info('txnId : ', txnId);
     return;
-  });
+  }, 30000);
 });
