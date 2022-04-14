@@ -1,6 +1,6 @@
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
-import { pgStart } from './aws-rds';
+import { pgAwsRdsConnectionTest } from './aws-rds';
 
 describe('database test', () => {
   describe('NeDB CRUD test', () => {
@@ -30,7 +30,7 @@ describe('database test', () => {
       return;
     }
     it('connect to AWS-RDS', async () => {
-      expect(await pgStart()).toBe(0);
+      expect(await pgAwsRdsConnectionTest()).toBe('Hello world!');
     });
   });
 });

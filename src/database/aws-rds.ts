@@ -1,19 +1,38 @@
-// import pg from 'pg';
+import { Client } from 'pg';
 
-export { pgStart };
+export { pgAwsRdsConnectionTest };
 
 // (async () => {
 //   pgStart();
 // })();
 
-async function pgStart() {
-  const { Client } = require('pg');
+async function pgAwsRdsConnectionTest() {
   const client = new Client();
   await client.connect();
-  const res = await client.query('SELECT $1::text as message', [
-    'Hello world!',
-  ]);
-  console.log(res.rows[0].message); // Hello world!
+
+  async function example_write() {
+    const res = await client.query('SELECT $1::text as message', [
+      'Hello world!',
+    ]);
+    console.log(res.rows[0].message); // Hello world!
+  }
+
+  async function example_read() {
+    var res;
+    try {
+      res = await client.query('SELECT $1::text as message', ['Hello world!']);
+      console.log('res.rows[0].message : ', res.rows[0].message); // DEV_LOG_TO_REMOVE
+      return res.rows[0].message;
+    } catch (err: any) {
+      console.log(err.stack); // Hello World!
+      throw new Error(err.stack);
+    }
+  }
+
+  await example_write();
+  const result = await example_read();
+
   await client.end();
-  return 0;
+
+  return result;
 }
