@@ -25,6 +25,7 @@ const default_ENV = {
   ALGO_CONFIRM_TIMEOUT_SEC: 60,
   ALGO_CONFIRM_INTERVAL_SEC: 5,
   TEST_NET_GO_NEAR_ASSET_ID: 83251085,
+  DB_ORIGIN: 'NEDB',
 };
 
 const secret_ENV = {
