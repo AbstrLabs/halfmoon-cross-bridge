@@ -35,6 +35,9 @@
     "build": "tsc",
     "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
     "test": "jest",
-    "test:algorand": "jest --testPathPattern=src/blockchain/algorand"
+    "test:algo": "jest --testPathPattern=src/blockchain/algorand",
+    "test:db": "jest --testPathPattern=src/database",
+    "algo": "yarn test:algo",
+    "db": "yarn test:db"
   }
 }
