@@ -21,6 +21,7 @@ function startServer() {
   apiRouter
     .route('/mint')
     .get((req: Request, res: Response) => {
+      // TODO: use things like 'joi' to validate. if we change this more
       const [from, to, amount, txId] = [
         ensureString(req.query.from),
         ensureString(req.query.to),

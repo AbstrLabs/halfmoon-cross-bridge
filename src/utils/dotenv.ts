@@ -4,6 +4,7 @@
 
 export { loadDotEnv, ENV };
 
+import { NOT_LOADED_FROM_ENV } from './constant';
 import dpv from 'dotenv-parse-variables';
 
 function loadDotEnv() {
@@ -27,19 +28,19 @@ const default_ENV = {
 };
 
 const secret_ENV = {
-  NEAR_MASTER_ADDR: 'not_loaded_from_env',
-  NEAR_MASTER_PRIV: 'not_loaded_from_env',
-  NEAR_MASTER_PASS: 'not_loaded_from_env',
-  ALGO_MASTER_ADDR: 'not_loaded_from_env',
-  ALGO_MASTER_PRIV: 'not_loaded_from_env',
-  ALGO_MASTER_PASS: 'not_loaded_from_env',
-  NEAR_EXAMPL_ADDR: 'not_loaded_from_env',
-  NEAR_EXAMPL_PRIV: 'not_loaded_from_env',
-  NEAR_EXAMPL_PASS: 'not_loaded_from_env',
-  ALGO_EXAMPL_ADDR: 'not_loaded_from_env',
-  ALGO_EXAMPL_PRIV: 'not_loaded_from_env',
-  ALGO_EXAMPL_PASS: 'not_loaded_from_env',
-  PURE_STAKE_API_KEY: 'not_loaded_from_env',
+  NEAR_MASTER_ADDR: NOT_LOADED_FROM_ENV,
+  NEAR_MASTER_PRIV: NOT_LOADED_FROM_ENV,
+  NEAR_MASTER_PASS: NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_ADDR: NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_PRIV: NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_PASS: NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_ADDR: NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_PRIV: NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_PASS: NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_ADDR: NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_PRIV: NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_PASS: NOT_LOADED_FROM_ENV,
+  PURE_STAKE_API_KEY: NOT_LOADED_FROM_ENV,
 };
 const parsed_ENV = loadDotEnv();
 
