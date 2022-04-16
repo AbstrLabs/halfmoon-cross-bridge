@@ -28,6 +28,7 @@ class Postgres {
     if (!this.client) {
       throw new Error('Could not connect to database');
     }
+    log('database connected');
   }
 
   async query(query: string, params: any[] = []) {
