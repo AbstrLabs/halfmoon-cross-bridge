@@ -18,7 +18,7 @@ class Postgres {
   // private readonly pgConfig = getEnvConfig();
   private client?: PoolClient;
   private pool: Pool;
-  private isConnected = false;
+  isConnected = false;
 
   constructor(pgConfig?: PgConfig) {
     this.pool = new Pool(pgConfig);
@@ -48,7 +48,7 @@ class Postgres {
     return res.rows;
   }
 
-  async disconnect() {
+  disconnect() {
     if (this.isConnected) {
       if (!this.client) {
         throw new Error('client and isConnected do not match');
@@ -57,6 +57,7 @@ class Postgres {
       this.isConnected = false;
     }
   }
+
   async end() {
     if (this.isConnected) {
       await this.disconnect();
