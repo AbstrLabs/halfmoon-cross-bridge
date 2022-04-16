@@ -1,5 +1,5 @@
 // this file is tested in database.spec.ts
-
+// TODO: Make singleton
 import { Client } from 'pg';
 
 export { postgres };

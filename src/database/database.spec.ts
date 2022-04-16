@@ -30,8 +30,21 @@ describe('database test', () => {
       return;
     }
     // const postgres = new Postgres(Postgres._configFromEnv());
-    it.only('connect to AWS-RDS via class', async () => {
+    it.skip('connect to AWS-RDS via class', async () => {
       expect(await postgres._connectionTest()).toBe('Hello world!');
+    });
+    it.only('create and drop a new table', async () => {
+      await postgres.connect();
+      const tableName = 'test_table_fakeNonce';
+      const query = `CREATE TABLE ${tableName} (
+        id SERIAL PRIMARY KEY,
+        test_date TIMESTAMP NOT NULL
+      );`;
+      const res = await postgres.query(query);
+      expect(res.length).toBe(0);
+      const res2 = await postgres.query(`DROP TABLE ${tableName};`);
+      expect(res2.length).toBe(0);
+      await postgres.disconnect();
     });
   });
 });

@@ -1,5 +1,5 @@
 /* All blockchain functionalities wrapped up with our centralized account */
-
+// TODO: Make singleton
 export {
   type NearAddr,
   type AlgoAddr,
