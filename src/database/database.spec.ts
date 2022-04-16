@@ -1,7 +1,17 @@
+import {
+  passConfFromEnv,
+  passConfFromModule,
+  passEnv,
+  passEnvAsync,
+  pgAwsRdsConnectionTest,
+  pgConfig,
+  postgres,
+} from './aws-rds';
+
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
-import { pgAwsRdsConnectionTest } from './aws-rds';
 
+const TEST_HOST = 'ban-db-test.c2i8nv1hxebn.us-east-1.rds.amazonaws.com';
 describe('database test', () => {
   describe('NeDB CRUD test', () => {
     if (ENV.DB_ORIGIN !== 'NEDB') {
@@ -31,6 +41,23 @@ describe('database test', () => {
     }
     it('connect to AWS-RDS', async () => {
       expect(await pgAwsRdsConnectionTest()).toBe('Hello world!');
+    });
+    it('connect to AWS-RDS via class', async () => {
+      expect(await postgres._connectionTest()).toBe('Hello world!');
+    });
+    it.only('get env config', () => {
+      expect(
+        (() => {
+          console.log('pgConfig.host : ', pgConfig.host); // DEV_LOG_TO_REMOVE
+          return pgConfig.host;
+        })()
+      ).toBeUndefined();
+      expect(passEnv()).toBe(TEST_HOST);
+      // expect(await passEnvAsync()).toBe(TEST_HOST);
+      expect(process.env.PGHOST).toBe(TEST_HOST); // DEV_LOG_TO_REMOVE
+
+      console.log('passConfFromModule() : ', passConfFromModule()); // DEV_LOG_TO_REMOVE
+      console.log('passConfFromEnv() : ', passConfFromEnv()); // DEV_LOG_TO_REMOVE
     });
   });
 });
