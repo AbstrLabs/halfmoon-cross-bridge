@@ -4,7 +4,10 @@ import { postgres } from './aws-rds';
 
 describe('DATABASE test', () => {
   describe('AWS-RDS test', () => {
-    // const postgres = new Postgres(Postgres._configFromEnv());
+    afterAll(async () => {
+      await postgres.end();
+    });
+    let _ = ENV; // to load .env file
     it('connect to AWS-RDS via class', async () => {
       expect(await postgres._connectionTest()).toBe('Hello world!');
     });
@@ -54,7 +57,6 @@ describe('DATABASE test', () => {
       // Without sorting, first element in res2 has id 2.
       expect(res2[0].test_date).toBe(date.toString());
     });
-
     it('delete last entry in test_table', async () => {
       // todo: maybe just check MAX(id)?
       const tableName = 'test_table';

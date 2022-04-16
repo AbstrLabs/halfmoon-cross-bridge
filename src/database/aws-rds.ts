@@ -18,16 +18,21 @@ class Postgres {
   // private readonly pgConfig = getEnvConfig();
   private client?: PoolClient;
   private pool: Pool;
+  private isConnected = false;
 
   constructor(pgConfig?: PgConfig) {
     this.pool = new Pool(pgConfig);
   }
 
   async connect() {
+    if (this.isConnected) {
+      return;
+    }
     this.client = await this.pool.connect();
     if (!this.client) {
       throw new Error('Could not connect to database');
     }
+    this.isConnected = true;
     log('database connected');
   }
 
@@ -44,9 +49,19 @@ class Postgres {
   }
 
   async disconnect() {
-    if (this.client) {
+    if (this.isConnected) {
+      if (!this.client) {
+        throw new Error('client and isConnected do not match');
+      }
       this.client.release();
+      this.isConnected = false;
     }
+  }
+  async end() {
+    if (this.isConnected) {
+      await this.disconnect();
+    }
+    await this.pool.end();
   }
 
   static _configFromEnv(): PgConfig {
