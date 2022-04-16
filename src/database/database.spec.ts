@@ -30,10 +30,10 @@ describe('database test', () => {
       return;
     }
     // const postgres = new Postgres(Postgres._configFromEnv());
-    it.skip('connect to AWS-RDS via class', async () => {
+    it('connect to AWS-RDS via class', async () => {
       expect(await postgres._connectionTest()).toBe('Hello world!');
     });
-    it.only('create and drop a new table', async () => {
+    it('create and drop a new table', async () => {
       await postgres.connect();
       const tableName = 'test_table_fakeNonce';
       const query = `CREATE TABLE ${tableName} (

@@ -1,6 +1,8 @@
+import { Client, Pool, PoolClient } from 'pg';
+
 // this file is tested in database.spec.ts
 // TODO: Make singleton
-import { Client } from 'pg';
+import { log } from 'console';
 
 export { postgres };
 
@@ -14,23 +16,36 @@ type PgConfig = {
 
 class Postgres {
   // private readonly pgConfig = getEnvConfig();
-  private client: Client;
+  private client?: PoolClient;
+  private pool: Pool;
 
   constructor(pgConfig?: PgConfig) {
-    this.client = new Client(pgConfig);
+    this.pool = new Pool(pgConfig);
   }
 
   async connect() {
-    await this.client.connect();
+    this.client = await this.pool.connect();
+    if (!this.client) {
+      throw new Error('Could not connect to database');
+    }
   }
 
   async query(query: string, params: any[] = []) {
+    if (!this.client) {
+      log('Not connected to database, connecting now...');
+      await this.connect();
+    }
+    if (!this.client) {
+      throw new Error('Could not connect to database');
+    }
     const res = await this.client.query(query, params);
     return res.rows;
   }
 
   async disconnect() {
-    await this.client.end();
+    if (this.client) {
+      this.client.release();
+    }
   }
 
   static _configFromEnv(): PgConfig {
