@@ -1,12 +1,4 @@
-import {
-  passConfFromEnv,
-  passConfFromModule,
-  passEnv,
-  passEnvAsync,
-  pgAwsRdsConnectionTest,
-  pgConfig,
-  postgres,
-} from './aws-rds';
+import { Postgres, pgAwsRdsConnectionTest, postgres } from './aws-rds';
 
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
@@ -39,25 +31,15 @@ describe('database test', () => {
       expect(true).toBe(true);
       return;
     }
+    const postgres = new Postgres(Postgres._configFromEnv());
     it('connect to AWS-RDS', async () => {
       expect(await pgAwsRdsConnectionTest()).toBe('Hello world!');
     });
-    it('connect to AWS-RDS via class', async () => {
+    it.only('connect to AWS-RDS via class', async () => {
       expect(await postgres._connectionTest()).toBe('Hello world!');
     });
-    it.only('get env config', () => {
-      expect(
-        (() => {
-          console.log('pgConfig.host : ', pgConfig.host); // DEV_LOG_TO_REMOVE
-          return pgConfig.host;
-        })()
-      ).toBeUndefined();
-      expect(passEnv()).toBe(TEST_HOST);
-      // expect(await passEnvAsync()).toBe(TEST_HOST);
+    it.skip('get env config', () => {
       expect(process.env.PGHOST).toBe(TEST_HOST); // DEV_LOG_TO_REMOVE
-
-      console.log('passConfFromModule() : ', passConfFromModule()); // DEV_LOG_TO_REMOVE
-      console.log('passConfFromEnv() : ', passConfFromEnv()); // DEV_LOG_TO_REMOVE
     });
   });
 });

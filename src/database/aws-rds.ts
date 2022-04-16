@@ -2,8 +2,8 @@
 
 import { Client } from 'pg';
 
-export { passConfFromModule, passConfFromEnv, passEnvAsync, passEnv };
-export { pgAwsRdsConnectionTest, postgres, pgConfig };
+export { Postgres }; // for test
+export { pgAwsRdsConnectionTest, postgres };
 
 async function pgAwsRdsConnectionTest() {
   // console.log('process.env.PGHOST : ', process.env.PGHOST); // DEV_LOG_TO_REMOVE
@@ -17,47 +17,19 @@ async function pgAwsRdsConnectionTest() {
   return res.rows[0].message;
 }
 
-async function passEnvAsync() {
-  return process.env.PGHOST;
-}
-
-function passEnv() {
-  return process.env.PGHOST;
-}
-
-const pgConfig = {
-  host: process.env.PGHOST!,
-  user: process.env.PGUSER!,
-  database: process.env.PGDATABASE!,
-  password: process.env.PGPASSWORD!,
-  port: process.env.PGPORT as any as number,
+type PgConfig = {
+  host: string;
+  user: string;
+  database: string;
+  password: string;
+  port: number;
 };
-type PgConfig = typeof pgConfig;
-
-function passConfFromModule() {
-  return pgConfig;
-}
-function passConfFromEnv() {
-  return {
-    host: process.env.PGHOST!,
-    user: process.env.PGUSER!,
-    database: process.env.PGDATABASE!,
-    password: process.env.PGPASSWORD!,
-    port: process.env.PGPORT as any as number,
-  };
-}
-function getEnvConfig() {
-  // why won't work?
-  // helper function for testing
-  return;
-}
 
 class Postgres {
   // private readonly pgConfig = getEnvConfig();
   private client: Client;
 
   constructor(pgConfig?: PgConfig) {
-    console.log('this.pgConfig : ', pgConfig); // DEV_LOG_TO_REMOVE
     this.client = new Client(pgConfig);
   }
 
@@ -72,6 +44,16 @@ class Postgres {
 
   async disconnect() {
     await this.client.end();
+  }
+
+  static _configFromEnv(): PgConfig {
+    return {
+      host: process.env.PGHOST!,
+      user: process.env.PGUSER!,
+      database: process.env.PGDATABASE!,
+      password: process.env.PGPASSWORD!,
+      port: process.env.PGPORT as any as number,
+    };
   }
 
   async _connectionTest() {
