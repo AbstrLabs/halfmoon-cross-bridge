@@ -2,20 +2,7 @@
 
 import { Client } from 'pg';
 
-export { Postgres }; // for test
-export { pgAwsRdsConnectionTest, postgres };
-
-async function pgAwsRdsConnectionTest() {
-  // console.log('process.env.PGHOST : ', process.env.PGHOST); // DEV_LOG_TO_REMOVE
-
-  const client = new Client();
-  await client.connect();
-  const res = await client.query('SELECT $1::text as message', [
-    'Hello world!',
-  ]);
-  await client.end();
-  return res.rows[0].message;
-}
+export { postgres };
 
 type PgConfig = {
   host: string;
@@ -66,4 +53,5 @@ class Postgres {
   }
 }
 
-const postgres = new Postgres();
+// not `new Postgres()` because jest won't initialize with process.env
+const postgres = new Postgres(Postgres._configFromEnv());

@@ -1,9 +1,7 @@
-import { Postgres, pgAwsRdsConnectionTest, postgres } from './aws-rds';
-
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
+import { postgres } from './aws-rds';
 
-const TEST_HOST = 'ban-db-test.c2i8nv1hxebn.us-east-1.rds.amazonaws.com';
 describe('database test', () => {
   describe('NeDB CRUD test', () => {
     if (ENV.DB_ORIGIN !== 'NEDB') {
@@ -31,15 +29,9 @@ describe('database test', () => {
       expect(true).toBe(true);
       return;
     }
-    const postgres = new Postgres(Postgres._configFromEnv());
-    it('connect to AWS-RDS', async () => {
-      expect(await pgAwsRdsConnectionTest()).toBe('Hello world!');
-    });
+    // const postgres = new Postgres(Postgres._configFromEnv());
     it.only('connect to AWS-RDS via class', async () => {
       expect(await postgres._connectionTest()).toBe('Hello world!');
-    });
-    it.skip('get env config', () => {
-      expect(process.env.PGHOST).toBe(TEST_HOST); // DEV_LOG_TO_REMOVE
     });
   });
 });
