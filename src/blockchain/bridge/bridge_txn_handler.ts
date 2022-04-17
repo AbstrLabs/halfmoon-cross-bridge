@@ -10,30 +10,30 @@ async function bridge_txn_handler(
   txType: TxType
 ): Promise<void> {
   /* CONFIG */
-  let receivingBlockchain: Blockchain;
-  let sendingBlockchain: Blockchain;
-  const { from, to, amount, txId } = genericTxInfo;
+  let incomingBlockchain: Blockchain;
+  let outgoingBlockchain: Blockchain;
+  const { from, to, amount, txId: txId } = genericTxInfo;
   log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
   if (txType === TxType.Mint) {
-    receivingBlockchain = nearBlockchain;
-    sendingBlockchain = algoBlockchain;
+    incomingBlockchain = nearBlockchain;
+    outgoingBlockchain = algoBlockchain;
   } else if (txType === TxType.Burn) {
-    receivingBlockchain = algoBlockchain;
-    sendingBlockchain = nearBlockchain;
+    incomingBlockchain = algoBlockchain;
+    outgoingBlockchain = nearBlockchain;
   } else {
     throw new Error('Unknown txType');
   }
 
   /* MAKE TRANSACTION */
-  await receivingBlockchain.confirmTransaction({
+  await incomingBlockchain.confirmTransaction({
     ...genericTxInfo,
     to: 'abstrlabs.testnet',
   });
-  await sendingBlockchain.makeTransaction({
+  await outgoingBlockchain.makeOutgoingTxn({
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
-  await sendingBlockchain.confirmTransaction({
+  await outgoingBlockchain.confirmTransaction({
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
