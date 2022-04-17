@@ -4,8 +4,8 @@ export {
   type NearAddr,
   type AlgoAddr,
   type Addr,
-  type NearTxHash,
-  type AlgoTxnId,
+  type NearTxId,
+  type AlgoTxId,
   type TxID,
   type AlgoMnemonic,
   type AlgoAcc,
@@ -21,13 +21,13 @@ import { type GenericTxInfo } from '..';
 type NearAddr = string;
 type AlgoAddr = string;
 type Addr = NearAddr | AlgoAddr;
-type NearTxHash = string;
-type AlgoTxnId = string;
-type TxID = NearTxHash | AlgoTxnId;
+type NearTxId = string;
+type AlgoTxId = string;
+type TxID = NearTxId | AlgoTxId;
 type AlgoMnemonic = string;
 type AlgoReceipt = any;
 type NearReceipt = any;
-type GeneralReceipt = AlgoReceipt | NearReceipt;
+type TxReceipt = AlgoReceipt | NearReceipt;
 type AlgoAcc = algosdk.Account;
 type NearAcc = undefined;
 type GenericAcc = AlgoAcc | NearAcc;
@@ -40,8 +40,6 @@ enum TxType {
 abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
-  abstract makeOutgoingTxn(
-    genericTxInfo: GenericTxInfo
-  ): Promise<GeneralReceipt>;
+  abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxReceipt>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

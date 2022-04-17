@@ -19,13 +19,13 @@ describe('AlgorandBlockchain', () => {
   // it.skip('user not opted in', () => {});
   it.only('make a txn, 1 AU goNEAR, central acc -> example acc', async () => {
     // jest.setTimeout(30000); // 30sec
-    const txnId = await algoBlockchain.makeOutgoingTxn({
+    const algoTxId = await algoBlockchain.makeOutgoingTxn({
       from: UNUSED,
       txId: UNUSED,
       to: ENV.ALGO_EXAMPL_ADDR,
       amount: '1',
     });
-    console.info('txnId : ', txnId);
+    console.info('algoTxId : ', algoTxId);
     return;
   }, 30000);
 });

@@ -3,7 +3,7 @@ export { algoBlockchain, createGoNearWithAdmin };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
+import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxId } from '.';
 import {
   Algodv2 as AlgodClient,
   AssetTransferTxn,
@@ -40,13 +40,13 @@ class AlgorandBlockchain extends Blockchain {
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
-  async getTxnStatus(txnId: AlgoTxnId): Promise<string> {
+  async getTxnStatus(algoTxId: AlgoTxId): Promise<string> {
     return 'finished';
   }
   async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
     throw new Error('not implemented!');
   }
-  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
+  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
     // abstract class implementation.
     // TODO! make sure amount is atomic unit!
     return await this._makeGoNearTxnFromAdmin(
@@ -71,7 +71,7 @@ class AlgorandBlockchain extends Blockchain {
     amountInAtomic: number | bigint,
     senderAccount: AlgoAcc,
     asaId: number
-  ): Promise<AlgoTxnId> {
+  ): Promise<AlgoTxId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#build-first-transaction
     let params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee

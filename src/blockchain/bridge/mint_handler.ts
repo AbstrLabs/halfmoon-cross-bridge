@@ -4,8 +4,8 @@ import {
   type AlgoAddr,
   type NearAddr,
   type Addr,
-  type NearTxHash,
-  type AlgoTxnId,
+  type NearTxId,
+  type AlgoTxId,
   type TxID,
   TxType,
 } from '..';

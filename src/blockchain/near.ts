@@ -4,7 +4,7 @@ export { nearBlockchain, NearBlockchain };
 
 import { providers, utils } from 'near-api-js';
 
-import { AlgoTxnId, type NearAddr, type NearTxHash } from '.';
+import { AlgoTxId, type NearAddr, type NearTxId } from '.';
 import { GenericTxInfo } from '..';
 import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
@@ -22,7 +22,7 @@ class NearBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    txId: NearTxHash,
+    txId: NearTxId,
     from: NearAddr
   ): Promise<providers.FinalExecutionOutcome> {
     log('nearIndexer', 'getTxnStatus()'); //verbose
@@ -32,7 +32,7 @@ class NearBlockchain extends Blockchain {
     return result;
   }
   async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    log('nearIndexer', 'confirmStatus()', 'txHash'); //verbose
+    log('nearIndexer', 'confirmStatus()', 'NearTxId'); //verbose
     const { from, to, amount, txId } = genericTxInfo;
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
@@ -57,10 +57,10 @@ class NearBlockchain extends Blockchain {
     return await confirmed;
   }
 
-  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxnId> {
+  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
     throw new Error('not implemented!');
   }
-  static async getRecentTransactions(limit: number): Promise<NearTxHash[]> {
+  static async getRecentTransactions(limit: number): Promise<NearTxId[]> {
     log('nearIndexer', 'getRecentTransactions()', 'limit'); //verbose
     throw new Error('Not implemented');
     return [];
