@@ -101,6 +101,15 @@ class Database {
     log(`Updated bridge tx with id ${bridgeTx.dbId}`);
     return result[0].id;
   }
+  async deleteTx(txId: number) {
+    // const query = `
+    //   DELETE FROM user_mint_request WHERE id = $1;
+    // `;
+    // const params = [txId];
+    // const result = await this.query(query, params);
+
+    throw new Error(`We cannot delete TX from DB.`);
+  }
 }
 
 const db = new Database();
