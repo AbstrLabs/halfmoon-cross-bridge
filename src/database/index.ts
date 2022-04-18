@@ -31,11 +31,13 @@ class Database {
   }
 
   async createTx(bridgeTx: BridgeTxInfo) {
+    // will assign a dbId when created.
+    // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
       INSERT INTO user_mint_request (
         near_address, algorand_address, amount, create_time, request_status, near_tx_hash, algo_txn_id
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id
+      RETURNING id;
     `;
     const params = [
       bridgeTx.fromAddr,
@@ -47,7 +49,36 @@ class Database {
       bridgeTx.toTxId,
     ];
     const result = await this.query(query, params);
-    log(`Created bridge tx with id ${result[0].id}`);
+    const dbId = result[0].id;
+    log(`Created bridge tx with id ${dbId}`);
+    bridgeTx.dbId = dbId;
+    return dbId;
+  }
+  async updateTx(bridgeTx: BridgeTxInfo) {
+    // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
+    // they are the only two fields that are allowed to change after created.
+    // will raise err if data mismatch
+    const query = `
+      UPDATE user_mint_request SET
+        request_status = $1, algo_txn_id = $2
+          WHERE (id = $3 AND near_tx_hash = $4 AND algorand_address = $5 AND near_address = $6 AND amount = $7 AND create_time = $8)
+      RETURNING id;
+    `;
+    const params = [
+      bridgeTx.txStatus,
+      bridgeTx.toTxId,
+      bridgeTx.dbId,
+      bridgeTx.fromTxId,
+      bridgeTx.toAddr,
+      bridgeTx.fromAddr,
+      bridgeTx.amount,
+      bridgeTx.timestamp,
+    ];
+    const result = await this.query(query, params);
+    if (result.length !== 1) {
+      throw new Error(`Update bridge tx failed.`);
+    }
+    log(`Updated bridge tx with id ${bridgeTx.dbId}`);
     return result[0].id;
   }
 }

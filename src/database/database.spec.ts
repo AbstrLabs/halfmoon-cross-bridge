@@ -1,8 +1,20 @@
 import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
 
-import { Blockchain } from '../blockchain';
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
+
+const updateTestBridgeTx: BridgeTxInfo = {
+  dbId: 1,
+  fromAddr: '0x1234567890123456789012345678901234567890',
+  toAddr: '0x1234567890123456789012345678901234567890',
+  amount: BigInt('10000000000'),
+  timestamp: BigInt('1650264115011'),
+  txStatus: BridgeTxStatus.DONE_SEND,
+  fromTxId: '0x1234567890123456789012345678901234567890',
+  toTxId: 'some new tx id',
+  fromBlockchain: BlockchainName.NEAR,
+  toBlockchain: BlockchainName.ALGO,
+};
 
 describe('DATABASE test', () => {
   describe('AWS-RDS capability test', () => {
@@ -82,7 +94,7 @@ describe('DATABASE test', () => {
       await db.end();
     });
 
-    it('create a transaction', async () => {
+    it.skip('create a transaction', async () => {
       const bridgeTx: BridgeTxInfo = {
         fromAddr: '0x1234567890123456789012345678901234567890',
         toAddr: '0x1234567890123456789012345678901234567890',
@@ -95,6 +107,13 @@ describe('DATABASE test', () => {
         toBlockchain: BlockchainName.ALGO,
       };
       const res = await db.createTx(bridgeTx);
+      console.log('res : ', res); // DEV_LOG_TO_REMOVE
+      expect(typeof res).toBe('number');
+    });
+
+    it('update a transaction', async () => {
+      updateTestBridgeTx;
+      const res = await db.updateTx(updateTestBridgeTx);
       console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('number');
     });

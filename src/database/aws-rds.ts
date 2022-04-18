@@ -60,7 +60,7 @@ class Postgres {
 
   async end() {
     if (this.isConnected) {
-      await this.disconnect();
+      this.disconnect();
     }
     await this.pool.end();
   }
