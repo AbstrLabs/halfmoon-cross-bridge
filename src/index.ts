@@ -3,10 +3,27 @@ export { type GenericTxInfo, BridgeTxStatus, BridgeTxInfo, BlockchainName };
 interface GenericTxInfo {
   from: string;
   to: string;
-  amount: string; // i18n. in some cases 1/2 written as 0,5
+  amount: string; // l10n. in some cases 1/2 written as 0,5
   txId: string;
 }
 
+interface BridgeTxInfo {
+  dbId?: number;
+  amount: bigint; // in "toTx"
+  timestamp: bigint;
+  fromAddr: string;
+  fromBlockchain: BlockchainName;
+  fromTxId: string;
+  toAddr: string;
+  toBlockchain: BlockchainName;
+  toTxId?: string;
+  txStatus: BridgeTxStatus;
+}
+
+enum BlockchainName {
+  NEAR = 'NEAR',
+  ALGO = 'ALGO',
+}
 enum BridgeTxStatus {
   NOT_STARTED = 'NOT_STARTED',
   ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL',

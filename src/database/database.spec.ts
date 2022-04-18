@@ -1,8 +1,11 @@
+import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
+
+import { Blockchain } from '../blockchain';
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
 
 describe('DATABASE test', () => {
-  describe('AWS-RDS test', () => {
+  describe('AWS-RDS capability test', () => {
     afterAll(async () => {
       await db.end();
     });
@@ -68,6 +71,32 @@ describe('DATABASE test', () => {
 
       expect(res.length).toBe(0);
       expect(res_before_del.length - res_after_del.length).toBe(1);
+    });
+  });
+  describe.only('create transaction', () => {
+    beforeAll(async () => {
+      await db.connect();
+    });
+    afterAll(async () => {
+      db.disconnect();
+      await db.end();
+    });
+
+    it('create a transaction', async () => {
+      const bridgeTx: BridgeTxInfo = {
+        fromAddr: '0x1234567890123456789012345678901234567890',
+        toAddr: '0x1234567890123456789012345678901234567890',
+        amount: BigInt('10000000000'),
+        timestamp: BigInt(+new Date()),
+        txStatus: BridgeTxStatus.DOING_SEND,
+        fromTxId: '0x1234567890123456789012345678901234567890',
+        toTxId: '0x1234567890123456789012345678901234567890',
+        fromBlockchain: BlockchainName.NEAR,
+        toBlockchain: BlockchainName.ALGO,
+      };
+      const res = await db.createTx(bridgeTx);
+      console.log('res : ', res); // DEV_LOG_TO_REMOVE
+      expect(typeof res).toBe('number');
     });
   });
 });
