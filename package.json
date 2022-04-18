@@ -2,7 +2,7 @@
   "name": "algorand-near-bridge",
   "version": "0.0.1",
   "description": "Unidirectional bridge for Algorand <- NEAR",
-  "main": "src/index.ts",
+  "main": "src/main.ts",
   "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
   "author": "Pablion <36828324+Pablion@users.noreply.github.com>",
   "license": "gpl-3.0",

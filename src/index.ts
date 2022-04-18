@@ -1,7 +1,4 @@
-export { type GenericTxInfo, BridgeTxStatus };
-import { startServer } from './server';
-
-startServer();
+export { type GenericTxInfo, BridgeTxStatus, BridgeTxInfo, BlockchainName };
 
 interface GenericTxInfo {
   from: string;
