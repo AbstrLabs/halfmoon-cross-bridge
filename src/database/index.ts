@@ -54,10 +54,12 @@ class Database {
     bridgeTx.dbId = dbId;
     return dbId;
   }
+
   async updateTx(bridgeTx: BridgeTxInfo) {
     // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
+    // TODO: should confirm current status as well. Status can be "stage"
     const query = `
       UPDATE user_mint_request SET
         request_status = $1, algo_txn_id = $2
@@ -75,8 +77,11 @@ class Database {
       bridgeTx.timestamp,
     ];
     const result = await this.query(query, params);
-    if (result.length !== 1) {
-      throw new Error(`Update bridge tx failed.`);
+    if (result.length === 0) {
+      throw new Error(`No TX found to update.`);
+    }
+    if (result.length > 1) {
+      throw new Error(`Found too many TX to update.`);
     }
     log(`Updated bridge tx with id ${bridgeTx.dbId}`);
     return result[0].id;

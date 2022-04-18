@@ -9,9 +9,9 @@ const updateTestBridgeTx: BridgeTxInfo = {
   toAddr: '0x1234567890123456789012345678901234567890',
   amount: BigInt('10000000000'),
   timestamp: BigInt('1650264115011'),
-  txStatus: BridgeTxStatus.DONE_SEND,
+  txStatus: BridgeTxStatus.DOING_SEND,
   fromTxId: '0x1234567890123456789012345678901234567890',
-  toTxId: 'some new tx id',
+  toTxId: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
   toBlockchain: BlockchainName.ALGO,
 };
@@ -113,6 +113,8 @@ describe('DATABASE test', () => {
 
     it('update a transaction', async () => {
       updateTestBridgeTx;
+      updateTestBridgeTx.txStatus = BridgeTxStatus.DONE_SEND;
+      updateTestBridgeTx.toTxId = 'some_fake_tx_id';
       const res = await db.updateTx(updateTestBridgeTx);
       console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('number');
