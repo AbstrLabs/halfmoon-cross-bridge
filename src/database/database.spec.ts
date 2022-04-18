@@ -2,8 +2,9 @@ import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
 
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
+import { dbItemToBridgeTxInfo } from '../utils/formatter';
 
-const updateTestBridgeTx: BridgeTxInfo = {
+const testBridgeTx: BridgeTxInfo = {
   dbId: 1,
   fromAddr: '0x1234567890123456789012345678901234567890',
   toAddr: '0x1234567890123456789012345678901234567890',
@@ -110,14 +111,29 @@ describe('DATABASE test', () => {
       console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('number');
     });
-
+    it('read a transaction', async () => {
+      const res = await db.readTx(1);
+      console.log('res : ', res); // DEV_LOG_TO_REMOVE
+      expect(typeof res).toBe('object');
+      // expect(res).toEqual(testBridgeTx);
+    });
     it('update a transaction', async () => {
-      updateTestBridgeTx;
-      updateTestBridgeTx.txStatus = BridgeTxStatus.DONE_SEND;
-      updateTestBridgeTx.toTxId = 'some_fake_tx_id';
-      const res = await db.updateTx(updateTestBridgeTx);
+      testBridgeTx.txStatus = BridgeTxStatus.DONE_SEND;
+      testBridgeTx.toTxId = 'some_fake_tx_id';
+      const res = await db.updateTx(testBridgeTx);
       console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('number');
+
+      // read the updated transaction
+      const res2 = await db.readTx(testBridgeTx.dbId!);
+      console.log('res2 : ', res2); // DEV_LOG_TO_REMOVE
+      expect(typeof res2).toBe('object');
+      expect(
+        dbItemToBridgeTxInfo(res2, {
+          fromBlockchain: BlockchainName.NEAR,
+          toBlockchain: BlockchainName.ALGO,
+        })
+      ).toEqual(testBridgeTx);
     });
   });
 });

@@ -54,7 +54,21 @@ class Database {
     bridgeTx.dbId = dbId;
     return dbId;
   }
-
+  async readTx(txId: number) {
+    const query = `
+      SELECT * FROM user_mint_request WHERE id = $1;
+    `;
+    const params = [txId];
+    const result = await this.query(query, params);
+    // TODO: check result.length wrap to a function
+    if (result.length === 0) {
+      throw new Error(`No TX found to update.`);
+    }
+    if (result.length > 1) {
+      throw new Error(`Found too many TX to update.`);
+    }
+    return result[0];
+  }
   async updateTx(bridgeTx: BridgeTxInfo) {
     // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
     // they are the only two fields that are allowed to change after created.
@@ -77,6 +91,7 @@ class Database {
       bridgeTx.timestamp,
     ];
     const result = await this.query(query, params);
+    // TODO: check result.length wrap to a function
     if (result.length === 0) {
       throw new Error(`No TX found to update.`);
     }
