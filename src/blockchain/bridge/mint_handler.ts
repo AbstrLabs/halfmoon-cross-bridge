@@ -16,7 +16,6 @@ import { bridge_txn_handler } from './bridge_txn_handler';
 
 async function mint(genericTxInfo: GenericTxInfo): Promise<void> {
   const { from, to, amount, txId } = genericTxInfo;
-
   if (
     from === undefined ||
     to === undefined ||

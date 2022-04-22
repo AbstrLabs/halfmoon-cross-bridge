@@ -37,7 +37,9 @@
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:db": "jest --testPathPattern=src/database",
+    "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "algo": "yarn test:algo",
-    "db": "yarn test:db"
+    "db": "yarn test:db",
+    "bridge": "yarn test:bridge"
   }
 }

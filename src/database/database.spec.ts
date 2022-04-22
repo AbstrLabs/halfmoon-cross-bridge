@@ -86,7 +86,7 @@ describe('DATABASE test', () => {
       expect(res_before_del.length - res_after_del.length).toBe(1);
     });
   });
-  describe.only('create transaction', () => {
+  describe('create transaction', () => {
     beforeAll(async () => {
       await db.connect();
     });
