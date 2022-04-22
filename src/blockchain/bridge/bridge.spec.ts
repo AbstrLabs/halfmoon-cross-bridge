@@ -2,7 +2,7 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
 import { ENV } from '../../utils/dotenv';
 import { GenericTxInfo } from '../..';
-import { mint } from './mint_handler';
+import { mint } from './mint-handler';
 
 const TIMEOUT_30S = 30_000;
 

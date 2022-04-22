@@ -12,7 +12,7 @@ import {
 import { GenericTxInfo } from '../..';
 import { sleep } from '../../utils/helper';
 import { log } from '../../utils/logger';
-import { bridge_txn_handler } from './bridge_txn_handler';
+import { bridge_txn_handler } from './bridge-txn-handler';
 
 async function mint(genericTxInfo: GenericTxInfo): Promise<void> {
   const { from, to, amount, txId } = genericTxInfo;
