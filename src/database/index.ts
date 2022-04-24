@@ -30,7 +30,7 @@ class Database {
     await this.instance.end();
   }
 
-  async createTx(bridgeTx: BridgeTxInfo) {
+  async createTx(bridgeTx: BridgeTxInfo): Promise<number> {
     // will assign a dbId when created.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
@@ -52,7 +52,7 @@ class Database {
     const dbId = result[0].id;
     log(`Created bridge tx with id ${dbId}`);
     bridgeTx.dbId = dbId;
-    return dbId;
+    return dbId as number;
   }
   async readTx(txId: number) {
     const query = `
