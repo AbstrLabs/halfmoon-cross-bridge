@@ -40,6 +40,6 @@ enum TxType {
 abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
-  abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxReceipt>;
+  abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxID>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

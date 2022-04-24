@@ -14,7 +14,7 @@ import { nearBlockchain } from '../near';
 async function bridge_txn_handler(
   genericTxInfo: GenericTxInfo,
   txType: TxType
-): Promise<void> {
+): Promise<BridgeTxInfo> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
@@ -32,29 +32,29 @@ async function bridge_txn_handler(
   await db.connect();
 
   /* MAKE TRANSACTION */
-  const bridgeTx = genericInfoToBridgeTxInfo(
+  const bridgeTxInfo = genericInfoToBridgeTxInfo(
     genericTxInfo,
     txType,
     BigInt(Date.now())
   );
-  const dbId = await db.createTx(bridgeTx);
-  bridgeTx.dbId = dbId;
+  const dbId = await db.createTx(bridgeTxInfo);
+  bridgeTxInfo.dbId = dbId;
 
   // update as sequence diagram
-  bridgeTx.txStatus = BridgeTxStatus.DOING_RECEIVE;
-  await db.updateTx(bridgeTx);
+  bridgeTxInfo.txStatus = BridgeTxStatus.DOING_RECEIVE;
+  await db.updateTx(bridgeTxInfo);
   await incomingBlockchain.confirmTransaction({
     ...genericTxInfo,
     to: 'abstrlabs.testnet',
   });
-  bridgeTx.txStatus = BridgeTxStatus.DONE_RECEIVE;
-  await db.updateTx(bridgeTx);
+  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_RECEIVE;
+  await db.updateTx(bridgeTxInfo);
 
   // empty slot, after confirming incoming tx, for error handling
 
-  bridgeTx.txStatus = BridgeTxStatus.DOING_SEND;
-  await db.updateTx(bridgeTx);
-  await outgoingBlockchain.makeOutgoingTxn({
+  bridgeTxInfo.txStatus = BridgeTxStatus.DOING_SEND;
+  await db.updateTx(bridgeTxInfo);
+  const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
@@ -63,15 +63,16 @@ async function bridge_txn_handler(
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
-  bridgeTx.txStatus = BridgeTxStatus.DONE_SEND;
-  await db.updateTx(bridgeTx);
+  bridgeTxInfo.toTxId = outgoingTxId;
+  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_SEND;
+  await db.updateTx(bridgeTxInfo);
 
   // user confirmation via socket
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
 
-  return;
+  return bridgeTxInfo;
   // check indexer with hash
 }
 

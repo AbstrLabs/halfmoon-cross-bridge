@@ -1,5 +1,5 @@
 /* Algorand functionalities wrapped up with our centralized account */
-export { algoBlockchain, createGoNearWithAdmin };
+export { algoBlockchain };
 
 import * as algosdk from 'algosdk';
 
@@ -149,26 +149,3 @@ class AlgorandBlockchain extends Blockchain {
 }
 
 const algoBlockchain = new AlgorandBlockchain();
-
-/* Functions below are designed to run once */
-
-async function createGoNear(creatorMnemonic: AlgoMnemonic, admin?: AlgoAddr) {
-  return await algoBlockchain.createAsaWithMnemonic(
-    {
-      ...noParamGoNearConfig,
-      manager: admin,
-      reserve: admin,
-      freeze: admin,
-      clawback: admin,
-    },
-    creatorMnemonic
-  );
-}
-
-async function createGoNearWithAdmin() {
-  await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
-}
-
-const fake_makeTransaction = async (genericTxInfo: GenericTxInfo) => {
-  throw new Error('not implemented!');
-};
