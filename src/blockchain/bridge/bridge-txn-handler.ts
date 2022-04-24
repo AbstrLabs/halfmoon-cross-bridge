@@ -41,30 +41,32 @@ async function bridge_txn_handler(
   bridgeTxInfo.dbId = dbId;
 
   // update as sequence diagram
-  bridgeTxInfo.txStatus = BridgeTxStatus.DOING_RECEIVE;
+  bridgeTxInfo.txStatus = BridgeTxStatus.CONFIRM_INCOMING;
   await db.updateTx(bridgeTxInfo);
   await incomingBlockchain.confirmTransaction({
     ...genericTxInfo,
     to: 'abstrlabs.testnet',
   });
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_RECEIVE;
+  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
   await db.updateTx(bridgeTxInfo);
 
   // empty slot, after confirming incoming tx, for error handling
+  // TODO: add txn fee.
 
-  bridgeTxInfo.txStatus = BridgeTxStatus.DOING_SEND;
+  bridgeTxInfo.txStatus = BridgeTxStatus.MAKE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
-  // TODO: add a confirmation checkpoint in db
+  bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
+  await db.updateTx(bridgeTxInfo);
   await outgoingBlockchain.confirmTransaction({
     ...genericTxInfo,
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
   bridgeTxInfo.toTxId = outgoingTxId;
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_SEND;
+  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
 
   // user confirmation via socket

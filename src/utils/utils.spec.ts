@@ -24,7 +24,7 @@ const sampleTxInfo: BridgeTxInfo = {
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
   toTxId: 'some_fake_tx_id',
-  txStatus: BridgeTxStatus.DONE_SEND,
+  txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
 describe('utils tool test, should skip', () => {
