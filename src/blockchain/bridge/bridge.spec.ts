@@ -16,8 +16,11 @@ describe('mint test', () => {
     await db.end();
   });
   it(
-    'mint NEAR from NEAR to ALGO',
+    'mint 0.424 NEAR from NEAR to ALGO',
     async () => {
+      // config
+      const amount = '0.424';
+
       // simulate frontend: make NEAR txn
       const mintResponse = await transferOnNearTestnetFromExampleToMaster('1');
       // manually checked the amount is correct.
@@ -27,7 +30,7 @@ describe('mint test', () => {
       const genericTxInfo: GenericTxInfo = {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
-        amount: '1',
+        amount,
         txId: nearTxId,
       };
 

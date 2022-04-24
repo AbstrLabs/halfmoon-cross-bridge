@@ -1,12 +1,6 @@
 /* This file stores the config of all used ASA: Algorand Standard Asset(s) */
 
-export {
-  type AsaConfig,
-  type NoParamAsaConfig,
-  noParamGoNearConfig,
-  GO_NEAR_DECIMAL,
-  NEAR_TOTAL,
-};
+export { type AsaConfig, type NoParamAsaConfig, noParamGoNearConfig };
 
 import { SuggestedParams } from 'algosdk';
 
@@ -31,13 +25,12 @@ interface AsaConfig {
 }
 type NoParamAsaConfig = Omit<AsaConfig, 'suggestedParams'>;
 
-const GO_NEAR_DECIMAL = 10; // 1 atomic goNEAR = 10^14 yoctoNEAR
-const NEAR_TOTAL = 1e9; // NEAR total supply 1 billion.
 const noParamGoNearConfig: NoParamAsaConfig = {
+  // this is the current test goNEAR with id 83251085 on testnet
   from: ENV.ALGO_MASTER_ADDR,
   assetName: 'goNEAR',
-  decimals: GO_NEAR_DECIMAL,
-  total: BigInt(NEAR_TOTAL) * BigInt(10 ** GO_NEAR_DECIMAL),
+  decimals: ENV.GO_NEAR_DECIMALS,
+  total: BigInt(ENV.NEAR_TOTAL) * BigInt(10 ** ENV.GO_NEAR_DECIMALS),
   // fixed: JS gives  BigInt(10 ** (9 + 10)) = 10000000000000000000n
   // fixed: JS gives  BigInt(10 ** (9 + 24)) ==> 999999999999999945575230987042816n
   unitName: 'goNEAR',

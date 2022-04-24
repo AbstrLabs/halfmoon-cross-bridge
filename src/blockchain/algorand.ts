@@ -11,14 +11,14 @@ import {
 } from 'algosdk';
 import {
   AsaConfig,
-  GO_NEAR_DECIMAL,
-  NoParamAsaConfig,
+  type NoParamAsaConfig,
   noParamGoNearConfig,
 } from '../utils/config/asa';
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
+import { goNearInAtom } from '../utils/formatter';
 import { log } from '../utils/logger';
 
 class AlgorandBlockchain extends Blockchain {
@@ -58,8 +58,8 @@ class AlgorandBlockchain extends Blockchain {
     return await this._makeAsaTxn(
       to,
       this.centralizedAcc.addr,
-      // TODO: use correct amount precision. first BigInt will round up.
-      BigInt(amount) * BigInt(10) ** BigInt(GO_NEAR_DECIMAL),
+      // TODO: BAN-15: amount should be parsed right after API call
+      BigInt(goNearInAtom(amount)),
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
@@ -110,6 +110,9 @@ class AlgorandBlockchain extends Blockchain {
 
   /* Methods below are designed to run once */
 
+  protected async _createGoNearWithAdmin() {
+    this.createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
+  }
   async genAcc() {
     // tested, not used
     const algoAcc = algosdk.generateAccount();
