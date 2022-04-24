@@ -61,6 +61,7 @@ async function bridge_txn_handler(
     // TODO: use env
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
+  bridgeTxInfo.toTxId = outgoingTxId;
   bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   await outgoingBlockchain.confirmTransaction({
@@ -68,7 +69,6 @@ async function bridge_txn_handler(
     // TODO: use env
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
-  bridgeTxInfo.toTxId = outgoingTxId;
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
 
