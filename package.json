@@ -33,14 +33,16 @@
     "winston": "^3.7.2"
   },
   "scripts": {
+    "algo": "yarn test:algo",
+    "bridge": "yarn test:bridge",
     "build": "tsc",
+    "db": "yarn test:db",
     "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
+    "near": "yarn test:near",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
-    "test:db": "jest --testPathPattern=src/database",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
-    "algo": "yarn test:algo",
-    "db": "yarn test:db",
-    "bridge": "yarn test:bridge"
+    "test:db": "jest --testPathPattern=src/database",
+    "test:near": "jest --testPathPattern=src/blockchain/near"
   }
 }

@@ -4,11 +4,11 @@ export { nearBlockchain, NearBlockchain };
 
 import { providers, utils } from 'near-api-js';
 
-import { AlgoTxId, type NearAddr, type NearTxId } from '.';
+import { AlgoTxId, TxID, type NearAddr, type NearTxId } from '.';
 import { GenericTxInfo } from '..';
 import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
-import { log } from '../utils/logger';
+import { log, logger } from '../utils/logger';
 import { Blockchain } from '.';
 
 class NearBlockchain extends Blockchain {
@@ -31,19 +31,25 @@ class NearBlockchain extends Blockchain {
     // log((result.receipts_outcome[0] as any).proof!);
     return result;
   }
+
   async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    log('nearIndexer', 'confirmStatus()', 'NearTxId'); //verbose
-    const { from, to, amount, txId } = genericTxInfo;
+    const confirmTxnConfig = {
+      timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
+      intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
+    };
+    logger.silly('Blockchain: confirmTransaction()', genericTxInfo);
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
-      }, ENV.NEAR_CONFIRM_TIMEOUT_SEC * 1000);
+      }, confirmTxnConfig.timeoutSec * 1000);
 
       const interval = setImmediateInterval(async () => {
-        console.log('itv run : '); // DEV_LOG_TO_REMOVE
-
-        let txReceipt = await this.getTxnStatus(txId, from);
-        if (correctnessCheck(txReceipt, to, from, amount)) {
+        let txnOutcome = await this.getTxnStatus(
+          genericTxInfo.txId,
+          genericTxInfo.from
+        );
+        //TODO: error handling
+        if (this.verifyCorrectness(txnOutcome, genericTxInfo)) {
           clearTimeout(timeout);
           clearInterval(interval);
           resolve(true);
@@ -52,14 +58,24 @@ class NearBlockchain extends Blockchain {
           clearInterval(interval);
           resolve(false);
         }
-      }, ENV.NEAR_CONFIRM_INTERVAL_SEC * 1000);
+      }, confirmTxnConfig.intervalSec * 1000);
     });
     return await confirmed;
   }
+  verifyCorrectness(
+    txnOutcome: providers.FinalExecutionOutcome,
+    genericTxInfo: GenericTxInfo
+  ): boolean {
+    const { from, to, amount, txId } = genericTxInfo;
+    console.log('txnOutcome : ', txnOutcome); // DEV_LOG_TO_REMOVE
 
+    return correctnessCheck(txnOutcome, to, from, amount);
+  }
   async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
     throw new Error('not implemented!');
   }
+
+  // TODO: protect, not used.
   static async getRecentTransactions(limit: number): Promise<NearTxId[]> {
     log('nearIndexer', 'getRecentTransactions()', 'limit'); //verbose
     throw new Error('Not implemented');
@@ -73,6 +89,7 @@ const nearBlockchain = new NearBlockchain();
 
 const correctnessCheck = (
   txReceipt: providers.FinalExecutionOutcome,
+  // txID: TxID,
   to: NearAddr,
   from: NearAddr,
   amount: string
@@ -84,7 +101,11 @@ const correctnessCheck = (
       txReceipt.status.Failure !== undefined &&
       txReceipt.status.Failure !== null
     ) {
-      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Failure'); //debug
+      logger.silly(
+        'nearIndexer',
+        'correctnessCheck()',
+        'txReceipt.status.Failure'
+      );
       return false;
     }
   } else {
@@ -96,33 +117,32 @@ const correctnessCheck = (
       return false;
     }
   }
-  // from
+  // check from address
   if (txReceipt.transaction.signer_id !== from) {
     log('nearIndexer', 'correctnessCheck()', 'txReceipt.transaction.signer_id'); //debug
     return false;
-  } // maybe signer != sender?
-  // to
+  } // TODO: later: maybe signer != sender?
+  // check to address
   if (txReceipt.transaction.receiver_id !== to) {
-    log(
+    logger.silly(
       'nearIndexer',
       'correctnessCheck()',
       'txReceipt.transaction.receiver_id'
-    ); //debug
+    );
     return false;
   }
-  // amount
+  // check amount
   if (
     txReceipt.transaction.actions[0].Transfer.deposit !==
     utils.format.parseNearAmount(amount)
   ) {
-    log(
+    logger.silly(
       'nearIndexer',
       'correctnessCheck()',
       'txReceipt.transaction.actions[0].Transfer.deposit'
-    ); //debug
+    );
     return false;
   }
-  //TODO: amount should be string // 10^24 > 2^53.
   return true;
 };
 

@@ -16,6 +16,7 @@ export {
 };
 
 import algosdk from 'algosdk';
+import { providers } from 'near-api-js';
 import { type GenericTxInfo } from '..';
 
 type NearAddr = string;
@@ -28,6 +29,7 @@ type AlgoMnemonic = string;
 type AlgoReceipt = any;
 type NearReceipt = any;
 type TxReceipt = AlgoReceipt | NearReceipt;
+type TxStatuesOutcome = TxReceipt | providers.FinalExecutionOutcome;
 type AlgoAcc = algosdk.Account;
 type NearAcc = undefined;
 type GenericAcc = AlgoAcc | NearAcc;
@@ -40,6 +42,11 @@ enum TxType {
 abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
+  abstract verifyCorrectness(
+    txnOutcome: TxStatuesOutcome,
+    genericTxInfo: GenericTxInfo
+  ): boolean;
+  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxStatuesOutcome>;
   abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxID>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

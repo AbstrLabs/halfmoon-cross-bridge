@@ -3,7 +3,7 @@ export { type GenericTxInfo, BridgeTxStatus, BridgeTxInfo, BlockchainName };
 interface GenericTxInfo {
   from: string;
   to: string;
-  amount: string; // l10n. in some cases 1/2 written as 0,5
+  amount: string; // TODO: l10n. in some cases 1/2 written as 0,5
   txId: string;
 }
 
