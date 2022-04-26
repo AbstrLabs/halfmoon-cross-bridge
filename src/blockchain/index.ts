@@ -1,18 +1,19 @@
 /* All blockchain functionalities wrapped up with our centralized account */
 // TODO: Make singleton
 export {
-  type NearAddr,
-  type AlgoAddr,
-  type Addr,
-  type NearTxId,
-  type AlgoTxId,
-  type TxID,
-  type AlgoMnemonic,
-  type AlgoAcc,
-  type NearAcc,
-  type GenericAcc,
-  TxType,
   Blockchain,
+  TxType,
+  type Addr,
+  type AlgoAcc,
+  type AlgoAddr,
+  type AlgoMnemonic,
+  type AlgoReceipt,
+  type AlgoTxId,
+  type GenericAcc,
+  type NearAcc,
+  type NearAddr,
+  type NearTxId,
+  type TxID,
 };
 
 import algosdk from 'algosdk';
@@ -21,20 +22,20 @@ import { type GenericTxInfo } from '..';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type NearAddr = string;
-type AlgoAddr = string;
 type Addr = NearAddr | AlgoAddr;
-type NearTxId = string;
-type AlgoTxId = string;
-type TxID = NearTxId | AlgoTxId;
+type AlgoAcc = algosdk.Account;
+type AlgoAddr = string;
 type AlgoMnemonic = string;
 type AlgoReceipt = any;
+type AlgoTxId = string;
+type GenericAcc = AlgoAcc | NearAcc;
+type NearAcc = undefined;
+type NearAddr = string;
 type NearReceipt = any;
+type NearTxId = string;
+type TxID = NearTxId | AlgoTxId;
 type TxReceipt = AlgoReceipt | NearReceipt;
 type TxStatuesOutcome = TxReceipt | providers.FinalExecutionOutcome;
-type AlgoAcc = algosdk.Account;
-type NearAcc = undefined;
-type GenericAcc = AlgoAcc | NearAcc;
 type ConfirmTxnConfig = {
   timeoutSec: number;
   intervalSec: number;

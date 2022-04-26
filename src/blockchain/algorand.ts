@@ -3,10 +3,11 @@ export { algoBlockchain };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxId } from '.';
+import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoReceipt, AlgoTxId } from '.';
 import {
   Algodv2 as AlgodClient,
   AssetTransferTxn,
+  Indexer,
   SuggestedParams,
 } from 'algosdk';
 import {
@@ -23,6 +24,7 @@ import { log } from '../utils/logger';
 
 class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
+  readonly indexer: Indexer;
   readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
@@ -30,27 +32,56 @@ class AlgorandBlockchain extends Blockchain {
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.ALGO_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
+    algoRound: ENV.ALGO_CONFIRM_ROUND,
   };
   constructor() {
     super();
-    const pure_stake_client = {
+    const PURE_STAKE_CLIENT = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
-      server: 'https://testnet-algorand.api.purestake.io/ps2',
       port: '', // from https://developer.purestake.io/code-samples
     };
-    const algoClientParamSource = pure_stake_client;
-    const { token, server, port } = algoClientParamSource;
-    this.client = new AlgodClient(token, server, port);
+    const PURE_STAKE_DAEMON_CLIENT = {
+      ...PURE_STAKE_CLIENT,
+      server: 'https://testnet-algorand.api.purestake.io/ps2',
+    };
+    const PURE_STAKE_INDEXER_CLIENT = {
+      ...PURE_STAKE_CLIENT,
+      server: 'https://testnet-algorand.api.purestake.io/idx2',
+    };
+    // TODO: switch network
+    const algodClientParamSource = PURE_STAKE_DAEMON_CLIENT;
+    const algoIndexerParamSource = PURE_STAKE_INDEXER_CLIENT;
+
+    this.client = new AlgodClient(
+      algodClientParamSource.token,
+      algodClientParamSource.server,
+      algodClientParamSource.port
+    );
+
+    this.indexer = new Indexer(
+      algoIndexerParamSource.token,
+      algoIndexerParamSource.server,
+      algoIndexerParamSource.port
+    );
+
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
-  async getTxnStatus(algoTxId: AlgoTxId): Promise<string> {
-    return 'finished';
+  async getTxnStatus(algoTxId: AlgoTxId): Promise<AlgoReceipt> {
+    // will timeout in `confirmTxn` if txn not confirmed
+    return await this.indexer.lookupTransactionByID(algoTxId).do();
+
+    // the following method only checks new blocks
+    // return await algosdk.waitForConfirmation(
+    //   this.client,
+    //   algoTxId,
+    //   this.confirmTxnConfig.algoRound
+    // );
   }
-  async confirmTxn(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    throw new Error('not implemented!');
-  }
-  verifyCorrectness(txnOutcome: any, genericTxInfo: GenericTxInfo): boolean {
+  verifyCorrectness(
+    txnOutcome: AlgoReceipt,
+    genericTxInfo: GenericTxInfo
+  ): boolean {
     throw new Error('not implemented!');
   }
   async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {

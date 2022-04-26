@@ -28,6 +28,7 @@ const default_ENV = {
   GO_NEAR_DECIMALS: 10,
   NEAR_TOTAL: 1_000_000_000,
   DB_ORIGIN: 'NEDB',
+  ALGO_CONFIRM_ROUND: 60,
 };
 
 const secret_ENV = {
