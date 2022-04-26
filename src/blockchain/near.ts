@@ -16,6 +16,10 @@ class NearBlockchain extends Blockchain {
   readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
+  public readonly confirmTxnConfig = {
+    timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
+    intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
+  };
 
   constructor() {
     super();
@@ -32,36 +36,6 @@ class NearBlockchain extends Blockchain {
     return result;
   }
 
-  async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    const confirmTxnConfig = {
-      timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
-      intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
-    };
-    logger.silly('Blockchain: confirmTransaction()', genericTxInfo);
-    const confirmed = new Promise<boolean>((resolve) => {
-      const timeout = setTimeout(() => {
-        resolve(false);
-      }, confirmTxnConfig.timeoutSec * 1000);
-
-      const interval = setImmediateInterval(async () => {
-        let txnOutcome = await this.getTxnStatus(
-          genericTxInfo.txId,
-          genericTxInfo.from
-        );
-        //TODO: error handling
-        if (this.verifyCorrectness(txnOutcome, genericTxInfo)) {
-          clearTimeout(timeout);
-          clearInterval(interval);
-          resolve(true);
-        } else {
-          clearTimeout(timeout);
-          clearInterval(interval);
-          resolve(false);
-        }
-      }, confirmTxnConfig.intervalSec * 1000);
-    });
-    return await confirmed;
-  }
   verifyCorrectness(
     txnOutcome: providers.FinalExecutionOutcome,
     genericTxInfo: GenericTxInfo

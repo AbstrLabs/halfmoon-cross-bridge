@@ -18,6 +18,8 @@ export {
 import algosdk from 'algosdk';
 import { providers } from 'near-api-js';
 import { type GenericTxInfo } from '..';
+import { setImmediateInterval } from '../utils/helper';
+import { logger } from '../utils/logger';
 
 type NearAddr = string;
 type AlgoAddr = string;
@@ -33,6 +35,10 @@ type TxStatuesOutcome = TxReceipt | providers.FinalExecutionOutcome;
 type AlgoAcc = algosdk.Account;
 type NearAcc = undefined;
 type GenericAcc = AlgoAcc | NearAcc;
+type ConfirmTxnConfig = {
+  timeoutSec: number;
+  intervalSec: number;
+};
 
 enum TxType {
   Mint = 'MINT',
@@ -40,8 +46,34 @@ enum TxType {
 }
 
 abstract class Blockchain {
+  async confirmTxn(genericTxInfo: GenericTxInfo): Promise<boolean> {
+    logger.silly('Blockchain: confirmTransaction()', genericTxInfo);
+    const confirmed = new Promise<boolean>((resolve) => {
+      const timeout = setTimeout(() => {
+        resolve(false);
+      }, this.confirmTxnConfig.timeoutSec * 1000);
+      const interval = setImmediateInterval(async () => {
+        let txnOutcome = await this.getTxnStatus(
+          genericTxInfo.txId,
+          genericTxInfo.from
+        );
+        //TODO: error handling
+        if (this.verifyCorrectness(txnOutcome, genericTxInfo)) {
+          clearTimeout(timeout);
+          clearInterval(interval);
+          resolve(true);
+        } else {
+          clearTimeout(timeout);
+          clearInterval(interval);
+          resolve(false);
+        }
+      }, this.confirmTxnConfig.intervalSec * 1000);
+    });
+    return await confirmed;
+  }
+  // Abstract methods
   protected abstract readonly centralizedAcc: GenericAcc;
-  abstract confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean>;
+  abstract readonly confirmTxnConfig: ConfirmTxnConfig;
   abstract verifyCorrectness(
     txnOutcome: TxStatuesOutcome,
     genericTxInfo: GenericTxInfo

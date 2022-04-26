@@ -27,6 +27,10 @@ class AlgorandBlockchain extends Blockchain {
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
+  public readonly confirmTxnConfig = {
+    timeoutSec: ENV.ALGO_CONFIRM_TIMEOUT_SEC,
+    intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
+  };
   constructor() {
     super();
     const pure_stake_client = {
@@ -43,7 +47,10 @@ class AlgorandBlockchain extends Blockchain {
   async getTxnStatus(algoTxId: AlgoTxId): Promise<string> {
     return 'finished';
   }
-  async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
+  async confirmTxn(genericTxInfo: GenericTxInfo): Promise<boolean> {
+    throw new Error('not implemented!');
+  }
+  verifyCorrectness(txnOutcome: any, genericTxInfo: GenericTxInfo): boolean {
     throw new Error('not implemented!');
   }
   async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {

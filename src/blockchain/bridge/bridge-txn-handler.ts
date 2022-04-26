@@ -44,7 +44,7 @@ async function bridge_txn_handler(
   // update as sequence diagram
   bridgeTxInfo.txStatus = BridgeTxStatus.CONFIRM_INCOMING;
   await db.updateTx(bridgeTxInfo);
-  await incomingBlockchain.confirmTransaction({
+  await incomingBlockchain.confirmTxn({
     ...genericTxInfo,
     to: 'abstrlabs.testnet',
   });
@@ -64,7 +64,7 @@ async function bridge_txn_handler(
   bridgeTxInfo.toTxId = outgoingTxId;
   bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
   await db.updateTx(bridgeTxInfo);
-  await outgoingBlockchain.confirmTransaction({
+  await outgoingBlockchain.confirmTxn({
     ...genericTxInfo,
     // TODO: use env
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
