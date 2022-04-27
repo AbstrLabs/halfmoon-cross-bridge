@@ -27,7 +27,7 @@ async function mint(genericTxInfo: GenericTxInfo): Promise<BridgeTxInfo> {
   // const amount = +amount;
   log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
   const bridgeTxInfo = await bridge_txn_handler(genericTxInfo, TxType.Mint);
-  log('fake mint success');
+  log('mint success');
   return bridgeTxInfo;
 }
 

@@ -26,7 +26,7 @@ import {
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
-import { goNearInAtom } from '../utils/formatter';
+import { goNearToAtom } from '../utils/formatter';
 import { log } from '../utils/logger';
 
 class AlgorandBlockchain extends Blockchain {
@@ -151,7 +151,7 @@ class AlgorandBlockchain extends Blockchain {
       to,
       this.centralizedAcc.addr,
       // TODO: BAN-15: amount should be parsed right after API call
-      BigInt(goNearInAtom(amount)),
+      BigInt(goNearToAtom(amount)),
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );

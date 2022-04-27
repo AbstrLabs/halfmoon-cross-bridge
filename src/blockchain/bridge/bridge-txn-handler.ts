@@ -7,7 +7,7 @@ import {
   GenericTxInfo,
 } from '../..';
 import { db } from '../../database';
-import { goNearInAtom } from '../../utils/formatter';
+import { goNearToAtom } from '../../utils/formatter';
 import { log } from '../../utils/logger';
 import { algoBlockchain } from '../algorand';
 import { nearBlockchain } from '../near';
@@ -67,6 +67,8 @@ async function bridge_txn_handler(
   await outgoingBlockchain.confirmTxn({
     ...genericTxInfo,
     // TODO: use env
+    txId: outgoingTxId,
+    amount: goNearToAtom(genericTxInfo.amount),
     from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
@@ -82,6 +84,7 @@ async function bridge_txn_handler(
 }
 
 /* HELPER */
+// TODO: move to formatter
 function genericInfoToBridgeTxInfo(
   genericTxInfo: GenericTxInfo,
   txType: TxType,
@@ -89,7 +92,7 @@ function genericInfoToBridgeTxInfo(
 ): BridgeTxInfo {
   const { from, to, amount, txId } = genericTxInfo;
   // TODO: BAN-15: amount should be parsed right after API call
-  const atomicAmount = BigInt(goNearInAtom(amount));
+  const atomicAmount = BigInt(goNearToAtom(amount));
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
   if (txType === TxType.Mint) {
