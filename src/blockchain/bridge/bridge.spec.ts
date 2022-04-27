@@ -4,7 +4,7 @@ import { ENV } from '../../utils/dotenv';
 import { GenericTxInfo } from '../..';
 import { db } from '../../database';
 import { mint } from './mint-handler';
-import { transferOnNearTestnetFromExampleToMaster } from './test-helpter';
+import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
