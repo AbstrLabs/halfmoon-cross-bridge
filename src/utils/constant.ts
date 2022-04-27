@@ -1,0 +1,1 @@
+export const NOT_LOADED_FROM_ENV = 'NOT_LOADED_FROM_ENV';

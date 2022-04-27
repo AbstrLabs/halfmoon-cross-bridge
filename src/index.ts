@@ -1,81 +1,41 @@
-import { Request, Response } from 'express';
+export { type GenericTxInfo, BridgeTxStatus, BridgeTxInfo, BlockchainName };
 
-import { ensureString } from './utils/helper';
-import express from 'express';
-import { init_near_acc } from './txn/init';
-import { loadDotEnv } from './utils/dotenv';
-import { mint } from './txn/mint_handler';
-
-loadDotEnv();
-
-/* route */
-const app = express();
-const apiRouter = express.Router();
-
-function mintResp(
-  // TODO: Should use a page - logger.
-  from: string,
-  to: string,
-  amount: number,
-  res: Response
-): void {
-  try {
-    mint(from, to, amount, 'fake_hash');
-    res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
-    res.write(`Will redirect to "history" after transaction confirmed. \n`);
-    res.end();
-  } catch (e) {
-    res.status(400).send('Missing required query params');
-  }
+interface GenericTxInfo {
+  from: string;
+  to: string;
+  amount: string; // l10n. in some cases 1/2 written as 0,5
+  txId: string;
 }
 
-apiRouter
-  .route('/mint')
-  .get((req: Request, res: Response) => {
-    const [from, to, amount] = [
-      ensureString(req.query.from),
-      ensureString(req.query.to),
-      parseFloat(ensureString(req.query.amount)),
-    ];
-    mintResp(from, to, amount, res);
-  })
-  .post((req: Request, res: Response) => {
-    // res.json(req.body);
-    const [from, to, amount] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      req.body['mint_amount'],
-    ];
-    mintResp(from, to, amount, res);
-  });
-
-/* burn */
-// app
-//   .get('/api/burn', (req: Request, res: Response) => {
-//     if (!req.query.amount || !req.query.to || !req.query.from) {
-//       return res.status(400).send('Missing required query params');
-//     }
-//     // TODO: burn logic
-//     res.send(
-//       `Burning ${req.query.amount} goNEAR from ${req.query.from}(ALGO) to ${req.query.to}(NEAR)`
-//     );
-//   })
-//   .post('/api/burn', (req: Request, res: Response) => {});
-function test() {
-  init_near_acc();
+interface BridgeTxInfo {
+  dbId?: number;
+  amount: bigint; // in "toTx"
+  timestamp: bigint;
+  fromAddr: string;
+  fromBlockchain: BlockchainName;
+  fromTxId: string;
+  toAddr: string;
+  toBlockchain: BlockchainName;
+  toTxId?: string;
+  txStatus: BridgeTxStatus;
 }
-app.get('/', (req: Request, res: Response) => {
-  test();
-  res.sendFile('example-frontend.html', { root: __dirname });
-});
 
-/* Express setup */
-app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
-app.use(express.json()); // parse application/json
-
-app.use('/api', apiRouter);
-app.listen(process.env.PORT, () => {
-  console.log(
-    `Application started on port ${process.env.PORT}! http://localhost:${process.env.PORT}/`
-  );
-});
+enum BlockchainName {
+  NEAR = 'NEAR',
+  ALGO = 'ALGO',
+}
+enum BridgeTxStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL',
+  ERR_AWS_RDS_DB = 'ERR_AWS_RDS_DB',
+  DOING_RECEIVE = 'DOING_RECEIVE',
+  ERR_VERIFY_INCOMING = 'ERR_VERIFY_INCOMING',
+  ERR_TIMEOUT_INCOMING = 'ERR_TIMEOUT_INCOMING',
+  DONE_RECEIVE = 'DONE_RECEIVE',
+  ERR_MAKE_OUTGOING = 'ERR_MAKE_OUTGOING',
+  DOING_SEND = 'DOING_SEND',
+  ERR_TIMEOUT_OUTGOING = 'ERR_TIMEOUT_OUTGOING',
+  DONE_SEND = 'DONE_SEND',
+  BRIDGE_PROCESSED = 'BRIDGE_PROCESSED',
+  BRIDGE_CONFIRMED = 'BRIDGE_CONFIRMED',
+}
