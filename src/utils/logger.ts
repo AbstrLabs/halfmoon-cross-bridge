@@ -1,7 +1,23 @@
 // This file is an logger interface
 // options: winston / morgan
+import { createLogger, format, transports, default as winston } from 'winston';
 
-export { log };
+const { combine, timestamp, prettyPrint, colorize, errors } = format;
+
+export { log, logger };
 function log(...args: any): void {
-  console.log(...args);
+  logger.info({ ...args });
 }
+
+const logger = createLogger({
+  transports: [
+    new transports.Console(),
+    // new transports.File({ filename: 'combined.log' }),
+  ],
+  format: combine(
+    errors({ stack: true }), // <-- use errors format
+    colorize(),
+    timestamp(),
+    prettyPrint()
+  ),
+});

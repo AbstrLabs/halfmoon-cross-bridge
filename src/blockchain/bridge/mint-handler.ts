@@ -9,14 +9,13 @@ import {
   type TxID,
   TxType,
 } from '..';
-import { GenericTxInfo } from '../..';
+import { BridgeTxInfo, GenericTxInfo } from '../..';
 import { sleep } from '../../utils/helper';
 import { log } from '../../utils/logger';
-import { bridge_txn_handler } from './bridge_txn_handler';
+import { bridge_txn_handler } from './bridge-txn-handler';
 
-async function mint(genericTxInfo: GenericTxInfo): Promise<void> {
+async function mint(genericTxInfo: GenericTxInfo): Promise<BridgeTxInfo> {
   const { from, to, amount, txId } = genericTxInfo;
-
   if (
     from === undefined ||
     to === undefined ||
@@ -27,9 +26,9 @@ async function mint(genericTxInfo: GenericTxInfo): Promise<void> {
   }
   // const amount = +amount;
   log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
-  await bridge_txn_handler(genericTxInfo, TxType.Mint);
-  log('fake mint success');
-  return;
+  const bridgeTxInfo = await bridge_txn_handler(genericTxInfo, TxType.Mint);
+  log('mint success');
+  return bridgeTxInfo;
 }
 
 // `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;

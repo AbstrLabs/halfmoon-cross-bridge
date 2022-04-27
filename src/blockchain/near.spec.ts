@@ -15,7 +15,7 @@ describe('nearBlockchain', () => {
   });
   it('confirm transaction', async () => {
     expect(
-      await nearBlockchain.confirmTransaction({
+      await nearBlockchain.confirmTxn({
         from: exampleFrom,
         to: exampleTo,
         amount: exampleAmount,

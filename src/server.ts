@@ -2,7 +2,7 @@ export { startServer };
 
 import express, { Request, Response } from 'express';
 
-import { mint } from './blockchain/bridge/mint_handler';
+import { mint } from './blockchain/bridge/mint-handler';
 import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type GenericTxInfo } from '.';

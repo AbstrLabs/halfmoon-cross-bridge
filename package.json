@@ -29,15 +29,20 @@
     "prettier": "^2.6.2",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "winston": "^3.7.2"
   },
   "scripts": {
+    "algo": "yarn test:algo",
+    "bridge": "yarn test:bridge",
     "build": "tsc",
+    "db": "yarn test:db",
     "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
+    "near": "yarn test:near",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
+    "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:db": "jest --testPathPattern=src/database",
-    "algo": "yarn test:algo",
-    "db": "yarn test:db"
+    "test:near": "jest --testPathPattern=src/blockchain/near"
   }
 }

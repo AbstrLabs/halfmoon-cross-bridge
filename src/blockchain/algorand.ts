@@ -1,50 +1,142 @@
 /* Algorand functionalities wrapped up with our centralized account */
-export { algoBlockchain, createGoNearWithAdmin };
+export { algoBlockchain };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxId } from '.';
+import {
+  AlgoAcc,
+  AlgoAddr,
+  AlgoMnemonic,
+  AlgoReceipt,
+  AlgoTxId,
+  AlgoAssetTransferTxOutcome,
+} from '.';
 import {
   Algodv2 as AlgodClient,
   AssetTransferTxn,
+  Indexer,
   SuggestedParams,
 } from 'algosdk';
 import {
   AsaConfig,
-  GO_NEAR_DECIMAL,
-  NoParamAsaConfig,
+  type NoParamAsaConfig,
   noParamGoNearConfig,
 } from '../utils/config/asa';
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
+import { goNearToAtom } from '../utils/formatter';
 import { log } from '../utils/logger';
 
 class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
+  readonly indexer: Indexer;
   readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
+  public readonly confirmTxnConfig = {
+    timeoutSec: ENV.ALGO_CONFIRM_TIMEOUT_SEC,
+    intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
+    algoRound: ENV.ALGO_CONFIRM_ROUND,
+  };
   constructor() {
     super();
-    const pure_stake_client = {
+    const PURE_STAKE_CLIENT = {
       token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
-      server: 'https://testnet-algorand.api.purestake.io/ps2',
       port: '', // from https://developer.purestake.io/code-samples
     };
-    const algoClientParamSource = pure_stake_client;
-    const { token, server, port } = algoClientParamSource;
-    this.client = new AlgodClient(token, server, port);
+    const PURE_STAKE_DAEMON_CLIENT = {
+      ...PURE_STAKE_CLIENT,
+      server: 'https://testnet-algorand.api.purestake.io/ps2',
+    };
+    const PURE_STAKE_INDEXER_CLIENT = {
+      ...PURE_STAKE_CLIENT,
+      server: 'https://testnet-algorand.api.purestake.io/idx2',
+    };
+    // TODO: switch network
+    const algodClientParamSource = PURE_STAKE_DAEMON_CLIENT;
+    const algoIndexerParamSource = PURE_STAKE_INDEXER_CLIENT;
+
+    this.client = new AlgodClient(
+      algodClientParamSource.token,
+      algodClientParamSource.server,
+      algodClientParamSource.port
+    );
+
+    this.indexer = new Indexer(
+      algoIndexerParamSource.token,
+      algoIndexerParamSource.server,
+      algoIndexerParamSource.port
+    );
+
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
-  async getTxnStatus(algoTxId: AlgoTxId): Promise<string> {
-    return 'finished';
+  async getTxnStatus(algoTxId: AlgoTxId): Promise<AlgoAssetTransferTxOutcome> {
+    // will timeout in `confirmTxn` if txn not confirmed
+    return (await this.indexer
+      .lookupTransactionByID(algoTxId)
+      .do()) as AlgoAssetTransferTxOutcome;
+
+    // the following method only checks new blocks
+    // return await algosdk.waitForConfirmation(
+    //   this.client,
+    //   algoTxId,
+    //   this.confirmTxnConfig.algoRound
+    // );
   }
-  async confirmTransaction(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    throw new Error('not implemented!');
+
+  verifyCorrectness(
+    txnOutcome: AlgoAssetTransferTxOutcome,
+    genericTxInfo: GenericTxInfo
+  ): boolean {
+    // parse txnOutcome, parse AlgoAssetTransferTxOutcome
+    // TODO! verify asset id
+    const currentRound = txnOutcome['current-round'];
+    const txn = txnOutcome.transaction;
+    const confirmedRound = txn['confirmed-round'];
+    const amount = `${txn['asset-transfer-transaction'].amount}`;
+    const sender = txn.sender;
+    const receiver = txn['asset-transfer-transaction'].receiver;
+    const txId = txn.id;
+    // verify confirmed
+    if (!(currentRound >= confirmedRound)) {
+      throw Error(
+        `currentRound: ${currentRound} < confirmedRound: ${confirmedRound}`
+      );
+      return false;
+    }
+    // compare txID
+    if (txId !== genericTxInfo.txId) {
+      throw Error(
+        `txnOutcome.txID ${txId} !== genericTxInfo.txId ${genericTxInfo.txId}`
+      );
+      return false;
+    }
+    // compare sender
+    if (sender !== genericTxInfo.from) {
+      throw Error(
+        `txnOutcome.sender ${sender} !== genericTxInfo.from ${genericTxInfo.from}`
+      );
+      return false;
+    }
+    // compare receiver
+    if (receiver !== genericTxInfo.to) {
+      throw Error(
+        `txnOutcome.receiver ${receiver} !== genericTxInfo.to ${genericTxInfo.to}`
+      );
+      return false;
+    }
+    // compare amount
+    if (`${amount}` !== genericTxInfo.amount) {
+      throw Error(
+        `txnOutcome.amount ${amount} !== genericTxInfo.amount ${genericTxInfo.amount}`
+      );
+      return false;
+    }
+    return true;
   }
   async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
     // abstract class implementation.
@@ -58,8 +150,8 @@ class AlgorandBlockchain extends Blockchain {
     return await this._makeAsaTxn(
       to,
       this.centralizedAcc.addr,
-      // TODO: use correct amount precision. first BigInt will round up.
-      BigInt(amount) * BigInt(10) ** BigInt(GO_NEAR_DECIMAL),
+      // TODO: BAN-15: amount should be parsed right after API call
+      BigInt(goNearToAtom(amount)),
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
@@ -110,6 +202,9 @@ class AlgorandBlockchain extends Blockchain {
 
   /* Methods below are designed to run once */
 
+  protected async _createGoNearWithAdmin() {
+    this.createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
+  }
   async genAcc() {
     // tested, not used
     const algoAcc = algosdk.generateAccount();
@@ -149,26 +244,3 @@ class AlgorandBlockchain extends Blockchain {
 }
 
 const algoBlockchain = new AlgorandBlockchain();
-
-/* Functions below are designed to run once */
-
-async function createGoNear(creatorMnemonic: AlgoMnemonic, admin?: AlgoAddr) {
-  return await algoBlockchain.createAsaWithMnemonic(
-    {
-      ...noParamGoNearConfig,
-      manager: admin,
-      reserve: admin,
-      freeze: admin,
-      clawback: admin,
-    },
-    creatorMnemonic
-  );
-}
-
-async function createGoNearWithAdmin() {
-  await createGoNear(ENV.ALGO_MASTER_PASS, ENV.ALGO_MASTER_ADDR); // create algorand account
-}
-
-const fake_makeTransaction = async (genericTxInfo: GenericTxInfo) => {
-  throw new Error('not implemented!');
-};

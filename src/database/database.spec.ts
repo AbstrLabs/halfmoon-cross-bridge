@@ -10,7 +10,7 @@ const testBridgeTx: BridgeTxInfo = {
   toAddr: '0x1234567890123456789012345678901234567890',
   amount: BigInt('10000000000'),
   timestamp: BigInt('1650264115011'),
-  txStatus: BridgeTxStatus.DOING_SEND,
+  txStatus: BridgeTxStatus.MAKE_OUTGOING,
   fromTxId: '0x1234567890123456789012345678901234567890',
   toTxId: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
@@ -86,7 +86,7 @@ describe('DATABASE test', () => {
       expect(res_before_del.length - res_after_del.length).toBe(1);
     });
   });
-  describe.only('create transaction', () => {
+  describe('create transaction', () => {
     beforeAll(async () => {
       await db.connect();
     });
@@ -101,7 +101,7 @@ describe('DATABASE test', () => {
         toAddr: '0x1234567890123456789012345678901234567890',
         amount: BigInt('10000000000'),
         timestamp: BigInt(+new Date()),
-        txStatus: BridgeTxStatus.DOING_SEND,
+        txStatus: BridgeTxStatus.MAKE_OUTGOING,
         fromTxId: '0x1234567890123456789012345678901234567890',
         toTxId: '0x1234567890123456789012345678901234567890',
         fromBlockchain: BlockchainName.NEAR,
@@ -118,7 +118,7 @@ describe('DATABASE test', () => {
       // expect(res).toEqual(testBridgeTx);
     });
     it('update a transaction', async () => {
-      testBridgeTx.txStatus = BridgeTxStatus.DONE_SEND;
+      testBridgeTx.txStatus = BridgeTxStatus.DONE_OUTGOING;
       testBridgeTx.toTxId = 'some_fake_tx_id';
       const res = await db.updateTx(testBridgeTx);
       console.log('res : ', res); // DEV_LOG_TO_REMOVE

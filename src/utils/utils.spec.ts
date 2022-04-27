@@ -1,7 +1,5 @@
-// for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
-// from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
-
 import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
+import { log, logger } from './logger';
 
 import { dbItemToBridgeTxInfo } from './formatter';
 
@@ -26,14 +24,25 @@ const sampleTxInfo: BridgeTxInfo = {
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
   toTxId: 'some_fake_tx_id',
-  txStatus: BridgeTxStatus.DONE_SEND,
+  txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
-it('formatter test', () => {
-  expect(
-    dbItemToBridgeTxInfo(sampleDbItem, {
-      fromBlockchain: BlockchainName.NEAR,
-      toBlockchain: BlockchainName.ALGO,
-    })
-  ).toEqual(sampleTxInfo);
+describe('utils tool test, should skip', () => {
+  describe('logger', () => {
+    it('log "something"', () => {
+      logger.info('something');
+      log('something');
+      console.log('something'); // this is bette to show call stack
+    });
+  });
+  it('formatter test', () => {
+    // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
+    // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
+    expect(
+      dbItemToBridgeTxInfo(sampleDbItem, {
+        fromBlockchain: BlockchainName.NEAR,
+        toBlockchain: BlockchainName.ALGO,
+      })
+    ).toEqual(sampleTxInfo);
+  });
 });
