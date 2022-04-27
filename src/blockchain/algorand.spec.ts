@@ -1,5 +1,5 @@
 import { ENV } from '../utils/dotenv';
-import { NOT_LOADED_FROM_ENV } from '../utils/constant';
+import { NOT_LOADED_FROM_ENV } from '../utils/literal';
 import { algoBlockchain } from './algorand';
 import { logger } from '../utils/logger';
 import { verify } from 'crypto';

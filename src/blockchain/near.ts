@@ -4,12 +4,12 @@ export { nearBlockchain, NearBlockchain };
 
 import { providers, utils } from 'near-api-js';
 
-import { AlgoTxId, TxID, type NearAddr, type NearTxId } from '.';
+import { AlgoTxId, type NearAddr, type NearTxId } from '.';
 import { GenericTxInfo } from '..';
 import { ENV } from '../utils/dotenv';
-import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 import { Blockchain } from '.';
+import { literal } from '../utils/literal';
 
 class NearBlockchain extends Blockchain {
   protected readonly centralizedAcc = undefined;
@@ -31,7 +31,7 @@ class NearBlockchain extends Blockchain {
   ): Promise<providers.FinalExecutionOutcome> {
     logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.provider.txStatus(txId, from);
-    logger.info(`near txn result: ${result}`);
+    logger.info(literal.NEAR_TXN_RESULT(result));
     return result;
   }
 
@@ -40,7 +40,7 @@ class NearBlockchain extends Blockchain {
     genericTxInfo: GenericTxInfo
   ): boolean {
     const { from, to, amount, txId } = genericTxInfo;
-    logger.verbose('NEAR verifyCorrectness txnOutcome : ', txnOutcome);
+    logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
 
     return correctnessCheck(txnOutcome, to, from, amount);
   }
@@ -74,10 +74,8 @@ const correctnessCheck = (
       txReceipt.status.Failure !== undefined &&
       txReceipt.status.Failure !== null
     ) {
-      logger.silly(
-        'nearIndexer',
-        'correctnessCheck()',
-        'txReceipt.status.Failure'
+      throw new Error(
+        'nearIndexer: correctnessCheck(): txReceipt.status.Failure'
       );
       return false;
     }
@@ -86,23 +84,23 @@ const correctnessCheck = (
       txReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
       txReceipt.status === providers.FinalExecutionStatusBasic.Failure
     ) {
-      logger.silly('nearIndexer correctnessCheck() txReceipt.status.Failure'); //debug
+      throw new Error(
+        'nearIndexer: correctnessCheck(): txReceipt.status.Failure'
+      ); //debug
       return false;
     }
   }
   // check from address
   if (txReceipt.transaction.signer_id !== from) {
-    logger.silly(
-      'nearIndexer correctnessCheck() txReceipt.transaction.signer_id'
+    throw new Error(
+      'nearIndexer: correctnessCheck(): txReceipt.transaction.signer_id'
     );
     return false;
   } // TODO: later: maybe signer != sender?
   // check to address
   if (txReceipt.transaction.receiver_id !== to) {
-    logger.silly(
-      'nearIndexer',
-      'correctnessCheck()',
-      'txReceipt.transaction.receiver_id'
+    throw new Error(
+      'nearIndexer: correctnessCheck(): txReceipt.transaction.receiver_id'
     );
     return false;
   }
@@ -111,10 +109,8 @@ const correctnessCheck = (
     txReceipt.transaction.actions[0].Transfer.deposit !==
     utils.format.parseNearAmount(amount)
   ) {
-    logger.silly(
-      'nearIndexer',
-      'correctnessCheck()',
-      'txReceipt.transaction.actions[0].Transfer.deposit'
+    throw new Error(
+      'nearIndexer: correctnessCheck(): txReceipt.transaction.actions[0].Transfer.deposit'
     );
     return false;
   }

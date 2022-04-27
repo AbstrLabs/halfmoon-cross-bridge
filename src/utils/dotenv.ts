@@ -4,7 +4,7 @@
 
 export { loadDotEnv, ENV };
 
-import { NOT_LOADED_FROM_ENV } from './constant';
+import { NOT_LOADED_FROM_ENV } from './literal';
 import dpv from 'dotenv-parse-variables';
 
 function loadDotEnv() {

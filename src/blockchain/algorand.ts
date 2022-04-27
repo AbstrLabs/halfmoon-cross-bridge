@@ -7,16 +7,10 @@ import {
   AlgoAcc,
   AlgoAddr,
   AlgoMnemonic,
-  AlgoReceipt,
   AlgoTxId,
   AlgoAssetTransferTxOutcome,
 } from '.';
-import {
-  Algodv2 as AlgodClient,
-  AssetTransferTxn,
-  Indexer,
-  SuggestedParams,
-} from 'algosdk';
+import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
   AsaConfig,
   type NoParamAsaConfig,
@@ -28,6 +22,7 @@ import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
 import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
+import { literal } from '../utils/literal';
 
 class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
@@ -195,7 +190,13 @@ class AlgorandBlockchain extends Blockchain {
     );
     //Get the completed Transaction
     logger.info(
-      `Transaction from ${from} to ${to} of amount ${amountInAtomic} (atomic unit) with id ${xtx.txId} confirmed in round ${confirmedTxn['confirmed-round']}`
+      literal.TXN_CONFIRMED(
+        from,
+        to,
+        amountInAtomic,
+        confirmedTxn.txId,
+        confirmedTxn.txReceipt.round
+      )
     );
     return xtx.txId;
   }
@@ -237,7 +238,11 @@ class AlgorandBlockchain extends Blockchain {
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
     logger.info(
-      `New ASA ${noParamAsaConfig.assetName} created with ${tx.txId} having id ${noParamAsaConfig.assetId}.`
+      literal.ASA_CREATED(
+        noParamAsaConfig.assetName,
+        tx.txId,
+        noParamAsaConfig.assetId
+      )
     );
     return noParamAsaConfig;
   }

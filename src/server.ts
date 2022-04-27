@@ -7,6 +7,7 @@ import { ENV, loadDotEnv } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type GenericTxInfo } from '.';
 import { logger } from './utils/logger';
+import { literal } from './utils/literal';
 
 async function homePageTest() {
   /* Used once code */
@@ -86,11 +87,11 @@ function mintResp(genericTxInfo: GenericTxInfo, res: Response): void {
   const { from, to, amount, txId } = genericTxInfo;
   try {
     mint(genericTxInfo);
-    res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
-    res.write(`Mint stake with transaction ID [${txId}](NEAR).\n`);
-    res.write(`Will redirect to "history" after transaction finished. \n`);
+    res.write(`${literal.START_MINTING(amount, from, to)}\n`);
+    res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
+    res.write(`${literal.MINT_AWAITING}\n`);
     res.end();
   } catch (e) {
-    res.status(400).send('Missing required query params');
+    res.status(400).send('Missing required query params'); // TODO: ref err msg
   }
 }

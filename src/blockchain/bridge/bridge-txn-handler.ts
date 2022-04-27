@@ -1,15 +1,19 @@
 export { bridge_txn_handler };
-import { type Addr, type TxID, TxType, Blockchain } from '..';
+
+import { Blockchain, TxType } from '..';
 import {
   BlockchainName,
   BridgeTxInfo,
   BridgeTxStatus,
   GenericTxInfo,
 } from '../..';
+
+import { ENV } from '../../utils/dotenv';
+import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
 import { goNearToAtom } from '../../utils/formatter';
+import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
-import { algoBlockchain } from '../algorand';
 import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
@@ -20,9 +24,7 @@ async function bridge_txn_handler(
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
   const { from, to, amount, txId: txId } = genericTxInfo;
-  logger.info(
-    `Making ${txType} transaction of ${amount} from ${from} to ${to}`
-  );
+  logger.info(literal.MAKING_TXN(txType, amount, from, to));
   if (txType === TxType.Mint) {
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
@@ -48,30 +50,29 @@ async function bridge_txn_handler(
   await db.updateTx(bridgeTxInfo);
   await incomingBlockchain.confirmTxn({
     ...genericTxInfo,
-    to: 'abstrlabs.testnet',
+    to: ENV.NEAR_MASTER_ADDR,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
   await db.updateTx(bridgeTxInfo);
 
   // empty slot, after confirming incoming tx, for error handling
-  // TODO: add txn fee.
+  // TODO: add txn fee calculation logic here.
+  // TODO! important
 
   bridgeTxInfo.txStatus = BridgeTxStatus.MAKE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
     ...genericTxInfo,
-    // TODO: use env
-    from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+    from: ENV.ALGO_MASTER_ADDR,
   });
   bridgeTxInfo.toTxId = outgoingTxId;
   bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   await outgoingBlockchain.confirmTxn({
     ...genericTxInfo,
-    // TODO: use env
     txId: outgoingTxId,
     amount: goNearToAtom(genericTxInfo.amount),
-    from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+    from: ENV.ALGO_MASTER_ADDR,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
