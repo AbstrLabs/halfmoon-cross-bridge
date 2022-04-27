@@ -3,7 +3,14 @@ export { algoBlockchain };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoReceipt, AlgoTxId } from '.';
+import {
+  AlgoAcc,
+  AlgoAddr,
+  AlgoMnemonic,
+  AlgoReceipt,
+  AlgoTxId,
+  AlgoAssetTransferTxOutcome,
+} from '.';
 import {
   Algodv2 as AlgodClient,
   AssetTransferTxn,
@@ -67,9 +74,11 @@ class AlgorandBlockchain extends Blockchain {
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
-  async getTxnStatus(algoTxId: AlgoTxId): Promise<AlgoReceipt> {
+  async getTxnStatus(algoTxId: AlgoTxId): Promise<AlgoAssetTransferTxOutcome> {
     // will timeout in `confirmTxn` if txn not confirmed
-    return await this.indexer.lookupTransactionByID(algoTxId).do();
+    return (await this.indexer
+      .lookupTransactionByID(algoTxId)
+      .do()) as AlgoAssetTransferTxOutcome;
 
     // the following method only checks new blocks
     // return await algosdk.waitForConfirmation(
@@ -78,11 +87,56 @@ class AlgorandBlockchain extends Blockchain {
     //   this.confirmTxnConfig.algoRound
     // );
   }
+
   verifyCorrectness(
-    txnOutcome: AlgoReceipt,
+    txnOutcome: AlgoAssetTransferTxOutcome,
     genericTxInfo: GenericTxInfo
   ): boolean {
-    throw new Error('not implemented!');
+    // parse txnOutcome, parse AlgoAssetTransferTxOutcome
+    // TODO! verify asset id
+    const currentRound = txnOutcome['current-round'];
+    const txn = txnOutcome.transaction;
+    const confirmedRound = txn['confirmed-round'];
+    const amount = `${txn['asset-transfer-transaction'].amount}`;
+    const sender = txn.sender;
+    const receiver = txn['asset-transfer-transaction'].receiver;
+    const txId = txn.id;
+    // verify confirmed
+    if (!(currentRound >= confirmedRound)) {
+      throw Error(
+        `currentRound: ${currentRound} < confirmedRound: ${confirmedRound}`
+      );
+      return false;
+    }
+    // compare txID
+    if (txId !== genericTxInfo.txId) {
+      throw Error(
+        `txnOutcome.txID ${txId} !== genericTxInfo.txId ${genericTxInfo.txId}`
+      );
+      return false;
+    }
+    // compare sender
+    if (sender !== genericTxInfo.from) {
+      throw Error(
+        `txnOutcome.sender ${sender} !== genericTxInfo.from ${genericTxInfo.from}`
+      );
+      return false;
+    }
+    // compare receiver
+    if (receiver !== genericTxInfo.to) {
+      throw Error(
+        `txnOutcome.receiver ${receiver} !== genericTxInfo.to ${genericTxInfo.to}`
+      );
+      return false;
+    }
+    // compare amount
+    if (`${amount}` !== genericTxInfo.amount) {
+      throw Error(
+        `txnOutcome.amount ${amount} !== genericTxInfo.amount ${genericTxInfo.amount}`
+      );
+      return false;
+    }
+    return true;
   }
   async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
     // abstract class implementation.

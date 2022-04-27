@@ -42,6 +42,6 @@ describe('mint test', () => {
       // verification
       expect(bridgeTxInfo.toTxId).toBeDefined();
     },
-    TIMEOUT_30S
+    TIMEOUT_30S * 3
   );
 });

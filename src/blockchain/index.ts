@@ -6,17 +6,24 @@ export {
   type Addr,
   type AlgoAcc,
   type AlgoAddr,
+  type AlgoAssetTransferTxOutcome,
   type AlgoMnemonic,
   type AlgoReceipt,
   type AlgoTxId,
+  type AlgoTxOutcome,
   type GenericAcc,
   type NearAcc,
   type NearAddr,
   type NearTxId,
+  type NearTxOutcome,
   type TxID,
+  type TxOutcome,
+  type TxReceipt,
 };
 
-import algosdk from 'algosdk';
+import algosdk, { Transaction } from 'algosdk';
+import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
+import { AssetTransferTransaction } from 'algosdk/dist/types/src/types/transactions/asset';
 import { providers } from 'near-api-js';
 import { type GenericTxInfo } from '..';
 import { setImmediateInterval } from '../utils/helper';
@@ -26,7 +33,7 @@ type Addr = NearAddr | AlgoAddr;
 type AlgoAcc = algosdk.Account;
 type AlgoAddr = string;
 type AlgoMnemonic = string;
-type AlgoReceipt = any;
+type AlgoReceipt = Transaction;
 type AlgoTxId = string;
 type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = undefined;
@@ -35,7 +42,49 @@ type NearReceipt = any;
 type NearTxId = string;
 type TxID = NearTxId | AlgoTxId;
 type TxReceipt = AlgoReceipt | NearReceipt;
-type TxStatuesOutcome = TxReceipt | providers.FinalExecutionOutcome;
+type NearTxOutcome = providers.FinalExecutionOutcome;
+type BigNum = number; // | bigint; // using number now
+type AlgoAssetTransferTxOutcome = {
+  // from Indexer JSON response
+  'current-round': number;
+  transaction: {
+    'asset-transfer-transaction': {
+      amount: BigNum;
+      'asset-id': number;
+      'close-amount': number;
+      receiver: AlgoAddr;
+    };
+    'close-rewards': BigNum;
+    'closing-amount': BigNum;
+    'confirmed-round': number;
+    fee: BigNum;
+    'first-valid': BigNum;
+    'genesis-hash': string;
+    'genesis-id': 'testnet-v1.0';
+    id: AlgoTxId;
+    'intra-round-offset': number;
+    'last-valid': number;
+    'receiver-rewards': number;
+    'round-time': number;
+    sender: AlgoAddr;
+    'sender-rewards': number;
+    signature: {
+      sig: string;
+    };
+    'tx-type': 'axfer';
+  };
+}; // TODO: programmatically check if this type is correct.
+type AlgoTxOutcome =
+  | {
+      'current-round': number;
+      transaction: AnyTransaction & {
+        'confirmed-round': number;
+        id: string;
+      };
+    }
+  | AlgoAssetTransferTxOutcome; // TODO: programmatically check if this type is correct.
+type TxOutcome = NearTxOutcome | AlgoTxOutcome;
+// type TxStatuesOutcome = TxReceipt | AlgoTxOutcome;
 type ConfirmTxnConfig = {
   timeoutSec: number;
   intervalSec: number;
@@ -76,10 +125,10 @@ abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract readonly confirmTxnConfig: ConfirmTxnConfig;
   abstract verifyCorrectness(
-    txnOutcome: TxStatuesOutcome,
+    txnOutcome: TxOutcome,
     genericTxInfo: GenericTxInfo
   ): boolean;
-  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxStatuesOutcome>;
+  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxOutcome>;
   abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxID>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }
