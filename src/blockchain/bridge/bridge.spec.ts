@@ -1,6 +1,5 @@
-import { KeyPair, connect, keyStores, utils } from 'near-api-js';
-
 import { ENV } from '../../utils/dotenv';
+import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { GenericTxInfo } from '../..';
 import { db } from '../../database';
 import { mint } from './mint-handler';
@@ -22,9 +21,9 @@ describe('mint test', () => {
       const amount = '0.424';
 
       // simulate frontend: make NEAR txn
-      const mintResponse = await transferOnNearTestnetFromExampleToMaster('1');
+      const mintResponse: FinalExecutionOutcome =
+        await transferOnNearTestnetFromExampleToMaster('1');
       // manually checked the amount is correct.
-      console.log('mintResponse : ', mintResponse); // DEV_LOG_TO_REMOVE
       const nearTxId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
       const genericTxInfo: GenericTxInfo = {

@@ -8,7 +8,7 @@ import {
 } from '../..';
 import { db } from '../../database';
 import { goNearToAtom } from '../../utils/formatter';
-import { log } from '../../utils/logger';
+import { logger } from '../../utils/logger';
 import { algoBlockchain } from '../algorand';
 import { nearBlockchain } from '../near';
 
@@ -20,7 +20,9 @@ async function bridge_txn_handler(
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
   const { from, to, amount, txId: txId } = genericTxInfo;
-  log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
+  logger.info(
+    `Making ${txType} transaction of ${amount} from ${from} to ${to}`
+  );
   if (txType === TxType.Mint) {
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;

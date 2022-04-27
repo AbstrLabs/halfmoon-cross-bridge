@@ -1,7 +1,7 @@
 import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
-import { log, logger } from './logger';
 
 import { dbItemToBridgeTxInfo } from './formatter';
+import { logger } from './logger';
 
 const sampleDbItem = {
   algo_txn_id: 'some_fake_tx_id',
@@ -31,8 +31,7 @@ describe('utils tool test, should skip', () => {
   describe('logger', () => {
     it('log "something"', () => {
       logger.info('something');
-      log('something');
-      console.log('something'); // this is bette to show call stack
+      console.log('something'); // this is better to show call stack
     });
   });
   it('formatter test', () => {

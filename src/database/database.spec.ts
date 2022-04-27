@@ -108,26 +108,23 @@ describe('DATABASE test', () => {
         toBlockchain: BlockchainName.ALGO,
       };
       const res = await db.createTx(bridgeTx);
-      console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
       const res = await db.readTx(1);
-      console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
       // expect(res).toEqual(testBridgeTx);
     });
     it('update a transaction', async () => {
       testBridgeTx.txStatus = BridgeTxStatus.DONE_OUTGOING;
       testBridgeTx.toTxId = 'some_fake_tx_id';
-      const res = await db.updateTx(testBridgeTx);
-      console.log('res : ', res); // DEV_LOG_TO_REMOVE
-      expect(typeof res).toBe('number');
+      const res1 = await db.updateTx(testBridgeTx);
+      expect(typeof res1).toBe('number');
 
       // read the updated transaction
       const res2 = await db.readTx(testBridgeTx.dbId!);
-      console.log('res2 : ', res2); // DEV_LOG_TO_REMOVE
       expect(typeof res2).toBe('object');
+      // verify updated transaction is correct
       expect(
         dbItemToBridgeTxInfo(res2, {
           fromBlockchain: BlockchainName.NEAR,

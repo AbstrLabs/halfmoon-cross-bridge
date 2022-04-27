@@ -2,7 +2,7 @@ export { db };
 
 import { BridgeTxInfo, GenericTxInfo } from '..';
 
-import { log } from '../utils/logger';
+import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
 class Database {
@@ -50,7 +50,7 @@ class Database {
     ];
     const result = await this.query(query, params);
     const dbId = result[0].id;
-    log(`Created bridge tx with id ${dbId}`);
+    logger.info(`Created bridge tx with id ${dbId}`);
     bridgeTx.dbId = dbId;
     return dbId as number;
   }
@@ -98,7 +98,7 @@ class Database {
     if (result.length > 1) {
       throw new Error(`Found too many TX to update.`);
     }
-    log(`Updated bridge tx with id ${bridgeTx.dbId}`);
+    logger.verbose(`Updated bridge tx with id ${bridgeTx.dbId}`);
     return result[0].id;
   }
   async deleteTx(txId: number) {

@@ -1,10 +1,12 @@
 import { ENV } from '../utils/dotenv';
 import { NOT_LOADED_FROM_ENV } from '../utils/constant';
 import { algoBlockchain } from './algorand';
+import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
 const UNUSED = 'not required value';
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
+// exampleAlgoTxnId === exampleRcpt.transaction.id;
 const exampleAlgoTxn = {
   from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   to: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
@@ -48,7 +50,7 @@ describe('AlgorandBlockchain', () => {
     expect(algoBlockchain).toBeDefined();
   });
   it('manually check ENV VARS', () => {
-    console.log({
+    logger.warn({
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
@@ -71,12 +73,10 @@ describe('AlgorandBlockchain', () => {
   }, 30000);
   it.only('get example txn status', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
-    console.log('rcpt : ', rcpt); // DEV_LOG_TO_REMOVE
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
   }, 30000);
   it.only('verify transaction status on algo', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
-    console.log('rcpt : ', rcpt); // DEV_LOG_TO_REMOVE
     const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoTxn);
     expect(answer).toBe(true);
   });

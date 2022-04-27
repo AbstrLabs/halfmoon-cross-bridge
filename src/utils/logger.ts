@@ -4,10 +4,7 @@ import { createLogger, format, transports, default as winston } from 'winston';
 
 const { combine, timestamp, prettyPrint, colorize, errors } = format;
 
-export { log, logger };
-function log(...args: any): void {
-  logger.info({ ...args });
-}
+export { logger };
 
 const logger = createLogger({
   transports: [

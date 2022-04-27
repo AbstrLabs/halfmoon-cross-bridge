@@ -8,7 +8,7 @@ import { AlgoTxId, TxID, type NearAddr, type NearTxId } from '.';
 import { GenericTxInfo } from '..';
 import { ENV } from '../utils/dotenv';
 import { setImmediateInterval } from '../utils/helper';
-import { log, logger } from '../utils/logger';
+import { logger } from '../utils/logger';
 import { Blockchain } from '.';
 
 class NearBlockchain extends Blockchain {
@@ -29,10 +29,9 @@ class NearBlockchain extends Blockchain {
     txId: NearTxId,
     from: NearAddr
   ): Promise<providers.FinalExecutionOutcome> {
-    log('nearIndexer', 'getTxnStatus()'); //verbose
+    logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.provider.txStatus(txId, from);
-    log(result);
-    // log((result.receipts_outcome[0] as any).proof!);
+    logger.info(`near txn result: ${result}`);
     return result;
   }
 
@@ -41,7 +40,7 @@ class NearBlockchain extends Blockchain {
     genericTxInfo: GenericTxInfo
   ): boolean {
     const { from, to, amount, txId } = genericTxInfo;
-    console.log('txnOutcome : ', txnOutcome); // DEV_LOG_TO_REMOVE
+    logger.verbose('NEAR verifyCorrectness txnOutcome : ', txnOutcome);
 
     return correctnessCheck(txnOutcome, to, from, amount);
   }
@@ -51,7 +50,7 @@ class NearBlockchain extends Blockchain {
 
   // TODO: protect, not used.
   static async getRecentTransactions(limit: number): Promise<NearTxId[]> {
-    log('nearIndexer', 'getRecentTransactions()', 'limit'); //verbose
+    logger.silly('nearIndexer getRecentTransactions() limit');
     throw new Error('Not implemented');
     return [];
   }
@@ -87,13 +86,15 @@ const correctnessCheck = (
       txReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
       txReceipt.status === providers.FinalExecutionStatusBasic.Failure
     ) {
-      log('nearIndexer', 'correctnessCheck()', 'txReceipt.status.Failure'); //debug
+      logger.silly('nearIndexer correctnessCheck() txReceipt.status.Failure'); //debug
       return false;
     }
   }
   // check from address
   if (txReceipt.transaction.signer_id !== from) {
-    log('nearIndexer', 'correctnessCheck()', 'txReceipt.transaction.signer_id'); //debug
+    logger.silly(
+      'nearIndexer correctnessCheck() txReceipt.transaction.signer_id'
+    );
     return false;
   } // TODO: later: maybe signer != sender?
   // check to address

@@ -1,8 +1,9 @@
 import { Client, Pool, PoolClient } from 'pg';
 
+import { logger } from '../utils/logger';
+
 // this file is tested in database.spec.ts
 // TODO: Make singleton
-import { log } from 'console';
 
 export { postgres };
 
@@ -33,12 +34,12 @@ class Postgres {
       throw new Error('Could not connect to database');
     }
     this.isConnected = true;
-    log('database connected');
+    logger.info('database connected');
   }
 
   async query(query: string, params: any[] = []) {
     if (!this.client) {
-      log('Not connected to database, connecting now...');
+      logger.info('Not connected to database, connecting now...');
       await this.connect();
     }
     if (!this.client) {
@@ -80,7 +81,7 @@ class Postgres {
     const res = await this.query('SELECT $1::text as message', [
       'Hello world!',
     ]);
-    await this.disconnect();
+    this.disconnect();
     return res[0].message;
   }
 }

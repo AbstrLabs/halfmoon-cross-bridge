@@ -27,7 +27,7 @@ import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { GenericTxInfo } from '..';
 import { goNearToAtom } from '../utils/formatter';
-import { log } from '../utils/logger';
+import { logger } from '../utils/logger';
 
 class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
@@ -194,7 +194,7 @@ class AlgorandBlockchain extends Blockchain {
       4
     );
     //Get the completed Transaction
-    log(
+    logger.info(
       `Transaction from ${from} to ${to} of amount ${amountInAtomic} (atomic unit) with id ${xtx.txId} confirmed in round ${confirmedTxn['confirmed-round']}`
     );
     return xtx.txId;
@@ -208,12 +208,12 @@ class AlgorandBlockchain extends Blockchain {
   async genAcc() {
     // tested, not used
     const algoAcc = algosdk.generateAccount();
-    console.log('Account Address = ' + algoAcc.addr);
+    logger.warn('Account Address = ' + algoAcc.addr);
     let account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
-    console.log('Account Mnemonic = ' + account_mnemonic);
-    console.log('Account created. Save off Mnemonic and address');
-    console.log('Add funds to account using the TestNet Dispenser: ');
-    console.log('https://dispenser.testnet.aws.algodev.network/ ');
+    logger.warn('Account Mnemonic = ' + account_mnemonic);
+    logger.warn('Account created. Save off Mnemonic and address');
+    logger.warn('Add funds to account using the TestNet Dispenser: ');
+    logger.warn('https://dispenser.testnet.aws.algodev.network/ ');
     return algoAcc;
   }
 
@@ -236,7 +236,7 @@ class AlgorandBlockchain extends Blockchain {
     let tx = await this.client.sendRawTransaction(rawSignedTxn).do();
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
-    log(
+    logger.info(
       `New ASA ${noParamAsaConfig.assetName} created with ${tx.txId} having id ${noParamAsaConfig.assetId}.`
     );
     return noParamAsaConfig;
