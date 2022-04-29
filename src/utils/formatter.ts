@@ -2,8 +2,11 @@ import { blob } from 'stream/consumers';
 import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
 import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
+import { z } from 'zod';
 
 export { dbItemToBridgeTxInfo, goNearToAtom };
+
+// param validation and formatting
 
 const dbItemToBridgeTxInfo = (
   dbItem: any,
@@ -27,6 +30,7 @@ const dbItemToBridgeTxInfo = (
   return bridgeTx;
 };
 
+// goNear related
 function goNearToAtom(goNearPlain: string): string {
   // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
   // TODO: l10n: and won't work for separators like 123_4567.0123456789 nor 1.234.567,0123456789

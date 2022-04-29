@@ -1,7 +1,6 @@
 import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
 
 import { dbItemToBridgeTxInfo } from './formatter';
-import { logger } from './logger';
 
 const sampleDbItem = {
   algo_txn_id: 'some_fake_tx_id',
@@ -27,13 +26,7 @@ const sampleTxInfo: BridgeTxInfo = {
   txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
-describe('utils tool test, should skip', () => {
-  describe('logger', () => {
-    it('log "something"', () => {
-      logger.info('something');
-      console.log('something'); // this is better to show call stack
-    });
-  });
+describe('param validation and formatting', () => {
   it('formatter test', () => {
     // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414

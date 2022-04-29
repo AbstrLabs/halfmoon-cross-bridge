@@ -2,12 +2,12 @@ export { startServer };
 
 import express, { Request, Response } from 'express';
 
-import { mint } from './blockchain/bridge/mint-handler';
 import { ENV } from './utils/dotenv';
+import { GenericTxInfo } from './';
 import { ensureString } from './utils/helper';
-import { type GenericTxInfo } from '.';
-import { logger } from './utils/logger';
 import { literal } from './utils/literal';
+import { logger } from './utils/logger';
+import { mint } from './blockchain/bridge/mint-handler';
 
 async function homePageTest() {
   /* Used once code */
