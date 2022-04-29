@@ -1,5 +1,5 @@
 /* Algorand functionalities wrapped up with our centralized account */
-export { algoBlockchain };
+export { algoBlockchain, type AlgorandBlockchain };
 
 import * as algosdk from 'algosdk';
 
@@ -211,9 +211,9 @@ class AlgorandBlockchain extends Blockchain {
   /* Methods below are designed to run once */
 
   protected async _createGoNearWithAdmin() {
-    this.createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
+    this._createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
   }
-  async genAcc() {
+  protected async _genAcc() {
     // tested, not used
     const algoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
@@ -224,8 +224,7 @@ class AlgorandBlockchain extends Blockchain {
     logger.warn('https://dispenser.testnet.aws.algodev.network/ ');
     return algoAcc;
   }
-
-  async createAsaWithMnemonic(
+  protected async _createAsaWithMnemonic(
     // tested, used once
     // modified from https://developer.algorand.org/docs/get-details/asa/
     noParamAsaConfig: NoParamAsaConfig,
