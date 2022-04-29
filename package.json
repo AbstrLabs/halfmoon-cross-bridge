@@ -44,6 +44,7 @@
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:db": "jest --testPathPattern=src/database",
-    "test:near": "jest --testPathPattern=src/blockchain/near"
+    "test:near": "jest --testPathPattern=src/blockchain/near",
+    "test:util": "jest --testPathPattern=src/utils"
   }
 }

@@ -10,7 +10,7 @@ const sampleDbItem = {
   id: 1,
   near_address: '0x1234567890123456789012345678901234567890',
   near_tx_hash: '0x1234567890123456789012345678901234567890',
-  request_status: 'DONE_SEND',
+  request_status: 'DONE_OUTGOING',
 };
 
 const sampleTxInfo: BridgeTxInfo = {
