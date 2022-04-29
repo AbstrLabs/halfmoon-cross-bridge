@@ -3,7 +3,7 @@ export { startServer };
 import express, { Request, Response } from 'express';
 
 import { mint } from './blockchain/bridge/mint-handler';
-import { ENV, loadDotEnv } from './utils/dotenv';
+import { ENV } from './utils/dotenv';
 import { ensureString } from './utils/helper';
 import { type GenericTxInfo } from '.';
 import { logger } from './utils/logger';
@@ -14,8 +14,6 @@ async function homePageTest() {
 }
 
 function startServer() {
-  loadDotEnv();
-
   /* route */
   const app = express();
   const apiRouter = express.Router();
