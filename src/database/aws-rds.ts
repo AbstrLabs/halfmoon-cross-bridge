@@ -1,3 +1,4 @@
+import { BridgeError, ERRORS } from '../utils/errors';
 import { Client, Pool, PoolClient } from 'pg';
 
 import { logger } from '../utils/logger';
@@ -31,7 +32,7 @@ class Postgres {
     }
     this.client = await this.pool.connect();
     if (!this.client) {
-      throw new Error('Could not connect to database');
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
     }
     this.isConnected = true;
     logger.info('database connected');
@@ -43,7 +44,7 @@ class Postgres {
       await this.connect();
     }
     if (!this.client) {
-      throw new Error('Could not connect to database');
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
     }
     const res = await this.client.query(query, params);
     return res.rows;
@@ -52,7 +53,7 @@ class Postgres {
   disconnect() {
     if (this.isConnected) {
       if (!this.client) {
-        throw new Error('client and isConnected do not match');
+        throw new BridgeError(ERRORS.INTERNAL.DB_CLASS_LOGIC_ERROR);
       }
       this.client.release();
       this.isConnected = false;

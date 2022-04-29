@@ -19,15 +19,17 @@ import {
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
-import { GenericTxInfo } from '..';
+import { BlockchainName, GenericTxInfo } from '..';
 import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
+import { BridgeError, ERRORS } from '../utils/errors';
 
 class AlgorandBlockchain extends Blockchain {
   readonly client: AlgodClient;
   readonly indexer: Indexer;
   readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
+  readonly name = BlockchainName.ALGO;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
@@ -98,38 +100,43 @@ class AlgorandBlockchain extends Blockchain {
     const txId = txn.id;
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
-      throw Error(
-        `currentRound: ${currentRound} < confirmedRound: ${confirmedRound}`
-      );
-      return false;
+      throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
+        currentRound,
+        confirmedRound,
+        blockchainName: this.name,
+      });
     }
     // compare txID
     if (txId !== genericTxInfo.txId) {
-      throw Error(
-        `txnOutcome.txID ${txId} !== genericTxInfo.txId ${genericTxInfo.txId}`
-      );
-      return false;
+      throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
+        blockchainId: txId,
+        receivedId: genericTxInfo.txId,
+        blockchainName: this.name,
+      });
     }
     // compare sender
     if (sender !== genericTxInfo.from) {
-      throw Error(
-        `txnOutcome.sender ${sender} !== genericTxInfo.from ${genericTxInfo.from}`
-      );
-      return false;
+      throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
+        blockchainSender: sender,
+        receivedSender: genericTxInfo.from,
+        blockchainName: this.name,
+      });
     }
     // compare receiver
     if (receiver !== genericTxInfo.to) {
-      throw Error(
-        `txnOutcome.receiver ${receiver} !== genericTxInfo.to ${genericTxInfo.to}`
-      );
-      return false;
+      throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
+        blockchainReceiver: receiver,
+        receivedReceiver: genericTxInfo.to,
+        blockchainName: this.name,
+      });
     }
     // compare amount
     if (`${amount}` !== genericTxInfo.amount) {
-      throw Error(
-        `txnOutcome.amount ${amount} !== genericTxInfo.amount ${genericTxInfo.amount}`
-      );
-      return false;
+      throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
+        blockchainAmount: amount,
+        receivedAmount: genericTxInfo.amount,
+        blockchainName: this.name,
+      });
     }
     return true;
   }

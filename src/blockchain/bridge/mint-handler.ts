@@ -1,5 +1,6 @@
 export { mint };
 
+import { BridgeError, ERRORS } from '../../utils/errors';
 import { BridgeTxInfo, GenericTxInfo } from '../..';
 
 import { TxType } from '..';
@@ -15,7 +16,8 @@ async function mint(genericTxInfo: GenericTxInfo): Promise<BridgeTxInfo> {
     amount === undefined ||
     txId === undefined
   ) {
-    throw new Error('Missing required params');
+    throw new BridgeError(ERRORS.TXN.MISSING_PARAM);
+    // TODO: use zod
   }
   logger.info(literal.START_MINTING(amount, from, to));
   const bridgeTxInfo = await bridge_txn_handler(genericTxInfo, TxType.Mint);

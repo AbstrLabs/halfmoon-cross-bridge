@@ -7,6 +7,7 @@ import {
   BridgeTxStatus,
   GenericTxInfo,
 } from '../..';
+import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
@@ -32,7 +33,7 @@ async function bridge_txn_handler(
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
-    throw new Error('Unknown txType');
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
   }
   await db.connect();
 
@@ -98,6 +99,7 @@ function genericInfoToBridgeTxInfo(
   const atomicAmount = BigInt(goNearToAtom(amount));
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
+  // TODO: this can be skipped after BAN15
   if (txType === TxType.Mint) {
     fromBlockchain = BlockchainName.NEAR;
     toBlockchain = BlockchainName.ALGO;
@@ -105,7 +107,7 @@ function genericInfoToBridgeTxInfo(
     fromBlockchain = BlockchainName.ALGO;
     toBlockchain = BlockchainName.NEAR;
   } else {
-    throw new Error('Unknown txType');
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
   }
 
   const bridgeTxInfo: BridgeTxInfo = {

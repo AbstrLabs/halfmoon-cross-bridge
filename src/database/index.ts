@@ -1,10 +1,12 @@
 export { db };
 
+import { BridgeError, ERRORS } from '../utils/errors';
 import { BridgeTxInfo, GenericTxInfo } from '..';
 
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
+type DbId = number;
 class Database {
   private instance = postgres;
 
@@ -54,22 +56,23 @@ class Database {
     bridgeTx.dbId = dbId;
     return dbId as number;
   }
-  async readTx(txId: number) {
+  async readTx(txId: DbId) {
+    if (typeof txId !== 'number') {
+      txId = +txId;
+    }
     const query = `
       SELECT * FROM user_mint_request WHERE id = $1;
     `;
     const params = [txId];
     const result = await this.query(query, params);
-    // TODO: check result.length wrap to a function
-    if (result.length === 0) {
-      throw new Error(`No TX found to update.`);
-    }
-    if (result.length > 1) {
-      throw new Error(`Found too many TX to update.`);
+    try {
+      this._verifyResultLength(result, txId);
+    } catch (err) {
+      throw err;
     }
     return result[0];
   }
-  async updateTx(bridgeTx: BridgeTxInfo) {
+  async updateTx(bridgeTxInfo: BridgeTxInfo) {
     // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
@@ -81,34 +84,43 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTx.txStatus,
-      bridgeTx.toTxId,
-      bridgeTx.dbId,
-      bridgeTx.fromTxId,
-      bridgeTx.toAddr,
-      bridgeTx.fromAddr,
-      bridgeTx.amount,
-      bridgeTx.timestamp,
+      bridgeTxInfo.txStatus,
+      bridgeTxInfo.toTxId,
+      bridgeTxInfo.dbId,
+      bridgeTxInfo.fromTxId,
+      bridgeTxInfo.toAddr,
+      bridgeTxInfo.fromAddr,
+      bridgeTxInfo.amount,
+      bridgeTxInfo.timestamp,
     ];
     const result = await this.query(query, params);
-    // TODO: check result.length wrap to a function
-    if (result.length === 0) {
-      throw new Error(`No TX found to update.`);
+    try {
+      this._verifyResultLength(result, bridgeTxInfo);
+    } catch (err) {
+      throw err;
     }
-    if (result.length > 1) {
-      throw new Error(`Found too many TX to update.`);
-    }
-    logger.verbose(`Updated bridge tx with id ${bridgeTx.dbId}`);
+    logger.verbose(`Updated bridge tx with id ${bridgeTxInfo.dbId}`);
     return result[0].id;
   }
-  async deleteTx(txId: number) {
+  async deleteTx(txId: DbId) {
     // const query = `
     //   DELETE FROM user_mint_request WHERE id = $1;
     // `;
     // const params = [txId];
     // const result = await this.query(query, params);
+    throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
+      action: 'deleteTx',
+    });
+  }
 
-    throw new Error(`We cannot delete TX from DB.`);
+  private _verifyResultLength(result: any[], TxInfo: DbId | BridgeTxInfo) {
+    if (result.length === 0) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, { TxInfo });
+    }
+    if (result.length > 1) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_UNIQUE, { TxInfo });
+    }
+    return true;
   }
 }
 
