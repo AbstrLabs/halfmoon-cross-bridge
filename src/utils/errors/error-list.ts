@@ -44,7 +44,7 @@ const transactionErrors = {
   INVALID_TX_ID: {
     errId: 200,
     name: 'Invalid transaction id',
-    message: 'Blockchain rejected misformed transaction id',
+    message: 'Blockchain rejected malformed transaction id',
   },
   TX_NOT_CONFIRMED: {
     errId: 201,

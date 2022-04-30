@@ -15,14 +15,14 @@ const nearAddr = z
   .string()
   .regex(
     /^[0-9a-z][0-9a-z\-\_]{1,64}.(testnet|mainnet)$/,
-    'misformed near address'
+    'malformed near address'
   );
 const algoAddr = z
   .string()
-  .regex(/^[2-79A-Z]{58}$/, 'misformed algorand address');
+  .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
 const parsableAmount = z
   .string()
-  .regex(/^ *[0-9,]{1,9}\.?[0-9]{0,10} *$/, 'misformed amount address');
+  .regex(/^ *[0-9,]{1,9}\.?[0-9]{0,10} *$/, 'malformed amount address');
 
 const nearTxId = z.string(); // TODO: unfinished
 const algoTxId = z.string(); // TODO: unfinished

@@ -54,7 +54,7 @@ describe('param validation and formatting', () => {
     const apiTxInfo = parseMintApiInfo(exampleApiTxInfo);
     expect(apiTxInfo).toEqual(exampleApiTxInfo);
   });
-  it('parse wrong misformed api call', () => {
+  it('parse wrong malformed api call', () => {
     const wrongApiTxInfo = {
       ...exampleApiTxInfo,
       to: exampleApiTxInfo.to.slice(0, -1),
