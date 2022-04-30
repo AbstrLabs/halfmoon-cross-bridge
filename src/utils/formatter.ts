@@ -1,19 +1,51 @@
-import { blob } from 'stream/consumers';
+export { dbItemToBridgeTxInfo, goNearToAtom, parseMintApiInfo };
+
 import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
 import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 
-export { dbItemToBridgeTxInfo, goNearToAtom, txInfoParser };
+type MintApiTxInfo = z.infer<typeof mintApiInfoParser>;
 
 // param validation and formatting
 
-const txInfoParser = z.object({
-  amount: z.string(),
-  from: z.string(),
-  to: z.string(),
-  txId: z.string(),
+const nearAddr = z
+  // from https://wallet.testnet.near.org/create
+  // cannot start with `-` and `_`
+  .string()
+  .regex(
+    /^[0-9a-z][0-9a-z\-\_]{1,64}.(testnet|mainnet)$/,
+    'misformed near address'
+  );
+const algoAddr = z
+  .string()
+  .regex(/^[2-79A-Z]{58}$/, 'misformed algorand address');
+const parsableAmount = z
+  .string()
+  .regex(/^ *[0-9,]{1,9}\.?[0-9]{0,10} *$/, 'misformed amount address');
+
+const nearTxId = z.string(); // TODO: unfinished
+const algoTxId = z.string(); // TODO: unfinished
+
+// from https://forum.algorand.org/t/how-is-an-algorands-address-made/960
+// no 0,1,8
+
+const mintApiInfoParser = z.object({
+  amount: parsableAmount,
+  from: nearAddr,
+  to: algoAddr, // algorand address
+  txId: nearTxId,
 });
+const burnApiInfoParser = z.object({
+  amount: parsableAmount,
+  from: nearAddr,
+  to: algoAddr, // algorand address
+  txId: nearTxId,
+});
+
+function parseMintApiInfo(apiInfo: MintApiTxInfo) {
+  return mintApiInfoParser.parse(apiInfo);
+}
 
 const dbItemToBridgeTxInfo = (
   dbItem: any,

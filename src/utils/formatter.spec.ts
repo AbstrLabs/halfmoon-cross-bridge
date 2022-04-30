@@ -4,7 +4,7 @@ import {
   BridgeTxStatus,
   GenericTxInfo,
 } from '..';
-import { dbItemToBridgeTxInfo, txInfoParser } from './formatter';
+import { dbItemToBridgeTxInfo, parseMintApiInfo } from './formatter';
 
 import { ENV } from './dotenv';
 
@@ -34,8 +34,8 @@ const exampleTxInfo: BridgeTxInfo = {
 
 const exampleApiTxInfo: GenericTxInfo = {
   amount: '1',
-  from: ENV.ALGO_EXAMPL_ADDR,
-  to: ENV.NEAR_EXAMPL_ADDR,
+  to: ENV.ALGO_EXAMPL_ADDR,
+  from: ENV.NEAR_EXAMPL_ADDR,
   txId: 'some_fake_tx_id',
 };
 
@@ -50,8 +50,17 @@ describe('param validation and formatting', () => {
       })
     ).toEqual(exampleTxInfo);
   });
-  it('parse ', () => {
-    const ApiTxInfo = txInfoParser.parse(exampleApiTxInfo);
-    console.log('ApiTxInfo : ', ApiTxInfo); // DEV_LOG_TO_REMOVE
+  it('parse mint api call', () => {
+    const apiTxInfo = parseMintApiInfo(exampleApiTxInfo);
+    expect(apiTxInfo).toEqual(exampleApiTxInfo);
+  });
+  it('parse wrong misformed api call', () => {
+    const wrongApiTxInfo = {
+      ...exampleApiTxInfo,
+      to: exampleApiTxInfo.to.slice(0, -1),
+    };
+    expect(() => {
+      parseMintApiInfo(wrongApiTxInfo);
+    }).toThrow();
   });
 });
