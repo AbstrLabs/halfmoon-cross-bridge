@@ -1,8 +1,14 @@
-import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
+import {
+  BlockchainName,
+  BridgeTxInfo,
+  BridgeTxStatus,
+  GenericTxInfo,
+} from '..';
+import { dbItemToBridgeTxInfo, txInfoParser } from './formatter';
 
-import { dbItemToBridgeTxInfo } from './formatter';
+import { ENV } from './dotenv';
 
-const sampleDbItem = {
+const exampleDbItem = {
   algo_txn_id: 'some_fake_tx_id',
   algorand_address: '0x1234567890123456789012345678901234567890',
   amount: '10000000000',
@@ -13,7 +19,7 @@ const sampleDbItem = {
   request_status: 'DONE_OUTGOING',
 };
 
-const sampleTxInfo: BridgeTxInfo = {
+const exampleTxInfo: BridgeTxInfo = {
   amount: BigInt(10000000000), // big int jest err read on top.
   dbId: 1,
   fromAddr: '0x1234567890123456789012345678901234567890',
@@ -26,15 +32,26 @@ const sampleTxInfo: BridgeTxInfo = {
   txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
+const exampleApiTxInfo: GenericTxInfo = {
+  amount: '1',
+  from: ENV.ALGO_EXAMPL_ADDR,
+  to: ENV.NEAR_EXAMPL_ADDR,
+  txId: 'some_fake_tx_id',
+};
+
 describe('param validation and formatting', () => {
   it('formatter test', () => {
     // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
     expect(
-      dbItemToBridgeTxInfo(sampleDbItem, {
+      dbItemToBridgeTxInfo(exampleDbItem, {
         fromBlockchain: BlockchainName.NEAR,
         toBlockchain: BlockchainName.ALGO,
       })
-    ).toEqual(sampleTxInfo);
+    ).toEqual(exampleTxInfo);
+  });
+  it('parse ', () => {
+    const ApiTxInfo = txInfoParser.parse(exampleApiTxInfo);
+    console.log('ApiTxInfo : ', ApiTxInfo); // DEV_LOG_TO_REMOVE
   });
 });

@@ -4,9 +4,16 @@ import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 
-export { dbItemToBridgeTxInfo, goNearToAtom };
+export { dbItemToBridgeTxInfo, goNearToAtom, txInfoParser };
 
 // param validation and formatting
+
+const txInfoParser = z.object({
+  amount: z.string(),
+  from: z.string(),
+  to: z.string(),
+  txId: z.string(),
+});
 
 const dbItemToBridgeTxInfo = (
   dbItem: any,
