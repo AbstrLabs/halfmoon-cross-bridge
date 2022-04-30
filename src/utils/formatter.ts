@@ -1,8 +1,8 @@
 export {
   dbItemToBridgeTxInfo,
   goNearToAtom,
-  parseMintApiInfo,
-  parseBurnApiInfo,
+  parseMintApiParam,
+  parseBurnApiParam,
 };
 
 import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
@@ -10,8 +10,9 @@ import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 
-type MintApiTxInfo = z.infer<typeof mintApiInfoParser>;
-type BurnApiTxInfo = z.infer<typeof burnApiInfoParser>;
+type MintApiParam = z.infer<typeof mintApiParamParser>;
+type BurnApiParam = z.infer<typeof burnApiParamParser>;
+type ApiCallParam = MintApiParam | BurnApiParam;
 // param validation and formatting
 
 const nearAddr = z
@@ -35,22 +36,22 @@ const algoTxId = z.string(); // TODO: unfinished
 // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960
 // no 0,1,8
 
-const mintApiInfoParser = z.object({
+const mintApiParamParser = z.object({
   amount: parsableAmount,
   from: nearAddr,
   to: algoAddr,
   txId: nearTxId,
 });
-const burnApiInfoParser = z.object({
+const burnApiParamParser = z.object({
   amount: parsableAmount,
   from: algoAddr,
   to: nearAddr,
   txId: nearTxId,
 });
 
-function parseMintApiInfo(apiInfo: MintApiTxInfo): MintApiTxInfo {
+function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   try {
-    return mintApiInfoParser.parse(apiInfo);
+    return mintApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
       parseErrorDetail: e,
@@ -58,9 +59,9 @@ function parseMintApiInfo(apiInfo: MintApiTxInfo): MintApiTxInfo {
   }
 }
 
-function parseBurnApiInfo(apiInfo: BurnApiTxInfo): BurnApiTxInfo {
+function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   try {
-    return burnApiInfoParser.parse(apiInfo);
+    return burnApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
       parseErrorDetail: e,

@@ -7,8 +7,8 @@ import {
 import { BridgeError, ERRORS } from './errors';
 import {
   dbItemToBridgeTxInfo,
-  parseBurnApiInfo,
-  parseMintApiInfo,
+  parseBurnApiParam,
+  parseMintApiParam,
 } from './formatter';
 
 import { ENV } from './dotenv';
@@ -64,7 +64,7 @@ describe('param validation and formatting', () => {
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxInfo = parseMintApiInfo(exampleMintApiTxInfo);
+      const apiTxInfo = parseMintApiParam(exampleMintApiTxInfo);
       expect(apiTxInfo).toEqual(exampleMintApiTxInfo);
     });
     it('parse wrong malformed api call', () => {
@@ -74,7 +74,7 @@ describe('param validation and formatting', () => {
         to: exampleMintApiTxInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseMintApiInfo(wrongToAddrApiTxInfo);
+        parseMintApiParam(wrongToAddrApiTxInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -85,7 +85,7 @@ describe('param validation and formatting', () => {
   });
   describe('parseBurnApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxInfo = parseBurnApiInfo(exampleBurnApiTxInfo);
+      const apiTxInfo = parseBurnApiParam(exampleBurnApiTxInfo);
       expect(apiTxInfo).toEqual(exampleBurnApiTxInfo);
     });
     it('parse wrong malformed api call', () => {
@@ -95,7 +95,7 @@ describe('param validation and formatting', () => {
         to: exampleBurnApiTxInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseBurnApiInfo(wrongToAddrApiTxInfo);
+        parseBurnApiParam(wrongToAddrApiTxInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
