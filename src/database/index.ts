@@ -1,8 +1,8 @@
 export { db };
 
 import { BridgeError, ERRORS } from '../utils/errors';
-import { BridgeTxInfo, GenericTxInfo } from '..';
 
+import { BridgeTxInfo } from '..';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 

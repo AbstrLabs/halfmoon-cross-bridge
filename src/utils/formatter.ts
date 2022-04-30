@@ -1,8 +1,12 @@
 export {
   dbItemToBridgeTxInfo,
   goNearToAtom,
-  parseMintApiParam,
   parseBurnApiParam,
+  parseMintApiParam,
+  type AlgoTxParam,
+  type ApiCallParam,
+  type NearTxParam,
+  type TxParam,
 };
 
 import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
@@ -13,6 +17,10 @@ import { z } from 'zod';
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
 type ApiCallParam = MintApiParam | BurnApiParam;
+
+type AlgoTxParam = z.infer<typeof algoTxParamParser>;
+type NearTxParam = z.infer<typeof nearTxParamParser>;
+type TxParam = AlgoTxParam | NearTxParam;
 // param validation and formatting
 
 const nearAddr = z
@@ -46,6 +54,19 @@ const burnApiParamParser = z.object({
   amount: parsableAmount,
   from: algoAddr,
   to: nearAddr,
+  txId: nearTxId,
+});
+
+const algoTxParamParser = z.object({
+  atom: z.bigint(),
+  fromAddr: algoAddr,
+  toAddr: algoAddr,
+  txId: algoTxId,
+});
+const nearTxParamParser = z.object({
+  atom: z.bigint(),
+  fromAddr: nearAddr,
+  toAddr: nearAddr,
   txId: nearTxId,
 });
 
