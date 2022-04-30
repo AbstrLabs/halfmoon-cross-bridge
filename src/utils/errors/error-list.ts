@@ -86,6 +86,11 @@ const transactionErrors = {
     name: 'Missing parameter',
     message: 'API call parameters are missing',
   },
+  INVALID_API_PARAM: {
+    errId: 209,
+    name: 'Invalid API parameter',
+    message: 'API call parameters are invalid',
+  },
 };
 const externalErrors = {
   DB_CONNECTION_FAILED: {

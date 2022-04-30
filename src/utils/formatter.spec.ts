@@ -4,6 +4,7 @@ import {
   BridgeTxStatus,
   GenericTxInfo,
 } from '..';
+import { BridgeError, ERRORS } from './errors';
 import { dbItemToBridgeTxInfo, parseMintApiInfo } from './formatter';
 
 import { ENV } from './dotenv';
@@ -61,6 +62,11 @@ describe('param validation and formatting', () => {
     };
     expect(() => {
       parseMintApiInfo(wrongApiTxInfo);
-    }).toThrow();
+    }).toThrow(
+      // new Error('any error') this won't work
+      new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
+        unusedField: 'this does not matter',
+      })
+    );
   });
 });

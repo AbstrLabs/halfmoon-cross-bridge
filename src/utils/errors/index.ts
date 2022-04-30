@@ -21,9 +21,9 @@ class BridgeError extends Error {
 
   constructor(errorTemplate: ErrorTemplate, extraArg?: object) {
     super(
-      `${ERROR_PREFIX}${String(errorTemplate.errId)}` +
-        errorTemplate.message +
-        String(extraArg ?? '')
+      // TODO: add extraArg to message
+      `${ERROR_PREFIX} ${String(errorTemplate.errId)}: \n` +
+        `${errorTemplate.message}: ${extraArg}`
     );
 
     this.name = errorTemplate.name;

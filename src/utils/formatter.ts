@@ -44,7 +44,14 @@ const burnApiInfoParser = z.object({
 });
 
 function parseMintApiInfo(apiInfo: MintApiTxInfo) {
-  return mintApiInfoParser.parse(apiInfo);
+  try {
+    const mintApiInfo = mintApiInfoParser.parse(apiInfo);
+    return mintApiInfo;
+  } catch (e) {
+    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
+      parseErrorDetail: e,
+    });
+  }
 }
 
 const dbItemToBridgeTxInfo = (
