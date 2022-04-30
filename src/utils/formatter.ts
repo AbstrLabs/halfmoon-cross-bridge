@@ -1,4 +1,9 @@
-export { dbItemToBridgeTxInfo, goNearToAtom, parseMintApiInfo };
+export {
+  dbItemToBridgeTxInfo,
+  goNearToAtom,
+  parseMintApiInfo,
+  parseBurnApiInfo,
+};
 
 import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
 import { ENV } from './dotenv';
@@ -6,7 +11,7 @@ import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 
 type MintApiTxInfo = z.infer<typeof mintApiInfoParser>;
-
+type BurnApiTxInfo = z.infer<typeof burnApiInfoParser>;
 // param validation and formatting
 
 const nearAddr = z
@@ -33,20 +38,29 @@ const algoTxId = z.string(); // TODO: unfinished
 const mintApiInfoParser = z.object({
   amount: parsableAmount,
   from: nearAddr,
-  to: algoAddr, // algorand address
+  to: algoAddr,
   txId: nearTxId,
 });
 const burnApiInfoParser = z.object({
   amount: parsableAmount,
-  from: nearAddr,
-  to: algoAddr, // algorand address
+  from: algoAddr,
+  to: nearAddr,
   txId: nearTxId,
 });
 
-function parseMintApiInfo(apiInfo: MintApiTxInfo) {
+function parseMintApiInfo(apiInfo: MintApiTxInfo): MintApiTxInfo {
   try {
-    const mintApiInfo = mintApiInfoParser.parse(apiInfo);
-    return mintApiInfo;
+    return mintApiInfoParser.parse(apiInfo);
+  } catch (e) {
+    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
+      parseErrorDetail: e,
+    });
+  }
+}
+
+function parseBurnApiInfo(apiInfo: BurnApiTxInfo): BurnApiTxInfo {
+  try {
+    return burnApiInfoParser.parse(apiInfo);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
       parseErrorDetail: e,

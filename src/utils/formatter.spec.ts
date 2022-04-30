@@ -5,10 +5,15 @@ import {
   GenericTxInfo,
 } from '..';
 import { BridgeError, ERRORS } from './errors';
-import { dbItemToBridgeTxInfo, parseMintApiInfo } from './formatter';
+import {
+  dbItemToBridgeTxInfo,
+  parseBurnApiInfo,
+  parseMintApiInfo,
+} from './formatter';
 
 import { ENV } from './dotenv';
 
+const FAKE_TX_ID = 'some_fake_tx_id';
 const exampleDbItem = {
   algo_txn_id: 'some_fake_tx_id',
   algorand_address: '0x1234567890123456789012345678901234567890',
@@ -33,11 +38,17 @@ const exampleTxInfo: BridgeTxInfo = {
   txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
-const exampleApiTxInfo: GenericTxInfo = {
-  amount: '1',
+const exampleMintApiTxInfo: GenericTxInfo = {
+  amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
-  txId: 'some_fake_tx_id',
+  txId: FAKE_TX_ID,
+};
+const exampleBurnApiTxInfo: GenericTxInfo = {
+  amount: '1.00',
+  to: ENV.NEAR_EXAMPL_ADDR,
+  from: ENV.ALGO_EXAMPL_ADDR,
+  txId: FAKE_TX_ID,
 };
 
 describe('param validation and formatting', () => {
@@ -51,22 +62,46 @@ describe('param validation and formatting', () => {
       })
     ).toEqual(exampleTxInfo);
   });
-  it('parse mint api call', () => {
-    const apiTxInfo = parseMintApiInfo(exampleApiTxInfo);
-    expect(apiTxInfo).toEqual(exampleApiTxInfo);
+  describe('parseMintApiInfo', () => {
+    it('parse mint api call', () => {
+      const apiTxInfo = parseMintApiInfo(exampleMintApiTxInfo);
+      expect(apiTxInfo).toEqual(exampleMintApiTxInfo);
+    });
+    it('parse wrong malformed api call', () => {
+      // TODO: now we cannot distinguish between the error message and the error detail
+      const wrongToAddrApiTxInfo = {
+        ...exampleMintApiTxInfo,
+        to: exampleMintApiTxInfo.to.slice(0, -1),
+      };
+      expect(() => {
+        parseMintApiInfo(wrongToAddrApiTxInfo);
+      }).toThrow(
+        // new Error('any error') this won't work
+        new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
+          unusedField: 'this does not matter',
+        })
+      );
+    });
   });
-  it('parse wrong malformed api call', () => {
-    const wrongApiTxInfo = {
-      ...exampleApiTxInfo,
-      to: exampleApiTxInfo.to.slice(0, -1),
-    };
-    expect(() => {
-      parseMintApiInfo(wrongApiTxInfo);
-    }).toThrow(
-      // new Error('any error') this won't work
-      new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-        unusedField: 'this does not matter',
-      })
-    );
+  describe('parseBurnApiInfo', () => {
+    it('parse mint api call', () => {
+      const apiTxInfo = parseBurnApiInfo(exampleBurnApiTxInfo);
+      expect(apiTxInfo).toEqual(exampleBurnApiTxInfo);
+    });
+    it('parse wrong malformed api call', () => {
+      // TODO: now we cannot distinguish between the error message and the error detail
+      const wrongToAddrApiTxInfo = {
+        ...exampleBurnApiTxInfo,
+        to: exampleBurnApiTxInfo.to.slice(0, -1),
+      };
+      expect(() => {
+        parseBurnApiInfo(wrongToAddrApiTxInfo);
+      }).toThrow(
+        // new Error('any error') this won't work
+        new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
+          unusedField: 'this does not matter',
+        })
+      );
+    });
   });
 });
