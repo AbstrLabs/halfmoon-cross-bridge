@@ -151,7 +151,6 @@ class AlgorandBlockchain extends Blockchain {
     return await this._makeAsaTxn(
       to,
       this.centralizedAcc.addr,
-      // TODO: BAN-15: amount should be parsed right after API call
       atom,
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID

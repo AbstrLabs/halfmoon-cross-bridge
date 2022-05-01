@@ -8,7 +8,6 @@ import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint-handler';
-import { parseMintApiParam } from './utils/formatter';
 
 async function homePageTest() {
   /* Used once code */
@@ -21,16 +20,16 @@ function startServer() {
 
   apiRouter
     .route('/mint')
-    .get((req: Request, res: Response) => {
+    .get(async (req: Request, res: Response) => {
       const [from, to, amount, txId] = [
         ensureString(req.query.from),
         ensureString(req.query.to),
         ensureString(req.query.amount),
         ensureString(req.query.txId),
       ];
-      mintResp({ from, to, amount, txId }, res);
+      await mintResp({ from, to, amount, txId }, res);
     })
-    .post((req: Request, res: Response) => {
+    .post(async (req: Request, res: Response) => {
       // res.json(req.body);
       const [from, to, amount, txId] = [
         ensureString(req.body['mint_from']),
@@ -38,7 +37,7 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txId']),
       ];
-      mintResp({ from, to, amount, txId }, res);
+      await mintResp({ from, to, amount, txId }, res);
     });
 
   /* burn */
@@ -79,17 +78,21 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(apiCallParam: MintApiParam, res: Response): void {
-  const mintApiParam = parseMintApiParam(apiCallParam);
+async function mintResp(apiCallParam: MintApiParam, res: Response) {
+  /* CONFIG */
+  const mintApiParam = apiCallParam;
   const { from, to, amount, txId } = mintApiParam;
-  // BridgeTxInfo;
+  var bridgeTxInfo = undefined; // TODO
+  logger.info(literal.START_MINTING(amount, from, to));
+  res.write(`${literal.START_MINTING(amount, from, to)}\n`);
+  res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
+  res.write(`${literal.MINT_AWAITING}\n`);
   try {
     mint(mintApiParam);
-    res.write(`${literal.START_MINTING(amount, from, to)}\n`);
-    res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
-    res.write(`${literal.MINT_AWAITING}\n`);
+    logger.info(literal.DONE_MINT);
     res.end();
   } catch (e) {
-    res.status(400).send('Missing required query params'); // TODO: ref err msg
+    res.status(400).send('Missing required query params');
   }
+  return bridgeTxInfo;
 }
