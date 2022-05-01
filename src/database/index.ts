@@ -44,7 +44,7 @@ class Database {
     const params = [
       bridgeTx.fromAddr,
       bridgeTx.toAddr,
-      bridgeTx.amount,
+      bridgeTx.atomAmount,
       bridgeTx.timestamp,
       bridgeTx.txStatus,
       bridgeTx.fromTxId,
