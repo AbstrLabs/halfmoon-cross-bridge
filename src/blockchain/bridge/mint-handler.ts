@@ -16,7 +16,7 @@ async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
     {
       fromAddr: from,
       toAddr: to,
-      atomAmount: BigInt(goNearToAtom(amount)),
+      atomAmount: goNearToAtom(amount),
       txId,
     },
     TxnType.MINT,

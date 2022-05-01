@@ -70,7 +70,7 @@ describe('AlgorandBlockchain', () => {
       fromAddr: literal.UNUSED,
       txId: literal.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
-      atomAmount: BigInt(goNearToAtom(amount)),
+      atomAmount: goNearToAtom(amount),
     };
     const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
     newTxnParam.txId = algoTxnId;

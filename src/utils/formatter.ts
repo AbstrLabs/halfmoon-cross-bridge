@@ -152,7 +152,7 @@ const dbItemToBridgeTxnInfo = (
 };
 
 // goNear related
-function goNearToAtom(goNearPlain: string): string {
+function goNearToAtom(goNearPlain: string): bigint {
   // TODO: typing: return value should be a BigInt
 
   // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
@@ -169,8 +169,8 @@ function goNearToAtom(goNearPlain: string): string {
       goNearPlain,
     });
   }
-  const atomAmount = trimLeadingZeroes(
-    wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0')
+  const atomAmount = BigInt(
+    trimLeadingZeroes(wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0'))
   );
   logger.debug('goNearToAtom', {
     goNearPlain,
@@ -202,5 +202,5 @@ function yoctoNearToAtom(yoctoNear: string): bigint {
       yoctoNear,
     });
   }
-  return BigInt(goNearToAtom(nearPlain));
+  return goNearToAtom(nearPlain);
 }
