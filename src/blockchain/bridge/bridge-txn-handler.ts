@@ -1,31 +1,25 @@
 export { bridge_txn_handler };
 
 import { Blockchain, TxType } from '..';
-import {
-  BlockchainName,
-  BridgeTxInfo,
-  BridgeTxStatus,
-  GenericTxInfo,
-} from '../..';
+import { BlockchainName, BridgeTxInfo, BridgeTxStatus, TxParam } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
-import { goNearToAtom } from '../../utils/formatter';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
-  genericTxInfo: GenericTxInfo,
+  txParam: TxParam,
   txType: TxType
 ): Promise<BridgeTxInfo> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
-  const { from, to, amount, txId: txId } = genericTxInfo;
-  logger.info(literal.MAKING_TXN(txType, amount, from, to));
+  const { fromAddr, toAddr, atom, txId } = txParam;
+  logger.info(literal.MAKING_TXN(txType, atom, fromAddr, toAddr));
   if (txType === TxType.Mint) {
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
@@ -39,7 +33,7 @@ async function bridge_txn_handler(
 
   /* MAKE TRANSACTION */
   const bridgeTxInfo = genericInfoToBridgeTxInfo(
-    genericTxInfo,
+    txParam,
     txType,
     BigInt(Date.now())
   );
@@ -50,8 +44,8 @@ async function bridge_txn_handler(
   bridgeTxInfo.txStatus = BridgeTxStatus.CONFIRM_INCOMING;
   await db.updateTx(bridgeTxInfo);
   await incomingBlockchain.confirmTxn({
-    ...genericTxInfo,
-    to: ENV.NEAR_MASTER_ADDR,
+    ...txParam,
+    toAddr: ENV.NEAR_MASTER_ADDR,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
   await db.updateTx(bridgeTxInfo);
@@ -63,17 +57,18 @@ async function bridge_txn_handler(
   bridgeTxInfo.txStatus = BridgeTxStatus.MAKE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
-    ...genericTxInfo,
-    from: ENV.ALGO_MASTER_ADDR,
+    ...txParam,
+    fromAddr: ENV.ALGO_MASTER_ADDR,
   });
+
+  // verify outgoing tx
   bridgeTxInfo.toTxId = outgoingTxId;
   bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
   await db.updateTx(bridgeTxInfo);
   await outgoingBlockchain.confirmTxn({
-    ...genericTxInfo,
+    ...txParam,
     txId: outgoingTxId,
-    amount: goNearToAtom(genericTxInfo.amount),
-    from: ENV.ALGO_MASTER_ADDR,
+    fromAddr: ENV.ALGO_MASTER_ADDR,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
   await db.updateTx(bridgeTxInfo);
@@ -90,13 +85,12 @@ async function bridge_txn_handler(
 /* HELPER */
 // TODO: move to formatter
 function genericInfoToBridgeTxInfo(
-  genericTxInfo: GenericTxInfo,
+  txParam: TxParam,
   txType: TxType,
   timestamp: bigint
 ): BridgeTxInfo {
-  const { from, to, amount, txId } = genericTxInfo;
+  const { fromAddr, toAddr, atom, txId } = txParam;
   // TODO: BAN-15: amount should be parsed right after API call
-  const atomicAmount = BigInt(goNearToAtom(amount));
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
   // TODO: this can be skipped after BAN15
@@ -112,12 +106,12 @@ function genericInfoToBridgeTxInfo(
 
   const bridgeTxInfo: BridgeTxInfo = {
     dbId: undefined,
-    amount: atomicAmount, // in "toTx"
+    amount: atom, // in "toTx"
     timestamp,
-    fromAddr: from,
+    fromAddr,
     fromBlockchain,
     fromTxId: txId,
-    toAddr: to,
+    toAddr,
     toBlockchain,
     toTxId: undefined,
     txStatus: BridgeTxStatus.NOT_STARTED,

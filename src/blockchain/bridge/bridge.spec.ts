@@ -1,6 +1,6 @@
+import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { GenericTxInfo } from '../..';
 import { db } from '../../database';
 import { mint } from './mint-handler';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
@@ -14,6 +14,8 @@ describe('mint test', () => {
   afterAll(async () => {
     await db.end();
   });
+  // TODO: should in near test.
+  // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
     'mint 0.424 NEAR from NEAR to ALGO',
     async () => {
@@ -22,11 +24,11 @@ describe('mint test', () => {
 
       // simulate frontend: make NEAR txn
       const mintResponse: FinalExecutionOutcome =
-        await transferOnNearTestnetFromExampleToMaster('1');
+        await transferOnNearTestnetFromExampleToMaster(amount);
       // manually checked the amount is correct.
       const nearTxId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
-      const genericTxInfo: GenericTxInfo = {
+      const apiCallParam: ApiCallParam = {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
@@ -34,7 +36,7 @@ describe('mint test', () => {
       };
 
       // call API
-      const bridgeTxInfo = await mint(genericTxInfo);
+      const bridgeTxInfo = await mint(apiCallParam);
       // should return AlgoTxId,etc.
 
       console.log('bridgeTxInfo : ', bridgeTxInfo); // DEV_LOG_TO_REMOVE
@@ -43,4 +45,10 @@ describe('mint test', () => {
     },
     TIMEOUT_30S
   );
+  /* TODO: More tests:
+   * - wrong amount,
+   * - wrong txId
+   * - malformed address
+   * - timeout (?override with jest?)
+   */
 });
