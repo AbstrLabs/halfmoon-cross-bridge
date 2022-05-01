@@ -1,16 +1,17 @@
 import { ENV } from '../utils/dotenv';
 import { NOT_LOADED_FROM_ENV } from '../utils/literal';
 import { algoBlockchain } from './algorand';
+import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
 const UNUSED = 'not required value';
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
-const exampleAlgoTxn = {
-  from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
-  to: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
-  amount: '4240000000', // 0.424goNEAR in atom goNEAR
+const exampleAlgoParam = {
+  fromAddr: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+  toAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
+  atom: BigInt('4240000000'), // 0.424goNEAR in atom goNEAR
   txId: exampleAlgoTxnId,
 };
 const exampleRcpt = {
@@ -59,25 +60,37 @@ describe('AlgorandBlockchain', () => {
   });
   // it.skip('user not opted in', () => {});
 
-  it.skip('make txn, 1 goNEAR, central acc -> example acc', async () => {
+  it.skip('make txn, 0.767 goNEAR, central acc -> example acc', async () => {
     // skipped because not returning this 1 atom.
     // jest.setTimeout(30000); // won't work
-    const algoTxId = await algoBlockchain.makeOutgoingTxn({
-      from: UNUSED,
+
+    // make a txn (then verify)
+    const amount = '0.767';
+    const newTxnParam = {
+      fromAddr: UNUSED,
       txId: UNUSED,
-      to: ENV.ALGO_EXAMPL_ADDR,
-      amount: '1',
-    });
+      toAddr: ENV.ALGO_EXAMPL_ADDR,
+      atom: BigInt(goNearToAtom(amount)),
+    };
+    const algoTxId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
+    newTxnParam.txId = algoTxId;
     console.info('algoTxId : ', algoTxId);
+
+    //verify the txn
+    const rcpt = await algoBlockchain.getTxnStatus(algoTxId);
+    newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
+    const answer = algoBlockchain.verifyCorrectness(rcpt, newTxnParam);
+    expect(answer).toBe(true);
     return;
   }, 30000);
-  it.only('get example txn status', async () => {
+
+  it('get example txn status', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
   }, 30000);
-  it.only('verify transaction status on algo', async () => {
+  it('verify transaction status on algo', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
-    const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoTxn);
+    const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoParam);
     expect(answer).toBe(true);
   });
 });

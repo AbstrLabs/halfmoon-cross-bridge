@@ -19,8 +19,7 @@ import {
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
-import { BlockchainName, GenericTxInfo } from '..';
-import { goNearToAtom } from '../utils/formatter';
+import { BlockchainName, type AlgoTxParam } from '..';
 import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -87,7 +86,7 @@ class AlgorandBlockchain extends Blockchain {
 
   verifyCorrectness(
     txnOutcome: AlgoAssetTransferTxOutcome,
-    genericTxInfo: GenericTxInfo
+    algoTxParam: AlgoTxParam
   ): boolean {
     // parse txnOutcome, parse AlgoAssetTransferTxOutcome
     // TODO! verify asset id
@@ -107,53 +106,53 @@ class AlgorandBlockchain extends Blockchain {
       });
     }
     // compare txID
-    if (txId !== genericTxInfo.txId) {
+    if (txId !== algoTxParam.txId) {
       throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
         blockchainId: txId,
-        receivedId: genericTxInfo.txId,
+        receivedId: algoTxParam.txId,
         blockchainName: this.name,
       });
     }
     // compare sender
-    if (sender !== genericTxInfo.from) {
+    if (sender !== algoTxParam.fromAddr) {
       throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
         blockchainSender: sender,
-        receivedSender: genericTxInfo.from,
+        receivedSender: algoTxParam.fromAddr,
         blockchainName: this.name,
       });
     }
     // compare receiver
-    if (receiver !== genericTxInfo.to) {
+    if (receiver !== algoTxParam.toAddr) {
       throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
         blockchainReceiver: receiver,
-        receivedReceiver: genericTxInfo.to,
+        receivedReceiver: algoTxParam.toAddr,
         blockchainName: this.name,
       });
     }
     // compare amount
-    if (`${amount}` !== genericTxInfo.amount) {
+    if (amount !== algoTxParam.atom.toString()) {
+      // The trailing "n" is not part of the string.
       throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
-        receivedAmount: genericTxInfo.amount,
+        receivedAmount: algoTxParam.atom,
         blockchainName: this.name,
       });
     }
     return true;
   }
-  async makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<AlgoTxId> {
+  async makeOutgoingTxn(algoTxParam: AlgoTxParam): Promise<AlgoTxId> {
     // abstract class implementation.
-    // TODO! make sure amount is atomic unit!
     return await this._makeGoNearTxnFromAdmin(
-      genericTxInfo.to,
-      genericTxInfo.amount
+      algoTxParam.toAddr,
+      algoTxParam.atom
     );
   }
-  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, amount: string) {
+  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atom: bigint) {
     return await this._makeAsaTxn(
       to,
       this.centralizedAcc.addr,
       // TODO: BAN-15: amount should be parsed right after API call
-      BigInt(goNearToAtom(amount)),
+      atom,
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
@@ -166,7 +165,7 @@ class AlgorandBlockchain extends Blockchain {
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxId> {
-    // modified from https://developer.algorand.org/docs/sdks/javascript/#build-first-transaction
+    // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
     let params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
     // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
@@ -187,14 +186,25 @@ class AlgorandBlockchain extends Blockchain {
     let txn =
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(txnConfig);
 
+    // Sign the transaction
+    let txId = txn.txID().toString();
     let rawSignedTxn = txn.signTxn(senderAccount.sk);
-    let xtx = await this.client.sendRawTransaction(rawSignedTxn).do();
+    let rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(
       this.client,
-      xtx.txId,
+      txId,
       4
     );
+
+    if (rcpt.txId !== txId) {
+      throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
+        blockchainName: this.name,
+        rawTxId: txId,
+        blockchainTxId: rcpt.txId,
+      });
+    }
+
     //Get the completed Transaction
     logger.info(
       literal.TXN_CONFIRMED(
@@ -202,10 +212,10 @@ class AlgorandBlockchain extends Blockchain {
         to,
         amountInAtomic,
         confirmedTxn.txId,
-        confirmedTxn.txReceipt.round
+        confirmedTxn['confirmed-round']
       )
     );
-    return xtx.txId;
+    return txId;
   }
 
   /* Methods below are designed to run once */
