@@ -14,9 +14,9 @@ import {
 
 import { ENV } from './dotenv';
 
-const FAKE_TX_ID = 'some_fake_tx_id';
+const FAKE_TX_ID = 'some_fake_txn_id';
 const exampleDbItem = {
-  algo_txn_id: 'some_fake_tx_id',
+  algo_txn_id: FAKE_TX_ID,
   algorand_address: '0x1234567890123456789012345678901234567890',
   amount: '10000000000',
   create_time: '1650264115011',
@@ -27,7 +27,7 @@ const exampleDbItem = {
 };
 
 const exampleTxnInfo: BridgeTxnInfo = {
-  amount: BigInt(10000000000), // big int jest err read on top.
+  atomAmount: BigInt(10000000000), // big int jest err read on top.
   dbId: 1,
   fromAddr: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
@@ -35,21 +35,21 @@ const exampleTxnInfo: BridgeTxnInfo = {
   timestamp: BigInt('1650264115011'),
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
-  toTxnId: 'some_fake_tx_id',
-  txStatus: BridgeTxnStatus.DONE_OUTGOING,
+  toTxnId: FAKE_TX_ID,
+  txnStatus: BridgeTxnStatus.DONE_OUTGOING,
 };
 
 const exampleMintApiTxnInfo: MintApiParam = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
-  txId: FAKE_TX_ID,
+  txnId: FAKE_TX_ID,
 };
 const exampleBurnApiTxnInfo: BurnApiParam = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
-  txId: FAKE_TX_ID,
+  txnId: FAKE_TX_ID,
 };
 
 describe('param validation and formatting', () => {

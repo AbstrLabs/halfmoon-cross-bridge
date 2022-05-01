@@ -12,7 +12,7 @@ const exampleAlgoParam: TxnParam = {
   fromAddr: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   toAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
   atomAmount: BigInt('4240000000'), // 0.424goNEAR in atomic goNEAR unit
-  txId: exampleAlgoTxnId,
+  txnId: exampleAlgoTxnId,
 };
 const exampleRcpt = {
   // should be the same as rcpt used
@@ -68,12 +68,12 @@ describe('AlgorandBlockchain', () => {
     const amount = '0.767';
     const newTxnParam: TxnParam = {
       fromAddr: literal.UNUSED,
-      txId: literal.UNUSED,
+      txnId: literal.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
       atomAmount: goNearToAtom(amount),
     };
     const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
-    newTxnParam.txId = algoTxnId;
+    newTxnParam.txnId = algoTxnId;
     console.info('algoTxnId : ', algoTxnId);
 
     //verify the txn

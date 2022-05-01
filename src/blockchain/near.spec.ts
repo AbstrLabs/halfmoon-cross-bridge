@@ -20,7 +20,7 @@ describe('nearBlockchain', () => {
         fromAddr: exampleFrom,
         toAddr: exampleTo,
         atomAmount: exampleAmount,
-        txId: exampleTxnId,
+        txnId: exampleTxnId,
       })
     ).toBe(true);
   });

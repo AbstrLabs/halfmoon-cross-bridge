@@ -54,26 +54,26 @@ const mintApiParamParser = z.object({
   amount: parsableAmount,
   from: nearAddr,
   to: algoAddr,
-  txId: nearTxnId,
+  txnId: nearTxnId,
 });
 const burnApiParamParser = z.object({
   amount: parsableAmount,
   from: algoAddr,
   to: nearAddr,
-  txId: nearTxnId,
+  txnId: nearTxnId,
 });
 
 const algoTxnParamParser = z.object({
   atomAmount: z.bigint(),
   fromAddr: algoAddr,
   toAddr: algoAddr,
-  txId: algoTxnId,
+  txnId: algoTxnId,
 });
 const nearTxnParamParser = z.object({
   atomAmount: z.bigint(),
   fromAddr: nearAddr,
   toAddr: nearAddr,
-  txId: nearTxnId,
+  txnId: nearTxnId,
 });
 
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
@@ -97,21 +97,23 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
 }
 
 function apiParamToBridgeTxnInfo(
-  txParam: TxnParam,
-  txType: TxnType,
+  txnParam: TxnParam,
+  txnType: TxnType,
   timestamp: bigint
 ): BridgeTxnInfo {
-  const { fromAddr, toAddr, atomAmount, txId } = txParam;
+  const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
-  if (txType === TxnType.MINT) {
+  if (txnType === TxnType.MINT) {
     fromBlockchain = BlockchainName.NEAR;
     toBlockchain = BlockchainName.ALGO;
-  } else if (txType === TxnType.BURN) {
+  } else if (txnType === TxnType.BURN) {
     fromBlockchain = BlockchainName.ALGO;
     toBlockchain = BlockchainName.NEAR;
   } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      txnType: txnType,
+    });
   }
 
   const bridgeTxnInfo: BridgeTxnInfo = {
@@ -120,11 +122,11 @@ function apiParamToBridgeTxnInfo(
     timestamp,
     fromAddr,
     fromBlockchain,
-    fromTxnId: txId,
+    fromTxnId: txnId,
     toAddr,
     toBlockchain,
     toTxnId: undefined,
-    txStatus: BridgeTxnStatus.NOT_STARTED,
+    txnStatus: BridgeTxnStatus.NOT_STARTED,
   };
   return bridgeTxnInfo;
 }
@@ -146,7 +148,7 @@ const dbItemToBridgeTxnInfo = (
     toAddr: dbItem.algorand_address,
     toBlockchain: extra.toBlockchain,
     toTxnId: dbItem.algo_txn_id,
-    txStatus: dbItem.request_status,
+    txnStatus: dbItem.request_status,
   };
   return bridgeTxn;
 };

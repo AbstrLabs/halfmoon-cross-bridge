@@ -32,7 +32,7 @@ describe('mint test', () => {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
-        txId: nearTxnId,
+        txnId: nearTxnId,
       };
 
       // call API
@@ -47,7 +47,7 @@ describe('mint test', () => {
   );
   /* TODO: More tests:
    * - wrong amount,
-   * - wrong txId
+   * - wrong txnId
    * - malformed address
    * - timeout (?override with jest?)
    */

@@ -10,7 +10,7 @@ const testBridgeTxn: BridgeTxnInfo = {
   toAddr: '0x1234567890123456789012345678901234567890',
   atomAmount: BigInt('10000000000'),
   timestamp: BigInt('1650264115011'),
-  txStatus: BridgeTxnStatus.MAKE_OUTGOING,
+  txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
   fromTxnId: '0x1234567890123456789012345678901234567890',
   toTxnId: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
@@ -101,7 +101,7 @@ describe('DATABASE test', () => {
         toAddr: '0x1234567890123456789012345678901234567890',
         atomAmount: BigInt('10000000000'),
         timestamp: BigInt(+new Date()),
-        txStatus: BridgeTxnStatus.MAKE_OUTGOING,
+        txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
         fromTxnId: '0x1234567890123456789012345678901234567890',
         toTxnId: '0x1234567890123456789012345678901234567890',
         fromBlockchain: BlockchainName.NEAR,
@@ -116,8 +116,8 @@ describe('DATABASE test', () => {
       // expect(res).toEqual(testBridgeTxn);
     });
     it('update a transaction', async () => {
-      testBridgeTxn.txStatus = BridgeTxnStatus.DONE_OUTGOING;
-      testBridgeTxn.toTxnId = 'some_fake_tx_id';
+      testBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+      testBridgeTxn.toTxnId = 'some_fake_txn_id';
       const res1 = await db.updateTxn(testBridgeTxn);
       expect(typeof res1).toBe('number');
 

@@ -46,34 +46,34 @@ class Database {
       bridgeTxn.toAddr,
       bridgeTxn.atomAmount,
       bridgeTxn.timestamp,
-      bridgeTxn.txStatus,
+      bridgeTxn.txnStatus,
       bridgeTxn.fromTxnId,
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
     const dbId = result[0].id;
-    logger.info(`Created bridge tx with id ${dbId}`);
+    logger.info(`Created bridge txn with id ${dbId}`);
     bridgeTxn.dbId = dbId;
     return dbId as number;
   }
-  async readTxn(txId: DbId) {
-    if (typeof txId !== 'number') {
-      txId = +txId;
+  async readTxn(txnId: DbId) {
+    if (typeof txnId !== 'number') {
+      txnId = +txnId;
     }
     const query = `
       SELECT * FROM user_mint_request WHERE id = $1;
     `;
-    const params = [txId];
+    const params = [txnId];
     const result = await this.query(query, params);
     try {
-      this._verifyResultLength(result, txId);
+      this._verifyResultLength(result, txnId);
     } catch (err) {
       throw err;
     }
     return result[0];
   }
   async updateTxn(bridgeTxnInfo: BridgeTxnInfo) {
-    // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxnId)
+    // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
@@ -84,7 +84,7 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTxnInfo.txStatus,
+      bridgeTxnInfo.txnStatus,
       bridgeTxnInfo.toTxnId,
       bridgeTxnInfo.dbId,
       bridgeTxnInfo.fromTxnId,
@@ -99,14 +99,14 @@ class Database {
     } catch (err) {
       throw err;
     }
-    logger.verbose(`Updated bridge tx with id ${bridgeTxnInfo.dbId}`);
+    logger.verbose(`Updated bridge txn with id ${bridgeTxnInfo.dbId}`);
     return result[0].id;
   }
-  async deleteTxn(txId: DbId) {
+  async deleteTxn(dbId: DbId) {
     // const query = `
     //   DELETE FROM user_mint_request WHERE id = $1;
     // `;
-    // const params = [txId];
+    // const params = [dbId];
     // const result = await this.query(query, params);
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',

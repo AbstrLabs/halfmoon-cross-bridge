@@ -29,12 +29,12 @@ class NearBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    txId: NearTxnId,
+    txnId: NearTxnId,
     from: NearAddr
   ): Promise<providers.FinalExecutionOutcome> {
     // TODO: Type FinalExecutionOutcome.transaction.
     logger.silly('nearIndexer: getTxnStatus()');
-    const result = await this.provider.txStatus(txId, from);
+    const result = await this.provider.txStatus(txnId, from);
     logger.info(literal.NEAR_TXN_RESULT(result));
     return result;
   }
@@ -43,17 +43,17 @@ class NearBlockchain extends Blockchain {
     txnOutcome: providers.FinalExecutionOutcome,
     nearTxnParam: NearTxnParam
   ): boolean {
-    const { fromAddr, toAddr, atomAmount, txId } = nearTxnParam;
+    const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
     logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
-    const txReceipt = txnOutcome;
-    if (txReceipt.status instanceof Object) {
-      // txReceipt.status = txReceipt.status as providers.FinalExecutionStatus;
+    const txnReceipt = txnOutcome;
+    if (txnReceipt.status instanceof Object) {
+      // txnReceipt.status = txnReceipt.status as providers.FinalExecutionStatus;
       if (
-        txReceipt.status.Failure !== undefined &&
-        txReceipt.status.Failure !== null
+        txnReceipt.status.Failure !== undefined &&
+        txnReceipt.status.Failure !== null
       ) {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
-          txReceipt: txReceipt,
+          txnReceipt,
           to: toAddr,
           from: fromAddr,
           amount: atomAmount,
@@ -62,8 +62,8 @@ class NearBlockchain extends Blockchain {
       }
     } else {
       if (
-        txReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
-        txReceipt.status === providers.FinalExecutionStatusBasic.Failure
+        txnReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
+        txnReceipt.status === providers.FinalExecutionStatusBasic.Failure
       ) {
         throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
           blockchainName: this.name,
@@ -72,23 +72,23 @@ class NearBlockchain extends Blockchain {
     }
     // TODO: more var declaration here
     const receivedAtom = yoctoNearToAtom(
-      txReceipt.transaction.actions[0].Transfer.deposit
+      txnReceipt.transaction.actions[0].Transfer.deposit
     );
 
     // check from address
-    if (txReceipt.transaction.signer_id !== fromAddr) {
+    if (txnReceipt.transaction.signer_id !== fromAddr) {
       throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
         blockchainName: this.name,
         receivedSender: fromAddr,
-        blockchainSender: txReceipt.transaction.signer_id,
+        blockchainSender: txnReceipt.transaction.signer_id,
       });
     } // TODO: later: maybe signer != sender?
     // check to address
-    if (txReceipt.transaction.receiver_id !== toAddr) {
+    if (txnReceipt.transaction.receiver_id !== toAddr) {
       throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
         blockchainName: this.name,
         receivedReceiver: toAddr,
-        blockchainReceiver: txReceipt.transaction.receiver_id,
+        blockchainReceiver: txnReceipt.transaction.receiver_id,
       });
     }
     // check amount

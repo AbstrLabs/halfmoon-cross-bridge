@@ -63,8 +63,8 @@ const transactionErrors = {
   },
   TX_TX_ID_MISMATCH: {
     errId: 203,
-    name: 'Transaction tx id mismatch',
-    message: 'Transaction tx id does not match tx id in blockchain',
+    name: 'Transaction txn id mismatch',
+    message: 'Transaction txn id does not match txn id in blockchain',
   },
   TX_SENDER_MISMATCH: {
     errId: 204,

@@ -10,14 +10,14 @@ import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
 async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
-  const { from, to, amount, txId } = mintApiParam;
+  const { from, to, amount, txnId } = mintApiParam;
   logger.info(literal.START_MINTING(amount, from, to));
   const rawBridgeTxnInfo = apiParamToBridgeTxnInfo(
     {
       fromAddr: from,
       toAddr: to,
       atomAmount: goNearToAtom(amount),
-      txId,
+      txnId,
     },
     TxnType.MINT,
     BigInt(Date.now())

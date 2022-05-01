@@ -21,23 +21,23 @@ function startServer() {
   apiRouter
     .route('/mint')
     .get(async (req: Request, res: Response) => {
-      const [from, to, amount, txId] = [
+      const [from, to, amount, txnId] = [
         ensureString(req.query.from),
         ensureString(req.query.to),
         ensureString(req.query.amount),
-        ensureString(req.query.txId),
+        ensureString(req.query.txnId),
       ];
-      await mintResp({ from, to, amount, txId }, res);
+      await mintResp({ from, to, amount, txnId }, res);
     })
     .post(async (req: Request, res: Response) => {
       // res.json(req.body);
-      const [from, to, amount, txId] = [
+      const [from, to, amount, txnId] = [
         ensureString(req.body['mint_from']),
         ensureString(req.body['mint_to']),
         `${req.body['mint_amount']}`,
-        ensureString(req.body['mint_txId']),
+        ensureString(req.body['mint_txnId']),
       ];
-      await mintResp({ from, to, amount, txId }, res);
+      await mintResp({ from, to, amount, txnId: txnId }, res);
     });
 
   /* burn */
@@ -81,11 +81,11 @@ function startServer() {
 async function mintResp(apiCallParam: MintApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = apiCallParam;
-  const { from, to, amount, txId } = mintApiParam;
+  const { from, to, amount, txnId } = mintApiParam;
   var bridgeTxnInfo = undefined; // TODO
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
-  res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
+  res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
   res.write(`${literal.MINT_AWAITING}\n`);
   try {
     mint(mintApiParam);

@@ -98,7 +98,7 @@ class AlgorandBlockchain extends Blockchain {
     const amount = `${txn['asset-transfer-transaction'].amount}`;
     const sender = txn.sender;
     const receiver = txn['asset-transfer-transaction'].receiver;
-    const txId = txn.id;
+    const txnId = txn.id;
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
       throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
@@ -107,11 +107,11 @@ class AlgorandBlockchain extends Blockchain {
         blockchainName: this.name,
       });
     }
-    // compare txID
-    if (txId !== algoTxnParam.txId) {
+    // compare txnID
+    if (txnId !== algoTxnParam.txnId) {
       throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
-        blockchainId: txId,
-        receivedId: algoTxnParam.txId,
+        blockchainId: txnId,
+        receivedId: algoTxnParam.txnId,
         blockchainName: this.name,
       });
     }
@@ -177,7 +177,7 @@ class AlgorandBlockchain extends Blockchain {
       to,
       from,
       amount: amountInAtomic,
-      note: undefined, // maybe write the incoming txId here
+      note: undefined, // maybe write the incoming txnId here
       suggestedParams: params,
       assetIndex: asaId,
       revocationTarget: undefined,

@@ -95,19 +95,19 @@ enum TxnType {
 }
 
 abstract class Blockchain {
-  async confirmTxn(txParam: TxnParam): Promise<boolean> {
-    logger.silly('Blockchain: confirmTransaction()', txParam);
+  async confirmTxn(txnParam: TxnParam): Promise<boolean> {
+    logger.silly('Blockchain: confirmTransaction()', txnParam);
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
       }, this.confirmTxnConfig.timeoutSec * 1000);
       const interval = setImmediateInterval(async () => {
         let txnOutcome = await this.getTxnStatus(
-          txParam.txId,
-          txParam.fromAddr
+          txnParam.txnId,
+          txnParam.fromAddr
         );
         //TODO: error handling
-        if (this.verifyCorrectness(txnOutcome, txParam)) {
+        if (this.verifyCorrectness(txnOutcome, txnParam)) {
           clearTimeout(timeout);
           clearInterval(interval);
           resolve(true);
@@ -125,9 +125,9 @@ abstract class Blockchain {
   abstract readonly confirmTxnConfig: ConfirmTxnConfig;
   abstract verifyCorrectness(
     txnOutcome: TxnOutcome,
-    txParam: TxnParam
+    txnParam: TxnParam
   ): boolean;
-  abstract getTxnStatus(txId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
-  abstract makeOutgoingTxn(txParam: TxnParam): Promise<TxnID>;
+  abstract getTxnStatus(txnId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnID>;
   // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }

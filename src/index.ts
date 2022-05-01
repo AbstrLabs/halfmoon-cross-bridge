@@ -18,7 +18,7 @@ interface BridgeTxnInfo {
   toAddr: string;
   toBlockchain: BlockchainName;
   toTxnId?: string;
-  txStatus: BridgeTxnStatus;
+  txnStatus: BridgeTxnStatus;
 }
 
 enum BlockchainName {
