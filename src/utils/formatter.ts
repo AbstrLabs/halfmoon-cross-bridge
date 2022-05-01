@@ -104,10 +104,10 @@ function apiParamToBridgeTxnInfo(
   const { fromAddr, toAddr, atomAmount, txId } = txParam;
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
-  if (txType === TxnType.Mint) {
+  if (txType === TxnType.MINT) {
     fromBlockchain = BlockchainName.NEAR;
     toBlockchain = BlockchainName.ALGO;
-  } else if (txType === TxnType.Burn) {
+  } else if (txType === TxnType.BURN) {
     fromBlockchain = BlockchainName.ALGO;
     toBlockchain = BlockchainName.NEAR;
   } else {

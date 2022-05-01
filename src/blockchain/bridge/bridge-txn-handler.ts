@@ -23,14 +23,14 @@ async function bridgeTxnHandler(
     bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
     bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
   ) {
-    txType = TxnType.Mint;
+    txType = TxnType.MINT;
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
   } else if (
     bridgeTxnInfo.fromBlockchain === BlockchainName.ALGO &&
     bridgeTxnInfo.toBlockchain === BlockchainName.NEAR
   ) {
-    txType = TxnType.Burn;
+    txType = TxnType.BURN;
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {

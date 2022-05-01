@@ -2,7 +2,7 @@
 // TODO: Make singleton
 export {
   Blockchain,
-  TxnType as TxnType,
+  TxnType,
   type Addr,
   type AlgoAcc,
   type AlgoAddr,
@@ -90,8 +90,8 @@ type ConfirmTxnConfig = {
 };
 
 enum TxnType {
-  Mint = 'MINT',
-  Burn = 'BURN',
+  MINT = 'MINT',
+  BURN = 'BURN',
 }
 
 abstract class Blockchain {

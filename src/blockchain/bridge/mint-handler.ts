@@ -19,7 +19,7 @@ async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
       atomAmount: BigInt(goNearToAtom(amount)),
       txId,
     },
-    TxnType.Mint,
+    TxnType.MINT,
     BigInt(Date.now())
   );
   const bridgeTxnInfo = bridgeTxnHandler(rawBridgeTxnInfo);
