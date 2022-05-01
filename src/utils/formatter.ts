@@ -102,10 +102,8 @@ function apiParamToBridgeTxInfo(
   timestamp: bigint
 ): BridgeTxInfo {
   const { fromAddr, toAddr, atom, txId } = txParam;
-  // TODO: BAN-15: amount should be parsed right after API call
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
-  // TODO: this can be skipped after BAN15
   if (txType === TxType.Mint) {
     fromBlockchain = BlockchainName.NEAR;
     toBlockchain = BlockchainName.ALGO;
