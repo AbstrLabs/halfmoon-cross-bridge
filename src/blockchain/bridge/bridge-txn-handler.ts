@@ -1,7 +1,12 @@
 export { bridge_txn_handler };
 
 import { Blockchain, TxType } from '..';
-import { BlockchainName, BridgeTxInfo, BridgeTxStatus, TxParam } from '../..';
+import {
+  type BridgeTxInfo,
+  type TxParam,
+  BlockchainName,
+  BridgeTxStatus,
+} from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { ENV } from '../../utils/dotenv';

@@ -28,8 +28,7 @@ function startServer() {
         ensureString(req.query.amount),
         ensureString(req.query.txId),
       ];
-      const mintApiParam = parseMintApiParam({ from, to, amount, txId });
-      mintResp(mintApiParam, res);
+      mintResp({ from, to, amount, txId }, res);
     })
     .post((req: Request, res: Response) => {
       // res.json(req.body);
@@ -39,8 +38,7 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txId']),
       ];
-      const mintApiParam = parseMintApiParam({ from, to, amount, txId });
-      mintResp(mintApiParam, res);
+      mintResp({ from, to, amount, txId }, res);
     });
 
   /* burn */
@@ -81,8 +79,10 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(mintApiParam: MintApiParam, res: Response): void {
+function mintResp(apiCallParam: MintApiParam, res: Response): void {
+  const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txId } = mintApiParam;
+  // BridgeTxInfo;
   try {
     mint(mintApiParam);
     res.write(`${literal.START_MINTING(amount, from, to)}\n`);
