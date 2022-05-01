@@ -1,13 +1,13 @@
 import {
   BlockchainName,
-  BridgeTxStatus,
-  type BridgeTxInfo,
+  BridgeTxnStatus,
+  type BridgeTxnInfo,
   type MintApiParam,
   type BurnApiParam,
 } from '..';
 import { BridgeError, ERRORS } from './errors';
 import {
-  dbItemToBridgeTxInfo,
+  dbItemToBridgeTxnInfo,
   parseBurnApiParam,
   parseMintApiParam,
 } from './formatter';
@@ -26,26 +26,26 @@ const exampleDbItem = {
   request_status: 'DONE_OUTGOING',
 };
 
-const exampleTxInfo: BridgeTxInfo = {
+const exampleTxnInfo: BridgeTxnInfo = {
   amount: BigInt(10000000000), // big int jest err read on top.
   dbId: 1,
   fromAddr: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
-  fromTxId: '0x1234567890123456789012345678901234567890',
+  fromTxnId: '0x1234567890123456789012345678901234567890',
   timestamp: BigInt('1650264115011'),
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
-  toTxId: 'some_fake_tx_id',
-  txStatus: BridgeTxStatus.DONE_OUTGOING,
+  toTxnId: 'some_fake_tx_id',
+  txStatus: BridgeTxnStatus.DONE_OUTGOING,
 };
 
-const exampleMintApiTxInfo: MintApiParam = {
+const exampleMintApiTxnInfo: MintApiParam = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
   txId: FAKE_TX_ID,
 };
-const exampleBurnApiTxInfo: BurnApiParam = {
+const exampleBurnApiTxnInfo: BurnApiParam = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
@@ -57,25 +57,25 @@ describe('param validation and formatting', () => {
     // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
     expect(
-      dbItemToBridgeTxInfo(exampleDbItem, {
+      dbItemToBridgeTxnInfo(exampleDbItem, {
         fromBlockchain: BlockchainName.NEAR,
         toBlockchain: BlockchainName.ALGO,
       })
-    ).toEqual(exampleTxInfo);
+    ).toEqual(exampleTxnInfo);
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxInfo = parseMintApiParam(exampleMintApiTxInfo);
-      expect(apiTxInfo).toEqual(exampleMintApiTxInfo);
+      const apiTxnInfo = parseMintApiParam(exampleMintApiTxnInfo);
+      expect(apiTxnInfo).toEqual(exampleMintApiTxnInfo);
     });
     it('parse wrong malformed api call', () => {
       // TODO: now we cannot distinguish between the error message and the error detail
-      const wrongToAddrApiTxInfo = {
-        ...exampleMintApiTxInfo,
-        to: exampleMintApiTxInfo.to.slice(0, -1),
+      const wrongToAddrApiTxnInfo = {
+        ...exampleMintApiTxnInfo,
+        to: exampleMintApiTxnInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseMintApiParam(wrongToAddrApiTxInfo);
+        parseMintApiParam(wrongToAddrApiTxnInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -86,17 +86,17 @@ describe('param validation and formatting', () => {
   });
   describe('parseBurnApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxInfo = parseBurnApiParam(exampleBurnApiTxInfo);
-      expect(apiTxInfo).toEqual(exampleBurnApiTxInfo);
+      const apiTxnInfo = parseBurnApiParam(exampleBurnApiTxnInfo);
+      expect(apiTxnInfo).toEqual(exampleBurnApiTxnInfo);
     });
     it('parse wrong malformed api call', () => {
       // TODO: now we cannot distinguish between the error message and the error detail
-      const wrongToAddrApiTxInfo = {
-        ...exampleBurnApiTxInfo,
-        to: exampleBurnApiTxInfo.to.slice(0, -1),
+      const wrongToAddrApiTxnInfo = {
+        ...exampleBurnApiTxnInfo,
+        to: exampleBurnApiTxnInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseBurnApiParam(wrongToAddrApiTxInfo);
+        parseBurnApiParam(wrongToAddrApiTxnInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {

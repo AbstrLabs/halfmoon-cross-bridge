@@ -1,5 +1,5 @@
 import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
-import { TxParam, goNearToAtom } from '../utils/formatter';
+import { TxnParam, goNearToAtom } from '../utils/formatter';
 
 import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from './algorand';
@@ -8,7 +8,7 @@ import { verify } from 'crypto';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
-const exampleAlgoParam: TxParam = {
+const exampleAlgoParam: TxnParam = {
   fromAddr: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   toAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
   atomAmount: BigInt('4240000000'), // 0.424goNEAR in atomic goNEAR unit
@@ -66,18 +66,18 @@ describe('AlgorandBlockchain', () => {
 
     // make a txn (then verify)
     const amount = '0.767';
-    const newTxnParam: TxParam = {
+    const newTxnParam: TxnParam = {
       fromAddr: literal.UNUSED,
       txId: literal.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
       atomAmount: BigInt(goNearToAtom(amount)),
     };
-    const algoTxId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
-    newTxnParam.txId = algoTxId;
-    console.info('algoTxId : ', algoTxId);
+    const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
+    newTxnParam.txId = algoTxnId;
+    console.info('algoTxnId : ', algoTxnId);
 
     //verify the txn
-    const rcpt = await algoBlockchain.getTxnStatus(algoTxId);
+    const rcpt = await algoBlockchain.getTxnStatus(algoTxnId);
     newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
     const answer = algoBlockchain.verifyCorrectness(rcpt, newTxnParam);
     expect(answer).toBe(true);

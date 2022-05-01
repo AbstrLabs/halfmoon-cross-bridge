@@ -1,7 +1,7 @@
 export { bridge_txn_handler };
 
-import { Blockchain, TxType } from '..';
-import { type BridgeTxInfo, BlockchainName, BridgeTxStatus } from '../..';
+import { Blockchain, TxnType } from '..';
+import { type BridgeTxnInfo, BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { ENV } from '../../utils/dotenv';
@@ -12,25 +12,25 @@ import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
 async function bridge_txn_handler(
-  bridgeTxInfo: BridgeTxInfo
-): Promise<BridgeTxInfo> {
+  bridgeTxnInfo: BridgeTxnInfo
+): Promise<BridgeTxnInfo> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
   let txType;
-  const { fromAddr, toAddr, atomAmount } = bridgeTxInfo;
+  const { fromAddr, toAddr, atomAmount } = bridgeTxnInfo;
   if (
-    bridgeTxInfo.fromBlockchain === BlockchainName.NEAR &&
-    bridgeTxInfo.toBlockchain === BlockchainName.ALGO
+    bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
+    bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
   ) {
-    txType = TxType.Mint;
+    txType = TxnType.Mint;
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
   } else if (
-    bridgeTxInfo.fromBlockchain === BlockchainName.ALGO &&
-    bridgeTxInfo.toBlockchain === BlockchainName.NEAR
+    bridgeTxnInfo.fromBlockchain === BlockchainName.ALGO &&
+    bridgeTxnInfo.toBlockchain === BlockchainName.NEAR
   ) {
-    txType = TxType.Burn;
+    txType = TxnType.Burn;
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
@@ -41,53 +41,53 @@ async function bridge_txn_handler(
 
   /* MAKE TRANSACTION */
 
-  const dbId = await db.createTx(bridgeTxInfo);
-  bridgeTxInfo.dbId = dbId;
+  const dbId = await db.createTxn(bridgeTxnInfo);
+  bridgeTxnInfo.dbId = dbId;
 
   // update as sequence diagram
-  bridgeTxInfo.txStatus = BridgeTxStatus.CONFIRM_INCOMING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txStatus = BridgeTxnStatus.CONFIRM_INCOMING;
+  await db.updateTxn(bridgeTxnInfo);
   await incomingBlockchain.confirmTxn({
-    fromAddr: bridgeTxInfo.fromAddr,
+    fromAddr: bridgeTxnInfo.fromAddr,
     toAddr: ENV.NEAR_MASTER_ADDR,
-    atomAmount: bridgeTxInfo.atomAmount,
-    txId: bridgeTxInfo.fromTxId,
+    atomAmount: bridgeTxnInfo.atomAmount,
+    txId: bridgeTxnInfo.fromTxnId,
   });
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txStatus = BridgeTxnStatus.DONE_INCOMING;
+  await db.updateTxn(bridgeTxnInfo);
 
   // empty slot, after confirming incoming tx, for error handling
   // TODO: add txn fee calculation logic here.
   // TODO! important
 
-  bridgeTxInfo.txStatus = BridgeTxStatus.MAKE_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
-  const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
+  bridgeTxnInfo.txStatus = BridgeTxnStatus.MAKE_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
+  const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
-    toAddr: bridgeTxInfo.toAddr,
-    atomAmount: bridgeTxInfo.atomAmount,
+    toAddr: bridgeTxnInfo.toAddr,
+    atomAmount: bridgeTxnInfo.atomAmount,
     txId: literal.UNUSED,
   });
 
   // verify outgoing tx
-  bridgeTxInfo.toTxId = outgoingTxId;
-  bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.toTxnId = outgoingTxnId;
+  bridgeTxnInfo.txStatus = BridgeTxnStatus.VERIFY_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
-    toAddr: bridgeTxInfo.toAddr,
-    atomAmount: bridgeTxInfo.atomAmount,
-    txId: outgoingTxId,
+    toAddr: bridgeTxnInfo.toAddr,
+    atomAmount: bridgeTxnInfo.atomAmount,
+    txId: outgoingTxnId,
   });
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txStatus = BridgeTxnStatus.DONE_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
 
   // user confirmation via socket
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
 
-  return bridgeTxInfo;
+  return bridgeTxnInfo;
   // check indexer with hash
 }
 

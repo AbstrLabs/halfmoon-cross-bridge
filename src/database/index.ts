@@ -2,7 +2,7 @@ export { db };
 
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { BridgeTxInfo } from '..';
+import { BridgeTxnInfo } from '..';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
@@ -32,7 +32,7 @@ class Database {
     await this.instance.end();
   }
 
-  async createTx(bridgeTx: BridgeTxInfo): Promise<number> {
+  async createTxn(bridgeTxn: BridgeTxnInfo): Promise<number> {
     // will assign a dbId when created.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
@@ -42,21 +42,21 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTx.fromAddr,
-      bridgeTx.toAddr,
-      bridgeTx.atomAmount,
-      bridgeTx.timestamp,
-      bridgeTx.txStatus,
-      bridgeTx.fromTxId,
-      bridgeTx.toTxId,
+      bridgeTxn.fromAddr,
+      bridgeTxn.toAddr,
+      bridgeTxn.atomAmount,
+      bridgeTxn.timestamp,
+      bridgeTxn.txStatus,
+      bridgeTxn.fromTxnId,
+      bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
     const dbId = result[0].id;
     logger.info(`Created bridge tx with id ${dbId}`);
-    bridgeTx.dbId = dbId;
+    bridgeTxn.dbId = dbId;
     return dbId as number;
   }
-  async readTx(txId: DbId) {
+  async readTxn(txId: DbId) {
     if (typeof txId !== 'number') {
       txId = +txId;
     }
@@ -72,8 +72,8 @@ class Database {
     }
     return result[0];
   }
-  async updateTx(bridgeTxInfo: BridgeTxInfo) {
-    // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
+  async updateTxn(bridgeTxnInfo: BridgeTxnInfo) {
+    // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
@@ -84,41 +84,45 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTxInfo.txStatus,
-      bridgeTxInfo.toTxId,
-      bridgeTxInfo.dbId,
-      bridgeTxInfo.fromTxId,
-      bridgeTxInfo.toAddr,
-      bridgeTxInfo.fromAddr,
-      bridgeTxInfo.atomAmount,
-      bridgeTxInfo.timestamp,
+      bridgeTxnInfo.txStatus,
+      bridgeTxnInfo.toTxnId,
+      bridgeTxnInfo.dbId,
+      bridgeTxnInfo.fromTxnId,
+      bridgeTxnInfo.toAddr,
+      bridgeTxnInfo.fromAddr,
+      bridgeTxnInfo.atomAmount,
+      bridgeTxnInfo.timestamp,
     ];
     const result = await this.query(query, params);
     try {
-      this._verifyResultLength(result, bridgeTxInfo);
+      this._verifyResultLength(result, bridgeTxnInfo);
     } catch (err) {
       throw err;
     }
-    logger.verbose(`Updated bridge tx with id ${bridgeTxInfo.dbId}`);
+    logger.verbose(`Updated bridge tx with id ${bridgeTxnInfo.dbId}`);
     return result[0].id;
   }
-  async deleteTx(txId: DbId) {
+  async deleteTxn(txId: DbId) {
     // const query = `
     //   DELETE FROM user_mint_request WHERE id = $1;
     // `;
     // const params = [txId];
     // const result = await this.query(query, params);
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
-      action: 'deleteTx',
+      action: 'deleteTxn',
     });
   }
 
-  private _verifyResultLength(result: any[], TxInfo: DbId | BridgeTxInfo) {
+  private _verifyResultLength(result: any[], TxnInfo: DbId | BridgeTxnInfo) {
     if (result.length === 0) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, { TxInfo });
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {
+        TxnInfo: TxnInfo,
+      });
     }
     if (result.length > 1) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_UNIQUE, { TxInfo });
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_UNIQUE, {
+        TxnInfo: TxnInfo,
+      });
     }
     return true;
   }

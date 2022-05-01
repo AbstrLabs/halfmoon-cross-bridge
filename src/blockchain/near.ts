@@ -4,8 +4,8 @@ export { nearBlockchain, type NearBlockchain };
 
 import { providers } from 'near-api-js';
 
-import { AlgoTxId, type NearAddr, type NearTxId } from '.';
-import { BlockchainName, NearTxParam } from '..';
+import { AlgoTxnId, type NearAddr, type NearTxnId } from '.';
+import { BlockchainName, NearTxnParam } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 import { Blockchain } from '.';
@@ -29,7 +29,7 @@ class NearBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    txId: NearTxId,
+    txId: NearTxnId,
     from: NearAddr
   ): Promise<providers.FinalExecutionOutcome> {
     // TODO: Type FinalExecutionOutcome.transaction.
@@ -41,9 +41,9 @@ class NearBlockchain extends Blockchain {
 
   verifyCorrectness(
     txnOutcome: providers.FinalExecutionOutcome,
-    nearTxParam: NearTxParam
+    nearTxnParam: NearTxnParam
   ): boolean {
-    const { fromAddr, toAddr, atomAmount, txId } = nearTxParam;
+    const { fromAddr, toAddr, atomAmount, txId } = nearTxnParam;
     logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
     const txReceipt = txnOutcome;
     if (txReceipt.status instanceof Object) {
@@ -108,13 +108,13 @@ class NearBlockchain extends Blockchain {
     }
     return true;
   }
-  async makeOutgoingTxn(nearTxParam: NearTxParam): Promise<AlgoTxId> {
+  async makeOutgoingTxn(nearTxnParam: NearTxnParam): Promise<AlgoTxnId> {
     throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED);
   }
   // not used.
   protected static async getRecentTransactions(
     limit: number
-  ): Promise<NearTxId[]> {
+  ): Promise<NearTxnId[]> {
     logger.silly('nearIndexer getRecentTransactions() limit');
     throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED);
   }

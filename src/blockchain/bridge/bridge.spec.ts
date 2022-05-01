@@ -26,22 +26,22 @@ describe('mint test', () => {
       const mintResponse: FinalExecutionOutcome =
         await transferOnNearTestnetFromExampleToMaster(amount);
       // manually checked the amount is correct.
-      const nearTxId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
+      const nearTxnId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
       const apiCallParam: ApiCallParam = {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
-        txId: nearTxId,
+        txId: nearTxnId,
       };
 
       // call API
-      const bridgeTxInfo = await mint(apiCallParam);
-      // should return AlgoTxId,etc.
+      const bridgeTxnInfo = await mint(apiCallParam);
+      // should return AlgoTxnId,etc.
 
-      console.log('bridgeTxInfo : ', bridgeTxInfo); // DEV_LOG_TO_REMOVE
+      console.log('bridgeTxnInfo : ', bridgeTxnInfo); // DEV_LOG_TO_REMOVE
       // verification
-      expect(bridgeTxInfo.toTxId).toBeDefined();
+      expect(bridgeTxnInfo.toTxnId).toBeDefined();
     },
     TIMEOUT_30S
   );

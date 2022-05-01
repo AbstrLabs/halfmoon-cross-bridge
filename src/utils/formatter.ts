@@ -1,33 +1,33 @@
 export {
-  type AlgoTxParam,
+  type AlgoTxnParam,
   type ApiCallParam,
   type BurnApiParam,
   type MintApiParam,
-  type NearTxParam,
-  type TxParam,
-  apiParamToBridgeTxInfo,
-  dbItemToBridgeTxInfo,
+  type NearTxnParam,
+  type TxnParam,
+  apiParamToBridgeTxnInfo,
+  dbItemToBridgeTxnInfo,
   goNearToAtom,
   parseBurnApiParam,
   parseMintApiParam,
   yoctoNearToAtom,
 };
 
-import { BlockchainName, BridgeTxStatus, type BridgeTxInfo } from '..';
+import { BlockchainName, BridgeTxnStatus, type BridgeTxnInfo } from '..';
 import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
-import { TxType } from '../blockchain';
+import { TxnType } from '../blockchain';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
 type ApiCallParam = MintApiParam | BurnApiParam;
 
-type AlgoTxParam = z.infer<typeof algoTxParamParser>;
-type NearTxParam = z.infer<typeof nearTxParamParser>;
-type TxParam = AlgoTxParam | NearTxParam;
+type AlgoTxnParam = z.infer<typeof algoTxnParamParser>;
+type NearTxnParam = z.infer<typeof nearTxnParamParser>;
+type TxnParam = AlgoTxnParam | NearTxnParam;
 
 // param validation and formatting
 
@@ -47,33 +47,33 @@ const parsableAmount = z
   .string()
   .regex(/^ *[0-9,]{1,9}\.?[0-9]{0,10} *$/, 'malformed amount address');
 
-const nearTxId = z.string(); // TODO: unfinished
-const algoTxId = z.string(); // TODO: unfinished
+const nearTxnId = z.string(); // TODO: unfinished
+const algoTxnId = z.string(); // TODO: unfinished
 
 const mintApiParamParser = z.object({
   amount: parsableAmount,
   from: nearAddr,
   to: algoAddr,
-  txId: nearTxId,
+  txId: nearTxnId,
 });
 const burnApiParamParser = z.object({
   amount: parsableAmount,
   from: algoAddr,
   to: nearAddr,
-  txId: nearTxId,
+  txId: nearTxnId,
 });
 
-const algoTxParamParser = z.object({
+const algoTxnParamParser = z.object({
   atomAmount: z.bigint(),
   fromAddr: algoAddr,
   toAddr: algoAddr,
-  txId: algoTxId,
+  txId: algoTxnId,
 });
-const nearTxParamParser = z.object({
+const nearTxnParamParser = z.object({
   atomAmount: z.bigint(),
   fromAddr: nearAddr,
   toAddr: nearAddr,
-  txId: nearTxId,
+  txId: nearTxnId,
 });
 
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
@@ -96,59 +96,59 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   }
 }
 
-function apiParamToBridgeTxInfo(
-  txParam: TxParam,
-  txType: TxType,
+function apiParamToBridgeTxnInfo(
+  txParam: TxnParam,
+  txType: TxnType,
   timestamp: bigint
-): BridgeTxInfo {
+): BridgeTxnInfo {
   const { fromAddr, toAddr, atomAmount, txId } = txParam;
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
-  if (txType === TxType.Mint) {
+  if (txType === TxnType.Mint) {
     fromBlockchain = BlockchainName.NEAR;
     toBlockchain = BlockchainName.ALGO;
-  } else if (txType === TxType.Burn) {
+  } else if (txType === TxnType.Burn) {
     fromBlockchain = BlockchainName.ALGO;
     toBlockchain = BlockchainName.NEAR;
   } else {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
   }
 
-  const bridgeTxInfo: BridgeTxInfo = {
+  const bridgeTxnInfo: BridgeTxnInfo = {
     dbId: undefined,
-    atomAmount, // in "toTx"
+    atomAmount,
     timestamp,
     fromAddr,
     fromBlockchain,
-    fromTxId: txId,
+    fromTxnId: txId,
     toAddr,
     toBlockchain,
-    toTxId: undefined,
-    txStatus: BridgeTxStatus.NOT_STARTED,
+    toTxnId: undefined,
+    txStatus: BridgeTxnStatus.NOT_STARTED,
   };
-  return bridgeTxInfo;
+  return bridgeTxnInfo;
 }
 
-const dbItemToBridgeTxInfo = (
+const dbItemToBridgeTxnInfo = (
   dbItem: any,
   extra: {
     fromBlockchain: BlockchainName;
     toBlockchain: BlockchainName;
   }
-): BridgeTxInfo => {
-  const bridgeTx: BridgeTxInfo = {
+): BridgeTxnInfo => {
+  const bridgeTxn: BridgeTxnInfo = {
     atomAmount: BigInt(dbItem.amount),
     dbId: dbItem.id,
     fromAddr: dbItem.near_address,
     fromBlockchain: extra.fromBlockchain,
-    fromTxId: dbItem.near_tx_hash,
+    fromTxnId: dbItem.near_tx_hash,
     timestamp: BigInt(dbItem.create_time),
     toAddr: dbItem.algorand_address,
     toBlockchain: extra.toBlockchain,
-    toTxId: dbItem.algo_txn_id,
+    toTxnId: dbItem.algo_txn_id,
     txStatus: dbItem.request_status,
   };
-  return bridgeTx;
+  return bridgeTxn;
 };
 
 // goNear related

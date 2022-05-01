@@ -1,18 +1,18 @@
-import { BlockchainName, BridgeTxInfo, BridgeTxStatus } from '..';
+import { BlockchainName, BridgeTxnInfo, BridgeTxnStatus } from '..';
 
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
-import { dbItemToBridgeTxInfo } from '../utils/formatter';
+import { dbItemToBridgeTxnInfo } from '../utils/formatter';
 
-const testBridgeTx: BridgeTxInfo = {
+const testBridgeTxn: BridgeTxnInfo = {
   dbId: 1,
   fromAddr: '0x1234567890123456789012345678901234567890',
   toAddr: '0x1234567890123456789012345678901234567890',
-  amount: BigInt('10000000000'),
+  atomAmount: BigInt('10000000000'),
   timestamp: BigInt('1650264115011'),
-  txStatus: BridgeTxStatus.MAKE_OUTGOING,
-  fromTxId: '0x1234567890123456789012345678901234567890',
-  toTxId: '0x1234567890123456789012345678901234567890',
+  txStatus: BridgeTxnStatus.MAKE_OUTGOING,
+  fromTxnId: '0x1234567890123456789012345678901234567890',
+  toTxnId: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
   toBlockchain: BlockchainName.ALGO,
 };
@@ -96,41 +96,41 @@ describe('DATABASE test', () => {
     });
 
     it.skip('create a transaction', async () => {
-      const bridgeTx: BridgeTxInfo = {
+      const bridgeTxn: BridgeTxnInfo = {
         fromAddr: '0x1234567890123456789012345678901234567890',
         toAddr: '0x1234567890123456789012345678901234567890',
-        amount: BigInt('10000000000'),
+        atomAmount: BigInt('10000000000'),
         timestamp: BigInt(+new Date()),
-        txStatus: BridgeTxStatus.MAKE_OUTGOING,
-        fromTxId: '0x1234567890123456789012345678901234567890',
-        toTxId: '0x1234567890123456789012345678901234567890',
+        txStatus: BridgeTxnStatus.MAKE_OUTGOING,
+        fromTxnId: '0x1234567890123456789012345678901234567890',
+        toTxnId: '0x1234567890123456789012345678901234567890',
         fromBlockchain: BlockchainName.NEAR,
         toBlockchain: BlockchainName.ALGO,
       };
-      const res = await db.createTx(bridgeTx);
+      const res = await db.createTxn(bridgeTxn);
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
-      const res = await db.readTx(1);
+      const res = await db.readTxn(1);
       expect(typeof res).toBe('object');
-      // expect(res).toEqual(testBridgeTx);
+      // expect(res).toEqual(testBridgeTxn);
     });
     it('update a transaction', async () => {
-      testBridgeTx.txStatus = BridgeTxStatus.DONE_OUTGOING;
-      testBridgeTx.toTxId = 'some_fake_tx_id';
-      const res1 = await db.updateTx(testBridgeTx);
+      testBridgeTxn.txStatus = BridgeTxnStatus.DONE_OUTGOING;
+      testBridgeTxn.toTxnId = 'some_fake_tx_id';
+      const res1 = await db.updateTxn(testBridgeTxn);
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
-      const res2 = await db.readTx(testBridgeTx.dbId!);
+      const res2 = await db.readTxn(testBridgeTxn.dbId!);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(
-        dbItemToBridgeTxInfo(res2, {
+        dbItemToBridgeTxnInfo(res2, {
           fromBlockchain: BlockchainName.NEAR,
           toBlockchain: BlockchainName.ALGO,
         })
-      ).toEqual(testBridgeTx);
+      ).toEqual(testBridgeTxn);
     });
   });
 });

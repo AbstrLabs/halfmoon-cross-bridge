@@ -2,30 +2,29 @@
 // TODO: Make singleton
 export {
   Blockchain,
-  TxType,
+  TxnType as TxnType,
   type Addr,
   type AlgoAcc,
   type AlgoAddr,
-  type AlgoAssetTransferTxOutcome,
+  type AlgoAssetTransferTxnOutcome,
   type AlgoMnemonic,
   type AlgoReceipt,
-  type AlgoTxId,
-  type AlgoTxOutcome,
+  type AlgoTxnId,
+  type AlgoTxnOutcome,
   type GenericAcc,
   type NearAcc,
   type NearAddr,
-  type NearTxId,
-  type NearTxOutcome,
-  type TxID,
-  type TxOutcome,
-  type TxReceipt,
+  type NearTxnId,
+  type NearTxnOutcome,
+  type TxnID,
+  type TxnOutcome,
+  type TxnReceipt,
 };
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
-import { AssetTransferTransaction } from 'algosdk/dist/types/src/types/transactions/asset';
 import { providers } from 'near-api-js';
-import { type TxParam } from '..';
+import { type TxnParam } from '..';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
@@ -34,17 +33,17 @@ type AlgoAcc = algosdk.Account;
 type AlgoAddr = string;
 type AlgoMnemonic = string;
 type AlgoReceipt = Transaction;
-type AlgoTxId = string;
+type AlgoTxnId = string;
 type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = undefined;
 type NearAddr = string;
 type NearReceipt = any;
-type NearTxId = string;
-type TxID = NearTxId | AlgoTxId;
-type TxReceipt = AlgoReceipt | NearReceipt;
-type NearTxOutcome = providers.FinalExecutionOutcome;
+type NearTxnId = string;
+type TxnID = NearTxnId | AlgoTxnId;
+type TxnReceipt = AlgoReceipt | NearReceipt;
+type NearTxnOutcome = providers.FinalExecutionOutcome;
 type BigNum = number; // | bigint; // using number now
-type AlgoAssetTransferTxOutcome = {
+type AlgoAssetTransferTxnOutcome = {
   // from Indexer JSON response
   'current-round': number;
   transaction: {
@@ -61,7 +60,7 @@ type AlgoAssetTransferTxOutcome = {
     'first-valid': BigNum;
     'genesis-hash': string;
     'genesis-id': 'testnet-v1.0';
-    id: AlgoTxId;
+    id: AlgoTxnId;
     'intra-round-offset': number;
     'last-valid': number;
     'receiver-rewards': number;
@@ -74,7 +73,7 @@ type AlgoAssetTransferTxOutcome = {
     'tx-type': 'axfer';
   };
 }; // TODO: programmatically check if this type is correct.
-type AlgoTxOutcome =
+type AlgoTxnOutcome =
   | {
       'current-round': number;
       transaction: AnyTransaction & {
@@ -82,21 +81,21 @@ type AlgoTxOutcome =
         id: string;
       };
     }
-  | AlgoAssetTransferTxOutcome; // TODO: programmatically check if this type is correct.
-type TxOutcome = NearTxOutcome | AlgoTxOutcome;
-// type TxStatuesOutcome = TxReceipt | AlgoTxOutcome;
+  | AlgoAssetTransferTxnOutcome; // TODO: programmatically check if this type is correct.
+type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
+// type TxnStatuesOutcome = TxnReceipt | AlgoTxnOutcome;
 type ConfirmTxnConfig = {
   timeoutSec: number;
   intervalSec: number;
 };
 
-enum TxType {
+enum TxnType {
   Mint = 'MINT',
   Burn = 'BURN',
 }
 
 abstract class Blockchain {
-  async confirmTxn(txParam: TxParam): Promise<boolean> {
+  async confirmTxn(txParam: TxnParam): Promise<boolean> {
     logger.silly('Blockchain: confirmTransaction()', txParam);
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
@@ -124,8 +123,11 @@ abstract class Blockchain {
   // Abstract methods
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract readonly confirmTxnConfig: ConfirmTxnConfig;
-  abstract verifyCorrectness(txnOutcome: TxOutcome, txParam: TxParam): boolean;
-  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxOutcome>; // TODO: use TxParam.
-  abstract makeOutgoingTxn(txParam: TxParam): Promise<TxID>;
-  // getRecentTransactions(limit: number): Promise<TxID[]>;
+  abstract verifyCorrectness(
+    txnOutcome: TxnOutcome,
+    txParam: TxnParam
+  ): boolean;
+  abstract getTxnStatus(txId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  abstract makeOutgoingTxn(txParam: TxnParam): Promise<TxnID>;
+  // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }

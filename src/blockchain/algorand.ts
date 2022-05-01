@@ -7,8 +7,8 @@ import {
   AlgoAcc,
   AlgoAddr,
   AlgoMnemonic,
-  AlgoTxId,
-  AlgoAssetTransferTxOutcome,
+  AlgoTxnId,
+  AlgoAssetTransferTxnOutcome,
 } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
@@ -19,7 +19,7 @@ import {
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
-import { BlockchainName, type AlgoTxParam } from '..';
+import { BlockchainName, type AlgoTxnParam } from '..';
 import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -70,25 +70,27 @@ class AlgorandBlockchain extends Blockchain {
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
-  async getTxnStatus(algoTxId: AlgoTxId): Promise<AlgoAssetTransferTxOutcome> {
+  async getTxnStatus(
+    algoTxnId: AlgoTxnId
+  ): Promise<AlgoAssetTransferTxnOutcome> {
     // will timeout in `confirmTxn` if txn not confirmed
     return (await this.indexer
-      .lookupTransactionByID(algoTxId)
-      .do()) as AlgoAssetTransferTxOutcome;
+      .lookupTransactionByID(algoTxnId)
+      .do()) as AlgoAssetTransferTxnOutcome;
 
     // the following method only checks new blocks
     // return await algosdk.waitForConfirmation(
     //   this.client,
-    //   algoTxId,
+    //   algoTxnId,
     //   this.confirmTxnConfig.algoRound
     // );
   }
 
   verifyCorrectness(
-    txnOutcome: AlgoAssetTransferTxOutcome,
-    algoTxParam: AlgoTxParam
+    txnOutcome: AlgoAssetTransferTxnOutcome,
+    algoTxnParam: AlgoTxnParam
   ): boolean {
-    // parse txnOutcome, parse AlgoAssetTransferTxOutcome
+    // parse txnOutcome, parse AlgoAssetTransferTxnOutcome
     // TODO! verify asset id
     const currentRound = txnOutcome['current-round'];
     const txn = txnOutcome.transaction;
@@ -106,45 +108,45 @@ class AlgorandBlockchain extends Blockchain {
       });
     }
     // compare txID
-    if (txId !== algoTxParam.txId) {
+    if (txId !== algoTxnParam.txId) {
       throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
         blockchainId: txId,
-        receivedId: algoTxParam.txId,
+        receivedId: algoTxnParam.txId,
         blockchainName: this.name,
       });
     }
     // compare sender
-    if (sender !== algoTxParam.fromAddr) {
+    if (sender !== algoTxnParam.fromAddr) {
       throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
         blockchainSender: sender,
-        receivedSender: algoTxParam.fromAddr,
+        receivedSender: algoTxnParam.fromAddr,
         blockchainName: this.name,
       });
     }
     // compare receiver
-    if (receiver !== algoTxParam.toAddr) {
+    if (receiver !== algoTxnParam.toAddr) {
       throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
         blockchainReceiver: receiver,
-        receivedReceiver: algoTxParam.toAddr,
+        receivedReceiver: algoTxnParam.toAddr,
         blockchainName: this.name,
       });
     }
     // compare amount
-    if (amount !== algoTxParam.atomAmount.toString()) {
+    if (amount !== algoTxnParam.atomAmount.toString()) {
       // The trailing "n" is not part of the string.
       throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
-        receivedAmount: algoTxParam.atomAmount,
+        receivedAmount: algoTxnParam.atomAmount,
         blockchainName: this.name,
       });
     }
     return true;
   }
-  async makeOutgoingTxn(algoTxParam: AlgoTxParam): Promise<AlgoTxId> {
+  async makeOutgoingTxn(algoTxnParam: AlgoTxnParam): Promise<AlgoTxnId> {
     // abstract class implementation.
     return await this._makeGoNearTxnFromAdmin(
-      algoTxParam.toAddr,
-      algoTxParam.atomAmount
+      algoTxnParam.toAddr,
+      algoTxnParam.atomAmount
     );
   }
   protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atomAmount: bigint) {
@@ -163,7 +165,7 @@ class AlgorandBlockchain extends Blockchain {
     amountInAtomic: number | bigint,
     senderAccount: AlgoAcc,
     asaId: number
-  ): Promise<AlgoTxId> {
+  ): Promise<AlgoTxnId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
     let params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
@@ -186,21 +188,21 @@ class AlgorandBlockchain extends Blockchain {
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(txnConfig);
 
     // Sign the transaction
-    let txId = txn.txID().toString();
+    let txnId = txn.txID().toString();
     let rawSignedTxn = txn.signTxn(senderAccount.sk);
     let rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(
       this.client,
-      txId,
+      txnId,
       4
     );
 
-    if (rcpt.txId !== txId) {
+    if (rcpt.txId !== txnId) {
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
         blockchainName: this.name,
-        rawTxId: txId,
-        blockchainTxId: rcpt.txId,
+        rawTxnId: txnId,
+        blockchainTxnId: rcpt.txId,
       });
     }
 
@@ -214,7 +216,7 @@ class AlgorandBlockchain extends Blockchain {
         confirmedTxn['confirmed-round']
       )
     );
-    return txId;
+    return txnId;
   }
 
   /* Methods below are designed to run once */

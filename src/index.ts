@@ -1,31 +1,31 @@
-export { type BridgeTxInfo, BridgeTxStatus, BlockchainName };
+export { type BridgeTxnInfo, BridgeTxnStatus, BlockchainName };
 export {
-  type AlgoTxParam,
+  type AlgoTxnParam,
   type ApiCallParam,
   type BurnApiParam,
   type MintApiParam,
-  type NearTxParam,
-  type TxParam,
+  type NearTxnParam,
+  type TxnParam,
 } from './utils/formatter';
 
-interface BridgeTxInfo {
+interface BridgeTxnInfo {
   dbId?: number;
   atomAmount: bigint;
   timestamp: bigint;
   fromAddr: string;
   fromBlockchain: BlockchainName;
-  fromTxId: string;
+  fromTxnId: string;
   toAddr: string;
   toBlockchain: BlockchainName;
-  toTxId?: string;
-  txStatus: BridgeTxStatus;
+  toTxnId?: string;
+  txStatus: BridgeTxnStatus;
 }
 
 enum BlockchainName {
   NEAR = 'NEAR',
   ALGO = 'ALGO',
 }
-enum BridgeTxStatus {
+enum BridgeTxnStatus {
   // By order
   NOT_STARTED = 'NOT_STARTED',
   ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL',

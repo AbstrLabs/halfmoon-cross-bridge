@@ -1,28 +1,28 @@
 export { mint };
 
 import { BridgeError, ERRORS } from '../../utils/errors';
-import { BridgeTxInfo, MintApiParam } from '../..';
-import { apiParamToBridgeTxInfo, goNearToAtom } from '../../utils/formatter';
+import { BridgeTxnInfo, MintApiParam } from '../..';
+import { apiParamToBridgeTxnInfo, goNearToAtom } from '../../utils/formatter';
 
-import { TxType } from '..';
+import { TxnType } from '..';
 import { bridge_txn_handler } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
-async function mint(mintApiParam: MintApiParam): Promise<BridgeTxInfo> {
+async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
   const { from, to, amount, txId } = mintApiParam;
   logger.info(literal.START_MINTING(amount, from, to));
-  const rawBridgeTxInfo = apiParamToBridgeTxInfo(
+  const rawBridgeTxnInfo = apiParamToBridgeTxnInfo(
     {
       fromAddr: from,
       toAddr: to,
       atomAmount: BigInt(goNearToAtom(amount)),
       txId,
     },
-    TxType.Mint,
+    TxnType.Mint,
     BigInt(Date.now())
   );
-  const bridgeTxInfo = bridge_txn_handler(rawBridgeTxInfo);
+  const bridgeTxnInfo = bridge_txn_handler(rawBridgeTxnInfo);
   logger.info(literal.DONE_MINT);
-  return bridgeTxInfo;
+  return bridgeTxnInfo;
 }

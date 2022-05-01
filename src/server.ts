@@ -82,7 +82,7 @@ async function mintResp(apiCallParam: MintApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = apiCallParam;
   const { from, to, amount, txId } = mintApiParam;
-  var bridgeTxInfo = undefined; // TODO
+  var bridgeTxnInfo = undefined; // TODO
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
   res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
@@ -94,5 +94,5 @@ async function mintResp(apiCallParam: MintApiParam, res: Response) {
   } catch (e) {
     res.status(400).send('Missing required query params');
   }
-  return bridgeTxInfo;
+  return bridgeTxnInfo;
 }
