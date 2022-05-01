@@ -10,6 +10,7 @@ import { db } from '../../database';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
+import { goNearToAtom } from '../../utils/formatter';
 
 async function bridgeTxnHandler(
   bridgeTxnInfo: BridgeTxnInfo
@@ -18,7 +19,6 @@ async function bridgeTxnHandler(
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
   let txnType;
-  const { fromAddr, toAddr, atomAmount } = bridgeTxnInfo;
   if (
     bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
     bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
@@ -38,7 +38,14 @@ async function bridgeTxnHandler(
       txnType: txnType,
     });
   }
-  logger.info(literal.MAKING_TXN(txnType, atomAmount, fromAddr, toAddr));
+  logger.info(
+    literal.MAKING_TXN(
+      txnType,
+      bridgeTxnInfo.atomAmount,
+      bridgeTxnInfo.fromAddr,
+      bridgeTxnInfo.toAddr
+    )
+  );
   await db.connect();
 
   /* MAKE TRANSACTION */
@@ -51,16 +58,27 @@ async function bridgeTxnHandler(
   await db.updateTxn(bridgeTxnInfo);
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
-    toAddr: ENV.NEAR_MASTER_ADDR,
     atomAmount: bridgeTxnInfo.atomAmount,
+    toAddr: ENV.NEAR_MASTER_ADDR,
     txnId: bridgeTxnInfo.fromTxnId,
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateTxn(bridgeTxnInfo);
 
-  // empty slot, after confirming incoming txn, for error handling
-  // TODO: add txn fee calculation logic here.
-  // TODO! important
+  if (txnType === TxnType.MINT) {
+    const newAmount =
+      ((bridgeTxnInfo.atomAmount - goNearToAtom(ENV.MINT_FIX_FEE)) *
+        BigInt(100 - ENV.MINT_PERCENT_FEE)) /
+      BigInt(100);
+    bridgeTxnInfo.atomAmount = newAmount;
+  }
+  if (txnType === TxnType.BURN) {
+    const newAmount =
+      ((bridgeTxnInfo.atomAmount - goNearToAtom(ENV.BURN_FIX_FEE)) *
+        BigInt(100 - ENV.BURN_PERCENT_FEE)) /
+      BigInt(100);
+    bridgeTxnInfo.atomAmount = newAmount;
+  }
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
   await db.updateTxn(bridgeTxnInfo);
