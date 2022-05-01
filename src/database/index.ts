@@ -1,10 +1,12 @@
 export { db };
 
-import { BridgeTxInfo, GenericTxInfo } from '..';
+import { BridgeError, ERRORS } from '../utils/errors';
 
-import { log } from '../utils/logger';
+import { BridgeTxnInfo } from '..';
+import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
+type DbId = number;
 class Database {
   private instance = postgres;
 
@@ -30,7 +32,7 @@ class Database {
     await this.instance.end();
   }
 
-  async createTx(bridgeTx: BridgeTxInfo): Promise<number> {
+  async createTxn(bridgeTxn: BridgeTxnInfo): Promise<number> {
     // will assign a dbId when created.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
@@ -40,37 +42,38 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTx.fromAddr,
-      bridgeTx.toAddr,
-      bridgeTx.amount,
-      bridgeTx.timestamp,
-      bridgeTx.txStatus,
-      bridgeTx.fromTxId,
-      bridgeTx.toTxId,
+      bridgeTxn.fromAddr,
+      bridgeTxn.toAddr,
+      bridgeTxn.atomAmount,
+      bridgeTxn.timestamp,
+      bridgeTxn.txnStatus,
+      bridgeTxn.fromTxnId,
+      bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
     const dbId = result[0].id;
-    log(`Created bridge tx with id ${dbId}`);
-    bridgeTx.dbId = dbId;
+    logger.info(`Created bridge txn with id ${dbId}`);
+    bridgeTxn.dbId = dbId;
     return dbId as number;
   }
-  async readTx(txId: number) {
+  async readTxn(txnId: DbId) {
+    if (typeof txnId !== 'number') {
+      txnId = +txnId;
+    }
     const query = `
       SELECT * FROM user_mint_request WHERE id = $1;
     `;
-    const params = [txId];
+    const params = [txnId];
     const result = await this.query(query, params);
-    // TODO: check result.length wrap to a function
-    if (result.length === 0) {
-      throw new Error(`No TX found to update.`);
-    }
-    if (result.length > 1) {
-      throw new Error(`Found too many TX to update.`);
+    try {
+      this._verifyResultLength(result, txnId);
+    } catch (err) {
+      throw err;
     }
     return result[0];
   }
-  async updateTx(bridgeTx: BridgeTxInfo) {
-    // this action will update "request_status"(txStatus) and "algo_txn_id"(toTxId)
+  async updateTxn(bridgeTxnInfo: BridgeTxnInfo) {
+    // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
@@ -81,34 +84,47 @@ class Database {
       RETURNING id;
     `;
     const params = [
-      bridgeTx.txStatus,
-      bridgeTx.toTxId,
-      bridgeTx.dbId,
-      bridgeTx.fromTxId,
-      bridgeTx.toAddr,
-      bridgeTx.fromAddr,
-      bridgeTx.amount,
-      bridgeTx.timestamp,
+      bridgeTxnInfo.txnStatus,
+      bridgeTxnInfo.toTxnId,
+      bridgeTxnInfo.dbId,
+      bridgeTxnInfo.fromTxnId,
+      bridgeTxnInfo.toAddr,
+      bridgeTxnInfo.fromAddr,
+      bridgeTxnInfo.atomAmount,
+      bridgeTxnInfo.timestamp,
     ];
     const result = await this.query(query, params);
-    // TODO: check result.length wrap to a function
-    if (result.length === 0) {
-      throw new Error(`No TX found to update.`);
+    try {
+      this._verifyResultLength(result, bridgeTxnInfo);
+    } catch (err) {
+      throw err;
     }
-    if (result.length > 1) {
-      throw new Error(`Found too many TX to update.`);
-    }
-    log(`Updated bridge tx with id ${bridgeTx.dbId}`);
+    logger.verbose(`Updated bridge txn with id ${bridgeTxnInfo.dbId}`);
     return result[0].id;
   }
-  async deleteTx(txId: number) {
+  async deleteTxn(dbId: DbId) {
     // const query = `
     //   DELETE FROM user_mint_request WHERE id = $1;
     // `;
-    // const params = [txId];
+    // const params = [dbId];
     // const result = await this.query(query, params);
+    throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
+      action: 'deleteTxn',
+    });
+  }
 
-    throw new Error(`We cannot delete TX from DB.`);
+  private _verifyResultLength(result: any[], TxnInfo: DbId | BridgeTxnInfo) {
+    if (result.length === 0) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {
+        TxnInfo: TxnInfo,
+      });
+    }
+    if (result.length > 1) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_UNIQUE, {
+        TxnInfo: TxnInfo,
+      });
+    }
+    return true;
   }
 }
 

@@ -61,7 +61,7 @@
             </label>
             <br />
             <label>Transaction ID
-              <input type="text" name="mint_txId" value="8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7">
+              <input type="text" name="mint_txnId" value="8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7">
             </label>
             <button>MINT</button>
           </form>
@@ -85,7 +85,7 @@
               <input type="number" name="burn_amount" value="987.654" />
             </label>
             <label>Transaction ID
-              <input type="text" name="burn_txId">
+              <input type="text" name="burn_txnId">
             </label>
             <button>BURN</button>
           </form>
@@ -125,23 +125,23 @@
           <td></td>
         </tr>
         <tr>
-          <td>/api/mint?from=${MINT_FROM}&to=${MINT_TO}&amount=${MINT_AMOUNT}&txid=${TXID}</td>
+          <td>/api/mint?from=${MINT_FROM}&to=${MINT_TO}&amount=${MINT_AMOUNT}&txnId=${TXID}</td>
           <td>Mint API (POST)</td>
-          <td>from,to,amount,txid</td>
+          <td>from,to,amount,txnId</td>
           <td></td>
           <td></td>
         </tr>
         <tr>
-          <td>/api/burn?from=${BURN_FROM}&to=${BURN_TO}&amount=${BURN_AMOUNT}&txid=${TXID}</td>
+          <td>/api/burn?from=${BURN_FROM}&to=${BURN_TO}&amount=${BURN_AMOUNT}&txnId=${TXID}</td>
           <td>Burn API (POST)</td>
-          <td>from,to,amount,txid</td>
+          <td>from,to,amount,txnId</td>
           <td></td>
           <td></td>
         </tr>
         <tr>
           <td>/history</td>
           <td>History</td>
-          <td>[txid]</td>
+          <td>[txnId]</td>
           <td></td>
           <td></td>
         </tr>

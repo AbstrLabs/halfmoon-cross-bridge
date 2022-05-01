@@ -1,7 +1,6 @@
-import { KeyPair, connect, keyStores, utils } from 'near-api-js';
-
+import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
-import { GenericTxInfo } from '../..';
+import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { db } from '../../database';
 import { mint } from './mint-handler';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
@@ -15,6 +14,8 @@ describe('mint test', () => {
   afterAll(async () => {
     await db.end();
   });
+  // TODO: should in near test.
+  // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
     'mint 0.424 NEAR from NEAR to ALGO',
     async () => {
@@ -22,26 +23,32 @@ describe('mint test', () => {
       const amount = '0.424';
 
       // simulate frontend: make NEAR txn
-      const mintResponse = await transferOnNearTestnetFromExampleToMaster('1');
+      const mintResponse: FinalExecutionOutcome =
+        await transferOnNearTestnetFromExampleToMaster(amount);
       // manually checked the amount is correct.
-      console.log('mintResponse : ', mintResponse); // DEV_LOG_TO_REMOVE
-      const nearTxId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
+      const nearTxnId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
-      const genericTxInfo: GenericTxInfo = {
+      const apiCallParam: ApiCallParam = {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
-        txId: nearTxId,
+        txnId: nearTxnId,
       };
 
       // call API
-      const bridgeTxInfo = await mint(genericTxInfo);
-      // should return AlgoTxId,etc.
+      const bridgeTxnInfo = await mint(apiCallParam);
+      // should return AlgoTxnId,etc.
 
-      console.log('bridgeTxInfo : ', bridgeTxInfo); // DEV_LOG_TO_REMOVE
+      console.log('bridgeTxnInfo : ', bridgeTxnInfo); // DEV_LOG_TO_REMOVE
       // verification
-      expect(bridgeTxInfo.toTxId).toBeDefined();
+      expect(bridgeTxnInfo.toTxnId).toBeDefined();
     },
     TIMEOUT_30S
   );
+  /* TODO: More tests:
+   * - wrong amount,
+   * - wrong txnId
+   * - malformed address
+   * - timeout (?override with jest?)
+   */
 });

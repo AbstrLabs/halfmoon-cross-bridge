@@ -1,15 +1,19 @@
+import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
+
 import { ENV } from '../utils/dotenv';
-import { NOT_LOADED_FROM_ENV } from '../utils/constant';
+import { TxnParam } from '.';
 import { algoBlockchain } from './algorand';
+import { goNearToAtom } from '../utils/formatter';
+import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
-const UNUSED = 'not required value';
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
-const exampleAlgoTxn = {
-  from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
-  to: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
-  amount: '4240000000', // 0.424goNEAR in atom goNEAR
-  txId: exampleAlgoTxnId,
+// exampleAlgoTxnId === exampleRcpt.transaction.id;
+const exampleAlgoParam: TxnParam = {
+  fromAddr: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+  toAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
+  atomAmount: BigInt('4240000000'), // 0.424goNEAR in atomic goNEAR unit
+  txnId: exampleAlgoTxnId,
 };
 const exampleRcpt = {
   // should be the same as rcpt used
@@ -48,7 +52,7 @@ describe('AlgorandBlockchain', () => {
     expect(algoBlockchain).toBeDefined();
   });
   it('manually check ENV VARS', () => {
-    console.log({
+    logger.warn({
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
@@ -57,27 +61,37 @@ describe('AlgorandBlockchain', () => {
   });
   // it.skip('user not opted in', () => {});
 
-  it.skip('make txn, 1 goNEAR, central acc -> example acc', async () => {
-    // skipped because not returning this 1 atom.
+  it.skip('make txn, 0.767 goNEAR, central acc -> example acc', async () => {
+    // skipped because not returning this transfer.
     // jest.setTimeout(30000); // won't work
-    const algoTxId = await algoBlockchain.makeOutgoingTxn({
-      from: UNUSED,
-      txId: UNUSED,
-      to: ENV.ALGO_EXAMPL_ADDR,
-      amount: '1',
-    });
-    console.info('algoTxId : ', algoTxId);
+
+    // make a txn (then verify)
+    const amount = '0.767';
+    const newTxnParam: TxnParam = {
+      fromAddr: literal.UNUSED,
+      txnId: literal.UNUSED,
+      toAddr: ENV.ALGO_EXAMPL_ADDR,
+      atomAmount: goNearToAtom(amount),
+    };
+    const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
+    newTxnParam.txnId = algoTxnId;
+    console.info('algoTxnId : ', algoTxnId);
+
+    //verify the txn
+    const rcpt = await algoBlockchain.getTxnStatus(algoTxnId);
+    newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
+    const answer = algoBlockchain.verifyCorrectness(rcpt, newTxnParam);
+    expect(answer).toBe(true);
     return;
   }, 30000);
-  it.only('get example txn status', async () => {
+
+  it('get example txn status', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
-    console.log('rcpt : ', rcpt); // DEV_LOG_TO_REMOVE
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
   }, 30000);
-  it.only('verify transaction status on algo', async () => {
+  it('verify transaction status on algo', async () => {
     const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
-    console.log('rcpt : ', rcpt); // DEV_LOG_TO_REMOVE
-    const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoTxn);
+    const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoParam);
     expect(answer).toBe(true);
   });
 });

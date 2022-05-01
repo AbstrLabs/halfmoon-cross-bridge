@@ -1,34 +1,28 @@
 export { mint };
 
-import {
-  type AlgoAddr,
-  type NearAddr,
-  type Addr,
-  type NearTxId,
-  type AlgoTxId,
-  type TxID,
-  TxType,
-} from '..';
-import { BridgeTxInfo, GenericTxInfo } from '../..';
-import { sleep } from '../../utils/helper';
-import { log } from '../../utils/logger';
-import { bridge_txn_handler } from './bridge-txn-handler';
+import { BridgeError, ERRORS } from '../../utils/errors';
+import { BridgeTxnInfo, MintApiParam } from '../..';
+import { apiParamToBridgeTxnInfo, goNearToAtom } from '../../utils/formatter';
 
-async function mint(genericTxInfo: GenericTxInfo): Promise<BridgeTxInfo> {
-  const { from, to, amount, txId } = genericTxInfo;
-  if (
-    from === undefined ||
-    to === undefined ||
-    amount === undefined ||
-    txId === undefined
-  ) {
-    throw new Error('Missing required params');
-  }
-  // const amount = +amount;
-  log(`Minting ${amount} NEAR from ${from}(NEAR) to ${to}(ALGO)`);
-  const bridgeTxInfo = await bridge_txn_handler(genericTxInfo, TxType.Mint);
-  log('mint success');
-  return bridgeTxInfo;
+import { TxnType } from '..';
+import { bridgeTxnHandler } from './bridge-txn-handler';
+import { literal } from '../../utils/literal';
+import { logger } from '../../utils/logger';
+
+async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
+  const { from, to, amount, txnId } = mintApiParam;
+  logger.info(literal.START_MINTING(amount, from, to));
+  const rawBridgeTxnInfo = apiParamToBridgeTxnInfo(
+    {
+      fromAddr: from,
+      toAddr: to,
+      atomAmount: goNearToAtom(amount),
+      txnId,
+    },
+    TxnType.MINT,
+    BigInt(Date.now())
+  );
+  const bridgeTxnInfo = bridgeTxnHandler(rawBridgeTxnInfo);
+  logger.info(literal.DONE_MINT);
+  return bridgeTxnInfo;
 }
-
-// `Burning ${amount} ALGO from ${from}(ALGO) to ${to}(NEAR)`;

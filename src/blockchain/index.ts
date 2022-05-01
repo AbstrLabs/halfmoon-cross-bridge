@@ -2,49 +2,61 @@
 // TODO: Make singleton
 export {
   Blockchain,
-  TxType,
+  TxnType,
   type Addr,
   type AlgoAcc,
   type AlgoAddr,
-  type AlgoAssetTransferTxOutcome,
+  type AlgoAssetTransferTxnOutcome,
   type AlgoMnemonic,
   type AlgoReceipt,
-  type AlgoTxId,
-  type AlgoTxOutcome,
+  type AlgoTxnId,
+  type AlgoTxnOutcome,
   type GenericAcc,
   type NearAcc,
   type NearAddr,
-  type NearTxId,
-  type NearTxOutcome,
-  type TxID,
-  type TxOutcome,
-  type TxReceipt,
+  type NearTxnId,
+  type NearTxnOutcome,
+  type TxnID,
+  type TxnOutcome,
+  type TxnParam,
+  type TxnReceipt,
 };
+export {
+  type AlgoTxnParam,
+  type BurnApiParam,
+  type MintApiParam,
+  type NearTxnParam,
+} from '../utils/formatter';
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
-import { AssetTransferTransaction } from 'algosdk/dist/types/src/types/transactions/asset';
 import { providers } from 'near-api-js';
-import { type GenericTxInfo } from '..';
+
+import {
+  AlgoTxnId,
+  NearTxnId,
+  type AlgoAddr,
+  type AlgoTxnParam,
+  type NearAddr,
+  type NearTxnParam,
+} from '../utils/formatter';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type Addr = NearAddr | AlgoAddr;
+type Addr = AlgoAddr | NearAddr;
 type AlgoAcc = algosdk.Account;
-type AlgoAddr = string;
 type AlgoMnemonic = string;
 type AlgoReceipt = Transaction;
-type AlgoTxId = string;
+type BigNum = number; // | bigint; // using number now
 type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = undefined;
-type NearAddr = string;
 type NearReceipt = any;
-type NearTxId = string;
-type TxID = NearTxId | AlgoTxId;
-type TxReceipt = AlgoReceipt | NearReceipt;
-type NearTxOutcome = providers.FinalExecutionOutcome;
-type BigNum = number; // | bigint; // using number now
-type AlgoAssetTransferTxOutcome = {
+type NearTxnOutcome = providers.FinalExecutionOutcome;
+type TxnID = AlgoTxnId | NearTxnId;
+type TxnParam = AlgoTxnParam | NearTxnParam;
+type TxnReceipt = AlgoReceipt | NearReceipt;
+
+type AlgoAssetTransferTxnOutcome = {
   // from Indexer JSON response
   'current-round': number;
   transaction: {
@@ -61,7 +73,7 @@ type AlgoAssetTransferTxOutcome = {
     'first-valid': BigNum;
     'genesis-hash': string;
     'genesis-id': 'testnet-v1.0';
-    id: AlgoTxId;
+    id: AlgoTxnId;
     'intra-round-offset': number;
     'last-valid': number;
     'receiver-rewards': number;
@@ -74,7 +86,7 @@ type AlgoAssetTransferTxOutcome = {
     'tx-type': 'axfer';
   };
 }; // TODO: programmatically check if this type is correct.
-type AlgoTxOutcome =
+type AlgoTxnOutcome =
   | {
       'current-round': number;
       transaction: AnyTransaction & {
@@ -82,33 +94,33 @@ type AlgoTxOutcome =
         id: string;
       };
     }
-  | AlgoAssetTransferTxOutcome; // TODO: programmatically check if this type is correct.
-type TxOutcome = NearTxOutcome | AlgoTxOutcome;
-// type TxStatuesOutcome = TxReceipt | AlgoTxOutcome;
+  | AlgoAssetTransferTxnOutcome; // TODO: programmatically check if this type is correct.
+type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
+// type TxnStatuesOutcome = TxnReceipt | AlgoTxnOutcome;
 type ConfirmTxnConfig = {
   timeoutSec: number;
   intervalSec: number;
 };
 
-enum TxType {
-  Mint = 'MINT',
-  Burn = 'BURN',
+enum TxnType {
+  MINT = 'MINT',
+  BURN = 'BURN',
 }
 
 abstract class Blockchain {
-  async confirmTxn(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    logger.silly('Blockchain: confirmTransaction()', genericTxInfo);
+  async confirmTxn(txnParam: TxnParam): Promise<boolean> {
+    logger.silly('Blockchain: confirmTransaction()', txnParam);
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
       }, this.confirmTxnConfig.timeoutSec * 1000);
       const interval = setImmediateInterval(async () => {
         let txnOutcome = await this.getTxnStatus(
-          genericTxInfo.txId,
-          genericTxInfo.from
+          txnParam.txnId,
+          txnParam.fromAddr
         );
         //TODO: error handling
-        if (this.verifyCorrectness(txnOutcome, genericTxInfo)) {
+        if (this.verifyCorrectness(txnOutcome, txnParam)) {
           clearTimeout(timeout);
           clearInterval(interval);
           resolve(true);
@@ -125,10 +137,10 @@ abstract class Blockchain {
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract readonly confirmTxnConfig: ConfirmTxnConfig;
   abstract verifyCorrectness(
-    txnOutcome: TxOutcome,
-    genericTxInfo: GenericTxInfo
+    txnOutcome: TxnOutcome,
+    txnParam: TxnParam
   ): boolean;
-  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxOutcome>;
-  abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxID>;
-  // getRecentTransactions(limit: number): Promise<TxID[]>;
+  abstract getTxnStatus(txnId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnID>;
+  // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }

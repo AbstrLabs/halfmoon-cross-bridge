@@ -2,45 +2,42 @@ export { startServer };
 
 import express, { Request, Response } from 'express';
 
-import { mint } from './blockchain/bridge/mint-handler';
-import { ENV, loadDotEnv } from './utils/dotenv';
+import { ENV } from './utils/dotenv';
+import { type MintApiParam } from './';
 import { ensureString } from './utils/helper';
-import { type GenericTxInfo } from '.';
+import { literal } from './utils/literal';
+import { logger } from './utils/logger';
+import { mint } from './blockchain/bridge/mint-handler';
 
 async function homePageTest() {
   /* Used once code */
 }
 
 function startServer() {
-  loadDotEnv();
-
   /* route */
   const app = express();
   const apiRouter = express.Router();
 
   apiRouter
     .route('/mint')
-    .get((req: Request, res: Response) => {
-      // TODO: use things like 'joi' to validate. if we change this more
-      const [from, to, amount, txId] = [
+    .get(async (req: Request, res: Response) => {
+      const [from, to, amount, txnId] = [
         ensureString(req.query.from),
         ensureString(req.query.to),
         ensureString(req.query.amount),
-        ensureString(req.query.txId),
+        ensureString(req.query.txnId),
       ];
-      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
-      mintResp(genericTxInfo, res);
+      await mintResp({ from, to, amount, txnId }, res);
     })
-    .post((req: Request, res: Response) => {
+    .post(async (req: Request, res: Response) => {
       // res.json(req.body);
-      const [from, to, amount, txId] = [
+      const [from, to, amount, txnId] = [
         ensureString(req.body['mint_from']),
         ensureString(req.body['mint_to']),
         `${req.body['mint_amount']}`,
-        ensureString(req.body['mint_txId']),
+        ensureString(req.body['mint_txnId']),
       ];
-      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
-      mintResp(genericTxInfo, res);
+      await mintResp({ from, to, amount, txnId: txnId }, res);
     });
 
   /* burn */
@@ -73,7 +70,7 @@ function startServer() {
 
   app.use('/api', apiRouter);
   app.listen(ENV.PORT, () => {
-    console.log(
+    logger.info(
       `Application started on port ${ENV.PORT}! http://localhost:${ENV.PORT}/`
     );
   });
@@ -81,15 +78,21 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(genericTxInfo: GenericTxInfo, res: Response): void {
-  const { from, to, amount, txId } = genericTxInfo;
+async function mintResp(apiCallParam: MintApiParam, res: Response) {
+  /* CONFIG */
+  const mintApiParam = apiCallParam;
+  const { from, to, amount, txnId } = mintApiParam;
+  var bridgeTxnInfo = undefined; // TODO
+  logger.info(literal.START_MINTING(amount, from, to));
+  res.write(`${literal.START_MINTING(amount, from, to)}\n`);
+  res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
+  res.write(`${literal.MINT_AWAITING}\n`);
   try {
-    mint(genericTxInfo);
-    res.write(`Mint ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).\n`);
-    res.write(`Mint stake with transaction ID [${txId}](NEAR).\n`);
-    res.write(`Will redirect to "history" after transaction finished. \n`);
+    mint(mintApiParam);
+    logger.info(literal.DONE_MINT);
     res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');
   }
+  return bridgeTxnInfo;
 }

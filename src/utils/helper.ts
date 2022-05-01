@@ -1,7 +1,12 @@
+import { BridgeError, ERRORS } from './errors';
+
 export { ensureString, setImmediateInterval, sleep };
 function ensureString(value: any): string {
   if (typeof value !== 'string') {
-    throw new Error('value is not string type');
+    throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
+      expected: 'string',
+      actual: typeof value,
+    });
   }
   return value as string;
 }

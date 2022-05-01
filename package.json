@@ -14,7 +14,8 @@
     "dotenv-parse-variables": "^2.0.0",
     "express": "^4.17.3",
     "near-api-js": "^0.44.2",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "zod": "^3.14.4"
   },
   "devDependencies": {
     "@types/dotenv-parse-variables": "^2.0.1",
@@ -43,6 +44,7 @@
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:db": "jest --testPathPattern=src/database",
-    "test:near": "jest --testPathPattern=src/blockchain/near"
+    "test:near": "jest --testPathPattern=src/blockchain/near",
+    "test:util": "jest --testPathPattern=src/utils"
   }
 }

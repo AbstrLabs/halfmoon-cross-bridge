@@ -1,121 +1,97 @@
-export { bridge_txn_handler };
-import { type Addr, type TxID, TxType, Blockchain } from '..';
-import {
-  BlockchainName,
-  BridgeTxInfo,
-  BridgeTxStatus,
-  GenericTxInfo,
-} from '../..';
-import { db } from '../../database';
-import { goNearToAtom } from '../../utils/formatter';
-import { log } from '../../utils/logger';
+export { bridgeTxnHandler };
+
+import { Blockchain, TxnType } from '..';
+import { type BridgeTxnInfo, BlockchainName, BridgeTxnStatus } from '../..';
+import { BridgeError, ERRORS } from '../../utils/errors';
+
+import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
+import { db } from '../../database';
+import { literal } from '../../utils/literal';
+import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
-async function bridge_txn_handler(
-  genericTxInfo: GenericTxInfo,
-  txType: TxType
-): Promise<BridgeTxInfo> {
+async function bridgeTxnHandler(
+  bridgeTxnInfo: BridgeTxnInfo
+): Promise<BridgeTxnInfo> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
-  const { from, to, amount, txId: txId } = genericTxInfo;
-  log(`Making ${txType} transaction of ${amount} from ${from} to ${to}`);
-  if (txType === TxType.Mint) {
+  let txnType;
+  const { fromAddr, toAddr, atomAmount } = bridgeTxnInfo;
+  if (
+    bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
+    bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
+  ) {
+    txnType = TxnType.MINT;
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
-  } else if (txType === TxType.Burn) {
+  } else if (
+    bridgeTxnInfo.fromBlockchain === BlockchainName.ALGO &&
+    bridgeTxnInfo.toBlockchain === BlockchainName.NEAR
+  ) {
+    txnType = TxnType.BURN;
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
-    throw new Error('Unknown txType');
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      txnType: txnType,
+    });
   }
+  logger.info(literal.MAKING_TXN(txnType, atomAmount, fromAddr, toAddr));
   await db.connect();
 
   /* MAKE TRANSACTION */
-  const bridgeTxInfo = genericInfoToBridgeTxInfo(
-    genericTxInfo,
-    txType,
-    BigInt(Date.now())
-  );
-  const dbId = await db.createTx(bridgeTxInfo);
-  bridgeTxInfo.dbId = dbId;
+
+  const dbId = await db.createTxn(bridgeTxnInfo);
+  bridgeTxnInfo.dbId = dbId;
 
   // update as sequence diagram
-  bridgeTxInfo.txStatus = BridgeTxStatus.CONFIRM_INCOMING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.CONFIRM_INCOMING;
+  await db.updateTxn(bridgeTxnInfo);
   await incomingBlockchain.confirmTxn({
-    ...genericTxInfo,
-    to: 'abstrlabs.testnet',
+    fromAddr: bridgeTxnInfo.fromAddr,
+    toAddr: ENV.NEAR_MASTER_ADDR,
+    atomAmount: bridgeTxnInfo.atomAmount,
+    txnId: bridgeTxnInfo.fromTxnId,
   });
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
+  await db.updateTxn(bridgeTxnInfo);
 
-  // empty slot, after confirming incoming tx, for error handling
-  // TODO: add txn fee.
+  // empty slot, after confirming incoming txn, for error handling
+  // TODO: add txn fee calculation logic here.
+  // TODO! important
 
-  bridgeTxInfo.txStatus = BridgeTxStatus.MAKE_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
-  const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
-    ...genericTxInfo,
-    // TODO: use env
-    from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
+  const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
+    fromAddr: ENV.ALGO_MASTER_ADDR,
+    toAddr: bridgeTxnInfo.toAddr,
+    atomAmount: bridgeTxnInfo.atomAmount,
+    txnId: literal.UNUSED,
   });
-  bridgeTxInfo.toTxId = outgoingTxId;
-  bridgeTxInfo.txStatus = BridgeTxStatus.VERIFY_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
+
+  // verify outgoing tx
+  bridgeTxnInfo.toTxnId = outgoingTxnId;
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.VERIFY_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
-    ...genericTxInfo,
-    // TODO: use env
-    txId: outgoingTxId,
-    amount: goNearToAtom(genericTxInfo.amount),
-    from: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
+    fromAddr: ENV.ALGO_MASTER_ADDR,
+    toAddr: bridgeTxnInfo.toAddr,
+    atomAmount: bridgeTxnInfo.atomAmount,
+    txnId: outgoingTxnId,
   });
-  bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;
-  await db.updateTx(bridgeTxInfo);
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+  await db.updateTxn(bridgeTxnInfo);
 
   // user confirmation via socket
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
 
-  return bridgeTxInfo;
+  return bridgeTxnInfo;
   // check indexer with hash
 }
 
 /* HELPER */
 // TODO: move to formatter
-function genericInfoToBridgeTxInfo(
-  genericTxInfo: GenericTxInfo,
-  txType: TxType,
-  timestamp: bigint
-): BridgeTxInfo {
-  const { from, to, amount, txId } = genericTxInfo;
-  // TODO: BAN-15: amount should be parsed right after API call
-  const atomicAmount = BigInt(goNearToAtom(amount));
-  var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
-
-  if (txType === TxType.Mint) {
-    fromBlockchain = BlockchainName.NEAR;
-    toBlockchain = BlockchainName.ALGO;
-  } else if (txType === TxType.Burn) {
-    fromBlockchain = BlockchainName.ALGO;
-    toBlockchain = BlockchainName.NEAR;
-  } else {
-    throw new Error('Unknown txType');
-  }
-
-  const bridgeTxInfo: BridgeTxInfo = {
-    dbId: undefined,
-    amount: atomicAmount, // in "toTx"
-    timestamp,
-    fromAddr: from,
-    fromBlockchain,
-    fromTxId: txId,
-    toAddr: to,
-    toBlockchain,
-    toTxId: undefined,
-    txStatus: BridgeTxStatus.NOT_STARTED,
-  };
-  return bridgeTxInfo;
-}

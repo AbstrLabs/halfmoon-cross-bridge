@@ -1,8 +1,10 @@
+import { BridgeError, ERRORS } from '../utils/errors';
 import { Client, Pool, PoolClient } from 'pg';
+
+import { logger } from '../utils/logger';
 
 // this file is tested in database.spec.ts
 // TODO: Make singleton
-import { log } from 'console';
 
 export { postgres };
 
@@ -30,19 +32,19 @@ class Postgres {
     }
     this.client = await this.pool.connect();
     if (!this.client) {
-      throw new Error('Could not connect to database');
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
     }
     this.isConnected = true;
-    log('database connected');
+    logger.info('database connected');
   }
 
   async query(query: string, params: any[] = []) {
     if (!this.client) {
-      log('Not connected to database, connecting now...');
+      logger.info('Not connected to database, connecting now...');
       await this.connect();
     }
     if (!this.client) {
-      throw new Error('Could not connect to database');
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
     }
     const res = await this.client.query(query, params);
     return res.rows;
@@ -51,7 +53,7 @@ class Postgres {
   disconnect() {
     if (this.isConnected) {
       if (!this.client) {
-        throw new Error('client and isConnected do not match');
+        throw new BridgeError(ERRORS.INTERNAL.DB_CLASS_LOGIC_ERROR);
       }
       this.client.release();
       this.isConnected = false;
@@ -80,7 +82,7 @@ class Postgres {
     const res = await this.query('SELECT $1::text as message', [
       'Hello world!',
     ]);
-    await this.disconnect();
+    this.disconnect();
     return res[0].message;
   }
 }
