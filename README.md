@@ -1,3 +1,5 @@
 # Algorand-NEAR-bridge
 
-## using
+## Implementation
+
+- Using bigint for atomic unit (`atomAmount`) of cryptocurrency after api call.

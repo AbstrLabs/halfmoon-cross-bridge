@@ -39,7 +39,7 @@ const ASA_CREATED = (assetName: Stringer, txId: Stringer, assetId: Stringer) =>
 
 const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
-  `NEAR verifyCorrectness txnOutcome : ${outcome}`;
+  `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 
 const SILLY_LOG = {};
 const literal = {

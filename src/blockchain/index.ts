@@ -25,7 +25,7 @@ import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { AssetTransferTransaction } from 'algosdk/dist/types/src/types/transactions/asset';
 import { providers } from 'near-api-js';
-import { type GenericTxInfo } from '..';
+import { type TxParam } from '..';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
@@ -96,19 +96,19 @@ enum TxType {
 }
 
 abstract class Blockchain {
-  async confirmTxn(genericTxInfo: GenericTxInfo): Promise<boolean> {
-    logger.silly('Blockchain: confirmTransaction()', genericTxInfo);
+  async confirmTxn(txParam: TxParam): Promise<boolean> {
+    logger.silly('Blockchain: confirmTransaction()', txParam);
     const confirmed = new Promise<boolean>((resolve) => {
       const timeout = setTimeout(() => {
         resolve(false);
       }, this.confirmTxnConfig.timeoutSec * 1000);
       const interval = setImmediateInterval(async () => {
         let txnOutcome = await this.getTxnStatus(
-          genericTxInfo.txId,
-          genericTxInfo.from
+          txParam.txId,
+          txParam.fromAddr
         );
         //TODO: error handling
-        if (this.verifyCorrectness(txnOutcome, genericTxInfo)) {
+        if (this.verifyCorrectness(txnOutcome, txParam)) {
           clearTimeout(timeout);
           clearInterval(interval);
           resolve(true);
@@ -124,11 +124,8 @@ abstract class Blockchain {
   // Abstract methods
   protected abstract readonly centralizedAcc: GenericAcc;
   abstract readonly confirmTxnConfig: ConfirmTxnConfig;
-  abstract verifyCorrectness(
-    txnOutcome: TxOutcome,
-    genericTxInfo: GenericTxInfo
-  ): boolean;
-  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxOutcome>;
-  abstract makeOutgoingTxn(genericTxInfo: GenericTxInfo): Promise<TxID>;
+  abstract verifyCorrectness(txnOutcome: TxOutcome, txParam: TxParam): boolean;
+  abstract getTxnStatus(txId: TxID, from: Addr): Promise<TxOutcome>; // TODO: use TxParam.
+  abstract makeOutgoingTxn(txParam: TxParam): Promise<TxID>;
   // getRecentTransactions(limit: number): Promise<TxID[]>;
 }

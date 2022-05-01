@@ -11,6 +11,7 @@ const logger = createLogger({
     new transports.Console(),
     // new transports.File({ filename: 'combined.log' }),
   ],
+  level: 'debug',
   format: combine(
     errors({ stack: true }), // <-- use errors format
     colorize(),

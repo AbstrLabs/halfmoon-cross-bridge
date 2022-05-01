@@ -39,6 +39,11 @@ const internalErrors = {
     name: 'Type Error',
     message: 'Variable type error',
   },
+  INVALID_YOCTO_NEAR_AMOUNT: {
+    errId: 106,
+    name: 'Invalid Yocto Near Amount',
+    message: 'Yocto Near amount is not valid, cannot parse.',
+  },
 };
 const transactionErrors = {
   INVALID_TX_ID: {
