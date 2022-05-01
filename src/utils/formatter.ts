@@ -5,6 +5,7 @@ export {
   type MintApiParam,
   type NearTxParam,
   type TxParam,
+  apiParamToBridgeTxInfo,
   dbItemToBridgeTxInfo,
   goNearToAtom,
   parseBurnApiParam,
@@ -18,6 +19,7 @@ import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
+import { TxType } from '../blockchain';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
@@ -26,6 +28,7 @@ type ApiCallParam = MintApiParam | BurnApiParam;
 type AlgoTxParam = z.infer<typeof algoTxParamParser>;
 type NearTxParam = z.infer<typeof nearTxParamParser>;
 type TxParam = AlgoTxParam | NearTxParam;
+
 // param validation and formatting
 
 const nearAddr = z
@@ -37,6 +40,7 @@ const nearAddr = z
     'malformed near address'
   );
 const algoAddr = z
+  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
   .string()
   .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
 const parsableAmount = z
@@ -45,9 +49,6 @@ const parsableAmount = z
 
 const nearTxId = z.string(); // TODO: unfinished
 const algoTxId = z.string(); // TODO: unfinished
-
-// from https://forum.algorand.org/t/how-is-an-algorands-address-made/960
-// no 0,1,8
 
 const mintApiParamParser = z.object({
   amount: parsableAmount,
@@ -93,6 +94,41 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
       parseErrorDetail: e,
     });
   }
+}
+
+function apiParamToBridgeTxInfo(
+  txParam: TxParam,
+  txType: TxType,
+  timestamp: bigint
+): BridgeTxInfo {
+  const { fromAddr, toAddr, atom, txId } = txParam;
+  // TODO: BAN-15: amount should be parsed right after API call
+  var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
+
+  // TODO: this can be skipped after BAN15
+  if (txType === TxType.Mint) {
+    fromBlockchain = BlockchainName.NEAR;
+    toBlockchain = BlockchainName.ALGO;
+  } else if (txType === TxType.Burn) {
+    fromBlockchain = BlockchainName.ALGO;
+    toBlockchain = BlockchainName.NEAR;
+  } else {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
+  }
+
+  const bridgeTxInfo: BridgeTxInfo = {
+    dbId: undefined,
+    amount: atom, // in "toTx"
+    timestamp,
+    fromAddr,
+    fromBlockchain,
+    fromTxId: txId,
+    toAddr,
+    toBlockchain,
+    toTxId: undefined,
+    txStatus: BridgeTxStatus.NOT_STARTED,
+  };
+  return bridgeTxInfo;
 }
 
 const dbItemToBridgeTxInfo = (

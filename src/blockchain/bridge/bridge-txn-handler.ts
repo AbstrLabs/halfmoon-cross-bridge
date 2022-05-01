@@ -15,6 +15,7 @@ import { db } from '../../database';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
+import { apiParamToBridgeTxInfo } from '../../utils/formatter';
 
 async function bridge_txn_handler(
   txParam: TxParam,
@@ -37,7 +38,7 @@ async function bridge_txn_handler(
   await db.connect();
 
   /* MAKE TRANSACTION */
-  const bridgeTxInfo = genericInfoToBridgeTxInfo(
+  const bridgeTxInfo = apiParamToBridgeTxInfo(
     txParam,
     txType,
     BigInt(Date.now())
@@ -89,37 +90,3 @@ async function bridge_txn_handler(
 
 /* HELPER */
 // TODO: move to formatter
-function genericInfoToBridgeTxInfo(
-  txParam: TxParam,
-  txType: TxType,
-  timestamp: bigint
-): BridgeTxInfo {
-  const { fromAddr, toAddr, atom, txId } = txParam;
-  // TODO: BAN-15: amount should be parsed right after API call
-  var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
-
-  // TODO: this can be skipped after BAN15
-  if (txType === TxType.Mint) {
-    fromBlockchain = BlockchainName.NEAR;
-    toBlockchain = BlockchainName.ALGO;
-  } else if (txType === TxType.Burn) {
-    fromBlockchain = BlockchainName.ALGO;
-    toBlockchain = BlockchainName.NEAR;
-  } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
-  }
-
-  const bridgeTxInfo: BridgeTxInfo = {
-    dbId: undefined,
-    amount: atom, // in "toTx"
-    timestamp,
-    fromAddr,
-    fromBlockchain,
-    fromTxId: txId,
-    toAddr,
-    toBlockchain,
-    toTxId: undefined,
-    txStatus: BridgeTxStatus.NOT_STARTED,
-  };
-  return bridgeTxInfo;
-}
