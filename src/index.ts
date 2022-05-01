@@ -1,18 +1,12 @@
-export { type GenericTxInfo, BridgeTxStatus, BridgeTxInfo, BlockchainName };
+export { type BridgeTxInfo, BridgeTxStatus, BlockchainName };
 export {
-  type ApiCallParam,
   type AlgoTxParam,
+  type ApiCallParam,
+  type BurnApiParam,
+  type MintApiParam,
   type NearTxParam,
   type TxParam,
 } from './utils/formatter';
-
-interface GenericTxInfo {
-  // Deprecating!
-  from: string;
-  to: string;
-  amount: string; // TODO: l10n. in some cases 1/2 written as 0,5
-  txId: string;
-}
 
 interface BridgeTxInfo {
   dbId?: number;

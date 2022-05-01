@@ -3,11 +3,12 @@ export { startServer };
 import express, { Request, Response } from 'express';
 
 import { ENV } from './utils/dotenv';
-import { GenericTxInfo } from './';
+import { type MintApiParam } from './';
 import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint-handler';
+import { parseMintApiParam } from './utils/formatter';
 
 async function homePageTest() {
   /* Used once code */
@@ -21,15 +22,14 @@ function startServer() {
   apiRouter
     .route('/mint')
     .get((req: Request, res: Response) => {
-      // TODO: use things like 'joi' to validate. if we change this more
       const [from, to, amount, txId] = [
         ensureString(req.query.from),
         ensureString(req.query.to),
         ensureString(req.query.amount),
         ensureString(req.query.txId),
       ];
-      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
-      mintResp(genericTxInfo, res);
+      const mintApiParam = parseMintApiParam({ from, to, amount, txId });
+      mintResp(mintApiParam, res);
     })
     .post((req: Request, res: Response) => {
       // res.json(req.body);
@@ -39,8 +39,8 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txId']),
       ];
-      const genericTxInfo: GenericTxInfo = { from, to, amount, txId };
-      mintResp(genericTxInfo, res);
+      const mintApiParam = parseMintApiParam({ from, to, amount, txId });
+      mintResp(mintApiParam, res);
     });
 
   /* burn */
@@ -81,10 +81,10 @@ function startServer() {
 
 /* server-side function wrap */
 
-function mintResp(genericTxInfo: GenericTxInfo, res: Response): void {
-  const { from, to, amount, txId } = genericTxInfo;
+function mintResp(mintApiParam: MintApiParam, res: Response): void {
+  const { from, to, amount, txId } = mintApiParam;
   try {
-    mint(genericTxInfo);
+    mint(mintApiParam);
     res.write(`${literal.START_MINTING(amount, from, to)}\n`);
     res.write(`${literal.MINT_NEAR_TX_ID(txId)}\n`);
     res.write(`${literal.MINT_AWAITING}\n`);

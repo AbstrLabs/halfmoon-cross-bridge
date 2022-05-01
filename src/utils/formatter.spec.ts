@@ -1,8 +1,9 @@
 import {
   BlockchainName,
-  BridgeTxInfo,
   BridgeTxStatus,
-  GenericTxInfo,
+  type BridgeTxInfo,
+  type MintApiParam,
+  type BurnApiParam,
 } from '..';
 import { BridgeError, ERRORS } from './errors';
 import {
@@ -38,13 +39,13 @@ const exampleTxInfo: BridgeTxInfo = {
   txStatus: BridgeTxStatus.DONE_OUTGOING,
 };
 
-const exampleMintApiTxInfo: GenericTxInfo = {
+const exampleMintApiTxInfo: MintApiParam = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
   txId: FAKE_TX_ID,
 };
-const exampleBurnApiTxInfo: GenericTxInfo = {
+const exampleBurnApiTxInfo: BurnApiParam = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
