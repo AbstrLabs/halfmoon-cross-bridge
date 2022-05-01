@@ -29,6 +29,10 @@ const default_ENV = {
   NEAR_TOTAL: 1_000_000_000,
   DB_ORIGIN: 'NEDB',
   ALGO_CONFIRM_ROUND: 60,
+  MINT_FIX_FEE: 1,
+  MINT_PERCENT_FEE: 0,
+  BURN_FIX_FEE: 1,
+  BURN_PERCENT_FEE: 2,
 };
 
 const secret_ENV = {
