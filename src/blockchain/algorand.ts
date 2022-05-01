@@ -9,6 +9,7 @@ import {
   AlgoMnemonic,
   AlgoTxnId,
   AlgoAssetTransferTxnOutcome,
+  AlgoTxnParam,
 } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
@@ -19,7 +20,7 @@ import {
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
-import { BlockchainName, type AlgoTxnParam } from '..';
+import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';

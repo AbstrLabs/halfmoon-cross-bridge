@@ -1,12 +1,15 @@
-export { type BridgeTxnInfo, BridgeTxnStatus, BlockchainName };
 export {
-  type AlgoTxnParam,
+  BlockchainName,
+  BridgeTxnStatus,
   type ApiCallParam,
+  type BridgeTxnInfo,
   type BurnApiParam,
   type MintApiParam,
-  type NearTxnParam,
-  type TxnParam,
-} from './utils/formatter';
+};
+
+import { type BurnApiParam, type MintApiParam } from './utils/formatter';
+
+type ApiCallParam = MintApiParam | BurnApiParam;
 
 interface BridgeTxnInfo {
   dbId?: number;

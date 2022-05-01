@@ -18,31 +18,44 @@ export {
   type NearTxnOutcome,
   type TxnID,
   type TxnOutcome,
+  type TxnParam,
   type TxnReceipt,
 };
+export {
+  type AlgoTxnParam,
+  type BurnApiParam,
+  type MintApiParam,
+  type NearTxnParam,
+} from '../utils/formatter';
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { providers } from 'near-api-js';
-import { type TxnParam } from '..';
+
+import {
+  AlgoTxnId,
+  NearTxnId,
+  type AlgoAddr,
+  type AlgoTxnParam,
+  type NearAddr,
+  type NearTxnParam,
+} from '../utils/formatter';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type Addr = NearAddr | AlgoAddr;
+type Addr = AlgoAddr | NearAddr;
 type AlgoAcc = algosdk.Account;
-type AlgoAddr = string;
 type AlgoMnemonic = string;
 type AlgoReceipt = Transaction;
-type AlgoTxnId = string;
+type BigNum = number; // | bigint; // using number now
 type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = undefined;
-type NearAddr = string;
 type NearReceipt = any;
-type NearTxnId = string;
-type TxnID = NearTxnId | AlgoTxnId;
-type TxnReceipt = AlgoReceipt | NearReceipt;
 type NearTxnOutcome = providers.FinalExecutionOutcome;
-type BigNum = number; // | bigint; // using number now
+type TxnID = AlgoTxnId | NearTxnId;
+type TxnParam = AlgoTxnParam | NearTxnParam;
+type TxnReceipt = AlgoReceipt | NearReceipt;
+
 type AlgoAssetTransferTxnOutcome = {
   // from Indexer JSON response
   'current-round': number;

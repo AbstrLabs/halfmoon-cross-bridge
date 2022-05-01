@@ -1,10 +1,12 @@
 export {
+  type AlgoAddr,
+  type AlgoTxnId,
   type AlgoTxnParam,
-  type ApiCallParam,
   type BurnApiParam,
   type MintApiParam,
+  type NearAddr,
+  type NearTxnId,
   type NearTxnParam,
-  type TxnParam,
   apiParamToBridgeTxnInfo,
   dbItemToBridgeTxnInfo,
   goNearToAtom,
@@ -19,16 +21,19 @@ import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
-import { TxnType } from '../blockchain';
+import { TxnParam, TxnType } from '../blockchain';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
-type ApiCallParam = MintApiParam | BurnApiParam;
 
 type AlgoTxnParam = z.infer<typeof algoTxnParamParser>;
 type NearTxnParam = z.infer<typeof nearTxnParamParser>;
-type TxnParam = AlgoTxnParam | NearTxnParam;
 
+type AlgoAddr = z.infer<typeof algoAddr>;
+type NearAddr = z.infer<typeof nearAddr>;
+
+type NearTxnId = z.infer<typeof nearTxnId>;
+type AlgoTxnId = z.infer<typeof algoTxnId>;
 // param validation and formatting
 
 const nearAddr = z

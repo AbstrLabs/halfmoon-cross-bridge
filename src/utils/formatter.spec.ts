@@ -2,8 +2,8 @@ import {
   BlockchainName,
   BridgeTxnStatus,
   type BridgeTxnInfo,
-  type MintApiParam,
   type BurnApiParam,
+  type MintApiParam,
 } from '..';
 import { BridgeError, ERRORS } from './errors';
 import {

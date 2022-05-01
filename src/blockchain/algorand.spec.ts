@@ -1,8 +1,9 @@
 import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
-import { TxnParam, goNearToAtom } from '../utils/formatter';
 
 import { ENV } from '../utils/dotenv';
+import { TxnParam } from '.';
 import { algoBlockchain } from './algorand';
+import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
