@@ -1,4 +1,4 @@
-export { bridge_txn_handler };
+export { bridgeTxnHandler };
 
 import { Blockchain, TxnType } from '..';
 import { type BridgeTxnInfo, BlockchainName, BridgeTxnStatus } from '../..';
@@ -11,7 +11,7 @@ import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
-async function bridge_txn_handler(
+async function bridgeTxnHandler(
   bridgeTxnInfo: BridgeTxnInfo
 ): Promise<BridgeTxnInfo> {
   /* CONFIG */

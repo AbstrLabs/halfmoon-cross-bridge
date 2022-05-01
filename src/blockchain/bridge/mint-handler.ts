@@ -5,7 +5,7 @@ import { BridgeTxnInfo, MintApiParam } from '../..';
 import { apiParamToBridgeTxnInfo, goNearToAtom } from '../../utils/formatter';
 
 import { TxnType } from '..';
-import { bridge_txn_handler } from './bridge-txn-handler';
+import { bridgeTxnHandler } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
@@ -22,7 +22,7 @@ async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
     TxnType.Mint,
     BigInt(Date.now())
   );
-  const bridgeTxnInfo = bridge_txn_handler(rawBridgeTxnInfo);
+  const bridgeTxnInfo = bridgeTxnHandler(rawBridgeTxnInfo);
   logger.info(literal.DONE_MINT);
   return bridgeTxnInfo;
 }
