@@ -159,28 +159,38 @@ const dbItemToBridgeTxnInfo = (
 };
 
 // goNear related
-function goNearToAtom(goNearPlain: string): bigint {
+function goNearToAtom(goNearPlain: string | number): bigint {
   // TODO: typing: return value should be a BigInt
 
   // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
   // TODO: l10n: and won't work for separators like 123_4567.0123456789 nor 1.234.567,0123456789
   // TODO: l10n: temp-fix: added an regex to make sure that the input is in correct format
-  // from https://github.com/near/near-api-js/blob/6f83d39f47624b4223746c0d27d10f78471575f7/src/utils/format.ts#L46-L53
+  var goNear: string;
+  if (typeof goNearPlain === 'number') {
+    goNear = goNearPlain.toString();
+  } else if (typeof goNearPlain === 'string') {
+    goNear = goNearPlain;
+  } else {
+    throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
+      goNearType: typeof goNearPlain,
+    });
+  }
 
-  goNearPlain.replace(/,/g, '').trim(); // remove comma
-  const split = goNearPlain.split('.');
+  // from https://github.com/near/near-api-js/blob/6f83d39f47624b4223746c0d27d10f78471575f7/src/utils/format.ts#L46-L53
+  goNear.replace(/,/g, '').trim(); // remove comma
+  const split = goNear.split('.');
   const wholePart = split[0];
   const fracPart = split[1] || ''; // maybe ?? is better?
   if (split.length > 2 || fracPart.length > ENV.GO_NEAR_DECIMALS) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_GO_NEAR_AMOUNT, {
-      goNearPlain,
+      goNearPlain: goNear,
     });
   }
   const atomAmount = BigInt(
     trimLeadingZeroes(wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0'))
   );
   logger.debug('goNearToAtom', {
-    goNearPlain,
+    goNearPlain: goNear,
     wholePart,
     fracPart,
     atomAmount,
@@ -202,11 +212,30 @@ function trimLeadingZeroes(value: string): string {
   return value;
 }
 
-function yoctoNearToAtom(yoctoNear: string): bigint {
-  const nearPlain = utils.format.formatNearAmount(yoctoNear);
+function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
+  var yNear: string;
+
+  if (typeof yoctoNear === 'number') {
+    yNear = yoctoNear.toString();
+    if (yNear.includes('.')) {
+      throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
+        yoctoNear: yNear,
+      });
+    }
+  } else if (typeof yoctoNear === 'string') {
+    yNear = yoctoNear;
+  } else if (typeof yoctoNear === 'bigint') {
+    yNear = yoctoNear.toString();
+  } else {
+    throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
+      goNearType: typeof yoctoNear,
+    });
+  }
+
+  const nearPlain = utils.format.formatNearAmount(yNear);
   if (nearPlain === null) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
-      yoctoNear,
+      yNear,
     });
   }
   return goNearToAtom(nearPlain);
