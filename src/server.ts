@@ -7,7 +7,7 @@ import { type MintApiParam } from './';
 import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
-import { mint } from './blockchain/bridge/mint-handler';
+import { mint } from './blockchain/bridge/mint';
 
 async function homePageTest() {
   /* Used once code */
