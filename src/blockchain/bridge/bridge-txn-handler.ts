@@ -18,7 +18,7 @@ async function bridge_txn_handler(
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
   let txType;
-  const { fromAddr, toAddr, amount: atom } = bridgeTxInfo;
+  const { fromAddr, toAddr, atomAmount } = bridgeTxInfo;
   if (
     bridgeTxInfo.fromBlockchain === BlockchainName.NEAR &&
     bridgeTxInfo.toBlockchain === BlockchainName.ALGO
@@ -36,7 +36,7 @@ async function bridge_txn_handler(
   } else {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, { txType: txType });
   }
-  logger.info(literal.MAKING_TXN(txType, atom, fromAddr, toAddr));
+  logger.info(literal.MAKING_TXN(txType, atomAmount, fromAddr, toAddr));
   await db.connect();
 
   /* MAKE TRANSACTION */
@@ -50,7 +50,7 @@ async function bridge_txn_handler(
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxInfo.fromAddr,
     toAddr: ENV.NEAR_MASTER_ADDR,
-    atom: bridgeTxInfo.amount,
+    atomAmount: bridgeTxInfo.atomAmount,
     txId: bridgeTxInfo.fromTxId,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_INCOMING;
@@ -65,7 +65,7 @@ async function bridge_txn_handler(
   const outgoingTxId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxInfo.toAddr,
-    atom: bridgeTxInfo.amount,
+    atomAmount: bridgeTxInfo.atomAmount,
     txId: literal.UNUSED,
   });
 
@@ -76,7 +76,7 @@ async function bridge_txn_handler(
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxInfo.toAddr,
-    atom: bridgeTxInfo.amount,
+    atomAmount: bridgeTxInfo.atomAmount,
     txId: outgoingTxId,
   });
   bridgeTxInfo.txStatus = BridgeTxStatus.DONE_OUTGOING;

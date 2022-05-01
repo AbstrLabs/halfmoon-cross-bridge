@@ -1,17 +1,17 @@
 import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
+import { TxParam, goNearToAtom } from '../utils/formatter';
 
 import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from './algorand';
-import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
-const exampleAlgoParam = {
+const exampleAlgoParam: TxParam = {
   fromAddr: 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
   toAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
-  atom: BigInt('4240000000'), // 0.424goNEAR in atom goNEAR
+  atomAmount: BigInt('4240000000'), // 0.424goNEAR in atomic goNEAR unit
   txId: exampleAlgoTxnId,
 };
 const exampleRcpt = {
@@ -61,16 +61,16 @@ describe('AlgorandBlockchain', () => {
   // it.skip('user not opted in', () => {});
 
   it.skip('make txn, 0.767 goNEAR, central acc -> example acc', async () => {
-    // skipped because not returning this 1 atom.
+    // skipped because not returning this transfer.
     // jest.setTimeout(30000); // won't work
 
     // make a txn (then verify)
     const amount = '0.767';
-    const newTxnParam = {
+    const newTxnParam: TxParam = {
       fromAddr: literal.UNUSED,
       txId: literal.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
-      atom: BigInt(goNearToAtom(amount)),
+      atomAmount: BigInt(goNearToAtom(amount)),
     };
     const algoTxId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
     newTxnParam.txId = algoTxId;

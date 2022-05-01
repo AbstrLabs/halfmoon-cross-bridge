@@ -90,7 +90,7 @@ class Database {
       bridgeTxInfo.fromTxId,
       bridgeTxInfo.toAddr,
       bridgeTxInfo.fromAddr,
-      bridgeTxInfo.amount,
+      bridgeTxInfo.atomAmount,
       bridgeTxInfo.timestamp,
     ];
     const result = await this.query(query, params);

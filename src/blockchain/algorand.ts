@@ -130,11 +130,11 @@ class AlgorandBlockchain extends Blockchain {
       });
     }
     // compare amount
-    if (amount !== algoTxParam.atom.toString()) {
+    if (amount !== algoTxParam.atomAmount.toString()) {
       // The trailing "n" is not part of the string.
       throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
-        receivedAmount: algoTxParam.atom,
+        receivedAmount: algoTxParam.atomAmount,
         blockchainName: this.name,
       });
     }
@@ -144,14 +144,14 @@ class AlgorandBlockchain extends Blockchain {
     // abstract class implementation.
     return await this._makeGoNearTxnFromAdmin(
       algoTxParam.toAddr,
-      algoTxParam.atom
+      algoTxParam.atomAmount
     );
   }
-  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atom: bigint) {
+  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atomAmount: bigint) {
     return await this._makeAsaTxn(
       to,
       this.centralizedAcc.addr,
-      atom,
+      atomAmount,
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );

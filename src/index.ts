@@ -10,7 +10,7 @@ export {
 
 interface BridgeTxInfo {
   dbId?: number;
-  amount: bigint; // in "toTx"
+  atomAmount: bigint;
   timestamp: bigint;
   fromAddr: string;
   fromBlockchain: BlockchainName;

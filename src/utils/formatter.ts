@@ -64,13 +64,13 @@ const burnApiParamParser = z.object({
 });
 
 const algoTxParamParser = z.object({
-  atom: z.bigint(),
+  atomAmount: z.bigint(),
   fromAddr: algoAddr,
   toAddr: algoAddr,
   txId: algoTxId,
 });
 const nearTxParamParser = z.object({
-  atom: z.bigint(),
+  atomAmount: z.bigint(),
   fromAddr: nearAddr,
   toAddr: nearAddr,
   txId: nearTxId,
@@ -101,7 +101,7 @@ function apiParamToBridgeTxInfo(
   txType: TxType,
   timestamp: bigint
 ): BridgeTxInfo {
-  const { fromAddr, toAddr, atom, txId } = txParam;
+  const { fromAddr, toAddr, atomAmount, txId } = txParam;
   var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
   if (txType === TxType.Mint) {
@@ -116,7 +116,7 @@ function apiParamToBridgeTxInfo(
 
   const bridgeTxInfo: BridgeTxInfo = {
     dbId: undefined,
-    amount: atom, // in "toTx"
+    atomAmount, // in "toTx"
     timestamp,
     fromAddr,
     fromBlockchain,
@@ -137,7 +137,7 @@ const dbItemToBridgeTxInfo = (
   }
 ): BridgeTxInfo => {
   const bridgeTx: BridgeTxInfo = {
-    amount: BigInt(dbItem.amount),
+    atomAmount: BigInt(dbItem.amount),
     dbId: dbItem.id,
     fromAddr: dbItem.near_address,
     fromBlockchain: extra.fromBlockchain,
