@@ -20,6 +20,8 @@ const MAKING_TXN = (
 
 const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Minting ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).`;
+const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
+  `Burning ${amount} ALGO from [${from}](ALGO) to [${to}](NEAR)`;
 
 const MINT_NEAR_TX_ID = (txId: Stringer) =>
   `Mint stake with transaction ID [${txId}](NEAR).`;
@@ -40,17 +42,20 @@ const ASA_CREATED = (assetName: Stringer, txId: Stringer, assetId: Stringer) =>
 const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
+const UNUSED = 'not required value';
 
 const SILLY_LOG = {};
 const literal = {
-  MAKING_TXN,
-  START_MINTING,
-  DONE_MINT,
-  TXN_CONFIRMED,
-  SILLY_LOG,
   ASA_CREATED,
+  DONE_MINT,
+  MAKING_TXN,
+  MINT_AWAITING,
+  MINT_NEAR_TX_ID,
   NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
-  MINT_NEAR_TX_ID,
-  MINT_AWAITING,
+  SILLY_LOG,
+  START_BURNING,
+  START_MINTING,
+  TXN_CONFIRMED,
+  UNUSED,
 };

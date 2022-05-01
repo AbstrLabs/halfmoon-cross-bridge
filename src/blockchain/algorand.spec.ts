@@ -1,11 +1,11 @@
+import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
+
 import { ENV } from '../utils/dotenv';
-import { NOT_LOADED_FROM_ENV } from '../utils/literal';
 import { algoBlockchain } from './algorand';
 import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 import { verify } from 'crypto';
 
-const UNUSED = 'not required value';
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
 const exampleAlgoParam = {
@@ -67,8 +67,8 @@ describe('AlgorandBlockchain', () => {
     // make a txn (then verify)
     const amount = '0.767';
     const newTxnParam = {
-      fromAddr: UNUSED,
-      txId: UNUSED,
+      fromAddr: literal.UNUSED,
+      txId: literal.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
       atom: BigInt(goNearToAtom(amount)),
     };
