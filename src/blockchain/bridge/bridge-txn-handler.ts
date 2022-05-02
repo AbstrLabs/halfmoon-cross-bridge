@@ -50,8 +50,7 @@ async function bridgeTxnHandler(
 
   /* MAKE TRANSACTION */
 
-  const dbId = await db.createTxn(bridgeTxnInfo);
-  bridgeTxnInfo.dbId = dbId;
+  bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
 
   // update as sequence diagram
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.CONFIRM_INCOMING;

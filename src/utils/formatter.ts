@@ -69,13 +69,13 @@ const burnApiParamParser = z.object({
 });
 
 const algoTxnParamParser = z.object({
-  atomAmount: z.bigint(),
+  atomAmount: z.bigint(), // TODO: should add a gt 1e+10 check (1 fixed cost)
   fromAddr: algoAddr,
   toAddr: algoAddr,
   txnId: algoTxnId,
 });
 const nearTxnParamParser = z.object({
-  atomAmount: z.bigint(),
+  atomAmount: z.bigint(), // TODO: should add a gt 1e+10 check (1 fixed cost)
   fromAddr: nearAddr,
   toAddr: nearAddr,
   txnId: nearTxnId,
