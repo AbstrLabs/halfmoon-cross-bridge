@@ -6,7 +6,6 @@ export {
   type MintApiParam,
 };
 
-import { TxnType } from './blockchain';
 import { type BurnApiParam, type MintApiParam } from './utils/formatter';
 
 type ApiCallParam = MintApiParam | BurnApiParam;

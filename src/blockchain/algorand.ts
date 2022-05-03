@@ -134,7 +134,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare amount
     if (amount !== algoTxnParam.atomAmount.toString()) {
-      // The trailing "n" is not part of the string.
+      // Bigint: The trailing "n" is not part of the string.
       throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
         receivedAmount: algoTxnParam.atomAmount,
@@ -208,7 +208,7 @@ class AlgorandBlockchain extends Blockchain {
     }
 
     //Get the completed Transaction
-    logger.info(
+    logger.verbose(
       literal.TXN_CONFIRMED(
         from,
         to,

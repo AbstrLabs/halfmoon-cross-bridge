@@ -8,7 +8,6 @@ import { BridgeTxnInfo } from '.';
 import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
-import { goNearToAtom } from '../../utils/formatter';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
@@ -56,6 +55,7 @@ async function bridgeTxnHandler(
   // update as sequence diagram
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.CONFIRM_INCOMING;
   await db.updateMintTxn(bridgeTxnInfo);
+  // should use if.
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
     atomAmount: bridgeTxnInfo.fromAmountAtom,

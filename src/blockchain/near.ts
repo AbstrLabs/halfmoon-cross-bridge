@@ -52,6 +52,7 @@ class NearBlockchain extends Blockchain {
     logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
     const txnReceipt = txnOutcome;
     if (txnReceipt.status instanceof Object) {
+      //TODO: txnId
       // txnReceipt.status = txnReceipt.status as providers.FinalExecutionStatus;
       if (
         txnReceipt.status.Failure !== undefined &&

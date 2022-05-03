@@ -70,13 +70,13 @@ const burnApiParamParser = z.object({
 });
 
 const algoTxnParamParser = z.object({
-  atomAmount: z.bigint(), // TODO: should add a gt 1e+10 check (1 fixed cost)
+  atomAmount: z.bigint(), // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
   fromAddr: algoAddr,
   toAddr: algoAddr,
   txnId: algoTxnId,
 });
 const nearTxnParamParser = z.object({
-  atomAmount: z.bigint(), // TODO: should add a gt 1e+10 check (1 fixed cost)
+  atomAmount: z.bigint(), // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
   fromAddr: nearAddr,
   toAddr: nearAddr,
   txnId: nearTxnId,
@@ -84,6 +84,7 @@ const nearTxnParamParser = z.object({
 
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   try {
+    // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
     return mintApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -94,6 +95,7 @@ function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
 
 function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   try {
+    // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
     return burnApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -227,6 +229,7 @@ function trimLeadingZeroes(value: string): string {
 }
 
 function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
+  // TODO: rounding
   let yNear: string;
 
   if (typeof yoctoNear === 'number') {
