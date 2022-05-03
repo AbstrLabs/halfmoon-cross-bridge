@@ -7,7 +7,6 @@ export {
   type NearAddr,
   type NearTxnId,
   type NearTxnParam,
-  apiParamToBridgeTxnInfo,
   dbItemToBridgeTxnInfo,
   goNearToAtom,
   parseBurnApiParam,
@@ -102,51 +101,6 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
       parseErrorDetail: e,
     });
   }
-}
-/**
- * @param  {TxnParam} txnParam
- * @param  {TxnType} txnType
- * @param  {bigint} timestamp
- * @returns {BridgeTxnInfo}
- *
- * @deprecated: use BridgeTxnInfo.fromApiParam()
- */
-function apiParamToBridgeTxnInfo(
-  txnParam: TxnParam,
-  txnType: TxnType,
-  timestamp: bigint
-): BridgeTxnInfo {
-  const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
-  var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
-
-  if (txnType === TxnType.MINT) {
-    fromBlockchain = BlockchainName.NEAR;
-    toBlockchain = BlockchainName.ALGO;
-  } else if (txnType === TxnType.BURN) {
-    fromBlockchain = BlockchainName.ALGO;
-    toBlockchain = BlockchainName.NEAR;
-  } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
-      txnType: txnType,
-    });
-  }
-
-  const bridgeTxnInfo = new BridgeTxnInfo({
-    dbId: undefined,
-    fromAmountAtom: atomAmount,
-    fixedFeeAtom: BigInt(0),
-    marginFeeAtom: BigInt(0),
-    toAmountAtom: atomAmount,
-    timestamp,
-    fromAddr,
-    fromBlockchain,
-    fromTxnId: txnId,
-    toAddr,
-    toBlockchain,
-    toTxnId: undefined,
-    txnStatus: BridgeTxnStatus.NOT_STARTED,
-  });
-  return bridgeTxnInfo;
 }
 
 const dbItemToBridgeTxnInfo = (

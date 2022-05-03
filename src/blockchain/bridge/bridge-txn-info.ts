@@ -1,7 +1,7 @@
 // TODO: more txnStatus for internal process like fee calculation
 export { BridgeTxnInfo };
 
-import { BlockchainName, BridgeTxnStatus } from '../..';
+import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 import { TxnParam, TxnType } from '..';
 
@@ -25,13 +25,13 @@ class BridgeTxnInfo {
   txnType?: TxnType;
 
   static fromApiCallParam(
-    txnParam: TxnParam,
+    apiCallParam: ApiCallParam,
     txnType: TxnType,
-    timestamp: bigint
+    timestamp?: bigint
   ): BridgeTxnInfo {
-    const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
+    const { from, to, amount, txnId } = apiCallParam;
     var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
-
+    timestamp = timestamp ?? BigInt(+Date.now());
     if (txnType === TxnType.MINT) {
       fromBlockchain = BlockchainName.NEAR;
       toBlockchain = BlockchainName.ALGO;
@@ -46,15 +46,15 @@ class BridgeTxnInfo {
 
     const bridgeTxnInfo = new BridgeTxnInfo({
       dbId: undefined,
-      fromAmountAtom: atomAmount,
+      fromAmountAtom: goNearToAtom(amount),
       fixedFeeAtom: undefined,
       marginFeeAtom: undefined,
       toAmountAtom: undefined,
       timestamp,
-      fromAddr,
+      fromAddr: from,
       fromBlockchain,
       fromTxnId: txnId,
-      toAddr,
+      toAddr: to,
       toBlockchain,
       toTxnId: undefined,
       txnStatus: BridgeTxnStatus.NOT_STARTED,
@@ -142,6 +142,8 @@ class BridgeTxnInfo {
         fromAmountAtom: this.fromAmountAtom,
       });
     }
+
+    //TODO: verify address too.
 
     // we can also do a min/max check here.
     return this;
