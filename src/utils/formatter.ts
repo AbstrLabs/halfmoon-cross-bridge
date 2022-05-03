@@ -101,7 +101,14 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
     });
   }
 }
-
+/**
+ * @param  {TxnParam} txnParam
+ * @param  {TxnType} txnType
+ * @param  {bigint} timestamp
+ * @returns {BridgeTxnInfo}
+ *
+ * @deprecated: use BridgeTxnInfo.fromApiParam()
+ */
 function apiParamToBridgeTxnInfo(
   txnParam: TxnParam,
   txnType: TxnType,
@@ -220,7 +227,7 @@ function trimLeadingZeroes(value: string): string {
 }
 
 function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
-  var yNear: string;
+  let yNear: string;
 
   if (typeof yoctoNear === 'number') {
     yNear = yoctoNear.toString();

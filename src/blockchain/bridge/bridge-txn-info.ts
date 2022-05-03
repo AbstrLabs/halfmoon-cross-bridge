@@ -2,9 +2,10 @@
 export { BridgeTxnInfo };
 
 import { BlockchainName, BridgeTxnStatus } from '../..';
+import { BridgeError, ERRORS } from '../../utils/errors';
+import { TxnParam, TxnType } from '..';
 
 import { ENV } from '../../utils/dotenv';
-import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
 
 class BridgeTxnInfo {
@@ -17,7 +18,7 @@ class BridgeTxnInfo {
   fromBlockchain: BlockchainName;
   fromTxnId: string;
   toAddr: string;
-  toAmountAtom: bigint;
+  toAmountAtom?: bigint;
   toBlockchain: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
@@ -39,20 +40,23 @@ class BridgeTxnInfo {
     toTxnId,
     dbId,
   }: {
+    dbId?: number;
     timestamp: bigint;
+
     fromAddr: string;
     fromAmountAtom: bigint;
     fromBlockchain: BlockchainName;
     fromTxnId: string;
+
     toAddr: string;
-    toAmountAtom: bigint;
+    toAmountAtom?: bigint;
     toBlockchain: BlockchainName;
-    txnStatus: BridgeTxnStatus;
+    toTxnId?: string;
+
+    txnStatus?: BridgeTxnStatus;
     fixedFeeAtom?: bigint;
     marginFeeAtom?: bigint;
     txnType?: TxnType;
-    toTxnId?: string;
-    dbId?: number;
   }) {
     this.fixedFeeAtom = fixedFeeAtom;
     this.marginFeeAtom = marginFeeAtom;
@@ -64,19 +68,56 @@ class BridgeTxnInfo {
     this.toAddr = toAddr;
     this.toAmountAtom = toAmountAtom;
     this.toBlockchain = toBlockchain;
-    this.txnStatus = txnStatus;
+    this.txnStatus = txnStatus ?? BridgeTxnStatus.NOT_STARTED;
     this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
   }
 
-  initiate() {
+  initiate(): this {
     this.inferTxnType();
     this.getFixedFeeAtom();
     this.calculateMarginFeeAtom();
     this.calculateToAmountAtom();
+    return this;
   }
+  static fromApiCallParam(
+    txnParam: TxnParam,
+    txnType: TxnType,
+    timestamp: bigint
+  ): BridgeTxnInfo {
+    const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
+    var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
+    if (txnType === TxnType.MINT) {
+      fromBlockchain = BlockchainName.NEAR;
+      toBlockchain = BlockchainName.ALGO;
+    } else if (txnType === TxnType.BURN) {
+      fromBlockchain = BlockchainName.ALGO;
+      toBlockchain = BlockchainName.NEAR;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        txnType,
+      });
+    }
+
+    const bridgeTxnInfo = new BridgeTxnInfo({
+      dbId: undefined,
+      fromAmountAtom: atomAmount,
+      fixedFeeAtom: undefined,
+      marginFeeAtom: undefined,
+      toAmountAtom: undefined,
+      timestamp,
+      fromAddr,
+      fromBlockchain,
+      fromTxnId: txnId,
+      toAddr,
+      toBlockchain,
+      toTxnId: undefined,
+      txnStatus: BridgeTxnStatus.NOT_STARTED,
+    });
+    return bridgeTxnInfo;
+  }
   // methods below are likely to be private
   inferTxnType(): TxnType {
     var txnType: TxnType;
@@ -91,7 +132,10 @@ class BridgeTxnInfo {
     ) {
       txnType = TxnType.BURN;
     } else {
-      throw new Error('Cannot infer txn type');
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        fromBlockchain: this.fromBlockchain,
+        toBlockchain: this.toBlockchain,
+      });
     }
     this.txnType = txnType;
     return txnType;
@@ -107,7 +151,9 @@ class BridgeTxnInfo {
     } else if (this.txnType === TxnType.BURN) {
       fixedFee = goNearToAtom(ENV.MINT_FIX_FEE);
     } else {
-      throw new Error('Cannot infer txn type');
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        txnType: this.txnType,
+      });
     }
 
     this.fixedFeeAtom = fixedFee;
@@ -127,7 +173,9 @@ class BridgeTxnInfo {
     if (this.txnType === TxnType.BURN) {
       marginPercentage = ENV.BURN_PERCENT_FEE;
     } else {
-      throw new Error('Cannot infer txn type');
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        txnType: this.txnType,
+      });
     }
 
     marginFee =
