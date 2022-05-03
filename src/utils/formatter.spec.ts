@@ -1,18 +1,11 @@
-import {
-  BlockchainName,
-  BridgeTxnStatus,
-  type BurnApiParam,
-  type MintApiParam,
-} from '..';
+import { type BurnApiParam, type MintApiParam } from '..';
 import { BridgeError, ERRORS } from './errors';
-import {
-  dbItemToBridgeTxnInfo,
-  parseBurnApiParam,
-  parseMintApiParam,
-} from './formatter';
+import { parseBurnApiParam, parseMintApiParam } from './formatter';
 
 import { ENV } from './dotenv';
 import { exampleBridgeTxnInfo } from './test-helper';
+import { TxnType } from '../blockchain';
+import { BridgeTxnInfo } from '../blockchain/bridge';
 
 const FAKE_TX_ID = 'some_fake_txn_id';
 const exampleDbItem = {
@@ -25,6 +18,8 @@ const exampleDbItem = {
   near_address: '0x1234567890123456789012345678901234567890',
   near_tx_hash: '0x1234567890123456789012345678901234567890',
   request_status: 'DONE_OUTGOING',
+  fixed_fee: '123456',
+  margin_fee: '567890',
 };
 
 const exampleMintApiTxnInfo: MintApiParam = {
@@ -44,12 +39,9 @@ describe('param validation and formatting', () => {
   it('formatter test', () => {
     // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
-    expect(
-      dbItemToBridgeTxnInfo(exampleDbItem, {
-        fromBlockchain: BlockchainName.NEAR,
-        toBlockchain: BlockchainName.ALGO,
-      })
-    ).toEqual(exampleBridgeTxnInfo);
+    expect(BridgeTxnInfo.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
+      exampleBridgeTxnInfo
+    );
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {

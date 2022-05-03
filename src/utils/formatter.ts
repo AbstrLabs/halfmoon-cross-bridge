@@ -7,7 +7,6 @@ export {
   type NearAddr,
   type NearTxnId,
   type NearTxnParam,
-  dbItemToBridgeTxnInfo,
   goNearToAtom,
   parseBurnApiParam,
   parseMintApiParam,
@@ -110,31 +109,6 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
     });
   }
 }
-
-const dbItemToBridgeTxnInfo = (
-  dbItem: any,
-  extra: {
-    fromBlockchain: BlockchainName;
-    toBlockchain: BlockchainName;
-  }
-): BridgeTxnInfo => {
-  const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
-    fixedFeeAtom: BigInt(dbItem.fixed_fee),
-    marginFeeAtom: BigInt(dbItem.margin_fee),
-    dbId: dbItem.id,
-    fromAddr: dbItem.near_address,
-    fromAmountAtom: BigInt(dbItem.amount),
-    fromBlockchain: extra.fromBlockchain,
-    fromTxnId: dbItem.near_tx_hash,
-    timestamp: BigInt(dbItem.create_time),
-    toAddr: dbItem.algorand_address,
-    toAmountAtom: BigInt(dbItem.amount),
-    toBlockchain: extra.toBlockchain,
-    toTxnId: dbItem.algo_txn_id,
-    txnStatus: dbItem.request_status,
-  });
-  return bridgeTxn;
-};
 
 // goNear related
 function goNearToAtom(goNearPlain: string | number): bigint {

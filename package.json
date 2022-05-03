@@ -45,6 +45,6 @@
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:db": "jest --testPathPattern=src/database",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils"
+    "test:util": "jest --testPathPattern=src/utils -w=1"
   }
 }

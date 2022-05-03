@@ -1,8 +1,9 @@
 import { BlockchainName, BridgeTxnStatus } from '..';
 
+import { BridgeTxnInfo } from '../blockchain/bridge';
 import { ENV } from '../utils/dotenv';
+import { TxnType } from '../blockchain';
 import { db } from '.';
-import { dbItemToBridgeTxnInfo } from '../utils/formatter';
 import { exampleBridgeTxnInfo } from '../utils/test-helper';
 
 describe('DATABASE test', () => {
@@ -84,11 +85,7 @@ describe('DATABASE test', () => {
     });
 
     it.skip('create a transaction', async () => {
-      const res = await db.createMintTxn({
-        ...exampleBridgeTxnInfo,
-        timestamp: BigInt(+new Date()),
-        txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
-      });
+      const res = await db.createMintTxn(exampleBridgeTxnInfo);
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
@@ -106,12 +103,9 @@ describe('DATABASE test', () => {
       const res2 = await db.readMintTxn(exampleBridgeTxnInfo.dbId!);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
-      expect(
-        dbItemToBridgeTxnInfo(res2, {
-          fromBlockchain: BlockchainName.NEAR,
-          toBlockchain: BlockchainName.ALGO,
-        })
-      ).toEqual(exampleBridgeTxnInfo);
+      expect(BridgeTxnInfo.fromDbItem(res2, TxnType.MINT)).toEqual(
+        exampleBridgeTxnInfo
+      );
     });
   });
 });

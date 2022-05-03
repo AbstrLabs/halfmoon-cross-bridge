@@ -31,8 +31,6 @@ class BridgeTxnInfo {
     timestamp?: bigint
   ): BridgeTxnInfo {
     const { from, to, amount, txnId } = apiCallParam;
-    timestamp = timestamp ?? BigInt(+Date.now());
-
     const bridgeTxnInfo = new BridgeTxnInfo({
       dbId: undefined,
       txnType,
@@ -90,7 +88,7 @@ class BridgeTxnInfo {
     dbId,
   }: {
     dbId?: number;
-    timestamp: bigint;
+    timestamp?: bigint;
 
     fromAddr: string;
     fromAmountAtom: bigint;
@@ -109,7 +107,7 @@ class BridgeTxnInfo {
   }) {
     this.fixedFeeAtom = fixedFeeAtom;
     this.marginFeeAtom = marginFeeAtom;
-    this.timestamp = timestamp;
+    this.timestamp = timestamp ?? BigInt(+Date.now());
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
     this.fromBlockchain = fromBlockchain;
@@ -223,13 +221,13 @@ class BridgeTxnInfo {
     }
     var txnType: TxnType;
     if (
-      this.fromBlockchain === BlockchainName.ALGO &&
-      this.toBlockchain === BlockchainName.NEAR
+      this.fromBlockchain === BlockchainName.NEAR &&
+      this.toBlockchain === BlockchainName.ALGO
     ) {
       txnType = TxnType.MINT;
     } else if (
-      this.fromBlockchain === BlockchainName.NEAR &&
-      this.toBlockchain === BlockchainName.ALGO
+      this.fromBlockchain === BlockchainName.ALGO &&
+      this.toBlockchain === BlockchainName.NEAR
     ) {
       txnType = TxnType.BURN;
     } else {
