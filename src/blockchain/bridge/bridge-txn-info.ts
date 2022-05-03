@@ -1,4 +1,5 @@
 // TODO: more txnStatus for internal process like fee calculation
+// TODO: rename BridgeTxnInfo To BridgeTxn
 export { BridgeTxnInfo };
 
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
@@ -139,7 +140,27 @@ class BridgeTxnInfo {
     return this.toAmountAtom;
   }
 
+  equals(other: BridgeTxnInfo): boolean {
+    return (
+      this.fromAddr === other.fromAddr &&
+      this.fromAmountAtom === other.fromAmountAtom &&
+      this.fromBlockchain === other.fromBlockchain &&
+      this.fromTxnId === other.fromTxnId &&
+      this.toAddr === other.toAddr &&
+      this.toAmountAtom === other.toAmountAtom &&
+      this.toBlockchain === other.toBlockchain &&
+      this.toTxnId === other.toTxnId &&
+      this.txnStatus === other.txnStatus &&
+      this.txnType === other.txnType &&
+      this.dbId === other.dbId &&
+      this.fixedFeeAtom === other.fixedFeeAtom &&
+      this.marginFeeAtom === other.marginFeeAtom &&
+      this.timestamp === other.timestamp
+    );
+  }
+
   // methods below are likely to be private
+
   initiate(): this {
     this.verify();
     this.inferTxnType();
