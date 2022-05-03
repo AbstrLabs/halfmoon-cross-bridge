@@ -1,16 +1,17 @@
 export { bridgeTxnHandler };
 
 import { Blockchain, TxnType } from '..';
-import { type BridgeTxnInfo, BlockchainName, BridgeTxnStatus } from '../..';
+import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
+import { BridgeTxnInfo } from '.';
 import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
+import { goNearToAtom } from '../../utils/formatter';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
-import { goNearToAtom } from '../../utils/formatter';
 
 async function bridgeTxnHandler(
   bridgeTxnInfo: BridgeTxnInfo

@@ -1,4 +1,4 @@
-import { BlockchainName, BridgeTxnInfo, BridgeTxnStatus } from '..';
+import { BlockchainName, BridgeTxnStatus } from '..';
 
 import { ENV } from '../utils/dotenv';
 import { db } from '.';

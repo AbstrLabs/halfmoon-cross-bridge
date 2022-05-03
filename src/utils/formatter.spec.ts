@@ -1,7 +1,6 @@
 import {
   BlockchainName,
   BridgeTxnStatus,
-  type BridgeTxnInfo,
   type BurnApiParam,
   type MintApiParam,
 } from '..';

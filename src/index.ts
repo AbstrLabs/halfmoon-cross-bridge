@@ -2,30 +2,14 @@ export {
   BlockchainName,
   BridgeTxnStatus,
   type ApiCallParam,
-  type BridgeTxnInfo,
   type BurnApiParam,
   type MintApiParam,
 };
 
+import { TxnType } from './blockchain';
 import { type BurnApiParam, type MintApiParam } from './utils/formatter';
 
 type ApiCallParam = MintApiParam | BurnApiParam;
-
-interface BridgeTxnInfo {
-  dbId?: number;
-  fixedFeeAtom: bigint;
-  marginFeeAtom: bigint;
-  timestamp: bigint;
-  fromAddr: string;
-  fromAmountAtom: bigint;
-  fromBlockchain: BlockchainName;
-  fromTxnId: string;
-  toAddr: string;
-  toAmountAtom: bigint;
-  toBlockchain: BlockchainName;
-  toTxnId?: string;
-  txnStatus: BridgeTxnStatus;
-}
 
 enum BlockchainName {
   NEAR = 'NEAR',

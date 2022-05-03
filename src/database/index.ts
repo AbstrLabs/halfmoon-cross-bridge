@@ -2,7 +2,7 @@ export { db };
 
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { BridgeTxnInfo } from '..';
+import { BridgeTxnInfo } from '../blockchain/bridge';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 

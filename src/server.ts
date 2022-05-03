@@ -8,6 +8,7 @@ import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
+import { BridgeTxnInfo } from './blockchain/bridge';
 
 async function homePageTest() {
   /* Used once code */
@@ -82,13 +83,13 @@ async function mintResp(apiCallParam: MintApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = apiCallParam;
   const { from, to, amount, txnId } = mintApiParam;
-  var bridgeTxnInfo = undefined; // TODO
+  var bridgeTxnInfo: BridgeTxnInfo | undefined = undefined; // TODO
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
   res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
   res.write(`${literal.MINT_AWAITING}\n`);
   try {
-    mint(mintApiParam);
+    bridgeTxnInfo = await mint(mintApiParam);
     logger.info(literal.DONE_MINT);
     res.end();
   } catch (e) {

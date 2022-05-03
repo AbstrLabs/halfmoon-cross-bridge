@@ -1,9 +1,10 @@
 export { mint };
 
 import { BridgeError, ERRORS } from '../../utils/errors';
-import { BridgeTxnInfo, MintApiParam } from '../..';
 import { apiParamToBridgeTxnInfo, goNearToAtom } from '../../utils/formatter';
 
+import { BridgeTxnInfo } from '.';
+import { MintApiParam } from '../..';
 import { TxnType } from '..';
 import { bridgeTxnHandler } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';

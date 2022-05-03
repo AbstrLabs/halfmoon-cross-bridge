@@ -15,13 +15,14 @@ export {
   yoctoNearToAtom,
 };
 
-import { BlockchainName, BridgeTxnStatus, type BridgeTxnInfo } from '..';
+import { BlockchainName, BridgeTxnStatus } from '..';
 import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
 import { TxnParam, TxnType } from '../blockchain';
+import { BridgeTxnInfo } from '../blockchain/bridge';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
@@ -121,7 +122,7 @@ function apiParamToBridgeTxnInfo(
     });
   }
 
-  const bridgeTxnInfo: BridgeTxnInfo = {
+  const bridgeTxnInfo = new BridgeTxnInfo({
     dbId: undefined,
     fromAmountAtom: atomAmount,
     fixedFeeAtom: BigInt(0),
@@ -135,7 +136,7 @@ function apiParamToBridgeTxnInfo(
     toBlockchain,
     toTxnId: undefined,
     txnStatus: BridgeTxnStatus.NOT_STARTED,
-  };
+  });
   return bridgeTxnInfo;
 }
 
