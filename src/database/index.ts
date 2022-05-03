@@ -9,6 +9,8 @@ import { postgres } from './aws-rds';
 type DbId = number;
 class Database {
   private instance = postgres;
+  private mintTableName = `user_mint_request`;
+  private burnTableName = `user_burn_request`;
 
   get isConnected() {
     return this.instance.isConnected;
@@ -36,7 +38,7 @@ class Database {
     // will assign a dbId when created.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
-      INSERT INTO user_mint_request (
+      INSERT INTO ${this.mintTableName} (
         near_address, algorand_address, amount, create_time, request_status, near_tx_hash, algo_txn_id
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id;
@@ -61,7 +63,7 @@ class Database {
       txnId = +txnId;
     }
     const query = `
-      SELECT * FROM user_mint_request WHERE id = $1;
+      SELECT * FROM ${this.mintTableName} WHERE id = $1;
     `;
     const params = [txnId];
     const result = await this.query(query, params);
@@ -78,7 +80,7 @@ class Database {
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
     const query = `
-      UPDATE user_mint_request SET
+      UPDATE ${this.mintTableName} SET
         request_status = $1, algo_txn_id = $2
           WHERE (id = $3 AND near_tx_hash = $4 AND algorand_address = $5 AND near_address = $6 AND amount = $7 AND create_time = $8)
       RETURNING id;
@@ -104,7 +106,7 @@ class Database {
   }
   async deleteTxn(dbId: DbId) {
     // const query = `
-    //   DELETE FROM user_mint_request WHERE id = $1;
+    //   DELETE FROM ${this.mintTableName} WHERE id = $1;
     // `;
     // const params = [dbId];
     // const result = await this.query(query, params);
