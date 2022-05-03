@@ -147,7 +147,7 @@ const dbItemToBridgeTxnInfo = (
     toBlockchain: BlockchainName;
   }
 ): BridgeTxnInfo => {
-  const bridgeTxn: BridgeTxnInfo = {
+  const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
     fixedFeeAtom: BigInt(dbItem.fixed_fee),
     marginFeeAtom: BigInt(dbItem.margin_fee),
     dbId: dbItem.id,
@@ -161,7 +161,7 @@ const dbItemToBridgeTxnInfo = (
     toBlockchain: extra.toBlockchain,
     toTxnId: dbItem.algo_txn_id,
     txnStatus: dbItem.request_status,
-  };
+  });
   return bridgeTxn;
 };
 

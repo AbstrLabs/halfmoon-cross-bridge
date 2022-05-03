@@ -9,8 +9,8 @@ import { goNearToAtom } from '../../utils/formatter';
 
 class BridgeTxnInfo {
   dbId?: number;
-  fixedFeeAtom: bigint;
-  marginFeeAtom: bigint;
+  fixedFeeAtom?: bigint;
+  marginFeeAtom?: bigint;
   timestamp: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
@@ -39,8 +39,6 @@ class BridgeTxnInfo {
     toTxnId,
     dbId,
   }: {
-    fixedFeeAtom: bigint;
-    marginFeeAtom: bigint;
     timestamp: bigint;
     fromAddr: string;
     fromAmountAtom: bigint;
@@ -50,6 +48,8 @@ class BridgeTxnInfo {
     toAmountAtom: bigint;
     toBlockchain: BlockchainName;
     txnStatus: BridgeTxnStatus;
+    fixedFeeAtom?: bigint;
+    marginFeeAtom?: bigint;
     txnType?: TxnType;
     toTxnId?: string;
     dbId?: number;
@@ -70,6 +70,14 @@ class BridgeTxnInfo {
     this.dbId = dbId;
   }
 
+  initiate() {
+    this.inferTxnType();
+    this.getFixedFeeAtom();
+    this.calculateMarginFeeAtom();
+    this.calculateToAmountAtom();
+  }
+
+  // methods below are likely to be private
   inferTxnType(): TxnType {
     var txnType: TxnType;
     if (
@@ -109,10 +117,9 @@ class BridgeTxnInfo {
   calculateMarginFeeAtom(): bigint {
     let marginFee: bigint;
     let marginPercentage: number;
-    // TODO: check this.fixedFeeAtom
 
-    if (this.txnType === undefined) {
-      this.inferTxnType();
+    if (this.fixedFeeAtom === undefined) {
+      this.fixedFeeAtom = this.getFixedFeeAtom();
     }
     if (this.txnType === TxnType.MINT) {
       marginPercentage = ENV.MINT_PERCENT_FEE;
@@ -135,7 +142,13 @@ class BridgeTxnInfo {
 
   calculateToAmountAtom(): bigint {
     let toAmount: bigint;
-    // TODO: make sure this.fixedFeeAtom, this.marginFeeAtom are set
+    if (this.fixedFeeAtom === undefined) {
+      this.fixedFeeAtom = this.getFixedFeeAtom();
+    }
+    if (this.marginFeeAtom === undefined) {
+      this.marginFeeAtom = this.calculateMarginFeeAtom();
+    }
+
     toAmount = this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
 
     this.toAmountAtom = toAmount;
