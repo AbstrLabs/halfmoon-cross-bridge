@@ -24,6 +24,44 @@ class BridgeTxnInfo {
   toTxnId?: string;
   txnType?: TxnType;
 
+  static fromApiCallParam(
+    txnParam: TxnParam,
+    txnType: TxnType,
+    timestamp: bigint
+  ): BridgeTxnInfo {
+    const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
+    var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
+
+    if (txnType === TxnType.MINT) {
+      fromBlockchain = BlockchainName.NEAR;
+      toBlockchain = BlockchainName.ALGO;
+    } else if (txnType === TxnType.BURN) {
+      fromBlockchain = BlockchainName.ALGO;
+      toBlockchain = BlockchainName.NEAR;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        txnType,
+      });
+    }
+
+    const bridgeTxnInfo = new BridgeTxnInfo({
+      dbId: undefined,
+      fromAmountAtom: atomAmount,
+      fixedFeeAtom: undefined,
+      marginFeeAtom: undefined,
+      toAmountAtom: undefined,
+      timestamp,
+      fromAddr,
+      fromBlockchain,
+      fromTxnId: txnId,
+      toAddr,
+      toBlockchain,
+      toTxnId: undefined,
+      txnStatus: BridgeTxnStatus.NOT_STARTED,
+    });
+    return bridgeTxnInfo;
+  }
+
   constructor({
     fixedFeeAtom,
     marginFeeAtom,
@@ -72,52 +110,10 @@ class BridgeTxnInfo {
     this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
-  }
-  static fromApiCallParam(
-    txnParam: TxnParam,
-    txnType: TxnType,
-    timestamp: bigint
-  ): BridgeTxnInfo {
-    const { fromAddr, toAddr, atomAmount, txnId } = txnParam;
-    var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
 
-    if (txnType === TxnType.MINT) {
-      fromBlockchain = BlockchainName.NEAR;
-      toBlockchain = BlockchainName.ALGO;
-    } else if (txnType === TxnType.BURN) {
-      fromBlockchain = BlockchainName.ALGO;
-      toBlockchain = BlockchainName.NEAR;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
-        txnType,
-      });
-    }
-
-    const bridgeTxnInfo = new BridgeTxnInfo({
-      dbId: undefined,
-      fromAmountAtom: atomAmount,
-      fixedFeeAtom: undefined,
-      marginFeeAtom: undefined,
-      toAmountAtom: undefined,
-      timestamp,
-      fromAddr,
-      fromBlockchain,
-      fromTxnId: txnId,
-      toAddr,
-      toBlockchain,
-      toTxnId: undefined,
-      txnStatus: BridgeTxnStatus.NOT_STARTED,
-    });
-    return bridgeTxnInfo;
+    this.initiate();
   }
 
-  initiate(): this {
-    this.inferTxnType();
-    this.getFixedFeeAtom();
-    this.calculateMarginFeeAtom();
-    this.calculateToAmountAtom();
-    return this;
-  }
   getToAmountAtom(): bigint {
     if (this.toAmountAtom === undefined) {
       this.initiate();
@@ -127,6 +123,30 @@ class BridgeTxnInfo {
   }
 
   // methods below are likely to be private
+  initiate(): this {
+    this.verify();
+    this.inferTxnType();
+    this.getFixedFeeAtom();
+    this.calculateMarginFeeAtom();
+    this.calculateToAmountAtom();
+    return this;
+  }
+
+  verify(): this {
+    if (this.fixedFeeAtom === undefined) {
+      this.fixedFeeAtom = this.getFixedFeeAtom();
+    }
+
+    if (this.fromAmountAtom < this.fixedFeeAtom) {
+      throw new BridgeError(ERRORS.INTERNAL.INVALID_AMOUNT, {
+        fromAmountAtom: this.fromAmountAtom,
+      });
+    }
+
+    // we can also do a min/max check here.
+    return this;
+  }
+
   inferTxnType(): TxnType {
     var txnType: TxnType;
     if (
@@ -150,6 +170,9 @@ class BridgeTxnInfo {
   }
 
   getFixedFeeAtom(): bigint {
+    if (this.fixedFeeAtom !== undefined) {
+      return this.fixedFeeAtom;
+    }
     let fixedFee: bigint;
     if (this.txnType === undefined) {
       this.inferTxnType();
@@ -169,6 +192,10 @@ class BridgeTxnInfo {
   }
 
   calculateMarginFeeAtom(): bigint {
+    if (this.marginFeeAtom !== undefined) {
+      return this.marginFeeAtom;
+    }
+
     let marginFee: bigint;
     let marginPercentage: number;
 
@@ -197,6 +224,10 @@ class BridgeTxnInfo {
   }
 
   calculateToAmountAtom(): bigint {
+    if (this.toAmountAtom !== undefined) {
+      return this.toAmountAtom;
+    }
+
     let toAmount: bigint;
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this.getFixedFeeAtom();
