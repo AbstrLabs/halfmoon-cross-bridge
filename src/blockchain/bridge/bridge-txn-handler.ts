@@ -65,14 +65,14 @@ async function bridgeTxnHandler(
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateMintTxn(bridgeTxnInfo);
 
-  // TODO! calculate fee
+  bridgeTxnInfo.toAmountAtom = bridgeTxnInfo.getToAmountAtom();
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
   await db.updateMintTxn(bridgeTxnInfo);
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.fromAmountAtom,
+    atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: literal.UNUSED,
   });
 

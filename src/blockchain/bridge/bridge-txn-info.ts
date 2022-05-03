@@ -73,14 +73,6 @@ class BridgeTxnInfo {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
   }
-
-  initiate(): this {
-    this.inferTxnType();
-    this.getFixedFeeAtom();
-    this.calculateMarginFeeAtom();
-    this.calculateToAmountAtom();
-    return this;
-  }
   static fromApiCallParam(
     txnParam: TxnParam,
     txnType: TxnType,
@@ -118,6 +110,22 @@ class BridgeTxnInfo {
     });
     return bridgeTxnInfo;
   }
+
+  initiate(): this {
+    this.inferTxnType();
+    this.getFixedFeeAtom();
+    this.calculateMarginFeeAtom();
+    this.calculateToAmountAtom();
+    return this;
+  }
+  getToAmountAtom(): bigint {
+    if (this.toAmountAtom === undefined) {
+      this.initiate();
+      this.toAmountAtom = this.calculateToAmountAtom();
+    }
+    return this.toAmountAtom;
+  }
+
   // methods below are likely to be private
   inferTxnType(): TxnType {
     var txnType: TxnType;
