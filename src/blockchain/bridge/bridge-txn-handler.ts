@@ -65,20 +65,7 @@ async function bridgeTxnHandler(
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateMintTxn(bridgeTxnInfo);
 
-  if (txnType === TxnType.MINT) {
-    const newAmount =
-      ((bridgeTxnInfo.fromAmountAtom - goNearToAtom(ENV.MINT_FIX_FEE)) *
-        BigInt(100 - ENV.MINT_PERCENT_FEE)) /
-      BigInt(100);
-    bridgeTxnInfo.fromAmountAtom = newAmount;
-  }
-  if (txnType === TxnType.BURN) {
-    const newAmount =
-      ((bridgeTxnInfo.fromAmountAtom - goNearToAtom(ENV.BURN_FIX_FEE)) *
-        BigInt(100 - ENV.BURN_PERCENT_FEE)) /
-      BigInt(100);
-    bridgeTxnInfo.fromAmountAtom = newAmount;
-  }
+  // TODO! calculate fee
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
   await db.updateMintTxn(bridgeTxnInfo);
@@ -110,6 +97,3 @@ async function bridgeTxnHandler(
   return bridgeTxnInfo;
   // check indexer with hash
 }
-
-/* HELPER */
-// TODO: move to formatter

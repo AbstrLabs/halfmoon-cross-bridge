@@ -1,8 +1,11 @@
+// TODO: more txnStatus for internal process like fee calculation
 export { BridgeTxnInfo };
 
 import { BlockchainName, BridgeTxnStatus } from '../..';
 
+import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
+import { goNearToAtom } from '../../utils/formatter';
 
 class BridgeTxnInfo {
   dbId?: number;
@@ -16,8 +19,8 @@ class BridgeTxnInfo {
   toAddr: string;
   toAmountAtom: bigint;
   toBlockchain: BlockchainName;
-  toTxnId?: string;
   txnStatus: BridgeTxnStatus;
+  toTxnId?: string;
   txnType?: TxnType;
 
   constructor({
@@ -65,5 +68,77 @@ class BridgeTxnInfo {
     this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
+  }
+
+  inferTxnType(): TxnType {
+    var txnType: TxnType;
+    if (
+      this.fromBlockchain === BlockchainName.ALGO &&
+      this.toBlockchain === BlockchainName.NEAR
+    ) {
+      txnType = TxnType.MINT;
+    } else if (
+      this.fromBlockchain === BlockchainName.NEAR &&
+      this.toBlockchain === BlockchainName.ALGO
+    ) {
+      txnType = TxnType.BURN;
+    } else {
+      throw new Error('Cannot infer txn type');
+    }
+    this.txnType = txnType;
+    return txnType;
+  }
+
+  getFixedFeeAtom(): bigint {
+    let fixedFee: bigint;
+    if (this.txnType === undefined) {
+      this.inferTxnType();
+    }
+    if (this.txnType === TxnType.MINT) {
+      fixedFee = goNearToAtom(ENV.BURN_FIX_FEE);
+    } else if (this.txnType === TxnType.BURN) {
+      fixedFee = goNearToAtom(ENV.MINT_FIX_FEE);
+    } else {
+      throw new Error('Cannot infer txn type');
+    }
+
+    this.fixedFeeAtom = fixedFee;
+    return fixedFee;
+  }
+
+  calculateMarginFeeAtom(): bigint {
+    let marginFee: bigint;
+    let marginPercentage: number;
+    // TODO: check this.fixedFeeAtom
+
+    if (this.txnType === undefined) {
+      this.inferTxnType();
+    }
+    if (this.txnType === TxnType.MINT) {
+      marginPercentage = ENV.MINT_PERCENT_FEE;
+    }
+    if (this.txnType === TxnType.BURN) {
+      marginPercentage = ENV.BURN_PERCENT_FEE;
+    } else {
+      throw new Error('Cannot infer txn type');
+    }
+
+    marginFee =
+      ((this.fromAmountAtom - this.fixedFeeAtom) *
+        BigInt(100 - marginPercentage)) /
+        BigInt(100) +
+      BigInt(1); // +1 for rounding up
+
+    this.marginFeeAtom = marginFee;
+    return marginFee;
+  }
+
+  calculateToAmountAtom(): bigint {
+    let toAmount: bigint;
+    // TODO: make sure this.fixedFeeAtom, this.marginFeeAtom are set
+    toAmount = this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
+
+    this.toAmountAtom = toAmount;
+    return toAmount;
   }
 }
