@@ -34,7 +34,7 @@ class Database {
     await this.instance.end();
   }
 
-  async createTxn(bridgeTxn: BridgeTxnInfo): Promise<number> {
+  async createMintTxn(bridgeTxn: BridgeTxnInfo): Promise<number> {
     // will assign a dbId when created.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const query = `
@@ -58,7 +58,7 @@ class Database {
     bridgeTxn.dbId = dbId;
     return dbId as number;
   }
-  async readTxn(txnId: DbId) {
+  async readMintTxn(txnId: DbId) {
     if (typeof txnId !== 'number') {
       txnId = +txnId;
     }
@@ -74,7 +74,7 @@ class Database {
     }
     return result[0];
   }
-  async updateTxn(bridgeTxnInfo: BridgeTxnInfo) {
+  async updateMintTxn(bridgeTxnInfo: BridgeTxnInfo) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
@@ -104,7 +104,7 @@ class Database {
     logger.verbose(`Updated bridge txn with id ${bridgeTxnInfo.dbId}`);
     return result[0].id;
   }
-  async deleteTxn(dbId: DbId) {
+  async deleteMintTxn(dbId: DbId) {
     // const query = `
     //   DELETE FROM ${this.mintTableName} WHERE id = $1;
     // `;

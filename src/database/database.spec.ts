@@ -107,22 +107,22 @@ describe('DATABASE test', () => {
         fromBlockchain: BlockchainName.NEAR,
         toBlockchain: BlockchainName.ALGO,
       };
-      const res = await db.createTxn(bridgeTxn);
+      const res = await db.createMintTxn(bridgeTxn);
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
-      const res = await db.readTxn(1);
+      const res = await db.readMintTxn(1);
       expect(typeof res).toBe('object');
       // expect(res).toEqual(testBridgeTxn);
     });
     it('update a transaction', async () => {
       testBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
       testBridgeTxn.toTxnId = 'some_fake_txn_id';
-      const res1 = await db.updateTxn(testBridgeTxn);
+      const res1 = await db.updateMintTxn(testBridgeTxn);
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
-      const res2 = await db.readTxn(testBridgeTxn.dbId!);
+      const res2 = await db.readMintTxn(testBridgeTxn.dbId!);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(
