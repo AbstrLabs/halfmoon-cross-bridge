@@ -15,11 +15,11 @@ class BridgeTxnInfo {
   timestamp: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchain: BlockchainName;
+  fromBlockchain?: BlockchainName;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom?: bigint;
-  toBlockchain: BlockchainName;
+  toBlockchain?: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
   txnType?: TxnType;
@@ -30,36 +30,46 @@ class BridgeTxnInfo {
     timestamp?: bigint
   ): BridgeTxnInfo {
     const { from, to, amount, txnId } = apiCallParam;
-    var fromBlockchain: BlockchainName, toBlockchain: BlockchainName;
     timestamp = timestamp ?? BigInt(+Date.now());
-    if (txnType === TxnType.MINT) {
-      fromBlockchain = BlockchainName.NEAR;
-      toBlockchain = BlockchainName.ALGO;
-    } else if (txnType === TxnType.BURN) {
-      fromBlockchain = BlockchainName.ALGO;
-      toBlockchain = BlockchainName.NEAR;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
-        txnType,
-      });
-    }
 
     const bridgeTxnInfo = new BridgeTxnInfo({
       dbId: undefined,
-      fromAmountAtom: goNearToAtom(amount),
+      txnType,
       fixedFeeAtom: undefined,
-      marginFeeAtom: undefined,
-      toAmountAtom: undefined,
-      timestamp,
       fromAddr: from,
-      fromBlockchain,
+      fromAmountAtom: goNearToAtom(amount),
+      fromBlockchain: undefined,
       fromTxnId: txnId,
+      marginFeeAtom: undefined,
+      timestamp,
       toAddr: to,
-      toBlockchain,
+      toAmountAtom: undefined,
+      toBlockchain: undefined,
       toTxnId: undefined,
       txnStatus: BridgeTxnStatus.NOT_STARTED,
     });
     return bridgeTxnInfo;
+  }
+
+  static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxnInfo {
+    const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
+      dbId: dbItem.id,
+      txnType: dbType,
+
+      fixedFeeAtom: BigInt(dbItem.fixed_fee),
+      fromAddr: dbItem.near_address,
+      fromAmountAtom: BigInt(dbItem.amount),
+      fromBlockchain: undefined,
+      fromTxnId: dbItem.near_tx_hash,
+      marginFeeAtom: BigInt(dbItem.margin_fee),
+      timestamp: BigInt(dbItem.create_time),
+      toAddr: dbItem.algorand_address,
+      toAmountAtom: BigInt(dbItem.amount),
+      toBlockchain: undefined,
+      toTxnId: dbItem.algo_txn_id,
+      txnStatus: dbItem.request_status,
+    });
+    return bridgeTxn;
   }
 
   constructor({
@@ -83,12 +93,12 @@ class BridgeTxnInfo {
 
     fromAddr: string;
     fromAmountAtom: bigint;
-    fromBlockchain: BlockchainName;
+    fromBlockchain?: BlockchainName;
     fromTxnId: string;
 
     toAddr: string;
     toAmountAtom?: bigint;
-    toBlockchain: BlockchainName;
+    toBlockchain?: BlockchainName;
     toTxnId?: string;
 
     txnStatus?: BridgeTxnStatus;
@@ -111,6 +121,13 @@ class BridgeTxnInfo {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
+    if (
+      (this.fromBlockchain === undefined || this.toBlockchain === undefined) &&
+      this.txnType === undefined
+    ) {
+      throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM);
+    }
+
     this.initiate();
   }
 
@@ -126,6 +143,7 @@ class BridgeTxnInfo {
   initiate(): this {
     this.verify();
     this.inferTxnType();
+    this.inferBlockchainNames();
     this.getFixedFeeAtom();
     this.calculateMarginFeeAtom();
     this.calculateToAmountAtom();
@@ -149,7 +167,39 @@ class BridgeTxnInfo {
     return this;
   }
 
+  inferBlockchainNames(): {
+    fromBlockchain: BlockchainName;
+    toBlockchain: BlockchainName;
+  } {
+    if (this.fromBlockchain !== undefined && this.toBlockchain !== undefined) {
+      return {
+        fromBlockchain: this.fromBlockchain,
+        toBlockchain: this.toBlockchain,
+      };
+    }
+
+    let fromBlockchain: BlockchainName;
+    let toBlockchain: BlockchainName;
+    if (this.txnType === TxnType.MINT) {
+      fromBlockchain = BlockchainName.NEAR;
+      toBlockchain = BlockchainName.ALGO;
+    } else if (this.txnType === TxnType.BURN) {
+      fromBlockchain = BlockchainName.ALGO;
+      toBlockchain = BlockchainName.NEAR;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+        txnType: this.txnType,
+      });
+    }
+    this.fromBlockchain = fromBlockchain;
+    this.toBlockchain = toBlockchain;
+    return { fromBlockchain, toBlockchain };
+  }
+
   inferTxnType(): TxnType {
+    if (this.txnType !== undefined) {
+      return this.txnType;
+    }
     var txnType: TxnType;
     if (
       this.fromBlockchain === BlockchainName.ALGO &&

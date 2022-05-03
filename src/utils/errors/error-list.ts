@@ -50,6 +50,12 @@ const internalErrors = {
     name: 'Invalid Amount',
     message: 'Amount is not valid (internal error).',
   },
+  INVALID_BRIDGE_TXN_PARAM: {
+    errId: 108,
+    name: 'Invalid Bridge Transaction Parameter',
+    message:
+      'Both group of (fromBlockchain,toBlockchain) and (txnType) are undefined.',
+  },
 };
 const transactionErrors = {
   INVALID_TX_ID: {
