@@ -13,9 +13,11 @@ import {
 } from './formatter';
 
 import { ENV } from './dotenv';
+import { exampleBridgeTxnInfo } from './test-helper';
 
 const FAKE_TX_ID = 'some_fake_txn_id';
 const exampleDbItem = {
+  // TODO: this is deprecated. for receivedAtomNumber, fixedFeeAtomNumber, marginFeeAtomNumber
   algo_txn_id: FAKE_TX_ID,
   algorand_address: '0x1234567890123456789012345678901234567890',
   amount: '10000000000',
@@ -24,19 +26,6 @@ const exampleDbItem = {
   near_address: '0x1234567890123456789012345678901234567890',
   near_tx_hash: '0x1234567890123456789012345678901234567890',
   request_status: 'DONE_OUTGOING',
-};
-
-const exampleTxnInfo: BridgeTxnInfo = {
-  atomAmount: BigInt(10000000000), // big int jest err read on top.
-  dbId: 1,
-  fromAddr: '0x1234567890123456789012345678901234567890',
-  fromBlockchain: BlockchainName.NEAR,
-  fromTxnId: '0x1234567890123456789012345678901234567890',
-  timestamp: BigInt('1650264115011'),
-  toAddr: '0x1234567890123456789012345678901234567890',
-  toBlockchain: BlockchainName.ALGO,
-  toTxnId: FAKE_TX_ID,
-  txnStatus: BridgeTxnStatus.DONE_OUTGOING,
 };
 
 const exampleMintApiTxnInfo: MintApiParam = {
@@ -61,7 +50,7 @@ describe('param validation and formatting', () => {
         fromBlockchain: BlockchainName.NEAR,
         toBlockchain: BlockchainName.ALGO,
       })
-    ).toEqual(exampleTxnInfo);
+    ).toEqual(exampleBridgeTxnInfo);
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {

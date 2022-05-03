@@ -41,7 +41,7 @@ async function bridgeTxnHandler(
   logger.info(
     literal.MAKING_TXN(
       txnType,
-      bridgeTxnInfo.atomAmount,
+      bridgeTxnInfo.fromAmountAtom,
       bridgeTxnInfo.fromAddr,
       bridgeTxnInfo.toAddr
     )
@@ -57,7 +57,7 @@ async function bridgeTxnHandler(
   await db.updateMintTxn(bridgeTxnInfo);
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.fromAmountAtom,
     toAddr: ENV.NEAR_MASTER_ADDR,
     txnId: bridgeTxnInfo.fromTxnId,
   });
@@ -66,17 +66,17 @@ async function bridgeTxnHandler(
 
   if (txnType === TxnType.MINT) {
     const newAmount =
-      ((bridgeTxnInfo.atomAmount - goNearToAtom(ENV.MINT_FIX_FEE)) *
+      ((bridgeTxnInfo.fromAmountAtom - goNearToAtom(ENV.MINT_FIX_FEE)) *
         BigInt(100 - ENV.MINT_PERCENT_FEE)) /
       BigInt(100);
-    bridgeTxnInfo.atomAmount = newAmount;
+    bridgeTxnInfo.fromAmountAtom = newAmount;
   }
   if (txnType === TxnType.BURN) {
     const newAmount =
-      ((bridgeTxnInfo.atomAmount - goNearToAtom(ENV.BURN_FIX_FEE)) *
+      ((bridgeTxnInfo.fromAmountAtom - goNearToAtom(ENV.BURN_FIX_FEE)) *
         BigInt(100 - ENV.BURN_PERCENT_FEE)) /
       BigInt(100);
-    bridgeTxnInfo.atomAmount = newAmount;
+    bridgeTxnInfo.fromAmountAtom = newAmount;
   }
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
@@ -84,7 +84,7 @@ async function bridgeTxnHandler(
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.fromAmountAtom,
     txnId: literal.UNUSED,
   });
 
@@ -95,7 +95,7 @@ async function bridgeTxnHandler(
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.fromAmountAtom,
     txnId: outgoingTxnId,
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;

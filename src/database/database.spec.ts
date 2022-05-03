@@ -3,19 +3,7 @@ import { BlockchainName, BridgeTxnInfo, BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { db } from '.';
 import { dbItemToBridgeTxnInfo } from '../utils/formatter';
-
-const testBridgeTxn: BridgeTxnInfo = {
-  dbId: 1,
-  fromAddr: '0x1234567890123456789012345678901234567890',
-  toAddr: '0x1234567890123456789012345678901234567890',
-  atomAmount: BigInt('10000000000'),
-  timestamp: BigInt('1650264115011'),
-  txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
-  fromTxnId: '0x1234567890123456789012345678901234567890',
-  toTxnId: '0x1234567890123456789012345678901234567890',
-  fromBlockchain: BlockchainName.NEAR,
-  toBlockchain: BlockchainName.ALGO,
-};
+import { exampleBridgeTxnInfo } from '../utils/test-helper';
 
 describe('DATABASE test', () => {
   describe('AWS-RDS capability test', () => {
@@ -96,33 +84,26 @@ describe('DATABASE test', () => {
     });
 
     it.skip('create a transaction', async () => {
-      const bridgeTxn: BridgeTxnInfo = {
-        fromAddr: '0x1234567890123456789012345678901234567890',
-        toAddr: '0x1234567890123456789012345678901234567890',
-        atomAmount: BigInt('10000000000'),
+      const res = await db.createMintTxn({
+        ...exampleBridgeTxnInfo,
         timestamp: BigInt(+new Date()),
         txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
-        fromTxnId: '0x1234567890123456789012345678901234567890',
-        toTxnId: '0x1234567890123456789012345678901234567890',
-        fromBlockchain: BlockchainName.NEAR,
-        toBlockchain: BlockchainName.ALGO,
-      };
-      const res = await db.createMintTxn(bridgeTxn);
+      });
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
       const res = await db.readMintTxn(1);
       expect(typeof res).toBe('object');
-      // expect(res).toEqual(testBridgeTxn);
+      // expect(res).toEqual(exampleTxnInfo);
     });
     it('update a transaction', async () => {
-      testBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-      testBridgeTxn.toTxnId = 'some_fake_txn_id';
-      const res1 = await db.updateMintTxn(testBridgeTxn);
+      exampleBridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+      exampleBridgeTxnInfo.toTxnId = 'some_fake_txn_id';
+      const res1 = await db.updateMintTxn(exampleBridgeTxnInfo);
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
-      const res2 = await db.readMintTxn(testBridgeTxn.dbId!);
+      const res2 = await db.readMintTxn(exampleBridgeTxnInfo.dbId!);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(
@@ -130,7 +111,7 @@ describe('DATABASE test', () => {
           fromBlockchain: BlockchainName.NEAR,
           toBlockchain: BlockchainName.ALGO,
         })
-      ).toEqual(testBridgeTxn);
+      ).toEqual(exampleBridgeTxnInfo);
     });
   });
 });

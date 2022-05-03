@@ -13,12 +13,15 @@ type ApiCallParam = MintApiParam | BurnApiParam;
 
 interface BridgeTxnInfo {
   dbId?: number;
-  atomAmount: bigint;
+  fixedFeeAtom: bigint;
+  marginFeeAtom: bigint;
   timestamp: bigint;
   fromAddr: string;
+  fromAmountAtom: bigint;
   fromBlockchain: BlockchainName;
   fromTxnId: string;
   toAddr: string;
+  toAmountAtom: bigint;
   toBlockchain: BlockchainName;
   toTxnId?: string;
   txnStatus: BridgeTxnStatus;

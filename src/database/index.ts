@@ -46,7 +46,7 @@ class Database {
     const params = [
       bridgeTxn.fromAddr,
       bridgeTxn.toAddr,
-      bridgeTxn.atomAmount,
+      bridgeTxn.fromAmountAtom,
       bridgeTxn.timestamp,
       bridgeTxn.txnStatus,
       bridgeTxn.fromTxnId,
@@ -92,7 +92,7 @@ class Database {
       bridgeTxnInfo.fromTxnId,
       bridgeTxnInfo.toAddr,
       bridgeTxnInfo.fromAddr,
-      bridgeTxnInfo.atomAmount,
+      bridgeTxnInfo.fromAmountAtom,
       bridgeTxnInfo.timestamp,
     ];
     const result = await this.query(query, params);

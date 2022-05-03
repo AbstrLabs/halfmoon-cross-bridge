@@ -123,7 +123,10 @@ function apiParamToBridgeTxnInfo(
 
   const bridgeTxnInfo: BridgeTxnInfo = {
     dbId: undefined,
-    atomAmount,
+    fromAmountAtom: atomAmount,
+    fixedFeeAtom: BigInt(0),
+    marginFeeAtom: BigInt(0),
+    toAmountAtom: atomAmount,
     timestamp,
     fromAddr,
     fromBlockchain,
@@ -144,13 +147,16 @@ const dbItemToBridgeTxnInfo = (
   }
 ): BridgeTxnInfo => {
   const bridgeTxn: BridgeTxnInfo = {
-    atomAmount: BigInt(dbItem.amount),
+    fixedFeeAtom: BigInt(dbItem.fixed_fee),
+    marginFeeAtom: BigInt(dbItem.margin_fee),
     dbId: dbItem.id,
     fromAddr: dbItem.near_address,
+    fromAmountAtom: BigInt(dbItem.amount),
     fromBlockchain: extra.fromBlockchain,
     fromTxnId: dbItem.near_tx_hash,
     timestamp: BigInt(dbItem.create_time),
     toAddr: dbItem.algorand_address,
+    toAmountAtom: BigInt(dbItem.amount),
     toBlockchain: extra.toBlockchain,
     toTxnId: dbItem.algo_txn_id,
     txnStatus: dbItem.request_status,
