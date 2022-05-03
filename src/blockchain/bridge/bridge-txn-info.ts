@@ -3,9 +3,9 @@ export { BridgeTxnInfo };
 
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
-import { TxnParam, TxnType } from '..';
 
 import { ENV } from '../../utils/dotenv';
+import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
 
 class BridgeTxnInfo {

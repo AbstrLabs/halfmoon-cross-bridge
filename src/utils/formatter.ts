@@ -50,7 +50,17 @@ const algoAddr = z
   .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
 const parsableAmount = z
   .string()
-  .regex(/^ *[0-9,]{1,9}\.?[0-9]{0,10} *$/, 'malformed amount address');
+  .regex(/^ *[0-9,]{1,}\.?[0-9]{0,10} *$/, 'malformed amount address')
+  .refine((str: string) => {
+    const num = Number(str);
+    if (isNaN(num)) {
+      return false;
+    }
+    if (num < 1 || num > Number.MAX_SAFE_INTEGER) {
+      return false;
+    }
+    return true;
+  });
 
 const nearTxnId = z.string(); // TODO: unfinished
 const algoTxnId = z.string(); // TODO: unfinished
@@ -69,13 +79,13 @@ const burnApiParamParser = z.object({
 });
 
 const algoTxnParamParser = z.object({
-  atomAmount: z.bigint(), // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
+  atomAmount: z.bigint(),
   fromAddr: algoAddr,
   toAddr: algoAddr,
   txnId: algoTxnId,
 });
 const nearTxnParamParser = z.object({
-  atomAmount: z.bigint(), // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
+  atomAmount: z.bigint(),
   fromAddr: nearAddr,
   toAddr: nearAddr,
   txnId: nearTxnId,
@@ -83,7 +93,6 @@ const nearTxnParamParser = z.object({
 
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   try {
-    // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
     return mintApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -94,7 +103,6 @@ function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
 
 function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   try {
-    // TODO: big_int_amount should add a gt 1e+10 check (1 fixed cost)
     return burnApiParamParser.parse(apiParam);
   } catch (e) {
     throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
