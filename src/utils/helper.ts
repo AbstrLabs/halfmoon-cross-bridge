@@ -1,6 +1,7 @@
+export { ensureString, setImmediateInterval, sleep, optionalBigInt };
+
 import { BridgeError, ERRORS } from './errors';
 
-export { ensureString, setImmediateInterval, sleep };
 function ensureString(value: any): string {
   if (typeof value !== 'string') {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
@@ -19,3 +20,16 @@ function setImmediateInterval(func: () => any, interval: number): NodeJS.Timer {
 const sleep = (milliseconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
+
+// TODO: ADD TEST
+function optionalBigInt(value: string | number | bigint | boolean): bigint;
+function optionalBigInt(value: undefined): undefined;
+function optionalBigInt(
+  value: string | number | bigint | boolean | undefined
+): bigint | undefined {
+  if (value === undefined) {
+    return undefined;
+  } else {
+    return BigInt(value);
+  }
+}

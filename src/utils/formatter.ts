@@ -196,7 +196,7 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
   return goNearToAtom(nearPlain);
 }
 
-// TODO: NO TEST
+// TODO: ADD TEST
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
   if (!obj) {
