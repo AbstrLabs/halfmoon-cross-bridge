@@ -53,10 +53,10 @@ async function bridgeTxnHandler(
   /* MAKE BRIDGE TRANSACTION */
   // update as sequence diagram
 
-  bridgeTxnInfo.dbId = await db.createMintTxn(bridgeTxnInfo);
+  bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_INCOMING;
-  await db.updateMintTxn(bridgeTxnInfo);
+  await db.updateTxn(bridgeTxnInfo);
   // TODO: should use if.
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
@@ -65,12 +65,12 @@ async function bridgeTxnHandler(
     txnId: bridgeTxnInfo.fromTxnId,
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
-  await db.updateMintTxn(bridgeTxnInfo);
+  await db.updateTxn(bridgeTxnInfo);
 
   // make outgoing txn
   bridgeTxnInfo.toAmountAtom = bridgeTxnInfo.getToAmountAtom();
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-  await db.updateMintTxn(bridgeTxnInfo);
+  await db.updateTxn(bridgeTxnInfo);
 
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
@@ -80,7 +80,7 @@ async function bridgeTxnHandler(
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
   bridgeTxnInfo.toTxnId = outgoingTxnId;
-  await db.updateMintTxn(bridgeTxnInfo);
+  await db.updateTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
@@ -90,7 +90,7 @@ async function bridgeTxnHandler(
 
   // verify outgoing txn
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-  await db.updateMintTxn(bridgeTxnInfo);
+  await db.updateTxn(bridgeTxnInfo);
   // user confirmation via socket/email
 
   /* CLEAN UP */

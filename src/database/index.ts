@@ -1,3 +1,5 @@
+// TODO: separate database to database.ts from index.ts
+
 export { db };
 
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -10,15 +12,15 @@ import { postgres } from './aws-rds';
 
 type DbId = number;
 
-enum tableName {
+enum TableName {
   MINT_TABLE_NAME = `mint_request`,
   BURN_TABLE_NAME = `burn_request`,
 }
 
 class Database {
   private instance = postgres;
-  private mintTableName: tableName = tableName.MINT_TABLE_NAME;
-  private burnTableName: tableName = tableName.BURN_TABLE_NAME;
+  private mintTableName: TableName = TableName.MINT_TABLE_NAME;
+  private burnTableName: TableName = TableName.BURN_TABLE_NAME;
 
   get isConnected() {
     return this.instance.isConnected;
@@ -42,25 +44,13 @@ class Database {
     await this.instance.end();
   }
 
-  private async _createTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
+  public async createTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
     // will assign a dbId on creation.
     // TODO: Err handling, like sending alert email when db cannot connect.
-    let tableName;
-
-    if (bridgeTxn.txnType === TxnType.MINT) {
-      tableName = this.mintTableName;
-    } else if (bridgeTxn.txnType === TxnType.BURN) {
-      tableName = this.burnTableName;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: bridgeTxn.txnType,
-      });
-    }
-
+    const tableName = this._inferTableName(bridgeTxn);
     if (!this.isConnected) {
       await this.connect();
     }
-
     const query = `
       INSERT INTO ${tableName} 
       (
@@ -95,17 +85,12 @@ class Database {
     return dbId as DbId;
   }
 
-  async createMintTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
-    // will assign a dbId on creation.
-    return await this._createTxn(bridgeTxn);
-  }
-
-  async readMintTxn(txnId: DbId) {
-    if (typeof txnId !== 'number') {
-      txnId = +txnId;
-    }
+  public async readTxn(txnId: DbId, txnType: TxnType) {
+    // currently only used in test. not fixing.
+    // should return an BridgeTxn
+    // should use BridgeTxnInfo.fromDbItem to convert to BridgeTxn
     const query = `
-      SELECT * FROM ${this.mintTableName} WHERE id = $1;
+      SELECT * FROM ${this.mintTableName} WHERE db_id = $1;
     `;
     const params = [txnId];
     const result = await this.query(query, params);
@@ -114,37 +99,51 @@ class Database {
     return result[0];
   }
 
-  async updateMintTxn(bridgeTxnInfo: BridgeTxnInfo) {
+  async updateTxn(bridgeTxn: BridgeTxnInfo) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
+    const tableName = this._inferTableName(bridgeTxn);
+    if (!this.isConnected) {
+      await this.connect();
+    }
+
     const query = `
       UPDATE ${this.mintTableName} SET
-        request_status = $1, algo_txn_id = $2
-          WHERE (id = $3 AND near_tx_hash = $4 AND algorand_address = $5 AND near_address = $6 AND amount = $7 AND create_time = $8)
-      RETURNING id;
+        txn_status=$1, to_txn_id = $10
+          WHERE (
+            db_id=$11 AND create_time=$2 AND fixed_fee_atom=$3 AND
+            from_addr=$4 AND from_amount_atom=$5 AND from_txn_id=$6 AND
+            margin_fee_atom=$7 AND to_addr=$8 AND to_amount_atom=$9
+          )
+      RETURNING db_id;
     `;
     const params = [
-      bridgeTxnInfo.txnStatus,
-      bridgeTxnInfo.toTxnId,
-      bridgeTxnInfo.dbId,
-      bridgeTxnInfo.fromTxnId,
-      bridgeTxnInfo.toAddr,
-      bridgeTxnInfo.fromAddr,
-      bridgeTxnInfo.fromAmountAtom,
-      bridgeTxnInfo.timestamp,
+      bridgeTxn.txnStatus,
+      bridgeTxn.timestamp,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.fromAddr,
+      bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromTxnId,
+      bridgeTxn.marginFeeAtom,
+      bridgeTxn.toAddr,
+      bridgeTxn.toAmountAtom,
+      bridgeTxn.toTxnId,
+      bridgeTxn.dbId,
     ];
     const result = await this.query(query, params);
     try {
-      this._verifyResultLength(result, bridgeTxnInfo);
+      this._verifyResultLength(result, bridgeTxn);
     } catch (err) {
       throw err;
     }
-    logger.verbose(`Updated bridge txn with id ${bridgeTxnInfo.dbId}`);
-    return result[0].id;
+    logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
+    return result[0].db_id;
   }
-  async deleteMintTxn(dbId: DbId) {
+  async deleteTxn(dbId: DbId, txnType: TxnType) {
+    // never used.
+
     // const query = `
     //   DELETE FROM ${this.mintTableName} WHERE id = $1;
     // `;
@@ -155,6 +154,21 @@ class Database {
     });
   }
 
+  // PRIVATE METHODS
+
+  private _inferTableName(bridgeTxn: BridgeTxnInfo) {
+    let tableName: TableName;
+    if (bridgeTxn.txnType === TxnType.MINT) {
+      tableName = this.mintTableName;
+    } else if (bridgeTxn.txnType === TxnType.BURN) {
+      tableName = this.burnTableName;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+        txnType: bridgeTxn.txnType,
+      });
+    }
+    return tableName;
+  }
   private _verifyResultLength(result: any[], TxnInfo: DbId | BridgeTxnInfo) {
     // TODO: TxnInfo -> ErrInfoObj
     if (result.length === 0) {
