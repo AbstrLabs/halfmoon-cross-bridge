@@ -10,6 +10,7 @@ export {
   goNearToAtom,
   parseBurnApiParam,
   parseMintApiParam,
+  stringifyObjWithBigint,
   yoctoNearToAtom,
 };
 
@@ -21,6 +22,7 @@ import { logger } from './logger';
 import { utils } from 'near-api-js';
 import { TxnParam, TxnType } from '../blockchain';
 import { BridgeTxnInfo } from '../blockchain/bridge';
+import { json } from 'stream/consumers';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
@@ -192,4 +194,16 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
     });
   }
   return goNearToAtom(nearPlain);
+}
+
+// TODO: NO TEST
+function stringifyObjWithBigint(obj?: object): string {
+  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
+  if (!obj) {
+    return '';
+  }
+  return JSON.stringify(
+    obj,
+    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+  );
 }
