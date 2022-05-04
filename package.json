@@ -45,8 +45,8 @@
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
-    "test:db": "jest --testPathPattern=src/database -w=1 #serialize bigint",
-    "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint",
+    "test:db": "jest --testPathPattern=src/database ",
+    "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils -w=1 #serialize bigint"
   }

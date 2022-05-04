@@ -84,7 +84,7 @@ async function bridgeTxnHandler(
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.fromAmountAtom,
+    atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: outgoingTxnId,
   });
 

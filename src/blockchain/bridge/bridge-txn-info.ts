@@ -11,6 +11,7 @@ import { BridgeError, ERRORS } from '../../utils/errors';
 import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
+import { optionalBigInt } from '../../utils/helper';
 
 class BridgeTxnInfo {
   dbId?: number;
@@ -123,13 +124,6 @@ class BridgeTxnInfo {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
-    if (
-      (this.fromBlockchain === undefined || this.toBlockchain === undefined) &&
-      this.txnType === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM);
-    }
-
     this.initiate();
   }
 
@@ -186,6 +180,13 @@ class BridgeTxnInfo {
   }
 
   verify(): this {
+    if (
+      (this.fromBlockchain === undefined || this.toBlockchain === undefined) &&
+      this.txnType === undefined
+    ) {
+      throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM);
+    }
+
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this.getFixedFeeAtom();
     }
@@ -233,6 +234,11 @@ class BridgeTxnInfo {
 
   inferTxnType(): TxnType {
     if (this.txnType !== undefined) {
+      if (!(this.txnType in TxnType)) {
+        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+          txnType: this.txnType,
+        });
+      }
       return this.txnType;
     }
     var txnType: TxnType;
@@ -289,10 +295,10 @@ class BridgeTxnInfo {
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this.getFixedFeeAtom();
     }
+
     if (this.txnType === TxnType.MINT) {
       marginPercentage = ENV.MINT_PERCENT_FEE;
-    }
-    if (this.txnType === TxnType.BURN) {
+    } else if (this.txnType === TxnType.BURN) {
       marginPercentage = ENV.BURN_PERCENT_FEE;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
@@ -301,8 +307,8 @@ class BridgeTxnInfo {
     }
 
     marginFee =
-      ((this.fromAmountAtom - this.fixedFeeAtom) *
-        BigInt(100 - marginPercentage)) /
+      // TODO: fix marginPercentage cannot be 0.2% (rounding)
+      ((this.fromAmountAtom - this.fixedFeeAtom) * BigInt(marginPercentage)) /
         BigInt(100) +
       BigInt(1); // +1 for rounding up
 

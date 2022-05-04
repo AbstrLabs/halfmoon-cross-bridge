@@ -1,3 +1,6 @@
+// TODO: mint-burn-test: move more same functions to test helper.
+// TODO: test with <1 NEAR should all fail now (for fee).
+
 import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
@@ -17,10 +20,10 @@ describe('mint test', () => {
   // TODO: should in near test.
   // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
-    'mint 0.424 NEAR from NEAR to ALGO',
+    'burn 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
       // config
-      const amount = '0.424';
+      const amount = '1.2345678901';
 
       // simulate frontend: make NEAR txn
       const mintResponse: FinalExecutionOutcome =
