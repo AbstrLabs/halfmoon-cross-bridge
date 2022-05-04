@@ -206,7 +206,7 @@ class BridgeTxnInfo {
       fromBlockchain = BlockchainName.ALGO;
       toBlockchain = BlockchainName.NEAR;
     } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
       });
     }
@@ -231,7 +231,7 @@ class BridgeTxnInfo {
     ) {
       txnType = TxnType.BURN;
     } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         fromBlockchain: this.fromBlockchain,
         toBlockchain: this.toBlockchain,
       });
@@ -253,7 +253,7 @@ class BridgeTxnInfo {
     } else if (this.txnType === TxnType.BURN) {
       fixedFee = goNearToAtom(ENV.MINT_FIX_FEE);
     } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
       });
     }
@@ -279,7 +279,7 @@ class BridgeTxnInfo {
     if (this.txnType === TxnType.BURN) {
       marginPercentage = ENV.BURN_PERCENT_FEE;
     } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
       });
     }

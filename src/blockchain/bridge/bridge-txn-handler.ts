@@ -34,7 +34,7 @@ async function bridgeTxnHandler(
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       txnType: txnType,
     });
   }

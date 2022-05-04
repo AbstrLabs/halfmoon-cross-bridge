@@ -15,7 +15,7 @@ const internalErrors = {
     name: 'Not Implemented',
     message: 'Not implemented',
   },
-  UNKNOWN_TX_TYPE: {
+  UNKNOWN_TXN_TYPE: {
     errId: 101,
     name: 'Unknown Transaction Type',
     message: 'Wrong internal Transaction Type. Should be MINT or BURN',
