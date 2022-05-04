@@ -27,6 +27,7 @@ const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
 const MINT_NEAR_TX_ID = (txnId: Stringer) =>
   `Mint stake with transaction ID [${txnId}](NEAR).`;
 const DONE_MINT = 'mint success';
+const DONE_BURN = 'burn success';
 const MINT_AWAITING = 'Will redirect to "history" after transaction finished.';
 const TXN_CONFIRMED = (
   from: Stringer,
@@ -53,6 +54,7 @@ const literal = {
   ASA_CREATED,
   DB_ENTRY_CREATED,
   DONE_MINT,
+  DONE_BURN,
   MAKING_TXN,
   MINT_AWAITING,
   MINT_NEAR_TX_ID,
