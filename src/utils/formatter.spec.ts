@@ -7,19 +7,24 @@ import { exampleBridgeTxnInfo } from './test-helper';
 import { TxnType } from '../blockchain';
 import { BridgeTxnInfo } from '../blockchain/bridge';
 
+// TODO: move to test-helper + ren
 const FAKE_TX_ID = 'some_fake_txn_id';
+const FAKE_ADDR = '0x1234567890123456789012345678901234567890';
+
+// TODO: interface for this exampleDbItem with zod
 const exampleDbItem = {
-  // TODO: this is deprecated. for receivedAtomNumber, fixedFeeAtomNumber, marginFeeAtomNumber
-  algo_txn_id: FAKE_TX_ID,
-  algorand_address: '0x1234567890123456789012345678901234567890',
-  amount: '10000000000',
+  db_id: 1,
+  from_addr: 'some_from_addr',
+  from_amount_atom: '10000000000',
+  from_txn_id: FAKE_TX_ID,
+  to_addr: 'some_to_addr',
+  to_amount_atom: '642398',
+  to_txn_id: FAKE_TX_ID,
+  txn_status: 'some_txn_status',
+  txn_type: 'some_txn_type',
   create_time: '1650264115011',
-  id: 1,
-  near_address: '0x1234567890123456789012345678901234567890',
-  near_tx_hash: '0x1234567890123456789012345678901234567890',
-  request_status: 'DONE_OUTGOING',
-  fixed_fee: '123456',
-  margin_fee: '567890',
+  fixed_fee_atom: '567890',
+  margin_fee_atom: '53789243',
 };
 
 const exampleMintApiTxnInfo: MintApiParam = {
@@ -41,7 +46,7 @@ describe('param validation and formatting', () => {
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
     expect(BridgeTxnInfo.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
       exampleBridgeTxnInfo
-    );
+    ); // need --workers=1 flag
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {
@@ -59,7 +64,17 @@ describe('param validation and formatting', () => {
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-          unusedField: 'this does not matter',
+          parseErrorDetail: {
+            issues: [
+              {
+                validation: 'regex',
+                code: 'invalid_string',
+                message: 'malformed algorand address',
+                path: ['to'],
+              },
+            ],
+            name: 'ZodError',
+          },
         })
       );
     });
@@ -80,7 +95,17 @@ describe('param validation and formatting', () => {
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-          unusedField: 'this does not matter',
+          parseErrorDetail: {
+            issues: [
+              {
+                validation: 'regex',
+                code: 'invalid_string',
+                message: 'malformed near address',
+                path: ['to'],
+              },
+            ],
+            name: 'ZodError',
+          },
         })
       );
     });
