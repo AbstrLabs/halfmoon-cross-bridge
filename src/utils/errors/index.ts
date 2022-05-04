@@ -23,7 +23,7 @@ class BridgeError extends Error {
     super(
       // TODO: add extraArg to message
       `${ERROR_PREFIX} ${String(errorTemplate.errId)}: \n` +
-        `${errorTemplate.message}: ${extraArg}`
+        `${errorTemplate.message}: ${JSON.stringify(extraArg)}`
     );
 
     this.name = errorTemplate.name;
