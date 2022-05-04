@@ -8,8 +8,8 @@
 import { ENV } from '../utils/dotenv';
 import { postgres } from './aws-rds';
 
-it('create new mint table', async () => {
-  // skip: designed to be run once
+it.skip('create new mint table', async () => {
+  // skip: not a test, designed to be run once
   ENV; // import process.env
   const fs = require('fs');
 
@@ -23,6 +23,7 @@ it('create new mint table', async () => {
 });
 
 it.skip('fs.read', () => {
+  // skip: not needed
   const fs = require('fs');
 
   try {

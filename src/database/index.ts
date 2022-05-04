@@ -3,14 +3,22 @@ export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxnInfo } from '../blockchain/bridge';
+import { TxnType } from '../blockchain';
+import { literal } from '../utils/literal';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
 type DbId = number;
+
+enum tableName {
+  MINT_TABLE_NAME = `mint_request`,
+  BURN_TABLE_NAME = `burn_request`,
+}
+
 class Database {
   private instance = postgres;
-  private mintTableName = `user_mint_request`;
-  private burnTableName = `user_burn_request`;
+  private mintTableName: tableName = tableName.MINT_TABLE_NAME;
+  private burnTableName: tableName = tableName.BURN_TABLE_NAME;
 
   get isConnected() {
     return this.instance.isConnected;
@@ -34,29 +42,59 @@ class Database {
     await this.instance.end();
   }
 
-  async createMintTxn(bridgeTxn: BridgeTxnInfo): Promise<number> {
-    // will assign a dbId when created.
+  private async _createTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
+    // will assign a dbId on creation.
     // TODO: Err handling, like sending alert email when db cannot connect.
+    let tableName;
+
+    if (bridgeTxn.txnType === TxnType.MINT) {
+      tableName = this.mintTableName;
+    } else if (bridgeTxn.txnType === TxnType.BURN) {
+      tableName = this.burnTableName;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+        txnType: bridgeTxn.txnType,
+      });
+    }
+
+    if (!this.isConnected) {
+      await this.connect();
+    }
+
     const query = `
-      INSERT INTO ${this.mintTableName} (
-        near_address, algorand_address, amount, create_time, request_status, near_tx_hash, algo_txn_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO ${tableName} 
+      (
+        txn_status, create_time, fixed_fee_atom, from_addr, from_amount_atom,
+        from_txn_id, margin_fee_atom, to_addr, to_amount_atom, to_txn_id
+      ) 
+      VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9, $10
+      ) 
       RETURNING id;
     `;
     const params = [
-      bridgeTxn.fromAddr,
-      bridgeTxn.toAddr,
-      bridgeTxn.fromAmountAtom,
-      bridgeTxn.timestamp,
       bridgeTxn.txnStatus,
+      bridgeTxn.timestamp,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.fromAddr,
+      bridgeTxn.fromAmountAtom,
       bridgeTxn.fromTxnId,
+      bridgeTxn.marginFeeAtom,
+      bridgeTxn.toAddr,
+      bridgeTxn.toAmountAtom,
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
     const dbId = result[0].id;
-    logger.info(`Created bridge txn with id ${dbId}`);
+    logger.info(literal.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
-    return dbId as number;
+    return dbId as DbId;
+  }
+
+  async createMintTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
+    // will assign a dbId on creation.
+    return await this._createTxn(bridgeTxn);
   }
   async readMintTxn(txnId: DbId) {
     if (typeof txnId !== 'number') {

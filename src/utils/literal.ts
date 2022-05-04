@@ -1,3 +1,4 @@
+// TODO: ren to literals for zod
 export { literal };
 type Stringer =
   | string
@@ -43,10 +44,14 @@ const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
+const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
+  `Created bridge txn in table ${txnType} with id ${dbId}`;
 
 const SILLY_LOG = {};
+
 const literal = {
   ASA_CREATED,
+  DB_ENTRY_CREATED,
   DONE_MINT,
   MAKING_TXN,
   MINT_AWAITING,
