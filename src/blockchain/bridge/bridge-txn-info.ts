@@ -45,7 +45,7 @@ class BridgeTxnInfo {
       toAmountAtom: undefined,
       toBlockchain: undefined,
       toTxnId: undefined,
-      txnStatus: BridgeTxnStatus.NOT_STARTED,
+      txnStatus: BridgeTxnStatus.DOING_INITIALIZE,
     });
     return bridgeTxnInfo;
   }
@@ -115,7 +115,7 @@ class BridgeTxnInfo {
     this.toAddr = toAddr;
     this.toAmountAtom = toAmountAtom;
     this.toBlockchain = toBlockchain;
-    this.txnStatus = txnStatus ?? BridgeTxnStatus.NOT_STARTED;
+    this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
     this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;

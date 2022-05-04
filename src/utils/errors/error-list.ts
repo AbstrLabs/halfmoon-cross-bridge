@@ -1,6 +1,6 @@
-export { ERRORS };
+// TODO: INVALID_TX_ID should ren to TXN
 
-import { ErrorGroup, ErrorTemplate } from '.';
+export { ERRORS };
 
 const ERROR_RANGES = {
   // TODO: Ren TXN, to API, and its number to 100.

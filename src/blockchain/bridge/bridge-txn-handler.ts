@@ -1,3 +1,5 @@
+// TODO: add error handling
+// TODO: maybe merge to BridgeTxn class
 export { bridgeTxnHandler };
 
 import { Blockchain, TxnType } from '..';
@@ -48,14 +50,14 @@ async function bridgeTxnHandler(
   );
   await db.connect();
 
-  /* MAKE TRANSACTION */
+  /* MAKE BRIDGE TRANSACTION */
+  // update as sequence diagram
 
   bridgeTxnInfo.dbId = await db.createMintTxn(bridgeTxnInfo);
 
-  // update as sequence diagram
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.CONFIRM_INCOMING;
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_INCOMING;
   await db.updateMintTxn(bridgeTxnInfo);
-  // should use if.
+  // TODO: should use if.
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
     atomAmount: bridgeTxnInfo.fromAmountAtom,
@@ -65,20 +67,19 @@ async function bridgeTxnHandler(
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateMintTxn(bridgeTxnInfo);
 
+  // make outgoing txn
   bridgeTxnInfo.toAmountAtom = bridgeTxnInfo.getToAmountAtom();
-
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
   await db.updateMintTxn(bridgeTxnInfo);
+
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
     toAddr: bridgeTxnInfo.toAddr,
     atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: literal.UNUSED,
   });
-
-  // verify outgoing tx
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
   bridgeTxnInfo.toTxnId = outgoingTxnId;
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.VERIFY_OUTGOING;
   await db.updateMintTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
     fromAddr: ENV.ALGO_MASTER_ADDR,
@@ -86,10 +87,11 @@ async function bridgeTxnHandler(
     atomAmount: bridgeTxnInfo.fromAmountAtom,
     txnId: outgoingTxnId,
   });
+
+  // verify outgoing txn
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
   await db.updateMintTxn(bridgeTxnInfo);
-
-  // user confirmation via socket
+  // user confirmation via socket/email
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
