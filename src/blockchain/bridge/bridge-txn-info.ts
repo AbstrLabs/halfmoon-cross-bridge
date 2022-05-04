@@ -1,5 +1,8 @@
-// TODO: more txnStatus for internal process like fee calculation
-// TODO: rename BridgeTxnInfo To BridgeTxn
+// TODO: (next line) more txnStatus for internal process like fee calculation.
+// TODO: 1. apply the thing to this class.
+// TODO: 2. rename class BridgeTxnInfo To BridgeTxn
+// TODO: 3. rename field timestamp to createTime
+
 export { BridgeTxnInfo };
 
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
@@ -52,21 +55,21 @@ class BridgeTxnInfo {
 
   static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxnInfo {
     const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
-      dbId: dbItem.id,
+      dbId: dbItem.db_id,
       txnType: dbType,
 
-      fixedFeeAtom: BigInt(dbItem.fixed_fee),
-      fromAddr: dbItem.near_address,
-      fromAmountAtom: BigInt(dbItem.amount),
+      fixedFeeAtom: BigInt(dbItem.fixed_fee_atom),
+      fromAddr: dbItem.from_addr,
+      fromAmountAtom: BigInt(dbItem.from_amount_atom),
       fromBlockchain: undefined,
-      fromTxnId: dbItem.near_tx_hash,
-      marginFeeAtom: BigInt(dbItem.margin_fee),
+      fromTxnId: dbItem.from_txn_id,
+      marginFeeAtom: BigInt(dbItem.margin_fee_atom),
       timestamp: BigInt(dbItem.create_time),
-      toAddr: dbItem.algorand_address,
-      toAmountAtom: BigInt(dbItem.amount),
+      toAddr: dbItem.to_addr,
+      toAmountAtom: BigInt(dbItem.to_amount_atom),
       toBlockchain: undefined,
-      toTxnId: dbItem.algo_txn_id,
-      txnStatus: dbItem.request_status,
+      toTxnId: dbItem.to_txn_id,
+      txnStatus: dbItem.txn_status,
     });
     return bridgeTxn;
   }
@@ -137,7 +140,10 @@ class BridgeTxnInfo {
     }
     return this.toAmountAtom;
   }
-
+  /**
+   * @param  {BridgeTxnInfo} other
+   * @returns {boolean} true if the two BridgeTxnInfo are considered same
+   */
   equals(other: BridgeTxnInfo): boolean {
     return (
       this.fromAddr === other.fromAddr &&
@@ -159,6 +165,16 @@ class BridgeTxnInfo {
 
   // methods below are likely to be private
 
+  /**
+   * Initiate the BridgeTxn.
+   * Most fields are readonly, and are defined after initiate().
+   * 3 Exceptions: `dbId`, `toTxnId` are allowed to be assigned once.
+   * Field `txnStatus` is allowed to be assigned by the ${@link enum BridgeTxnStatus}.
+   *
+   * @returns {BridgeTxn} this
+   *
+   * TODO: link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
+   */
   initiate(): this {
     this.verify();
     this.inferTxnType();
