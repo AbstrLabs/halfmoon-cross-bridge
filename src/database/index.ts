@@ -71,7 +71,7 @@ class Database {
         $1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10
       ) 
-      RETURNING id;
+      RETURNING db_id;
     `;
     const params = [
       bridgeTxn.txnStatus,
@@ -86,7 +86,10 @@ class Database {
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
-    const dbId = result[0].id;
+    this._verifyResultLength(result, bridgeTxn);
+
+    const dbId = result[0]['db_id'];
+
     logger.info(literal.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
     return dbId as DbId;
@@ -96,6 +99,7 @@ class Database {
     // will assign a dbId on creation.
     return await this._createTxn(bridgeTxn);
   }
+
   async readMintTxn(txnId: DbId) {
     if (typeof txnId !== 'number') {
       txnId = +txnId;
@@ -105,13 +109,11 @@ class Database {
     `;
     const params = [txnId];
     const result = await this.query(query, params);
-    try {
-      this._verifyResultLength(result, txnId);
-    } catch (err) {
-      throw err;
-    }
+    this._verifyResultLength(result, txnId);
+
     return result[0];
   }
+
   async updateMintTxn(bridgeTxnInfo: BridgeTxnInfo) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
@@ -154,6 +156,7 @@ class Database {
   }
 
   private _verifyResultLength(result: any[], TxnInfo: DbId | BridgeTxnInfo) {
+    // TODO: TxnInfo -> ErrInfoObj
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {
         TxnInfo: TxnInfo,

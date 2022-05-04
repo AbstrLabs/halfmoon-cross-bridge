@@ -7,10 +7,14 @@ import { db } from '.';
 import { exampleBridgeTxnInfo } from '../utils/test-helper';
 
 describe('DATABASE test', () => {
+  beforeAll(async () => {
+    await db.connect();
+  });
+  afterAll(async () => {
+    db.disconnect();
+    await db.end();
+  });
   describe('AWS-RDS capability test', () => {
-    afterAll(async () => {
-      await db.end();
-    });
     let _ = ENV; // to load .env file
     // it('connect to AWS-RDS via class', async () => {
     //   expect(await db._connectionTest()).toBe('Hello world!');
@@ -75,16 +79,8 @@ describe('DATABASE test', () => {
       expect(res_before_del.length - res_after_del.length).toBe(1);
     });
   });
-  describe('create transaction', () => {
-    beforeAll(async () => {
-      await db.connect();
-    });
-    afterAll(async () => {
-      db.disconnect();
-      await db.end();
-    });
-
-    it.skip('create a transaction', async () => {
+  describe('CRUD test with Bridge Txn', () => {
+    it('create a transaction', async () => {
       const res = await db.createMintTxn(exampleBridgeTxnInfo);
       expect(typeof res).toBe('number');
     });

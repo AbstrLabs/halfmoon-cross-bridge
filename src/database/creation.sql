@@ -28,4 +28,7 @@ COMMENT ON COLUMN mint_request.to_txn_id IS 'checked always 52, but not sure. us
 
 -- Indices -------------------------------------------------------
 
+-- -- create:
 -- CREATE UNIQUE INDEX mint_request_pkey ON mint_request(id int4_ops);
+-- -- reset:
+-- ALTER SEQUENCE mint_request_db_id_seq RESTART WITH 1
