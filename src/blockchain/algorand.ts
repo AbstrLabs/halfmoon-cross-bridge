@@ -25,11 +25,13 @@ import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';
 
+// TODO: constructor: move config to param
 class AlgorandBlockchain extends Blockchain {
-  readonly client: AlgodClient;
-  readonly indexer: Indexer;
-  readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
-  readonly name = BlockchainName.ALGO;
+  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
+  public readonly client: AlgodClient;
+  public readonly indexer: Indexer;
+  public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
+  public readonly name = BlockchainName.ALGO;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
@@ -267,9 +269,7 @@ class AlgorandBlockchain extends Blockchain {
   }
 }
 
-const algoBlockchain = new AlgorandBlockchain();
-
-// For jest only
+// For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
 class TestAlgo extends AlgorandBlockchain {
   constructor() {
     super();
@@ -299,4 +299,6 @@ class TestAlgo extends AlgorandBlockchain {
     );
   }
 }
+
+const algoBlockchain = new AlgorandBlockchain();
 const testAlgo = new TestAlgo();
