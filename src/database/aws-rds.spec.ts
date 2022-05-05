@@ -15,7 +15,7 @@ it.skip('create new mint table', async () => {
   const fs = require('fs');
 
   const createNewMintTableQuery = fs.readFileSync(
-    __dirname + '/mint-creation.sql',
+    __dirname + '/sql/mint-creation.sql',
     'utf8'
   );
   await postgres.connect();
@@ -29,7 +29,7 @@ it('create new burn table', async () => {
   const fs = require('fs');
 
   const createNewBurnTableQuery = fs.readFileSync(
-    __dirname + '/burn-creation.sql',
+    __dirname + '/sql/burn-creation.sql',
     'utf8'
   );
   await postgres.connect();
