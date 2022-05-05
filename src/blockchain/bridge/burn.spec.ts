@@ -19,10 +19,10 @@ describe('burn test', () => {
   // TODO: should in near test.
   // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
-    'mint 2.345678901 NEAR from NEAR to ALGO',
+    'burn 1.2345678901 goNEAR from ALGO to NEAR',
     async () => {
       // config
-      const amount = '2.345678901';
+      const amount = '1.2345678901';
 
       // simulate frontend: make NEAR txn
       // TODO: return txnId is nice. Should do the same on mint.
@@ -41,11 +41,9 @@ describe('burn test', () => {
 
       // call API
       const bridgeTxnInfo = await burn(apiCallParam);
-      console.log('bridgeTxnInfo : ', bridgeTxnInfo); // DEV_LOG_TO_REMOVE
 
       // should return AlgoTxnId,etc.
 
-      console.log('bridgeTxnInfo : ', bridgeTxnInfo); // DEV_LOG_TO_REMOVE
       // verification
       expect(bridgeTxnInfo.toTxnId).toBeDefined();
     },

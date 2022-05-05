@@ -20,7 +20,7 @@ describe('mint test', () => {
   // TODO: should in near test.
   // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
-    'burn 1.2345678901 NEAR from NEAR to ALGO',
+    'mint 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
       // config
       const amount = '1.2345678901';
@@ -46,7 +46,7 @@ describe('mint test', () => {
       // verification
       expect(bridgeTxnInfo.toTxnId).toBeDefined();
     },
-    TIMEOUT_30S
+    TIMEOUT_30S * 3
   );
   /* TODO: More tests:
    * - wrong amount,

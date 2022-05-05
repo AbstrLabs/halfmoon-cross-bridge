@@ -26,7 +26,7 @@ it.skip('create new mint table', async () => {
   await postgres.end();
 });
 
-it('create new burn table', async () => {
+it.skip('create new burn table', async () => {
   // skip: not a test, designed to be run once
   ENV; // import process.env
 

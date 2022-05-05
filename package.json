@@ -15,12 +15,15 @@
     "@types/dotenv-parse-variables": "^2.0.1",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.1",
+    "@types/json-bigint": "^1.0.1",
     "@types/pg": "^8.6.5",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
     "concurrently": "^7.1.0",
     "eslint": "^8.14.0",
+    "husky": "^7.0.0",
     "jest": "^27.5.1",
+    "json-bigint": "^1.0.0",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
     "prettier": "^2.6.2",
@@ -47,10 +50,11 @@
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
-    "test:db": "jest --testPathPattern=src/database ",
+    "test:db": "jest --testPathPattern=src/database",
     "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils -w=1 #serialize bigint"
+    "test:util": "jest --testPathPattern=src/utils",
+    "prepare": "husky install"
   },
   "version": "1.0.0"
 }

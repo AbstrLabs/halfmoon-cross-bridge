@@ -138,23 +138,28 @@ class BridgeTxnInfo {
   /**
    * @param  {BridgeTxnInfo} other
    * @returns {boolean} true if the two BridgeTxnInfo are considered same
+   *
+   * @todo: Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
   equals(other: BridgeTxnInfo): boolean {
     return (
       this.fromAddr === other.fromAddr &&
-      this.fromAmountAtom === other.fromAmountAtom &&
+      this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
       this.fromBlockchain === other.fromBlockchain &&
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
-      this.toAmountAtom === other.toAmountAtom &&
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.toAmountAtom!.toString() === other.toAmountAtom!.toString() &&
       this.toBlockchain === other.toBlockchain &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
       this.txnType === other.txnType &&
       this.dbId === other.dbId &&
-      this.fixedFeeAtom === other.fixedFeeAtom &&
-      this.marginFeeAtom === other.marginFeeAtom &&
-      this.timestamp === other.timestamp
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.fixedFeeAtom!.toString() === other.fixedFeeAtom!.toString() &&
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
+      this.timestamp.toString() === other.timestamp.toString()
     );
   }
 
