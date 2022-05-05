@@ -29,6 +29,7 @@ const MINT_NEAR_TX_ID = (txnId: Stringer) =>
 const DONE_MINT = 'mint success';
 const DONE_BURN = 'burn success';
 const MINT_AWAITING = 'Will redirect to "history" after transaction finished.';
+
 const TXN_CONFIRMED = (
   from: Stringer,
   to: Stringer,
@@ -36,6 +37,7 @@ const TXN_CONFIRMED = (
   txnID: Stringer,
   confirmRound: Stringer
 ) =>
+  //TODO: on what chain??
   `Transaction from ${from} to ${to} of amount ${amount} (atomic unit) with id ${txnID} confirmed in round ${confirmRound}`;
 
 const ASA_CREATED = (assetName: Stringer, txnId: Stringer, assetId: Stringer) =>

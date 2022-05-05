@@ -20,7 +20,8 @@ async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxnInfo> {
     TxnType.BURN,
     BigInt(Date.now())
   );
-  const bridgeTxnInfo = bridgeTxnHandler(rawBridgeTxnInfo);
+  const bridgeTxnInfo = await bridgeTxnHandler(rawBridgeTxnInfo);
+  // ERR handler .burn success
   logger.info(literal.DONE_BURN);
   return bridgeTxnInfo;
 }

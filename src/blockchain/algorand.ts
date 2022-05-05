@@ -1,5 +1,5 @@
 /* Algorand functionalities wrapped up with our centralized account */
-export { algoBlockchain, type AlgorandBlockchain };
+export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
@@ -160,6 +160,7 @@ class AlgorandBlockchain extends Blockchain {
     );
   }
   // TODO: makeAsaTxn needs an err handler.
+  // TODO: use AlgoTxnParam here
   protected async _makeAsaTxn(
     to: AlgoAddr,
     from: AlgoAddr,
@@ -213,7 +214,7 @@ class AlgorandBlockchain extends Blockchain {
         from,
         to,
         amountInAtomic,
-        confirmedTxn.txId,
+        txnId,
         confirmedTxn['confirmed-round']
       )
     );
@@ -267,3 +268,35 @@ class AlgorandBlockchain extends Blockchain {
 }
 
 const algoBlockchain = new AlgorandBlockchain();
+
+// For jest only
+class TestAlgo extends AlgorandBlockchain {
+  constructor() {
+    super();
+  }
+  async emulateFrontendTxn(
+    algoTxnParam: AlgoTxnParam,
+    senderPassPhrase: string
+  ) {
+    const sender = algosdk.mnemonicToSecretKey(senderPassPhrase);
+    return this._makeAsaTxn(
+      algoTxnParam.toAddr,
+      algoTxnParam.fromAddr,
+      algoTxnParam.atomAmount,
+      sender,
+      ENV.TEST_NET_GO_NEAR_ASSET_ID
+    );
+  }
+  async sendFromExampleToMaster(atomAmount: bigint): Promise<AlgoTxnId> {
+    return this.emulateFrontendTxn(
+      {
+        toAddr: ENV.ALGO_MASTER_ADDR,
+        fromAddr: ENV.ALGO_EXAMPL_ADDR,
+        atomAmount: atomAmount,
+        txnId: '', // TODO: should support undefined
+      },
+      ENV.ALGO_EXAMPL_PASS
+    );
+  }
+}
+const testAlgo = new TestAlgo();
