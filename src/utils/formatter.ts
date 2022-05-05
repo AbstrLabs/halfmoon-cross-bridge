@@ -12,6 +12,7 @@ export {
   parseMintApiParam,
   stringifyObjWithBigint,
   yoctoNearToAtom,
+  atomToYoctoNear,
 };
 
 import { BlockchainName, BridgeTxnStatus } from '..';
@@ -113,6 +114,8 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
 }
 
 // goNear related
+// TODO: rename. it converts all format to goNEAR atom.
+
 function goNearToAtom(goNearPlain: string | number): bigint {
   // TODO: typing: return value should be a BigInt
 
@@ -194,6 +197,12 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
     });
   }
   return goNearToAtom(nearPlain);
+}
+
+// TODO: add test.
+function atomToYoctoNear(atom: bigint): string {
+  const coeStr = '0'.repeat(24 - ENV.GO_NEAR_DECIMALS);
+  return atom.toString() + coeStr;
 }
 
 // TODO: ADD TEST

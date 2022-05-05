@@ -2,7 +2,15 @@
 
 export { nearBlockchain, type NearBlockchain };
 
-import { providers } from 'near-api-js';
+import {
+  type Near,
+  type Account,
+  connect,
+  KeyPair,
+  keyStores,
+  providers,
+  utils,
+} from 'near-api-js';
 
 import {
   type AlgoTxnId,
@@ -16,21 +24,51 @@ import { logger } from '../utils/logger';
 import { Blockchain } from '.';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { yoctoNearToAtom } from '../utils/formatter';
+import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 
 class NearBlockchain extends Blockchain {
-  protected readonly centralizedAcc = undefined;
+  public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
   readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
     'https://archival-rpc.testnet.near.org'
   ); // TODO: deprecated
+  // TODO: ren to indexer, also in abstract class
+  protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
+  protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
   };
-  name = BlockchainName.NEAR;
+  private _keyStore: keyStores.KeyStore;
+  public readonly name = BlockchainName.NEAR;
 
   constructor() {
     super();
+    this._keyStore = new keyStores.InMemoryKeyStore();
+
+    // setup client
+    const config = {
+      networkId: 'testnet',
+      keyStore: this._keyStore,
+      nodeUrl: 'https://rpc.testnet.near.org',
+      walletUrl: 'https://wallet.testnet.near.org',
+      helperUrl: 'https://helper.testnet.near.org',
+      explorerUrl: 'https://explorer.testnet.near.org',
+      headers: {},
+    };
+    connect(config).then((near) => {
+      this.client = near;
+
+      // setup centralizedAcc
+      const centralizedAccPrivKey = ENV.NEAR_MASTER_PRIV;
+      const keyPair = KeyPair.fromString(centralizedAccPrivKey);
+      this._keyStore
+        .setKey('testnet', this.centralizedAddr, keyPair)
+        .then(async () => {
+          this.centralizedAcc = await this.client!.account(
+            this.centralizedAddr
+          );
+        });
+    });
   }
 
   async getTxnStatus(
@@ -115,13 +153,18 @@ class NearBlockchain extends Blockchain {
     return true;
   }
   async makeOutgoingTxn(nearTxnParam: NearTxnParam): Promise<AlgoTxnId> {
-    throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED);
+    const response = await this.centralizedAcc.sendMoney(
+      nearTxnParam.toAddr, // receiver account
+      atomToYoctoNear(nearTxnParam.atomAmount) // amount in yoctoNEAR
+    );
+    console.log('response : ', response); // DEV_LOG_TO_REMOVE
+
+    return response.transaction_outcome.id;
   }
   // not used.
   protected static async getRecentTransactions(
     limit: number
   ): Promise<NearTxnId[]> {
-    logger.silly('nearIndexer getRecentTransactions() limit');
     throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED);
   }
 }
