@@ -1,4 +1,7 @@
 /* This is not a test.
+ *
+ * TIPS: It's better to use Postico instead of this file.
+ *
  * Using once to create a new mint table 20220503
  * with yarn command:
  * ```zsh

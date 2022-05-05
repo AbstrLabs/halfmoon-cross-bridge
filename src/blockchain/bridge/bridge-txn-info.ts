@@ -1,5 +1,5 @@
 // TODO: (next line) more txnStatus for internal process like fee calculation.
-// TODO: 1. apply the thing to this class.
+// TODO: 1. apply last line txnStatus to this class.
 // TODO: 2. rename class BridgeTxnInfo To BridgeTxn
 // TODO: 3. rename field timestamp to createTime
 

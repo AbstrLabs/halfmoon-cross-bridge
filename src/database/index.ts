@@ -1,4 +1,5 @@
-// TODO: separate database to database.ts from index.ts
+// TODO: 1. separate database to database.ts from index.ts
+// TODO: 2. DbItem interface / class
 
 export { db };
 
