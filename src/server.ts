@@ -3,12 +3,14 @@ export { startServer };
 import express, { Request, Response } from 'express';
 
 import { ENV } from './utils/dotenv';
-import { type MintApiParam } from './';
+import { type MintApiParam as BurnApiParam } from './';
 import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
 import { BridgeTxnInfo } from './blockchain/bridge';
+import { parseBurnApiParam, parseMintApiParam } from './utils/formatter';
+import { burn } from './blockchain/bridge/burn';
 
 async function homePageTest() {
   /* Used once code */
@@ -41,18 +43,27 @@ function startServer() {
       await mintResp({ from, to, amount, txnId: txnId }, res);
     });
 
-  /* burn */
-  // app
-  //   .get('/api/burn', (req: Request, res: Response) => {
-  //     if (!req.query.amount || !req.query.to || !req.query.from) {
-  //       return res.status(400).send('Missing required query params');
-  //     }
-  //     // TODO: burn logic
-  //     res.send(
-  //       `Burning ${req.query.amount} goNEAR from ${req.query.from}(ALGO) to ${req.query.to}(NEAR)`
-  //     );
-  //   })
-  //   .post('/api/burn', (req: Request, res: Response) => {});
+  apiRouter
+    .route('/burn')
+    .get(async (req: Request, res: Response) => {
+      const [from, to, amount, txnId] = [
+        ensureString(req.query.from),
+        ensureString(req.query.to),
+        ensureString(req.query.amount),
+        ensureString(req.query.txnId),
+      ];
+      await burnResp({ from, to, amount, txnId }, res);
+    })
+    .post(async (req: Request, res: Response) => {
+      // res.json(req.body);
+      const [from, to, amount, txnId] = [
+        ensureString(req.body['mint_from']),
+        ensureString(req.body['mint_to']),
+        `${req.body['mint_amount']}`,
+        ensureString(req.body['mint_txnId']),
+      ];
+      await burnResp({ from, to, amount, txnId: txnId }, res);
+    });
 
   app.get('/', async (req: Request, res: Response) => {
     if (
@@ -79,11 +90,12 @@ function startServer() {
 
 /* server-side function wrap */
 
-async function mintResp(apiCallParam: MintApiParam, res: Response) {
+// TODO: 2-func: ref mintResp and burnResp since they are in same structure.
+async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
-  const mintApiParam = apiCallParam;
+  const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
-  var bridgeTxnInfo: BridgeTxnInfo | undefined = undefined; // TODO
+  var bridgeTxnInfo: BridgeTxnInfo;
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
   res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
@@ -94,6 +106,30 @@ async function mintResp(apiCallParam: MintApiParam, res: Response) {
     res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');
+    res.end();
+    throw e;
+  }
+  return bridgeTxnInfo;
+}
+
+// TODO: 2-func: ref mintResp and burnResp since they are in same structure.
+async function burnResp(apiCallParam: BurnApiParam, res: Response) {
+  /* CONFIG */
+  const burnApiParam = parseBurnApiParam(apiCallParam);
+  const { from, to, amount, txnId } = burnApiParam;
+  var bridgeTxnInfo: BridgeTxnInfo;
+  logger.info(literal.START_BURNING(amount, from, to));
+  res.write(`${literal.START_BURNING(amount, from, to)}\n`);
+  res.write(`${literal.BURN_ALGO_TX_ID(txnId)}\n`);
+  res.write(`${literal.BURN_AWAITING}\n`);
+  try {
+    bridgeTxnInfo = await burn(burnApiParam);
+    logger.info(literal.DONE_BURN);
+    res.end();
+  } catch (e) {
+    res.status(400).send('Missing required query params');
+    res.end();
+    throw e;
   }
   return bridgeTxnInfo;
 }
