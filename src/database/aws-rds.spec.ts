@@ -3,6 +3,7 @@
  * with yarn command:
  * ```zsh
  * yarn test -t 'create new mint table'
+ * yarn test -t 'create new burn table'
  * ```
  */
 import { ENV } from '../utils/dotenv';
@@ -14,11 +15,25 @@ it.skip('create new mint table', async () => {
   const fs = require('fs');
 
   const createNewMintTableQuery = fs.readFileSync(
-    __dirname + '/creation.sql',
+    __dirname + '/mint-creation.sql',
     'utf8'
   );
   await postgres.connect();
   await postgres.query(createNewMintTableQuery);
+  await postgres.end();
+});
+
+it('create new burn table', async () => {
+  // skip: not a test, designed to be run once
+  ENV; // import process.env
+  const fs = require('fs');
+
+  const createNewBurnTableQuery = fs.readFileSync(
+    __dirname + '/burn-creation.sql',
+    'utf8'
+  );
+  await postgres.connect();
+  await postgres.query(createNewBurnTableQuery);
   await postgres.end();
 });
 
