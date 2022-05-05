@@ -12,7 +12,7 @@ import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
-describe('mint test', () => {
+describe('burn test', () => {
   beforeAll(async () => {
     await db.connect();
   });
@@ -33,8 +33,6 @@ describe('mint test', () => {
         goNearToAtom(amount)
       );
       // manually checked the amount is correct.
-      console.log('burnResponse : ', burnResponse); // DEV_LOG_TO_REMOVE
-
       const algoTxnId = burnResponse;
 
       const apiCallParam: ApiCallParam = {

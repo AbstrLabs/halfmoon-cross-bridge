@@ -110,7 +110,7 @@ class Database {
     }
 
     const query = `
-      UPDATE ${this.mintTableName} SET
+      UPDATE ${tableName} SET
         txn_status=$1, to_txn_id = $10
           WHERE (
             db_id=$11 AND create_time=$2 AND fixed_fee_atom=$3 AND
@@ -133,11 +133,9 @@ class Database {
       bridgeTxn.dbId,
     ];
     const result = await this.query(query, params);
-    try {
-      this._verifyResultLength(result, bridgeTxn);
-    } catch (err) {
-      throw err;
-    }
+
+    this._verifyResultLength(result, bridgeTxn);
+
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
     return result[0].db_id;
   }

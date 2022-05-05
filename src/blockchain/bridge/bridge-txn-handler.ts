@@ -2,7 +2,7 @@
 // TODO: maybe merge to BridgeTxn class
 export { bridgeTxnHandler };
 
-import { Blockchain, TxnType } from '..';
+import { Addr, Blockchain, TxnType } from '..';
 import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
@@ -20,6 +20,7 @@ async function bridgeTxnHandler(
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
+
   let txnType;
   if (
     bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
@@ -61,7 +62,7 @@ async function bridgeTxnHandler(
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
     atomAmount: bridgeTxnInfo.fromAmountAtom,
-    toAddr: ENV.NEAR_MASTER_ADDR,
+    toAddr: incomingBlockchain.centralizedAddr,
     txnId: bridgeTxnInfo.fromTxnId,
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
@@ -73,7 +74,7 @@ async function bridgeTxnHandler(
   await db.updateTxn(bridgeTxnInfo);
 
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
-    fromAddr: ENV.ALGO_MASTER_ADDR,
+    fromAddr: outgoingBlockchain.centralizedAddr,
     toAddr: bridgeTxnInfo.toAddr,
     atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: literal.UNUSED,
@@ -82,7 +83,7 @@ async function bridgeTxnHandler(
   bridgeTxnInfo.toTxnId = outgoingTxnId;
   await db.updateTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
-    fromAddr: ENV.ALGO_MASTER_ADDR,
+    fromAddr: outgoingBlockchain.centralizedAddr,
     toAddr: bridgeTxnInfo.toAddr,
     atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: outgoingTxnId,
