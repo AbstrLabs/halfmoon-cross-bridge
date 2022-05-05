@@ -95,7 +95,7 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
-  var bridgeTxnInfo: BridgeTxnInfo;
+  let bridgeTxnInfo: BridgeTxnInfo;
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
   res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
@@ -117,7 +117,7 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const burnApiParam = parseBurnApiParam(apiCallParam);
   const { from, to, amount, txnId } = burnApiParam;
-  var bridgeTxnInfo: BridgeTxnInfo;
+  let bridgeTxnInfo: BridgeTxnInfo;
   logger.info(literal.START_BURNING(amount, from, to));
   res.write(`${literal.START_BURNING(amount, from, to)}\n`);
   res.write(`${literal.BURN_ALGO_TX_ID(txnId)}\n`);

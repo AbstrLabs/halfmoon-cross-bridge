@@ -1,5 +1,5 @@
 import { BridgeError, ERRORS } from '../utils/errors';
-import { Client, Pool, PoolClient } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 import { logger } from '../utils/logger';
 
@@ -38,7 +38,7 @@ class Postgres {
     logger.info('database connected');
   }
 
-  async query(query: string, params: any[] = []) {
+  async query(query: string, params: unknown[] = []) {
     if (!this.client) {
       logger.info('Not connected to database, connecting now...');
       await this.connect();
@@ -68,12 +68,13 @@ class Postgres {
   }
 
   static _configFromEnv(): PgConfig {
+    // TODO: Use ENV from utils/dotenv.ts
     return {
-      host: process.env.PGHOST!,
-      user: process.env.PGUSER!,
-      database: process.env.PGDATABASE!,
-      password: process.env.PGPASSWORD!,
-      port: process.env.PGPORT as any as number,
+      host: process.env.PGHOST!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      user: process.env.PGUSER!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      database: process.env.PGDATABASE!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      password: process.env.PGPASSWORD!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      port: process.env.PGPORT as unknown as number,
     };
   }
 

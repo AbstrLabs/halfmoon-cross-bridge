@@ -10,12 +10,12 @@
  * ```
  */
 import { ENV } from '../utils/dotenv';
+import fs from 'fs';
 import { postgres } from './aws-rds';
 
 it.skip('create new mint table', async () => {
   // skip: not a test, designed to be run once
   ENV; // import process.env
-  const fs = require('fs');
 
   const createNewMintTableQuery = fs.readFileSync(
     __dirname + '/sql/mint-creation.sql',
@@ -29,7 +29,6 @@ it.skip('create new mint table', async () => {
 it('create new burn table', async () => {
   // skip: not a test, designed to be run once
   ENV; // import process.env
-  const fs = require('fs');
 
   const createNewBurnTableQuery = fs.readFileSync(
     __dirname + '/sql/burn-creation.sql',
@@ -42,7 +41,6 @@ it('create new burn table', async () => {
 
 it.skip('fs.read', () => {
   // skip: not needed
-  const fs = require('fs');
 
   try {
     const data = fs.readFileSync(__dirname + '/creation.sql', 'utf8');

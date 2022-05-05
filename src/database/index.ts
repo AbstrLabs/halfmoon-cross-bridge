@@ -1,5 +1,10 @@
 // TODO: 1. separate database to database.ts from index.ts
 // TODO: 2. DbItem interface / class
+// TODO: 3. Wrap this piece below
+/* const tableName = this._inferTableName(bridgeTxn);
+if (!this.isConnected) {
+  await this.connect();
+} */
 
 export { db };
 
@@ -27,13 +32,13 @@ class Database {
     return this.instance.isConnected;
   }
 
-  constructor() {}
+  // TODO: add with settings constructor() {}
 
   async connect() {
     await this.instance.connect();
   }
 
-  async query(query: string, params: any[] = []) {
+  async query(query: string, params: unknown[] = []) {
     return await this.instance.query(query, params);
   }
 
@@ -52,6 +57,7 @@ class Database {
     if (!this.isConnected) {
       await this.connect();
     }
+
     const query = `
       INSERT INTO ${tableName} 
       (
@@ -90,8 +96,25 @@ class Database {
     // currently only used in test. not fixing.
     // should return an BridgeTxn
     // should use BridgeTxnInfo.fromDbItem to convert to BridgeTxn
+
+    // TODO: param of _inferTableName should be TxnType
+    let tableName: TableName;
+    if (txnType === TxnType.MINT) {
+      tableName = this.mintTableName;
+    } else if (txnType === TxnType.BURN) {
+      tableName = this.burnTableName;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+        txnType: txnType,
+      });
+    }
+
+    if (!this.isConnected) {
+      await this.connect();
+    }
+
     const query = `
-      SELECT * FROM ${this.mintTableName} WHERE db_id = $1;
+      SELECT * FROM ${tableName} WHERE db_id = $1;
     `;
     const params = [txnId];
     const result = await this.query(query, params);
@@ -150,6 +173,8 @@ class Database {
     // const result = await this.query(query, params);
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',
+      dbId: dbId,
+      txnType: txnType,
     });
   }
 
@@ -168,7 +193,11 @@ class Database {
     }
     return tableName;
   }
-  private _verifyResultLength(result: any[], TxnInfo: DbId | BridgeTxnInfo) {
+
+  private _verifyResultLength(
+    result: unknown[],
+    TxnInfo: DbId | BridgeTxnInfo
+  ) {
     // TODO: TxnInfo -> ErrInfoObj
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {

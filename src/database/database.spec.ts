@@ -1,6 +1,5 @@
-import { BlockchainName, BridgeTxnStatus } from '..';
-
 import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
 import { db } from '.';
@@ -15,10 +14,12 @@ describe('DATABASE test', () => {
     await db.end();
   });
   describe('AWS-RDS capability test', () => {
-    let _ = ENV; // to load .env file
+    ENV; // to load .env file
+
     // it('connect to AWS-RDS via class', async () => {
     //   expect(await db._connectionTest()).toBe('Hello world!');
     // });
+
     it('create and drop a new table', async () => {
       const tableName = 'test_table_fakeNonce';
       const query = `CREATE TABLE ${tableName} (
@@ -85,6 +86,8 @@ describe('DATABASE test', () => {
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
+      // TODO: BT-dbId: have a getter for dbId
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const res = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
       console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
@@ -100,6 +103,8 @@ describe('DATABASE test', () => {
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
+      // TODO: BT-dbId: have a getter for dbId
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const res2 = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct

@@ -2,7 +2,6 @@ export { transferOnNearTestnetFromExampleToMaster };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { AlgorandBlockchain } from '../algorand';
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 

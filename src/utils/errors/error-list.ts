@@ -2,6 +2,7 @@
 
 export { ERRORS };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ERROR_RANGES = {
   // TODO: Ren TXN, to API, and its number to 100.
   INTERNAL: { min: 100, max: 199, title: 'API call and server errors' },

@@ -11,7 +11,6 @@ import { BridgeError, ERRORS } from '../../utils/errors';
 import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
-import { optionalBigInt } from '../../utils/helper';
 
 class BridgeTxnInfo {
   dbId?: number;
@@ -54,6 +53,8 @@ class BridgeTxnInfo {
     return bridgeTxnInfo;
   }
 
+  // TODO: have a DbItem interface
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxnInfo {
     const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
       dbId: dbItem.db_id,
@@ -241,7 +242,7 @@ class BridgeTxnInfo {
       }
       return this.txnType;
     }
-    var txnType: TxnType;
+    let txnType: TxnType;
     if (
       this.fromBlockchain === BlockchainName.NEAR &&
       this.toBlockchain === BlockchainName.ALGO
@@ -289,7 +290,6 @@ class BridgeTxnInfo {
       return this.marginFeeAtom;
     }
 
-    let marginFee: bigint;
     let marginPercentage: number;
 
     if (this.fixedFeeAtom === undefined) {
@@ -306,7 +306,7 @@ class BridgeTxnInfo {
       });
     }
 
-    marginFee =
+    const marginFee: bigint =
       // TODO: fix marginPercentage cannot be 0.2% (rounding)
       ((this.fromAmountAtom - this.fixedFeeAtom) * BigInt(marginPercentage)) /
         BigInt(100) +
@@ -321,7 +321,6 @@ class BridgeTxnInfo {
       return this.toAmountAtom;
     }
 
-    let toAmount: bigint;
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this.getFixedFeeAtom();
     }
@@ -329,7 +328,8 @@ class BridgeTxnInfo {
       this.marginFeeAtom = this.calculateMarginFeeAtom();
     }
 
-    toAmount = this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
+    const toAmount: bigint =
+      this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
 
     this.toAmountAtom = toAmount;
     return toAmount;

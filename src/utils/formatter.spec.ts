@@ -9,7 +9,6 @@ import { BridgeTxnInfo } from '../blockchain/bridge';
 
 // TODO: move to test-helper + ren
 const FAKE_TX_ID = 'some_fake_txn_id';
-const FAKE_ADDR = '0x1234567890123456789012345678901234567890';
 
 // TODO: interface for this exampleDbItem with zod
 const exampleDbItem = {

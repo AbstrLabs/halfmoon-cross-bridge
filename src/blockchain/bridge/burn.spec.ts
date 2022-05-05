@@ -2,13 +2,10 @@
 
 import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
-import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { burn } from './burn';
 import { db } from '../../database';
 import { goNearToAtom } from '../../utils/formatter';
-import { mint } from './mint';
 import { testAlgo } from '../algorand';
-import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
