@@ -27,9 +27,9 @@ import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
-  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
-    'https://archival-rpc.testnet.near.org'
-  ); // TODO: deprecated
+  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider({
+    url: 'https://archival-rpc.testnet.near.org',
+  }); // TODO: deprecated
   // TODO: ren to indexer, also in abstract class
   protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
   protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
