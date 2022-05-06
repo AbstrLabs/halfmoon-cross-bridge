@@ -37,7 +37,7 @@
   },
   "license": "gpl-3.0",
   "lint-staged": {
-    "*.ts": "eslint --cache --fix",
+    "*.ts": "eslint --cache --fix --max-warnings=0",
     "*.{json,md}": "prettier --write"
   },
   "main": "src/main.ts",
@@ -61,7 +61,7 @@
     "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils",
-    "prepare": "husky install"
+    "postinstall": "husky install .config/husky"
   },
   "version": "1.0.0"
 }
