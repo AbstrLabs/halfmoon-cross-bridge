@@ -76,6 +76,7 @@
     "mint": "yarn test:mint",
     "near": "yarn test:near",
     "test": "jest",
+    "lint": "eslint . --ext .ts",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
