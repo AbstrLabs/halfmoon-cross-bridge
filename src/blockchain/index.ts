@@ -2,6 +2,7 @@
 // TODO: Make singleton
 export {
   Blockchain,
+  ConfirmOutcome,
   TxnType,
   type Addr,
   type AlgoAcc,
@@ -16,7 +17,7 @@ export {
   type NearAddr,
   type NearTxnId,
   type NearTxnOutcome,
-  type TxnID,
+  type TxnId,
   type TxnOutcome,
   type TxnParam,
   type TxnReceipt,
@@ -52,7 +53,7 @@ type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = Account;
 type NearReceipt = unknown; // TODO: type
 type NearTxnOutcome = providers.FinalExecutionOutcome;
-type TxnID = AlgoTxnId | NearTxnId;
+type TxnId = AlgoTxnId | NearTxnId;
 type TxnParam = AlgoTxnParam | NearTxnParam;
 type TxnReceipt = AlgoReceipt | NearReceipt;
 
@@ -107,31 +108,48 @@ enum TxnType {
   BURN = 'BURN',
 }
 
+enum ConfirmOutcome {
+  SUCCESS = 'SUCCESS',
+  WRONG_INFO = 'WRONG_INFO',
+  TIMEOUT = 'TIMEOUT',
+}
+
 abstract class Blockchain {
-  async confirmTxn(txnParam: TxnParam): Promise<boolean> {
+  async confirmTxn(txnParam: TxnParam): Promise<ConfirmOutcome> {
     logger.silly('Blockchain: confirmTransaction()', txnParam);
-    const confirmed = new Promise<boolean>((resolve) => {
+    const outcome = new Promise<ConfirmOutcome>((resolve) => {
       const timeout = setTimeout(() => {
-        resolve(false);
+        resolve(ConfirmOutcome.TIMEOUT);
       }, this.confirmTxnConfig.timeoutSec * 1000);
+
       const interval = setImmediateInterval(async () => {
         const txnOutcome = await this.getTxnStatus(
           txnParam.txnId,
           txnParam.fromAddr
         );
-        //TODO: error handling
-        if (this.verifyCorrectness(txnOutcome, txnParam)) {
+        let isCorrect;
+
+        try {
+          isCorrect = this.verifyCorrectness(txnOutcome, txnParam);
+          if (isCorrect) {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            resolve(ConfirmOutcome.SUCCESS);
+          } else {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            resolve(ConfirmOutcome.WRONG_INFO);
+          }
+        } catch (err) {
           clearTimeout(timeout);
           clearInterval(interval);
-          resolve(true);
-        } else {
-          clearTimeout(timeout);
-          clearInterval(interval);
-          resolve(false);
+          resolve(ConfirmOutcome.WRONG_INFO);
+          throw err;
         }
       }, this.confirmTxnConfig.intervalSec * 1000);
     });
-    return await confirmed;
+
+    return await outcome;
   }
 
   /* ABSTRACT */
@@ -144,8 +162,8 @@ abstract class Blockchain {
     txnOutcome: TxnOutcome,
     txnParam: TxnParam
   ): boolean;
-  public abstract getTxnStatus(txnId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
-  public abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnID>;
+  public abstract getTxnStatus(txnId: TxnId, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  public abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnId>;
 
   // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }

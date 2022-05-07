@@ -57,7 +57,13 @@ const internalErrors = {
     message:
       'Both group of (fromBlockchain,toBlockchain) and (txnType) are undefined.',
   },
+  UNKNOWN_CONFIRM_OUTCOME: {
+    errId: 109,
+    name: 'Unknown confirm outcome',
+    message: 'Unknown confirm outcome',
+  },
 };
+
 const transactionErrors = {
   INVALID_TX_ID: {
     errId: 200,
@@ -110,6 +116,7 @@ const transactionErrors = {
     message: 'API call parameters are invalid',
   },
 };
+
 const externalErrors = {
   DB_CONNECTION_FAILED: {
     errId: 300,
@@ -135,6 +142,16 @@ const externalErrors = {
     errId: 304,
     name: 'DB transaction not unique',
     message: 'Transaction not unique in database',
+  },
+  DB_CREATE_TX_FAILED: {
+    errId: 305,
+    name: 'DB create transaction failed',
+    message: 'Cannot create transaction in database',
+  },
+  MAKE_OUTGOING_TX_FAILED: {
+    errId: 306,
+    name: 'Make outgoing transaction failed',
+    message: 'Cannot make outgoing transaction on blockchain',
   },
 };
 
