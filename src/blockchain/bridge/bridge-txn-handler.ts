@@ -48,22 +48,35 @@ async function bridgeTxnHandler(
       bridgeTxnInfo.toAddr
     )
   );
+
+  // TODO: move this to main.ts
   await db.connect();
 
   /* MAKE BRIDGE TRANSACTION */
   // update as sequence diagram
 
-  bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
+  try {
+    bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
+  } catch (e) {
+    throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TX_FAILED, {
+      bridgeTxnInfo,
+    });
+  }
 
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_INCOMING;
   await db.updateTxn(bridgeTxnInfo);
-  // TODO: should use if.
-  await incomingBlockchain.confirmTxn({
-    fromAddr: bridgeTxnInfo.fromAddr,
-    atomAmount: bridgeTxnInfo.fromAmountAtom,
-    toAddr: incomingBlockchain.centralizedAddr,
-    txnId: bridgeTxnInfo.fromTxnId,
-  });
+
+  if (
+    !(await incomingBlockchain.confirmTxn({
+      fromAddr: bridgeTxnInfo.fromAddr,
+      atomAmount: bridgeTxnInfo.fromAmountAtom,
+      toAddr: incomingBlockchain.centralizedAddr,
+      txnId: bridgeTxnInfo.fromTxnId,
+    }))
+  ) {
+    // error is thrown in confirmTxn
+    return bridgeTxnInfo;
+  }
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateTxn(bridgeTxnInfo);
 

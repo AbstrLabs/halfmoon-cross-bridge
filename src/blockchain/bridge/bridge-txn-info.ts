@@ -125,7 +125,13 @@ class BridgeTxnInfo {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
-    this.initiate();
+    try {
+      this.initiate();
+    } catch (e) {
+      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
+      // TODO: upload to db
+      throw e;
+    }
   }
 
   getToAmountAtom(): bigint {

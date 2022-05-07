@@ -114,6 +114,7 @@ abstract class Blockchain {
       const timeout = setTimeout(() => {
         resolve(false);
       }, this.confirmTxnConfig.timeoutSec * 1000);
+
       const interval = setImmediateInterval(async () => {
         const txnOutcome = await this.getTxnStatus(
           txnParam.txnId,

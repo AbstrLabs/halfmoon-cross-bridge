@@ -136,6 +136,11 @@ const externalErrors = {
     name: 'DB transaction not unique',
     message: 'Transaction not unique in database',
   },
+  DB_CREATE_TX_FAILED: {
+    errId: 305,
+    name: 'DB create transaction failed',
+    message: 'Cannot create transaction in database',
+  },
 };
 
 const ERRORS = {
