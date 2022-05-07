@@ -50,7 +50,7 @@ type AlgoReceipt = Transaction;
 type BigNum = number; // | bigint; // using number now
 type GenericAcc = AlgoAcc | NearAcc;
 type NearAcc = Account;
-type NearReceipt = any;
+type NearReceipt = unknown; // TODO: type
 type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnID = AlgoTxnId | NearTxnId;
 type TxnParam = AlgoTxnParam | NearTxnParam;
@@ -115,7 +115,7 @@ abstract class Blockchain {
         resolve(false);
       }, this.confirmTxnConfig.timeoutSec * 1000);
       const interval = setImmediateInterval(async () => {
-        let txnOutcome = await this.getTxnStatus(
+        const txnOutcome = await this.getTxnStatus(
           txnParam.txnId,
           txnParam.fromAddr
         );

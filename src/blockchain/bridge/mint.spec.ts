@@ -20,11 +20,13 @@ describe('mint test', () => {
   // TODO: should in near test.
   // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
-    'burn 1.2345678901 NEAR from NEAR to ALGO',
+    'mint 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
+      // suppose Opted-in to goNEAR.
+
       // config
       const amount = '1.2345678901';
-
+      // TODO: not uuid some blockchain doesn't have the note field.
       // simulate frontend: make NEAR txn
       const mintResponse: FinalExecutionOutcome =
         await transferOnNearTestnetFromExampleToMaster(amount);
@@ -46,7 +48,7 @@ describe('mint test', () => {
       // verification
       expect(bridgeTxnInfo.toTxnId).toBeDefined();
     },
-    TIMEOUT_30S
+    TIMEOUT_30S * 3
   );
   /* TODO: More tests:
    * - wrong amount,

@@ -8,8 +8,13 @@ import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
 async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnInfo> {
-  const { from, to, amount, txnId } = mintApiParam;
-  logger.info(literal.START_MINTING(amount, from, to));
+  logger.info(
+    literal.START_MINTING(
+      mintApiParam.amount,
+      mintApiParam.from,
+      mintApiParam.to
+    )
+  );
   const rawBridgeTxnInfo = BridgeTxnInfo.fromApiCallParam(
     mintApiParam,
     TxnType.MINT

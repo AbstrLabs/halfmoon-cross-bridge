@@ -11,7 +11,6 @@ import { BridgeError, ERRORS } from '../../utils/errors';
 import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
-import { optionalBigInt } from '../../utils/helper';
 
 class BridgeTxnInfo {
   dbId?: number;
@@ -54,6 +53,8 @@ class BridgeTxnInfo {
     return bridgeTxnInfo;
   }
 
+  // TODO: have a DbItem interface
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxnInfo {
     const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
       dbId: dbItem.db_id,
@@ -137,23 +138,28 @@ class BridgeTxnInfo {
   /**
    * @param  {BridgeTxnInfo} other
    * @returns {boolean} true if the two BridgeTxnInfo are considered same
+   *
+   * @todo: Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
   equals(other: BridgeTxnInfo): boolean {
     return (
       this.fromAddr === other.fromAddr &&
-      this.fromAmountAtom === other.fromAmountAtom &&
+      this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
       this.fromBlockchain === other.fromBlockchain &&
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
-      this.toAmountAtom === other.toAmountAtom &&
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.toAmountAtom!.toString() === other.toAmountAtom!.toString() &&
       this.toBlockchain === other.toBlockchain &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
       this.txnType === other.txnType &&
       this.dbId === other.dbId &&
-      this.fixedFeeAtom === other.fixedFeeAtom &&
-      this.marginFeeAtom === other.marginFeeAtom &&
-      this.timestamp === other.timestamp
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.fixedFeeAtom!.toString() === other.fixedFeeAtom!.toString() &&
+      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
+      this.timestamp.toString() === other.timestamp.toString()
     );
   }
 
@@ -241,7 +247,7 @@ class BridgeTxnInfo {
       }
       return this.txnType;
     }
-    var txnType: TxnType;
+    let txnType: TxnType;
     if (
       this.fromBlockchain === BlockchainName.NEAR &&
       this.toBlockchain === BlockchainName.ALGO
@@ -289,7 +295,6 @@ class BridgeTxnInfo {
       return this.marginFeeAtom;
     }
 
-    let marginFee: bigint;
     let marginPercentage: number;
 
     if (this.fixedFeeAtom === undefined) {
@@ -306,7 +311,7 @@ class BridgeTxnInfo {
       });
     }
 
-    marginFee =
+    const marginFee: bigint =
       // TODO: fix marginPercentage cannot be 0.2% (rounding)
       ((this.fromAmountAtom - this.fixedFeeAtom) * BigInt(marginPercentage)) /
         BigInt(100) +
@@ -321,7 +326,6 @@ class BridgeTxnInfo {
       return this.toAmountAtom;
     }
 
-    let toAmount: bigint;
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this.getFixedFeeAtom();
     }
@@ -329,7 +333,8 @@ class BridgeTxnInfo {
       this.marginFeeAtom = this.calculateMarginFeeAtom();
     }
 
-    toAmount = this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
+    const toAmount: bigint =
+      this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
 
     this.toAmountAtom = toAmount;
     return toAmount;

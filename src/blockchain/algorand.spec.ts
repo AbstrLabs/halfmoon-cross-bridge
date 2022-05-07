@@ -3,9 +3,9 @@ import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '.';
 import { algoBlockchain } from './algorand';
+import { db } from '../database';
 import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
-import { verify } from 'crypto';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
@@ -47,7 +47,9 @@ const exampleRcpt = {
 };
 
 describe('AlgorandBlockchain', () => {
-  afterAll(() => {});
+  afterAll(() => {
+    db.end();
+  });
   it('should be defined', () => {
     expect(algoBlockchain).toBeDefined();
   });

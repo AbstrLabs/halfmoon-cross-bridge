@@ -171,7 +171,7 @@ class AlgorandBlockchain extends Blockchain {
     asaId: number
   ): Promise<AlgoTxnId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
-    let params = await this.defaultTxnParamsPromise;
+    const params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
     // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
     // params.flatFee = true;
@@ -188,13 +188,13 @@ class AlgorandBlockchain extends Blockchain {
       closeRemainderTo: undefined,
     };
 
-    let txn =
+    const txn =
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(txnConfig);
 
     // Sign the transaction
-    let txnId = txn.txID().toString();
-    let rawSignedTxn = txn.signTxn(senderAccount.sk);
-    let rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
+    const txnId = txn.txID().toString();
+    const rawSignedTxn = txn.signTxn(senderAccount.sk);
+    const rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(
       this.client,
@@ -232,7 +232,7 @@ class AlgorandBlockchain extends Blockchain {
     // tested, not used
     const algoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
-    let account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
+    const account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
     logger.warn('Account Mnemonic = ' + account_mnemonic);
     logger.warn('Account created. Save off Mnemonic and address');
     logger.warn('Add funds to account using the TestNet Dispenser: ');
@@ -249,13 +249,13 @@ class AlgorandBlockchain extends Blockchain {
       ...noParamAsaConfig,
       suggestedParams: await this.defaultTxnParamsPromise,
     };
-    let createTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
+    const createTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
       asaConfigWithSuggestedParams
     );
     const creatorSk = algosdk.mnemonicToSecretKey(creatorMnemonic).sk;
-    let recoveredAccount1 = { sk: creatorSk };
-    let rawSignedTxn = createTxn.signTxn(recoveredAccount1.sk);
-    let tx = await this.client.sendRawTransaction(rawSignedTxn).do();
+    const recoveredAccount1 = { sk: creatorSk };
+    const rawSignedTxn = createTxn.signTxn(recoveredAccount1.sk);
+    const tx = await this.client.sendRawTransaction(rawSignedTxn).do();
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
     logger.info(

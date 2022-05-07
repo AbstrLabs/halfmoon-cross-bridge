@@ -15,9 +15,11 @@ interface ErrorTemplate {
   errId: number;
 }
 type ErrorGroup = { [errorName: string]: ErrorTemplate };
-type ErrorCategory = {
-  [category: string /* in keyof typeof ERROR_RANGES */]: ErrorGroup;
-};
+
+//
+// type ErrorCategory = {
+//   [category: string /* in keyof typeof ERROR_RANGES */]: ErrorGroup;
+// };
 
 class BridgeError extends Error {
   public readonly errId: number;

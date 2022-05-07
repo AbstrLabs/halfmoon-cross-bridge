@@ -5,11 +5,15 @@
 export { loadDotEnv, ENV };
 
 import { NOT_LOADED_FROM_ENV } from './literal';
+import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
 
 function loadDotEnv() {
-  let env = require('dotenv').config();
-  require('dotenv-parse-variables');
+  const env = config();
+  if (env.parsed === undefined) {
+    // TODO: use BridgeError
+    throw new Error(NOT_LOADED_FROM_ENV);
+  }
 
   return dpv(env.parsed, {
     assignToProcessEnv: true,

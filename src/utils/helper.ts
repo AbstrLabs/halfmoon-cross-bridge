@@ -2,7 +2,7 @@ export { ensureString, setImmediateInterval, sleep, optionalBigInt };
 
 import { BridgeError, ERRORS } from './errors';
 
-function ensureString(value: any): string {
+function ensureString(value: unknown): string {
   if (typeof value !== 'string') {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
       expected: 'string',
@@ -12,7 +12,10 @@ function ensureString(value: any): string {
   return value as string;
 }
 
-function setImmediateInterval(func: () => any, interval: number): NodeJS.Timer {
+function setImmediateInterval(
+  func: () => unknown,
+  interval: number
+): NodeJS.Timer {
   func();
   return setInterval(func, interval);
 }

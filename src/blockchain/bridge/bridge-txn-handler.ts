@@ -2,12 +2,11 @@
 // TODO: maybe merge to BridgeTxn class
 export { bridgeTxnHandler };
 
-import { Addr, Blockchain, TxnType } from '..';
+import { Blockchain, TxnType } from '..';
 import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { BridgeTxnInfo } from '.';
-import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
 import { literal } from '../../utils/literal';

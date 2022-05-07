@@ -15,15 +15,11 @@ export {
   atomToYoctoNear,
 };
 
-import { BlockchainName, BridgeTxnStatus } from '..';
 import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
 import { z } from 'zod';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
-import { TxnParam, TxnType } from '../blockchain';
-import { BridgeTxnInfo } from '../blockchain/bridge';
-import { json } from 'stream/consumers';
 
 type MintApiParam = z.infer<typeof mintApiParamParser>;
 type BurnApiParam = z.infer<typeof burnApiParamParser>;
@@ -43,7 +39,7 @@ const nearAddr = z
   // cannot start with `-` and `_`
   .string()
   .regex(
-    /^[0-9a-z][0-9a-z\-\_]{1,64}.(testnet|mainnet)$/,
+    /^[0-9a-z][0-9a-z\-_]{1,64}.(testnet|mainnet)$/,
     'malformed near address'
   );
 const algoAddr = z
@@ -122,7 +118,7 @@ function goNearToAtom(goNearPlain: string | number): bigint {
   // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
   // TODO: l10n: and won't work for separators like 123_4567.0123456789 nor 1.234.567,0123456789
   // TODO: l10n: temp-fix: added an regex to make sure that the input is in correct format
-  var goNear: string;
+  let goNear: string;
   if (typeof goNearPlain === 'number') {
     goNear = goNearPlain.toString();
   } else if (typeof goNearPlain === 'string') {

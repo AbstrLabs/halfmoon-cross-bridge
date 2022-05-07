@@ -9,7 +9,6 @@ import {
   KeyPair,
   keyStores,
   providers,
-  utils,
 } from 'near-api-js';
 
 import {
@@ -28,9 +27,9 @@ import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
-  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(
-    'https://archival-rpc.testnet.near.org'
-  ); // TODO: deprecated
+  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider({
+    url: 'https://archival-rpc.testnet.near.org',
+  }); // TODO: deprecated
   // TODO: ren to indexer, also in abstract class
   protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
   protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
@@ -64,9 +63,7 @@ class NearBlockchain extends Blockchain {
       this._keyStore
         .setKey('testnet', this.centralizedAddr, keyPair)
         .then(async () => {
-          this.centralizedAcc = await this.client!.account(
-            this.centralizedAddr
-          );
+          this.centralizedAcc = await this.client.account(this.centralizedAddr);
         });
     });
   }
@@ -86,6 +83,8 @@ class NearBlockchain extends Blockchain {
     txnOutcome: providers.FinalExecutionOutcome,
     nearTxnParam: NearTxnParam
   ): boolean {
+    // TODO: compare txnId
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
     logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
     const txnReceipt = txnOutcome;
@@ -165,7 +164,7 @@ class NearBlockchain extends Blockchain {
   protected static async getRecentTransactions(
     limit: number
   ): Promise<NearTxnId[]> {
-    throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED);
+    throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED, { TxnLimit: limit });
   }
 }
 
