@@ -8,6 +8,7 @@ export { BridgeTxn };
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
+import { DbItem } from '../../database';
 import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
@@ -53,9 +54,8 @@ class BridgeTxn {
     return bridgeTxn;
   }
 
-  // TODO: have a DbItem interface
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxn {
+  static fromDbItem(dbItem: DbItem, dbType: TxnType): BridgeTxn {
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: dbItem.db_id,
       txnType: dbType,

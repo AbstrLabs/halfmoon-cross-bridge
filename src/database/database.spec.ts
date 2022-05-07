@@ -88,11 +88,16 @@ describe('DATABASE test', () => {
       const res = await db.createTxn(exampleBridgeTxn);
       expect(typeof res).toBe('number');
     });
-    it('read a transaction', async () => {
+    it.only('read a transaction', async () => {
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const res = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
       console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
+      console.log(
+        'typeof res.from_amount_atom : ',
+        typeof res.from_amount_atom
+      ); // DEV_LOG_TO_REMOVE
+      console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
 
       expect(BridgeTxn.fromDbItem(res, TxnType.MINT)).toEqual(exampleBridgeTxn);

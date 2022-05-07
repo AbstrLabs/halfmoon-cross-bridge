@@ -1,26 +1,42 @@
 // TODO: 1. separate database to database.ts from index.ts
-// TODO: 2. DbItem interface / class
+// TODO: 2. DbItem with zod
 // TODO: 3. Wrap this piece below
 /* const tableName = this._inferTableName(bridgeTxn);
 if (!this.isConnected) {
   await this.connect();
 } */
 
-export { db };
+export { db, type DbItem };
 
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxn } from '../blockchain/bridge';
-import { TxnType } from '../blockchain';
+import { Addr, TxnId, TxnType } from '../blockchain';
 import { literal } from '../utils/literal';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
+import { BridgeTxnStatus } from '..';
 
 type DbId = number;
 
 enum TableName {
   MINT_TABLE_NAME = `mint_request`,
   BURN_TABLE_NAME = `burn_request`,
+}
+
+type BigIntStr = string;
+interface DbItem {
+  db_id: DbId;
+  fixed_fee_atom: BigIntStr;
+  from_addr: Addr;
+  from_amount_atom: BigIntStr;
+  from_txn_id: TxnId;
+  margin_fee_atom: BigIntStr;
+  create_time: BigIntStr;
+  to_addr: Addr;
+  to_amount_atom: BigIntStr;
+  to_txn_id: TxnId;
+  txn_status: BridgeTxnStatus;
 }
 
 class Database {
@@ -92,7 +108,7 @@ class Database {
     return dbId as DbId;
   }
 
-  public async readTxn(txnId: DbId, txnType: TxnType) {
+  public async readTxn(txnId: DbId, txnType: TxnType): Promise<DbItem> {
     // currently only used in test. not fixing.
     // should return an BridgeTxn
     // should use BridgeTxn.fromDbItem to convert to BridgeTxn
@@ -120,7 +136,7 @@ class Database {
     const result = await this.query(query, params);
     this._verifyResultLength(result, txnId);
 
-    return result[0];
+    return result[0] as DbItem;
   }
 
   async updateTxn(bridgeTxn: BridgeTxn) {
