@@ -19,7 +19,7 @@ const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
   fromAddr: '0x1234567890123456789012345678901234567890',
   fromBlockchain: BlockchainName.NEAR,
   fromTxnId: '0x1234567890123456789012345678901234567890',
-  timestamp: BigInt(1650264115011),
+  createdTime: BigInt(1650264115011),
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
   toTxnId: FAKE_TX_ID,

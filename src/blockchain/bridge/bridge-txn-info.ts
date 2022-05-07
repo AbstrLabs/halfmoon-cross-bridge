@@ -1,8 +1,3 @@
-// TODO: (next line) more txnStatus for internal process like fee calculation.
-// TODO: 1. (DONE)
-// TODO: 2. (DONE)
-// TODO: 3. rename field timestamp to createTime
-
 export { BridgeTxn };
 
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
@@ -17,7 +12,7 @@ class BridgeTxn {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
-  timestamp: bigint;
+  createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
   fromBlockchain?: BlockchainName;
@@ -32,7 +27,7 @@ class BridgeTxn {
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
     txnType: TxnType,
-    timestamp?: bigint
+    createdTime?: bigint
   ): BridgeTxn {
     const { from, to, amount, txnId } = apiCallParam;
     const bridgeTxn = new BridgeTxn({
@@ -44,7 +39,7 @@ class BridgeTxn {
       fromBlockchain: undefined,
       fromTxnId: txnId,
       marginFeeAtom: undefined,
-      timestamp,
+      createdTime,
       toAddr: to,
       toAmountAtom: undefined,
       toBlockchain: undefined,
@@ -66,7 +61,7 @@ class BridgeTxn {
       fromBlockchain: undefined,
       fromTxnId: dbItem.from_txn_id,
       marginFeeAtom: BigInt(dbItem.margin_fee_atom),
-      timestamp: BigInt(dbItem.created_time),
+      createdTime: BigInt(dbItem.created_time),
       toAddr: dbItem.to_addr,
       toAmountAtom: BigInt(dbItem.to_amount_atom),
       toBlockchain: undefined,
@@ -79,7 +74,7 @@ class BridgeTxn {
   constructor({
     fixedFeeAtom,
     marginFeeAtom,
-    timestamp,
+    createdTime,
     fromAddr,
     fromAmountAtom,
     fromBlockchain,
@@ -93,7 +88,7 @@ class BridgeTxn {
     dbId,
   }: {
     dbId?: number;
-    timestamp?: bigint;
+    createdTime?: bigint;
 
     fromAddr: string;
     fromAmountAtom: bigint;
@@ -112,7 +107,7 @@ class BridgeTxn {
   }) {
     this.fixedFeeAtom = fixedFeeAtom;
     this.marginFeeAtom = marginFeeAtom;
-    this.timestamp = timestamp ?? BigInt(+Date.now());
+    this.createdTime = createdTime ?? BigInt(+Date.now());
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
     this.fromBlockchain = fromBlockchain;
@@ -165,7 +160,7 @@ class BridgeTxn {
       this.fixedFeeAtom!.toString() === other.fixedFeeAtom!.toString() &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
-      this.timestamp.toString() === other.timestamp.toString()
+      this.createdTime.toString() === other.createdTime.toString()
     );
   }
 

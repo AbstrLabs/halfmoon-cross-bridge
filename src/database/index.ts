@@ -88,7 +88,7 @@ class Database {
     `;
     const params = [
       bridgeTxn.txnStatus,
-      bridgeTxn.timestamp,
+      bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
@@ -161,7 +161,7 @@ class Database {
     `;
     const params = [
       bridgeTxn.txnStatus,
-      bridgeTxn.timestamp,
+      bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
