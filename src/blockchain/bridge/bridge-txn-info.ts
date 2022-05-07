@@ -66,7 +66,7 @@ class BridgeTxn {
       fromBlockchain: undefined,
       fromTxnId: dbItem.from_txn_id,
       marginFeeAtom: BigInt(dbItem.margin_fee_atom),
-      timestamp: BigInt(dbItem.create_time),
+      timestamp: BigInt(dbItem.created_time),
       toAddr: dbItem.to_addr,
       toAmountAtom: BigInt(dbItem.to_amount_atom),
       toBlockchain: undefined,

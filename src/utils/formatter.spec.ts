@@ -28,7 +28,7 @@ const exampleDbItem = {
   to_txn_id: FAKE_TX_ID,
   txn_status: 'some_txn_status',
   txn_type: 'some_txn_type',
-  create_time: '1650264115011',
+  created_time: '1650264115011',
   fixed_fee_atom: '567890',
   margin_fee_atom: '53789243',
 };

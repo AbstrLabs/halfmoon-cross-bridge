@@ -32,7 +32,7 @@ interface DbItem {
   from_amount_atom: BigIntStr;
   from_txn_id: TxnId;
   margin_fee_atom: BigIntStr;
-  create_time: BigIntStr;
+  created_time: BigIntStr;
   to_addr: Addr;
   to_amount_atom: BigIntStr;
   to_txn_id: TxnId;
@@ -77,7 +77,7 @@ class Database {
     const query = `
       INSERT INTO ${tableName} 
       (
-        txn_status, create_time, fixed_fee_atom, from_addr, from_amount_atom,
+        txn_status, created_time, fixed_fee_atom, from_addr, from_amount_atom,
         from_txn_id, margin_fee_atom, to_addr, to_amount_atom, to_txn_id
       ) 
       VALUES (
@@ -153,7 +153,7 @@ class Database {
       UPDATE ${tableName} SET
         txn_status=$1, to_txn_id = $10
           WHERE (
-            db_id=$11 AND create_time=$2 AND fixed_fee_atom=$3 AND
+            db_id=$11 AND created_time=$2 AND fixed_fee_atom=$3 AND
             from_addr=$4 AND from_amount_atom=$5 AND from_txn_id=$6 AND
             margin_fee_atom=$7 AND to_addr=$8 AND to_amount_atom=$9
           )
