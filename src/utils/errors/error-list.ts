@@ -1,8 +1,9 @@
+// TODO: INVALID_TX_ID should ren to TXN
+
 export { ERRORS };
 
-import { ErrorGroup, ErrorTemplate } from '.';
-
 const ERROR_RANGES = {
+  // TODO: Ren TXN, to API, and its number to 100.
   INTERNAL: { min: 100, max: 199, title: 'API call and server errors' },
   TXN: { min: 200, max: 299, title: 'Transaction related errors' },
   EXTERNAL: { min: 300, max: 399, title: 'DB service and blockchain errors' },
@@ -14,7 +15,7 @@ const internalErrors = {
     name: 'Not Implemented',
     message: 'Not implemented',
   },
-  UNKNOWN_TX_TYPE: {
+  UNKNOWN_TXN_TYPE: {
     errId: 101,
     name: 'Unknown Transaction Type',
     message: 'Wrong internal Transaction Type. Should be MINT or BURN',
@@ -43,6 +44,17 @@ const internalErrors = {
     errId: 106,
     name: 'Invalid Yocto Near Amount',
     message: 'Yocto Near amount is not valid, cannot parse.',
+  },
+  INVALID_AMOUNT: {
+    errId: 107,
+    name: 'Invalid Amount',
+    message: 'Amount is not valid (internal error).',
+  },
+  INVALID_BRIDGE_TXN_PARAM: {
+    errId: 108,
+    name: 'Invalid Bridge Transaction Parameter',
+    message:
+      'Both group of (fromBlockchain,toBlockchain) and (txnType) are undefined.',
   },
 };
 const transactionErrors = {

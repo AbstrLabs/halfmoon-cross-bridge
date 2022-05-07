@@ -30,7 +30,7 @@ export {
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
-import { providers } from 'near-api-js';
+import { type Account, providers } from 'near-api-js';
 
 import {
   AlgoTxnId,
@@ -49,7 +49,7 @@ type AlgoMnemonic = string;
 type AlgoReceipt = Transaction;
 type BigNum = number; // | bigint; // using number now
 type GenericAcc = AlgoAcc | NearAcc;
-type NearAcc = undefined;
+type NearAcc = Account;
 type NearReceipt = any;
 type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnID = AlgoTxnId | NearTxnId;
@@ -133,14 +133,19 @@ abstract class Blockchain {
     });
     return await confirmed;
   }
-  // Abstract methods
+
+  /* ABSTRACT */
+  public abstract readonly centralizedAddr: Addr;
+  public abstract readonly confirmTxnConfig: ConfirmTxnConfig;
+  public abstract readonly name: string;
   protected abstract readonly centralizedAcc: GenericAcc;
-  abstract readonly confirmTxnConfig: ConfirmTxnConfig;
-  abstract verifyCorrectness(
+
+  public abstract verifyCorrectness(
     txnOutcome: TxnOutcome,
     txnParam: TxnParam
   ): boolean;
-  abstract getTxnStatus(txnId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
-  abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnID>;
+  public abstract getTxnStatus(txnId: TxnID, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  public abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnID>;
+
   // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }

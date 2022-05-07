@@ -1,12 +1,5 @@
 {
-  "name": "algorand-near-bridge",
-  "version": "0.0.1",
-  "description": "Unidirectional bridge for Algorand <- NEAR",
-  "main": "src/main.ts",
-  "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
   "author": "Pablion <36828324+Pablion@users.noreply.github.com>",
-  "license": "gpl-3.0",
-  "private": true,
   "dependencies": {
     "@types/node": "^17.0.23",
     "algosdk": "^1.15.0",
@@ -17,6 +10,7 @@
     "typescript": "^4.6.3",
     "zod": "^3.14.4"
   },
+  "description": "Unidirectional bridge for Algorand <- NEAR",
   "devDependencies": {
     "@types/dotenv-parse-variables": "^2.0.1",
     "@types/express": "^4.17.13",
@@ -33,18 +27,27 @@
     "ts-node-dev": "^1.1.8",
     "winston": "^3.7.2"
   },
+  "license": "gpl-3.0",
+  "main": "src/main.ts",
+  "name": "algorand-near-bridge",
+  "private": true,
+  "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
   "scripts": {
     "algo": "yarn test:algo",
     "bridge": "yarn test:bridge",
     "build": "tsc",
+    "burn": "yarn test:burn",
     "db": "yarn test:db",
     "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
+    "mint": "yarn test:mint",
     "near": "yarn test:near",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
-    "test:db": "jest --testPathPattern=src/database",
+    "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
+    "test:db": "jest --testPathPattern=src/database ",
+    "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils"
+    "test:util": "jest --testPathPattern=src/utils -w=1 #serialize bigint"
   }
 }

@@ -1,42 +1,30 @@
-import {
-  BlockchainName,
-  BridgeTxnStatus,
-  type BridgeTxnInfo,
-  type BurnApiParam,
-  type MintApiParam,
-} from '..';
+import { type BurnApiParam, type MintApiParam } from '..';
 import { BridgeError, ERRORS } from './errors';
-import {
-  dbItemToBridgeTxnInfo,
-  parseBurnApiParam,
-  parseMintApiParam,
-} from './formatter';
+import { parseBurnApiParam, parseMintApiParam } from './formatter';
 
 import { ENV } from './dotenv';
+import { exampleBridgeTxnInfo } from './test-helper';
+import { TxnType } from '../blockchain';
+import { BridgeTxnInfo } from '../blockchain/bridge';
 
+// TODO: move to test-helper + ren
 const FAKE_TX_ID = 'some_fake_txn_id';
-const exampleDbItem = {
-  algo_txn_id: FAKE_TX_ID,
-  algorand_address: '0x1234567890123456789012345678901234567890',
-  amount: '10000000000',
-  create_time: '1650264115011',
-  id: 1,
-  near_address: '0x1234567890123456789012345678901234567890',
-  near_tx_hash: '0x1234567890123456789012345678901234567890',
-  request_status: 'DONE_OUTGOING',
-};
+const FAKE_ADDR = '0x1234567890123456789012345678901234567890';
 
-const exampleTxnInfo: BridgeTxnInfo = {
-  atomAmount: BigInt(10000000000), // big int jest err read on top.
-  dbId: 1,
-  fromAddr: '0x1234567890123456789012345678901234567890',
-  fromBlockchain: BlockchainName.NEAR,
-  fromTxnId: '0x1234567890123456789012345678901234567890',
-  timestamp: BigInt('1650264115011'),
-  toAddr: '0x1234567890123456789012345678901234567890',
-  toBlockchain: BlockchainName.ALGO,
-  toTxnId: FAKE_TX_ID,
-  txnStatus: BridgeTxnStatus.DONE_OUTGOING,
+// TODO: interface for this exampleDbItem with zod
+const exampleDbItem = {
+  db_id: 1,
+  from_addr: 'some_from_addr',
+  from_amount_atom: '10000000000',
+  from_txn_id: FAKE_TX_ID,
+  to_addr: 'some_to_addr',
+  to_amount_atom: '642398',
+  to_txn_id: FAKE_TX_ID,
+  txn_status: 'some_txn_status',
+  txn_type: 'some_txn_type',
+  create_time: '1650264115011',
+  fixed_fee_atom: '567890',
+  margin_fee_atom: '53789243',
 };
 
 const exampleMintApiTxnInfo: MintApiParam = {
@@ -56,12 +44,9 @@ describe('param validation and formatting', () => {
   it('formatter test', () => {
     // for "TypeError: Do not know how to serialize a BigInt", use `--maxWorkers=1`
     // from https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
-    expect(
-      dbItemToBridgeTxnInfo(exampleDbItem, {
-        fromBlockchain: BlockchainName.NEAR,
-        toBlockchain: BlockchainName.ALGO,
-      })
-    ).toEqual(exampleTxnInfo);
+    expect(BridgeTxnInfo.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
+      exampleBridgeTxnInfo
+    ); // need --workers=1 flag
   });
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {
@@ -79,7 +64,17 @@ describe('param validation and formatting', () => {
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-          unusedField: 'this does not matter',
+          parseErrorDetail: {
+            issues: [
+              {
+                validation: 'regex',
+                code: 'invalid_string',
+                message: 'malformed algorand address',
+                path: ['to'],
+              },
+            ],
+            name: 'ZodError',
+          },
         })
       );
     });
@@ -100,7 +95,17 @@ describe('param validation and formatting', () => {
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-          unusedField: 'this does not matter',
+          parseErrorDetail: {
+            issues: [
+              {
+                validation: 'regex',
+                code: 'invalid_string',
+                message: 'malformed near address',
+                path: ['to'],
+              },
+            ],
+            name: 'ZodError',
+          },
         })
       );
     });

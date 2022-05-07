@@ -1,9 +1,12 @@
+// TODO: add error handling
+// TODO: maybe merge to BridgeTxn class
 export { bridgeTxnHandler };
 
-import { Blockchain, TxnType } from '..';
-import { type BridgeTxnInfo, BlockchainName, BridgeTxnStatus } from '../..';
+import { Addr, Blockchain, TxnType } from '..';
+import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
+import { BridgeTxnInfo } from '.';
 import { ENV } from '../../utils/dotenv';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
@@ -17,8 +20,8 @@ async function bridgeTxnHandler(
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
+
   let txnType;
-  const { fromAddr, toAddr, atomAmount } = bridgeTxnInfo;
   if (
     bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
     bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
@@ -34,57 +37,62 @@ async function bridgeTxnHandler(
     incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TX_TYPE, {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       txnType: txnType,
     });
   }
-  logger.info(literal.MAKING_TXN(txnType, atomAmount, fromAddr, toAddr));
+  logger.info(
+    literal.MAKING_TXN(
+      txnType,
+      bridgeTxnInfo.fromAmountAtom,
+      bridgeTxnInfo.fromAddr,
+      bridgeTxnInfo.toAddr
+    )
+  );
   await db.connect();
 
-  /* MAKE TRANSACTION */
-
-  const dbId = await db.createTxn(bridgeTxnInfo);
-  bridgeTxnInfo.dbId = dbId;
-
+  /* MAKE BRIDGE TRANSACTION */
   // update as sequence diagram
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.CONFIRM_INCOMING;
+
+  bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
+
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_INCOMING;
   await db.updateTxn(bridgeTxnInfo);
+  // TODO: should use if.
   await incomingBlockchain.confirmTxn({
     fromAddr: bridgeTxnInfo.fromAddr,
-    toAddr: ENV.NEAR_MASTER_ADDR,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.fromAmountAtom,
+    toAddr: incomingBlockchain.centralizedAddr,
     txnId: bridgeTxnInfo.fromTxnId,
   });
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateTxn(bridgeTxnInfo);
 
-  // empty slot, after confirming incoming txn, for error handling
-  // TODO: add txn fee calculation logic here.
-  // TODO! important
-
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.MAKE_OUTGOING;
+  // make outgoing txn
+  bridgeTxnInfo.toAmountAtom = bridgeTxnInfo.getToAmountAtom();
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
   await db.updateTxn(bridgeTxnInfo);
+
   const outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
-    fromAddr: ENV.ALGO_MASTER_ADDR,
+    fromAddr: outgoingBlockchain.centralizedAddr,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: literal.UNUSED,
   });
-
-  // verify outgoing tx
+  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
   bridgeTxnInfo.toTxnId = outgoingTxnId;
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.VERIFY_OUTGOING;
   await db.updateTxn(bridgeTxnInfo);
   await outgoingBlockchain.confirmTxn({
-    fromAddr: ENV.ALGO_MASTER_ADDR,
+    fromAddr: outgoingBlockchain.centralizedAddr,
     toAddr: bridgeTxnInfo.toAddr,
-    atomAmount: bridgeTxnInfo.atomAmount,
+    atomAmount: bridgeTxnInfo.toAmountAtom,
     txnId: outgoingTxnId,
   });
+
+  // verify outgoing txn
   bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
   await db.updateTxn(bridgeTxnInfo);
-
-  // user confirmation via socket
+  // user confirmation via socket/email
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
@@ -92,6 +100,3 @@ async function bridgeTxnHandler(
   return bridgeTxnInfo;
   // check indexer with hash
 }
-
-/* HELPER */
-// TODO: move to formatter

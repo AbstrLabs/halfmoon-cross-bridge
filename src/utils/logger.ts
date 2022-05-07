@@ -1,5 +1,6 @@
+// TODO: Add logger level to .env
 // This file is an logger interface
-// options: winston / morgan
+
 import { createLogger, format, transports, default as winston } from 'winston';
 
 const { combine, timestamp, prettyPrint, colorize, errors } = format;

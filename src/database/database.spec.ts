@@ -1,27 +1,20 @@
-import { BlockchainName, BridgeTxnInfo, BridgeTxnStatus } from '..';
+import { BlockchainName, BridgeTxnStatus } from '..';
 
+import { BridgeTxnInfo } from '../blockchain/bridge';
 import { ENV } from '../utils/dotenv';
+import { TxnType } from '../blockchain';
 import { db } from '.';
-import { dbItemToBridgeTxnInfo } from '../utils/formatter';
-
-const testBridgeTxn: BridgeTxnInfo = {
-  dbId: 1,
-  fromAddr: '0x1234567890123456789012345678901234567890',
-  toAddr: '0x1234567890123456789012345678901234567890',
-  atomAmount: BigInt('10000000000'),
-  timestamp: BigInt('1650264115011'),
-  txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
-  fromTxnId: '0x1234567890123456789012345678901234567890',
-  toTxnId: '0x1234567890123456789012345678901234567890',
-  fromBlockchain: BlockchainName.NEAR,
-  toBlockchain: BlockchainName.ALGO,
-};
+import { exampleBridgeTxnInfo } from '../utils/test-helper';
 
 describe('DATABASE test', () => {
+  beforeAll(async () => {
+    await db.connect();
+  });
+  afterAll(async () => {
+    db.disconnect();
+    await db.end();
+  });
   describe('AWS-RDS capability test', () => {
-    afterAll(async () => {
-      await db.end();
-    });
     let _ = ENV; // to load .env file
     // it('connect to AWS-RDS via class', async () => {
     //   expect(await db._connectionTest()).toBe('Hello world!');
@@ -86,51 +79,33 @@ describe('DATABASE test', () => {
       expect(res_before_del.length - res_after_del.length).toBe(1);
     });
   });
-  describe('create transaction', () => {
-    beforeAll(async () => {
-      await db.connect();
-    });
-    afterAll(async () => {
-      db.disconnect();
-      await db.end();
-    });
-
-    it.skip('create a transaction', async () => {
-      const bridgeTxn: BridgeTxnInfo = {
-        fromAddr: '0x1234567890123456789012345678901234567890',
-        toAddr: '0x1234567890123456789012345678901234567890',
-        atomAmount: BigInt('10000000000'),
-        timestamp: BigInt(+new Date()),
-        txnStatus: BridgeTxnStatus.MAKE_OUTGOING,
-        fromTxnId: '0x1234567890123456789012345678901234567890',
-        toTxnId: '0x1234567890123456789012345678901234567890',
-        fromBlockchain: BlockchainName.NEAR,
-        toBlockchain: BlockchainName.ALGO,
-      };
-      const res = await db.createTxn(bridgeTxn);
+  describe('CRUD test with Bridge Txn', () => {
+    it('create a transaction', async () => {
+      const res = await db.createTxn(exampleBridgeTxnInfo);
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
-      const res = await db.readTxn(1);
+      const res = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
+      console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
-      // expect(res).toEqual(testBridgeTxn);
+
+      expect(BridgeTxnInfo.fromDbItem(res, TxnType.MINT)).toEqual(
+        exampleBridgeTxnInfo
+      );
     });
     it('update a transaction', async () => {
-      testBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-      testBridgeTxn.toTxnId = 'some_fake_txn_id';
-      const res1 = await db.updateTxn(testBridgeTxn);
+      exampleBridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+      exampleBridgeTxnInfo.toTxnId = 'some_fake_txn_id';
+      const res1 = await db.updateTxn(exampleBridgeTxnInfo);
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
-      const res2 = await db.readTxn(testBridgeTxn.dbId!);
+      const res2 = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
-      expect(
-        dbItemToBridgeTxnInfo(res2, {
-          fromBlockchain: BlockchainName.NEAR,
-          toBlockchain: BlockchainName.ALGO,
-        })
-      ).toEqual(testBridgeTxn);
+      expect(BridgeTxnInfo.fromDbItem(res2, TxnType.MINT)).toEqual(
+        exampleBridgeTxnInfo
+      );
     });
   });
 });

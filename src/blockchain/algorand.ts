@@ -1,5 +1,5 @@
 /* Algorand functionalities wrapped up with our centralized account */
-export { algoBlockchain, type AlgorandBlockchain };
+export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
@@ -25,11 +25,13 @@ import { logger } from '../utils/logger';
 import { literal } from '../utils/literal';
 import { BridgeError, ERRORS } from '../utils/errors';
 
+// TODO: constructor: move config to param
 class AlgorandBlockchain extends Blockchain {
-  readonly client: AlgodClient;
-  readonly indexer: Indexer;
-  readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
-  readonly name = BlockchainName.ALGO;
+  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
+  public readonly client: AlgodClient;
+  public readonly indexer: Indexer;
+  public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
+  public readonly name = BlockchainName.ALGO;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
@@ -134,7 +136,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare amount
     if (amount !== algoTxnParam.atomAmount.toString()) {
-      // The trailing "n" is not part of the string.
+      // Bigint: The trailing "n" is not part of the string.
       throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
         receivedAmount: algoTxnParam.atomAmount,
@@ -160,6 +162,7 @@ class AlgorandBlockchain extends Blockchain {
     );
   }
   // TODO: makeAsaTxn needs an err handler.
+  // TODO: use AlgoTxnParam here
   protected async _makeAsaTxn(
     to: AlgoAddr,
     from: AlgoAddr,
@@ -208,12 +211,12 @@ class AlgorandBlockchain extends Blockchain {
     }
 
     //Get the completed Transaction
-    logger.info(
+    logger.verbose(
       literal.TXN_CONFIRMED(
         from,
         to,
         amountInAtomic,
-        confirmedTxn.txId,
+        txnId,
         confirmedTxn['confirmed-round']
       )
     );
@@ -266,4 +269,36 @@ class AlgorandBlockchain extends Blockchain {
   }
 }
 
+// For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
+class TestAlgo extends AlgorandBlockchain {
+  constructor() {
+    super();
+  }
+  async emulateFrontendTxn(
+    algoTxnParam: AlgoTxnParam,
+    senderPassPhrase: string
+  ) {
+    const sender = algosdk.mnemonicToSecretKey(senderPassPhrase);
+    return this._makeAsaTxn(
+      algoTxnParam.toAddr,
+      algoTxnParam.fromAddr,
+      algoTxnParam.atomAmount,
+      sender,
+      ENV.TEST_NET_GO_NEAR_ASSET_ID
+    );
+  }
+  async sendFromExampleToMaster(atomAmount: bigint): Promise<AlgoTxnId> {
+    return this.emulateFrontendTxn(
+      {
+        toAddr: ENV.ALGO_MASTER_ADDR,
+        fromAddr: ENV.ALGO_EXAMPL_ADDR,
+        atomAmount: atomAmount,
+        txnId: '', // TODO: should support undefined
+      },
+      ENV.ALGO_EXAMPL_PASS
+    );
+  }
+}
+
 const algoBlockchain = new AlgorandBlockchain();
+const testAlgo = new TestAlgo();
