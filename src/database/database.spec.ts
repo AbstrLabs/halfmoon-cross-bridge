@@ -3,7 +3,7 @@ import { BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
 import { db } from '.';
-import { exampleBridgeTxn } from '../utils/test-helper';
+import { exampleBridgeTxn } from '../utils/test/test-example';
 
 describe('DATABASE test', () => {
   beforeAll(async () => {
