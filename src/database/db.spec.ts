@@ -2,7 +2,7 @@ import { BridgeTxn } from '../blockchain/bridge';
 import { BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
-import { db } from '.';
+import { db } from './db';
 import { exampleBridgeTxn } from '../utils/test/test-example';
 
 describe('DATABASE test', () => {

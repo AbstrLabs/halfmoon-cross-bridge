@@ -8,7 +8,7 @@ import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { BridgeTxn } from '.';
 import { algoBlockchain } from '../algorand';
-import { db } from '../../database';
+import { db } from '../../database/db';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';

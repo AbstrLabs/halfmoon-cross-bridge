@@ -3,7 +3,7 @@ import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '.';
 import { algoBlockchain } from './algorand';
-import { db } from '../database';
+import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 import { logger } from '../utils/logger';
 

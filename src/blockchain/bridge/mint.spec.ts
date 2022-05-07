@@ -4,7 +4,7 @@
 import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { db } from '../../database';
+import { db } from '../../database/db';
 import { mint } from './mint';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 

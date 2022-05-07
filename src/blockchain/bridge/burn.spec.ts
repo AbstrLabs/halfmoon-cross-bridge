@@ -3,7 +3,7 @@
 import { ApiCallParam } from '../..';
 import { ENV } from '../../utils/dotenv';
 import { burn } from './burn';
-import { db } from '../../database';
+import { db } from '../../database/db';
 import { goNearToAtom } from '../../utils/formatter';
 import { testAlgo } from '../algorand';
 
