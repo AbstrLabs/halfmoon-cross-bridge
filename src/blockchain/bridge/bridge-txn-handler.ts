@@ -1,6 +1,6 @@
 // TODO: add error handling
 // TODO: maybe merge to BridgeTxn class
-export { bridgeTxnHandler };
+export { handleBridgeTxn as handleBridgeTxn };
 
 import { Blockchain, ConfirmOutcome, TxnId, TxnType } from '..';
 import { BlockchainName, BridgeTxnStatus } from '../..';
@@ -13,7 +13,7 @@ import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
-async function bridgeTxnHandler(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
+async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;

@@ -3,7 +3,7 @@ export { burn };
 import { BridgeTxn } from '.';
 import { BurnApiParam } from '../..';
 import { TxnType } from '..';
-import { bridgeTxnHandler } from './bridge-txn-handler';
+import { handleBridgeTxn } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
@@ -20,7 +20,7 @@ async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxn> {
     TxnType.BURN,
     BigInt(Date.now())
   );
-  const bridgeTxn = await bridgeTxnHandler(rawBridgeTxn);
+  const bridgeTxn = await handleBridgeTxn(rawBridgeTxn);
   // ERR handler .burn success
   logger.info(literal.DONE_BURN);
   return bridgeTxn;

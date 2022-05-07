@@ -3,7 +3,7 @@ export { mint };
 import { BridgeTxn } from '.';
 import { MintApiParam } from '../..';
 import { TxnType } from '..';
-import { bridgeTxnHandler } from './bridge-txn-handler';
+import { handleBridgeTxn } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
@@ -16,7 +16,7 @@ async function mint(mintApiParam: MintApiParam): Promise<BridgeTxn> {
     )
   );
   const rawBridgeTxn = BridgeTxn.fromApiCallParam(mintApiParam, TxnType.MINT);
-  const bridgeTxn = bridgeTxnHandler(rawBridgeTxn);
+  const bridgeTxn = handleBridgeTxn(rawBridgeTxn);
   logger.info(literal.DONE_MINT);
   return bridgeTxn;
 }
