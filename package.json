@@ -1,5 +1,27 @@
 {
   "author": "Pablion <36828324+Pablion@users.noreply.github.com>",
+  "commitlint": {
+    "rules": {
+      "type-enum": [
+        2,
+        "always",
+        [
+          "build",
+          "chore",
+          "ci",
+          "docs",
+          "feat",
+          "fix",
+          "perf",
+          "ref",
+          "refactor",
+          "revert",
+          "style",
+          "test"
+        ]
+      ]
+    }
+  },
   "dependencies": {
     "@types/node": "^17.0.23",
     "algosdk": "^1.15.0",
