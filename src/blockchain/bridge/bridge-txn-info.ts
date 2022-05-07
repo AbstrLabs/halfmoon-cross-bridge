@@ -182,6 +182,7 @@ class BridgeTxnInfo {
     this.getFixedFeeAtom();
     this.calculateMarginFeeAtom();
     this.calculateToAmountAtom();
+    this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
     return this;
   }
 

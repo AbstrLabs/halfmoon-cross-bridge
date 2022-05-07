@@ -16,10 +16,11 @@ enum BlockchainName {
 }
 enum BridgeTxnStatus {
   // By order
+  ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL', //     General server internal error
   DOING_INITIALIZE = 'DOING_INITIALIZE', //         BridgeTxn without calling initialize
   DONE_INITIALIZE = 'DONE_INITIALIZE', //           BridgeTxn after initialize
-  ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL', //     BridgeTxn initialize failed
-  ERR_AWS_RDS_DB = 'ERR_AWS_RDS_DB', //             BridgeTxn initialize failed
+  ERR_INITIALIZE = 'ERR_INITIALIZE', //             BridgeTxn initialize failed
+  ERR_AWS_RDS_DB = 'ERR_AWS_RDS_DB', //             AWS DB External error
   DOING_INCOMING = 'DOING_INCOMING', //             Await confirm incoming
   ERR_TIMEOUT_INCOMING = 'ERR_TIMEOUT_INCOMING', // Confirm incoming timeout
   ERR_VERIFY_INCOMING = 'ERR_VERIFY_INCOMING', //   Verified incoming is wrong
