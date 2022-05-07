@@ -10,9 +10,9 @@ import { BridgeError, ERRORS } from './errors';
 import { parseBurnApiParam, parseMintApiParam } from './formatter';
 import JsonBig from 'json-bigint';
 import { ENV } from './dotenv';
-import { exampleBridgeTxnInfo } from './test-helper';
+import { exampleBridgeTxn } from './test-helper';
 import { TxnType } from '../blockchain';
-import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxn } from '../blockchain/bridge';
 
 // TODO: move to test-helper + ren
 const FAKE_TX_ID = 'some_fake_txn_id';
@@ -56,8 +56,8 @@ describe('param validation and formatting', () => {
     const JsonStringifySpy = jest.spyOn(JSON, 'stringify');
     JsonStringifySpy.mockImplementation(jest.fn(JsonBig.stringify));
 
-    expect(BridgeTxnInfo.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
-      exampleBridgeTxnInfo
+    expect(BridgeTxn.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
+      exampleBridgeTxn
     ); // need --workers=1 flag
   });
 

@@ -1,15 +1,15 @@
 // TODO: Move to utils
 // Used across many tests
-export { exampleBridgeTxnInfo };
+export { exampleBridgeTxn };
 
 import { BlockchainName, BridgeTxnStatus } from '..';
 
-import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxn } from '../blockchain/bridge';
 
 const FAKE_TX_ID = 'some_fake_txn_id';
 
 // TODO: Move to utils
-const exampleBridgeTxnInfo: BridgeTxnInfo = new BridgeTxnInfo({
+const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
   // this is a mint txn
   fromAmountAtom: BigInt(10000000000), // big int jest err read on top.
   fixedFeeAtom: BigInt(123456),

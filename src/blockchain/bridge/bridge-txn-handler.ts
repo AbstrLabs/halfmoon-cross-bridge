@@ -6,31 +6,29 @@ import { Blockchain, ConfirmOutcome, TxnId, TxnType } from '..';
 import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
-import { BridgeTxnInfo } from '.';
+import { BridgeTxn } from '.';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
-async function bridgeTxnHandler(
-  bridgeTxnInfo: BridgeTxnInfo
-): Promise<BridgeTxnInfo> {
+async function bridgeTxnHandler(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* CONFIG */
   let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
 
   let txnType;
   if (
-    bridgeTxnInfo.fromBlockchain === BlockchainName.NEAR &&
-    bridgeTxnInfo.toBlockchain === BlockchainName.ALGO
+    bridgeTxn.fromBlockchain === BlockchainName.NEAR &&
+    bridgeTxn.toBlockchain === BlockchainName.ALGO
   ) {
     txnType = TxnType.MINT;
     incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
   } else if (
-    bridgeTxnInfo.fromBlockchain === BlockchainName.ALGO &&
-    bridgeTxnInfo.toBlockchain === BlockchainName.NEAR
+    bridgeTxn.fromBlockchain === BlockchainName.ALGO &&
+    bridgeTxn.toBlockchain === BlockchainName.NEAR
   ) {
     txnType = TxnType.BURN;
     incomingBlockchain = algoBlockchain;
@@ -43,9 +41,9 @@ async function bridgeTxnHandler(
   logger.info(
     literal.MAKING_TXN(
       txnType,
-      bridgeTxnInfo.fromAmountAtom,
-      bridgeTxnInfo.fromAddr,
-      bridgeTxnInfo.toAddr
+      bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromAddr,
+      bridgeTxn.toAddr
     )
   );
 
@@ -57,93 +55,93 @@ async function bridgeTxnHandler(
 
   // TODO: should move err-handling to db.
   try {
-    bridgeTxnInfo.dbId = await db.createTxn(bridgeTxnInfo);
+    bridgeTxn.dbId = await db.createTxn(bridgeTxn);
   } catch (e) {
     throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TX_FAILED, {
-      bridgeTxnInfo,
+      bridgeTxn,
     });
   }
 
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_INCOMING;
-  await db.updateTxn(bridgeTxnInfo);
+  bridgeTxn.txnStatus = BridgeTxnStatus.DOING_INCOMING;
+  await db.updateTxn(bridgeTxn);
 
   let confirmOutcome;
   try {
     confirmOutcome = await incomingBlockchain.confirmTxn({
-      fromAddr: bridgeTxnInfo.fromAddr,
-      atomAmount: bridgeTxnInfo.fromAmountAtom,
+      fromAddr: bridgeTxn.fromAddr,
+      atomAmount: bridgeTxn.fromAmountAtom,
       toAddr: incomingBlockchain.centralizedAddr,
-      txnId: bridgeTxnInfo.fromTxnId,
+      txnId: bridgeTxn.fromTxnId,
     });
   } finally {
     switch (confirmOutcome) {
       case ConfirmOutcome.SUCCESS:
         break;
       case ConfirmOutcome.WRONG_INFO:
-        bridgeTxnInfo.txnStatus = BridgeTxnStatus.ERR_VERIFY_INCOMING;
-        await db.updateTxn(bridgeTxnInfo);
+        bridgeTxn.txnStatus = BridgeTxnStatus.ERR_VERIFY_INCOMING;
+        await db.updateTxn(bridgeTxn);
         break;
       case ConfirmOutcome.TIMEOUT:
-        bridgeTxnInfo.txnStatus = BridgeTxnStatus.ERR_TIMEOUT_INCOMING;
-        await db.updateTxn(bridgeTxnInfo);
+        bridgeTxn.txnStatus = BridgeTxnStatus.ERR_TIMEOUT_INCOMING;
+        await db.updateTxn(bridgeTxn);
         break;
     }
   }
 
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_INCOMING;
-  await db.updateTxn(bridgeTxnInfo);
+  bridgeTxn.txnStatus = BridgeTxnStatus.DONE_INCOMING;
+  await db.updateTxn(bridgeTxn);
 
   // make outgoing txn
   let outgoingTxnId: TxnId;
-  bridgeTxnInfo.toAmountAtom = bridgeTxnInfo.getToAmountAtom();
+  bridgeTxn.toAmountAtom = bridgeTxn.getToAmountAtom();
   try {
-    bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-    await db.updateTxn(bridgeTxnInfo);
+    bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+    await db.updateTxn(bridgeTxn);
     outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
       fromAddr: outgoingBlockchain.centralizedAddr,
-      toAddr: bridgeTxnInfo.toAddr,
-      atomAmount: bridgeTxnInfo.toAmountAtom,
+      toAddr: bridgeTxn.toAddr,
+      atomAmount: bridgeTxn.toAmountAtom,
       txnId: literal.UNUSED,
     });
-    bridgeTxnInfo.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-    bridgeTxnInfo.toTxnId = outgoingTxnId;
-    await db.updateTxn(bridgeTxnInfo);
+    bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+    bridgeTxn.toTxnId = outgoingTxnId;
+    await db.updateTxn(bridgeTxn);
   } catch {
     // TODO: same-piece-MAKE_OUTGOING_TX_FAILED
-    bridgeTxnInfo.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-    await db.updateTxn(bridgeTxnInfo);
+    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+    await db.updateTxn(bridgeTxn);
     throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TX_FAILED, {
-      bridgeTxnInfo,
+      bridgeTxn,
     });
   }
   if (outgoingTxnId === undefined) {
     // TODO: same-piece-MAKE_OUTGOING_TX_FAILED
-    bridgeTxnInfo.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-    await db.updateTxn(bridgeTxnInfo);
+    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+    await db.updateTxn(bridgeTxn);
     throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TX_FAILED, {
-      bridgeTxnInfo,
+      bridgeTxn,
     });
   }
 
   try {
     await outgoingBlockchain.confirmTxn({
       fromAddr: outgoingBlockchain.centralizedAddr,
-      toAddr: bridgeTxnInfo.toAddr,
-      atomAmount: bridgeTxnInfo.toAmountAtom,
+      toAddr: bridgeTxn.toAddr,
+      atomAmount: bridgeTxn.toAmountAtom,
       txnId: outgoingTxnId,
     });
   } catch {
-    bridgeTxnInfo.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
+    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
   }
 
   // verify outgoing txn
-  bridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-  await db.updateTxn(bridgeTxnInfo);
+  bridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+  await db.updateTxn(bridgeTxn);
   // user confirmation via socket/email
 
   /* CLEAN UP */
   /* await  */ db.disconnect();
 
-  return bridgeTxnInfo;
+  return bridgeTxn;
   // check indexer with hash
 }

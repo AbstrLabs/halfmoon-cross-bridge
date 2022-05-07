@@ -1,9 +1,9 @@
-import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxn } from '../blockchain/bridge';
 import { BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
 import { db } from '.';
-import { exampleBridgeTxnInfo } from '../utils/test-helper';
+import { exampleBridgeTxn } from '../utils/test-helper';
 
 describe('DATABASE test', () => {
   beforeAll(async () => {
@@ -85,34 +85,32 @@ describe('DATABASE test', () => {
   });
   describe('CRUD test with Bridge Txn', () => {
     it('create a transaction', async () => {
-      const res = await db.createTxn(exampleBridgeTxnInfo);
+      const res = await db.createTxn(exampleBridgeTxn);
       expect(typeof res).toBe('number');
     });
     it('read a transaction', async () => {
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
+      const res = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
       console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
 
-      expect(BridgeTxnInfo.fromDbItem(res, TxnType.MINT)).toEqual(
-        exampleBridgeTxnInfo
-      );
+      expect(BridgeTxn.fromDbItem(res, TxnType.MINT)).toEqual(exampleBridgeTxn);
     });
     it('update a transaction', async () => {
-      exampleBridgeTxnInfo.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-      exampleBridgeTxnInfo.toTxnId = 'some_fake_txn_id';
-      const res1 = await db.updateTxn(exampleBridgeTxnInfo);
+      exampleBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+      exampleBridgeTxn.toTxnId = 'some_fake_txn_id';
+      const res1 = await db.updateTxn(exampleBridgeTxn);
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res2 = await db.readTxn(exampleBridgeTxnInfo.dbId!, TxnType.MINT);
+      const res2 = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
-      expect(BridgeTxnInfo.fromDbItem(res2, TxnType.MINT)).toEqual(
-        exampleBridgeTxnInfo
+      expect(BridgeTxn.fromDbItem(res2, TxnType.MINT)).toEqual(
+        exampleBridgeTxn
       );
     });
   });

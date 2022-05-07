@@ -10,7 +10,7 @@ export { db };
 
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxn } from '../blockchain/bridge';
 import { TxnType } from '../blockchain';
 import { literal } from '../utils/literal';
 import { logger } from '../utils/logger';
@@ -50,7 +50,7 @@ class Database {
     await this.instance.end();
   }
 
-  public async createTxn(bridgeTxn: BridgeTxnInfo): Promise<DbId> {
+  public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign a dbId on creation.
     // TODO: Err handling, like sending alert email when db cannot connect.
     const tableName = this._inferTableName(bridgeTxn);
@@ -95,7 +95,7 @@ class Database {
   public async readTxn(txnId: DbId, txnType: TxnType) {
     // currently only used in test. not fixing.
     // should return an BridgeTxn
-    // should use BridgeTxnInfo.fromDbItem to convert to BridgeTxn
+    // should use BridgeTxn.fromDbItem to convert to BridgeTxn
 
     // TODO: param of _inferTableName should be TxnType
     let tableName: TableName;
@@ -123,7 +123,7 @@ class Database {
     return result[0];
   }
 
-  async updateTxn(bridgeTxn: BridgeTxnInfo) {
+  async updateTxn(bridgeTxn: BridgeTxn) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
@@ -180,7 +180,7 @@ class Database {
 
   // PRIVATE METHODS
 
-  private _inferTableName(bridgeTxn: BridgeTxnInfo) {
+  private _inferTableName(bridgeTxn: BridgeTxn) {
     let tableName: TableName;
     if (bridgeTxn.txnType === TxnType.MINT) {
       tableName = this.mintTableName;
@@ -194,10 +194,7 @@ class Database {
     return tableName;
   }
 
-  private _verifyResultLength(
-    result: unknown[],
-    TxnInfo: DbId | BridgeTxnInfo
-  ) {
+  private _verifyResultLength(result: unknown[], TxnInfo: DbId | BridgeTxn) {
     // TODO: TxnInfo -> ErrInfoObj
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {

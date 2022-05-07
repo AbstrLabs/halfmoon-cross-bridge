@@ -1,13 +1,13 @@
 export { burn };
 
-import { BridgeTxnInfo } from '.';
+import { BridgeTxn } from '.';
 import { BurnApiParam } from '../..';
 import { TxnType } from '..';
 import { bridgeTxnHandler } from './bridge-txn-handler';
 import { literal } from '../../utils/literal';
 import { logger } from '../../utils/logger';
 
-async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxnInfo> {
+async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxn> {
   logger.info(
     literal.START_MINTING(
       burnApiParam.amount,
@@ -15,13 +15,13 @@ async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxnInfo> {
       burnApiParam.to
     )
   );
-  const rawBridgeTxnInfo = BridgeTxnInfo.fromApiCallParam(
+  const rawBridgeTxn = BridgeTxn.fromApiCallParam(
     burnApiParam,
     TxnType.BURN,
     BigInt(Date.now())
   );
-  const bridgeTxnInfo = await bridgeTxnHandler(rawBridgeTxnInfo);
+  const bridgeTxn = await bridgeTxnHandler(rawBridgeTxn);
   // ERR handler .burn success
   logger.info(literal.DONE_BURN);
-  return bridgeTxnInfo;
+  return bridgeTxn;
 }

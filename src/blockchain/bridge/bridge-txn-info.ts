@@ -1,9 +1,9 @@
 // TODO: (next line) more txnStatus for internal process like fee calculation.
-// TODO: 1. apply last line txnStatus to this class.
-// TODO: 2. rename class BridgeTxnInfo To BridgeTxn
+// TODO: 1. (DONE)
+// TODO: 2. (DONE)
 // TODO: 3. rename field timestamp to createTime
 
-export { BridgeTxnInfo };
+export { BridgeTxn };
 
 import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
@@ -12,7 +12,7 @@ import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';
 
-class BridgeTxnInfo {
+class BridgeTxn {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
@@ -32,9 +32,9 @@ class BridgeTxnInfo {
     apiCallParam: ApiCallParam,
     txnType: TxnType,
     timestamp?: bigint
-  ): BridgeTxnInfo {
+  ): BridgeTxn {
     const { from, to, amount, txnId } = apiCallParam;
-    const bridgeTxnInfo = new BridgeTxnInfo({
+    const bridgeTxn = new BridgeTxn({
       dbId: undefined,
       txnType,
       fixedFeeAtom: undefined,
@@ -50,13 +50,13 @@ class BridgeTxnInfo {
       toTxnId: undefined,
       txnStatus: BridgeTxnStatus.DOING_INITIALIZE,
     });
-    return bridgeTxnInfo;
+    return bridgeTxn;
   }
 
   // TODO: have a DbItem interface
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxnInfo {
-    const bridgeTxn: BridgeTxnInfo = new BridgeTxnInfo({
+  static fromDbItem(dbItem: any, dbType: TxnType): BridgeTxn {
+    const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: dbItem.db_id,
       txnType: dbType,
 
@@ -142,12 +142,12 @@ class BridgeTxnInfo {
     return this.toAmountAtom;
   }
   /**
-   * @param  {BridgeTxnInfo} other
-   * @returns {boolean} true if the two BridgeTxnInfo are considered same
+   * @param  {BridgeTxn} other
+   * @returns {boolean} true if the two BridgeTxn are considered same
    *
    * @todo: Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
-  equals(other: BridgeTxnInfo): boolean {
+  equals(other: BridgeTxn): boolean {
     return (
       this.fromAddr === other.fromAddr &&
       this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&

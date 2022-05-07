@@ -41,12 +41,12 @@ describe('mint test', () => {
       };
 
       // call API
-      const bridgeTxnInfo = await mint(apiCallParam);
+      const bridgeTxn = await mint(apiCallParam);
       // should return AlgoTxnId,etc.
 
-      console.log('bridgeTxnInfo : ', bridgeTxnInfo); // DEV_LOG_TO_REMOVE
+      console.log('bridgeTxn : ', bridgeTxn);
       // verification
-      expect(bridgeTxnInfo.toTxnId).toBeDefined();
+      expect(bridgeTxn.toTxnId).toBeDefined();
     },
     TIMEOUT_30S * 3
   );

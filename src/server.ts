@@ -8,7 +8,7 @@ import { ensureString } from './utils/helper';
 import { literal } from './utils/literal';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
-import { BridgeTxnInfo } from './blockchain/bridge';
+import { BridgeTxn } from './blockchain/bridge';
 import { parseBurnApiParam, parseMintApiParam } from './utils/formatter';
 import { burn } from './blockchain/bridge/burn';
 
@@ -95,13 +95,13 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
-  let bridgeTxnInfo: BridgeTxnInfo;
+  let bridgeTxn: BridgeTxn;
   logger.info(literal.START_MINTING(amount, from, to));
   res.write(`${literal.START_MINTING(amount, from, to)}\n`);
   res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
   res.write(`${literal.MINT_AWAITING}\n`);
   try {
-    bridgeTxnInfo = await mint(mintApiParam);
+    bridgeTxn = await mint(mintApiParam);
     logger.info(literal.DONE_MINT);
     res.end();
   } catch (e) {
@@ -109,7 +109,7 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
     res.end();
     throw e;
   }
-  return bridgeTxnInfo;
+  return bridgeTxn;
 }
 
 // TODO: 2-func: ref mintResp and burnResp since they are in same structure.
@@ -117,13 +117,13 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const burnApiParam = parseBurnApiParam(apiCallParam);
   const { from, to, amount, txnId } = burnApiParam;
-  let bridgeTxnInfo: BridgeTxnInfo;
+  let bridgeTxn: BridgeTxn;
   logger.info(literal.START_BURNING(amount, from, to));
   res.write(`${literal.START_BURNING(amount, from, to)}\n`);
   res.write(`${literal.BURN_ALGO_TX_ID(txnId)}\n`);
   res.write(`${literal.BURN_AWAITING}\n`);
   try {
-    bridgeTxnInfo = await burn(burnApiParam);
+    bridgeTxn = await burn(burnApiParam);
     logger.info(literal.DONE_BURN);
     res.end();
   } catch (e) {
@@ -131,5 +131,5 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
     res.end();
     throw e;
   }
-  return bridgeTxnInfo;
+  return bridgeTxn;
 }

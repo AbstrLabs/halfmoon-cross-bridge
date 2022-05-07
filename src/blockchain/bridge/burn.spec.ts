@@ -40,12 +40,12 @@ describe('burn test', () => {
       };
 
       // call API
-      const bridgeTxnInfo = await burn(apiCallParam);
+      const bridgeTxn = await burn(apiCallParam);
 
       // should return AlgoTxnId,etc.
 
       // verification
-      expect(bridgeTxnInfo.toTxnId).toBeDefined();
+      expect(bridgeTxn.toTxnId).toBeDefined();
     },
     TIMEOUT_30S * 3
   );
