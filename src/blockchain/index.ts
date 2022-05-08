@@ -27,7 +27,7 @@ export {
   type BurnApiParam,
   type MintApiParam,
   type NearTxnParam,
-} from '../utils/formatter';
+} from '../utils/type';
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
@@ -40,7 +40,7 @@ import {
   type AlgoTxnParam,
   type NearAddr,
   type NearTxnParam,
-} from '../utils/formatter';
+} from '../utils/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 

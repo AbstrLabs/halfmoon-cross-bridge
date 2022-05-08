@@ -6,7 +6,7 @@ export {
   type MintApiParam,
 };
 
-import { type BurnApiParam, type MintApiParam } from './utils/formatter';
+import { type BurnApiParam, type MintApiParam } from './utils/type';
 
 type ApiCallParam = MintApiParam | BurnApiParam;
 
