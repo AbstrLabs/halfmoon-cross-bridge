@@ -1,9 +1,13 @@
-/** All Zod related types and their aliases */
-
 // TODO: 1, use same parse func for parseBurnApiParam parseMintApiParam ...
 // TODO: 1. like parse(Parser, BridgeError)
 // TODO: 2. Move types that need parse from src/index
 // TODO: 2.1. DbItem,Addr Collision
+
+/** Zod parser (verifier) and the derived Typescript Types
+ * All Zod related types should be here.
+ */
+
+// Use Zod.union instead of TS union
 
 export {
   type Addr,
@@ -12,12 +16,14 @@ export {
   type AlgoTxnId,
   type AlgoTxnParam,
   type BurnApiParam,
+  type DbId,
   type DbItem,
   type MintApiParam,
   type NearAddr,
   type NearTxnId,
   type NearTxnParam,
   type Stringer,
+  type TxnId,
   zDbItem,
   parseBurnApiParam,
   parseMintApiParam,
@@ -30,21 +36,34 @@ type Stringer = {
   toString(): string;
 };
 
+/* Zod to Typescript */
+// Order of these is same as they are used in the txn process.
+// Same order as below zTypeName part
+
+// API -> server
 type MintApiParam = z.infer<typeof zMintApiParam>;
 type BurnApiParam = z.infer<typeof zBurnApiParam>;
 type ApiCallParam = z.infer<typeof zApiCallParam>;
 
-type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
-type NearTxnParam = z.infer<typeof zNearTxnParam>;
-
+// blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
 type NearAddr = z.infer<typeof zNearAddr>;
 type Addr = z.infer<typeof zAddr>;
 type NearTxnId = z.infer<typeof zNearTxnId>;
 type AlgoTxnId = z.infer<typeof zAlgoTxnId>;
+type TxnId = z.infer<typeof zTxnId>;
+type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
+type NearTxnParam = z.infer<typeof zNearTxnParam>;
 
+// Used by BridgeTxn Class
 type DbItem = z.infer<typeof zDbItem>;
+type DbId = z.infer<typeof zDbId>;
 
+// API -> server
+const zAlgoAddr = z
+  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
+  .string()
+  .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
 const zNearAddr = z
   // from https://wallet.testnet.near.org/create
   // cannot start with `-` and `_`
@@ -53,11 +72,7 @@ const zNearAddr = z
     /^[0-9a-z][0-9a-z\-_]{1,64}.(testnet|mainnet)$/,
     'malformed near address'
   );
-
-const zAlgoAddr = z
-  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
-  .string()
-  .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
+const zAddr = z.union([zAlgoAddr, zNearAddr]);
 
 const zApiAmount = z
   .string()
@@ -72,8 +87,6 @@ const zApiAmount = z
     }
     return true;
   });
-
-const zAddr = z.union([zAlgoAddr, zNearAddr]);
 
 const zNearTxnId = z.string(); // TODO: unfinished
 const zAlgoTxnId = z.string(); // TODO: unfinished
@@ -92,6 +105,7 @@ const zBurnApiParam = z.object({
 });
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
 
+// blockchain specific
 const zAlgoTxnParam = z.object({
   atomAmount: z.bigint(),
   fromAddr: zAlgoAddr,
@@ -105,10 +119,10 @@ const zNearTxnParam = z.object({
   txnId: zNearTxnId,
 });
 
-const zDbId = z.number().int().positive();
+// Used by BridgeTxn Class - Database
 const zBiginter = z.string().regex(/^[1-9][0-9]{0,18}$/);
+const zDbId = z.number().int().positive();
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
-
 const zDbItem = z.object({
   db_id: zDbId,
   fixed_fee_atom: zBiginter,

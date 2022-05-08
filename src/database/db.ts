@@ -17,7 +17,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
-type DbId = number;
+type DbId = number; // TODO: use type.ts
 
 enum TableName {
   MINT_TABLE_NAME = `mint_request`,
