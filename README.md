@@ -8,3 +8,8 @@
 ## Contribute
 
 1. pre-commit hook will run `yarn test` which contains a mint and a burn transaction. Should transfer back the money when the centralized accounts hold too much transaction fee. (maybe automate later)
+
+## Frontend Requirements
+
+1. Algorand ASA Needs user to Opt In (transfer 0 to oneself, [see detail](https://developer.algorand.org/docs/get-details/asa/#receiving-an-asset))
+2. Wallet connection.

@@ -12,11 +12,12 @@ export {
   type AlgoTxnId,
   type AlgoTxnParam,
   type BurnApiParam,
+  type DbItem,
   type MintApiParam,
   type NearAddr,
   type NearTxnId,
   type NearTxnParam,
-  type DbItem,
+  type Stringer,
   zDbItem,
   parseBurnApiParam,
   parseMintApiParam,
@@ -24,6 +25,10 @@ export {
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from './errors';
+
+type Stringer = {
+  toString(): string;
+};
 
 type MintApiParam = z.infer<typeof zMintApiParam>;
 type BurnApiParam = z.infer<typeof zBurnApiParam>;

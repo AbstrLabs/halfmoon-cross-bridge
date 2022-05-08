@@ -1,10 +1,9 @@
-import { NOT_LOADED_FROM_ENV, literals } from '../utils/literals';
-
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '.';
 import { algoBlockchain } from './algorand';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
+import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
@@ -58,7 +57,7 @@ describe('AlgorandBlockchain', () => {
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
-    expect(ENV.ALGO_MASTER_ADDR).not.toBe(NOT_LOADED_FROM_ENV);
+    expect(ENV.ALGO_MASTER_ADDR).not.toBe(literals.NOT_LOADED_FROM_ENV);
     expect(typeof ENV.TEST_NET_GO_NEAR_ASSET_ID).toBe('number');
   });
   // it.skip('user not opted in', () => {});

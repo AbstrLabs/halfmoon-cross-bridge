@@ -1,15 +1,8 @@
 export { literals };
-type Stringer =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | {
-      toString(): string;
-    };
 
-export const NOT_LOADED_FROM_ENV = 'NOT_LOADED_FROM_ENV';
+import { Stringer } from './type';
+
+const NOT_LOADED_FROM_ENV = 'NOT_LOADED_FROM_ENV';
 
 const MAKING_TXN = (
   txnType: Stringer,
@@ -68,6 +61,7 @@ const literals = {
   MINT_NEAR_TX_ID,
   NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
+  NOT_LOADED_FROM_ENV,
   SILLY_LOG,
   START_BURNING,
   START_MINTING,

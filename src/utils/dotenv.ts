@@ -4,15 +4,15 @@
 
 export { loadDotEnv, ENV };
 
-import { NOT_LOADED_FROM_ENV } from './literals';
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
+import { literals } from './literals';
 
 function loadDotEnv() {
   const env = config();
   if (env.parsed === undefined) {
     // TODO: use BridgeError
-    throw new Error(NOT_LOADED_FROM_ENV);
+    throw new Error(literals.NOT_LOADED_FROM_ENV);
   }
 
   return dpv(env.parsed, {
@@ -40,19 +40,19 @@ const default_ENV = {
 };
 
 const secret_ENV = {
-  NEAR_MASTER_ADDR: NOT_LOADED_FROM_ENV,
-  NEAR_MASTER_PRIV: NOT_LOADED_FROM_ENV,
-  NEAR_MASTER_PASS: NOT_LOADED_FROM_ENV,
-  ALGO_MASTER_ADDR: NOT_LOADED_FROM_ENV,
-  ALGO_MASTER_PRIV: NOT_LOADED_FROM_ENV,
-  ALGO_MASTER_PASS: NOT_LOADED_FROM_ENV,
-  NEAR_EXAMPL_ADDR: NOT_LOADED_FROM_ENV,
-  NEAR_EXAMPL_PRIV: NOT_LOADED_FROM_ENV,
-  NEAR_EXAMPL_PASS: NOT_LOADED_FROM_ENV,
-  ALGO_EXAMPL_ADDR: NOT_LOADED_FROM_ENV,
-  ALGO_EXAMPL_PRIV: NOT_LOADED_FROM_ENV,
-  ALGO_EXAMPL_PASS: NOT_LOADED_FROM_ENV,
-  PURE_STAKE_API_KEY: NOT_LOADED_FROM_ENV,
+  NEAR_MASTER_ADDR: literals.NOT_LOADED_FROM_ENV,
+  NEAR_MASTER_PRIV: literals.NOT_LOADED_FROM_ENV,
+  NEAR_MASTER_PASS: literals.NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_ADDR: literals.NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_PRIV: literals.NOT_LOADED_FROM_ENV,
+  ALGO_MASTER_PASS: literals.NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_ADDR: literals.NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_PRIV: literals.NOT_LOADED_FROM_ENV,
+  NEAR_EXAMPL_PASS: literals.NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_ADDR: literals.NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_PRIV: literals.NOT_LOADED_FROM_ENV,
+  ALGO_EXAMPL_PASS: literals.NOT_LOADED_FROM_ENV,
+  PURE_STAKE_API_KEY: literals.NOT_LOADED_FROM_ENV,
 };
 const parsed_ENV = loadDotEnv();
 
