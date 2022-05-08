@@ -13,7 +13,7 @@ import { BridgeError, ERRORS } from '../utils/errors';
 import { BridgeTxn } from '../blockchain/bridge';
 import { type DbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
-import { literal } from '../utils/literal';
+import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
 
@@ -89,7 +89,7 @@ class Database {
 
     const dbId = result[0]['db_id'];
 
-    logger.info(literal.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
+    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
     return dbId as DbId;
   }

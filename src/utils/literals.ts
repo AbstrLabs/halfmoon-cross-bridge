@@ -1,5 +1,4 @@
-// TODO: ren to literals for zod
-export { literal };
+export { literals };
 type Stringer =
   | string
   | number
@@ -57,7 +56,7 @@ const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
 
 const SILLY_LOG = {};
 
-const literal = {
+const literals = {
   ASA_CREATED,
   BURN_ALGO_TX_ID,
   BURN_AWAITING,

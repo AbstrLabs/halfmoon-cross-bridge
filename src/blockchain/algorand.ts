@@ -22,7 +22,7 @@ import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
-import { literal } from '../utils/literal';
+import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 // TODO: constructor: move config to param
@@ -212,7 +212,7 @@ class AlgorandBlockchain extends Blockchain {
 
     //Get the completed Transaction
     logger.verbose(
-      literal.TXN_CONFIRMED(
+      literals.TXN_CONFIRMED(
         from,
         to,
         amountInAtomic,
@@ -259,7 +259,7 @@ class AlgorandBlockchain extends Blockchain {
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
     logger.info(
-      literal.ASA_CREATED(
+      literals.ASA_CREATED(
         noParamAsaConfig.assetName,
         tx.txId,
         noParamAsaConfig.assetId

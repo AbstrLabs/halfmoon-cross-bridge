@@ -21,7 +21,7 @@ import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 import { Blockchain } from '.';
-import { literal } from '../utils/literal';
+import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 
@@ -75,7 +75,7 @@ class NearBlockchain extends Blockchain {
     // TODO: Type FinalExecutionOutcome.transaction.
     logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.provider.txStatus(txnId, from);
-    logger.info(literal.NEAR_TXN_RESULT(result));
+    logger.info(literals.NEAR_TXN_RESULT(result));
     return result;
   }
 
@@ -86,7 +86,7 @@ class NearBlockchain extends Blockchain {
     // TODO: compare txnId
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
-    logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
+    logger.verbose(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
     const txnReceipt = txnOutcome;
     if (txnReceipt.status instanceof Object) {
       //TODO: txnId

@@ -4,7 +4,7 @@
 
 export { loadDotEnv, ENV };
 
-import { NOT_LOADED_FROM_ENV } from './literal';
+import { NOT_LOADED_FROM_ENV } from './literals';
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
 

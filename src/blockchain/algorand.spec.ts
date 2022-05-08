@@ -1,4 +1,4 @@
-import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
+import { NOT_LOADED_FROM_ENV, literals } from '../utils/literals';
 
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '.';
@@ -70,8 +70,8 @@ describe('AlgorandBlockchain', () => {
     // make a txn (then verify)
     const amount = '0.767';
     const newTxnParam: TxnParam = {
-      fromAddr: literal.UNUSED,
-      txnId: literal.UNUSED,
+      fromAddr: literals.UNUSED,
+      txnId: literals.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
       atomAmount: goNearToAtom(amount),
     };

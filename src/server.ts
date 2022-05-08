@@ -5,7 +5,7 @@ import express, { Request, Response } from 'express';
 import { ENV } from './utils/dotenv';
 import { type MintApiParam as BurnApiParam } from './';
 import { ensureString } from './utils/helper';
-import { literal } from './utils/literal';
+import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
 import { BridgeTxn } from './blockchain/bridge';
@@ -96,13 +96,13 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
   let bridgeTxn: BridgeTxn;
-  logger.info(literal.START_MINTING(amount, from, to));
-  res.write(`${literal.START_MINTING(amount, from, to)}\n`);
-  res.write(`${literal.MINT_NEAR_TX_ID(txnId)}\n`);
-  res.write(`${literal.MINT_AWAITING}\n`);
+  logger.info(literals.START_MINTING(amount, from, to));
+  res.write(`${literals.START_MINTING(amount, from, to)}\n`);
+  res.write(`${literals.MINT_NEAR_TX_ID(txnId)}\n`);
+  res.write(`${literals.MINT_AWAITING}\n`);
   try {
     bridgeTxn = await mint(mintApiParam);
-    logger.info(literal.DONE_MINT);
+    logger.info(literals.DONE_MINT);
     res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');
@@ -118,13 +118,13 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   const burnApiParam = parseBurnApiParam(apiCallParam);
   const { from, to, amount, txnId } = burnApiParam;
   let bridgeTxn: BridgeTxn;
-  logger.info(literal.START_BURNING(amount, from, to));
-  res.write(`${literal.START_BURNING(amount, from, to)}\n`);
-  res.write(`${literal.BURN_ALGO_TX_ID(txnId)}\n`);
-  res.write(`${literal.BURN_AWAITING}\n`);
+  logger.info(literals.START_BURNING(amount, from, to));
+  res.write(`${literals.START_BURNING(amount, from, to)}\n`);
+  res.write(`${literals.BURN_ALGO_TX_ID(txnId)}\n`);
+  res.write(`${literals.BURN_AWAITING}\n`);
   try {
     bridgeTxn = await burn(burnApiParam);
-    logger.info(literal.DONE_BURN);
+    logger.info(literals.DONE_BURN);
     res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');

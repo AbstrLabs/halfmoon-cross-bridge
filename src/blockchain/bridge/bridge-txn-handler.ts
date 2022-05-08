@@ -1,5 +1,7 @@
-// TODO: add error handling
-// TODO: maybe merge to BridgeTxn class
+// TODO: 1. merge to BridgeTxn class
+// TODO: 2. Check Asset ID!
+// TODO: 3. Check if fromTxnId is reused
+
 export { handleBridgeTxn as handleBridgeTxn };
 
 import { Blockchain, ConfirmOutcome, TxnId, TxnType } from '..';
@@ -9,7 +11,7 @@ import { BridgeError, ERRORS } from '../../utils/errors';
 import { BridgeTxn } from '.';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database/db';
-import { literal } from '../../utils/literal';
+import { literals } from '../../utils/literals';
 import { logger } from '../../utils/logger';
 import { nearBlockchain } from '../near';
 
@@ -39,7 +41,7 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
     });
   }
   logger.info(
-    literal.MAKING_TXN(
+    literals.MAKING_TXN(
       txnType,
       bridgeTxn.fromAmountAtom,
       bridgeTxn.fromAddr,
@@ -101,7 +103,7 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
       fromAddr: outgoingBlockchain.centralizedAddr,
       toAddr: bridgeTxn.toAddr,
       atomAmount: bridgeTxn.toAmountAtom,
-      txnId: literal.UNUSED,
+      txnId: literals.UNUSED,
     });
     bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
     bridgeTxn.toTxnId = outgoingTxnId;

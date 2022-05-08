@@ -4,12 +4,12 @@ import { BridgeTxn } from '.';
 import { MintApiParam } from '../..';
 import { TxnType } from '..';
 import { handleBridgeTxn } from './bridge-txn-handler';
-import { literal } from '../../utils/literal';
+import { literals } from '../../utils/literals';
 import { logger } from '../../utils/logger';
 
 async function mint(mintApiParam: MintApiParam): Promise<BridgeTxn> {
   logger.info(
-    literal.START_MINTING(
+    literals.START_MINTING(
       mintApiParam.amount,
       mintApiParam.from,
       mintApiParam.to
@@ -17,6 +17,6 @@ async function mint(mintApiParam: MintApiParam): Promise<BridgeTxn> {
   );
   const rawBridgeTxn = BridgeTxn.fromApiCallParam(mintApiParam, TxnType.MINT);
   const bridgeTxn = handleBridgeTxn(rawBridgeTxn);
-  logger.info(literal.DONE_MINT);
+  logger.info(literals.DONE_MINT);
   return bridgeTxn;
 }

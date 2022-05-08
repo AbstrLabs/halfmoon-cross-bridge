@@ -1,3 +1,5 @@
+// TODO: check {X as X} and Y : Y.
+
 export {
   BlockchainName,
   BridgeTxnStatus,
