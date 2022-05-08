@@ -83,12 +83,13 @@ describe('DATABASE test', () => {
       expect(res_before_del.length - res_after_del.length).toBe(1);
     });
   });
-  describe('CRUD test with Bridge Txn', () => {
+  describe.skip('CRUD test with Bridge Txn', () => {
     it('create a transaction', async () => {
       const res = await db.createTxn(exampleBridgeTxn);
       expect(typeof res).toBe('number');
     });
-    it.only('read a transaction', async () => {
+    it.skip('read a transaction', async () => {
+      // skip: serialize
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const res = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);

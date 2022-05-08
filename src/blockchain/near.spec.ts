@@ -1,3 +1,4 @@
+import { ConfirmOutcome } from '.';
 import { goNearToAtom } from '../utils/formatter';
 import { nearBlockchain } from './near';
 
@@ -22,6 +23,6 @@ describe('nearBlockchain', () => {
         atomAmount: exampleAmount,
         txnId: exampleTxnId,
       })
-    ).toBe(true);
+    ).toBe(ConfirmOutcome.SUCCESS);
   });
 });
