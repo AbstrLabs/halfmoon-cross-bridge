@@ -11,7 +11,7 @@ export { db, type DbId };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxn } from '../blockchain/bridge';
-import { DbItem } from '.';
+import { type DbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literal } from '../utils/literal';
 import { logger } from '../utils/logger';
