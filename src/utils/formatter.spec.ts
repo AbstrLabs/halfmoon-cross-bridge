@@ -7,7 +7,7 @@ it('test place holder to fix', () => {
 
 import { type BurnApiParam, type MintApiParam } from '..';
 import { BridgeError, ERRORS } from './errors';
-import { parseBurnApiParam, parseMintApiParam } from './formatter';
+import { parseBurnApiParam, parseMintApiParam } from './type';
 import JsonBig from 'json-bigint';
 import { ENV } from './dotenv';
 import { exampleBridgeTxn } from './test-helper';

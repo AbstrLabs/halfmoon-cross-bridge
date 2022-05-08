@@ -9,7 +9,7 @@ import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
 import { BridgeTxn } from './blockchain/bridge';
-import { parseBurnApiParam, parseMintApiParam } from './utils/formatter';
+import { parseBurnApiParam, parseMintApiParam } from './utils/type';
 import { burn } from './blockchain/bridge/burn';
 
 async function homePageTest() {

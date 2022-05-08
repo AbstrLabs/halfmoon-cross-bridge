@@ -1,5 +1,3 @@
-// TODO: 1, use same parse func for parseBurnApiParam parseMintApiParam ...
-// TODO: 1. like parse(Parser, BridgeError)
 // TODO: 2. Move types that need parse from src/index
 // TODO: 2.1. DbItem,Addr Collision
 
@@ -30,7 +28,7 @@ export {
 };
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
-import { BridgeError, ERRORS } from './errors';
+import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 
 type Stringer = {
   toString(): string;
@@ -137,22 +135,24 @@ const zDbItem = z.object({
   txn_status: zBridgeTxnStatus,
 });
 
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
+/* PARSE FUNCTIONS */
+
+// TODO: test
+function parseWithZod<T>(
+  zodShaped: T,
+  zodParser: z.ZodType,
+  errorTemplate: ErrorTemplate
+): T {
   try {
-    return zMintApiParam.parse(apiParam);
-  } catch (e) {
-    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-      parseErrorDetail: e,
-    });
+    return zodParser.parse(zodShaped);
+  } catch (err) {
+    throw new BridgeError(errorTemplate, { parseErrorDetail: err });
   }
 }
 
+function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
+  return parseWithZod(apiParam, zMintApiParam, ERRORS.TXN.INVALID_API_PARAM);
+}
 function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  try {
-    return zBurnApiParam.parse(apiParam);
-  } catch (e) {
-    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-      parseErrorDetail: e,
-    });
-  }
+  return parseWithZod(apiParam, zBurnApiParam, ERRORS.TXN.INVALID_API_PARAM);
 }
