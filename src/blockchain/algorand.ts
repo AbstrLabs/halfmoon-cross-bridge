@@ -262,7 +262,7 @@ class AlgorandBlockchain extends Blockchain {
       literals.ASA_CREATED(
         noParamAsaConfig.assetName,
         tx.txId,
-        noParamAsaConfig.assetId
+        noParamAsaConfig.assetId! // eslint-disable-line @typescript-eslint/no-non-null-assertion
       )
     );
     return noParamAsaConfig;
