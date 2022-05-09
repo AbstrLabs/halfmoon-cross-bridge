@@ -302,7 +302,7 @@ class TestAlgo extends AlgorandBlockchain {
         toAddr: ENV.ALGO_MASTER_ADDR,
         fromAddr: ENV.ALGO_EXAMPL_ADDR,
         atomAmount: atomAmount,
-        txnId: '', // TODO: should support undefined
+        txnId: literals.UNUSED,
       },
       ENV.ALGO_EXAMPL_PASS
     );

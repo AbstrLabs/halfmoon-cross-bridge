@@ -206,7 +206,7 @@ class BridgeTxn {
       });
     }
 
-    //TODO: verify address too.
+    //TODO: verify to address is legal.
 
     // we can also do a min/max check here.
     return this;

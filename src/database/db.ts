@@ -1,5 +1,5 @@
 // TODO: 1. separate database to database.ts from index.ts
-// TODO: 3. Wrap this piece below
+// TODO: 2. Wrap this piece below
 /* const tableName = this._inferTableName(bridgeTxn);
 if (!this.isConnected) {
   await this.connect();
@@ -13,13 +13,8 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
+import { TableName } from '.';
 
-enum TableName {
-  MINT_TABLE_NAME = `mint_request`,
-  BURN_TABLE_NAME = `burn_request`,
-}
-
-export type BigIntStr = string;
 class Database {
   private instance = postgres;
   private mintTableName: TableName = TableName.MINT_TABLE_NAME;
