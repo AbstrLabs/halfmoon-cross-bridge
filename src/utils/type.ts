@@ -24,6 +24,7 @@ export {
   zDbItem,
   parseBurnApiParam,
   parseMintApiParam,
+  parseDbItem,
 };
 
 import { z } from 'zod';
@@ -33,6 +34,18 @@ import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 type Stringer = {
   toString(): string;
 };
+
+function parseWithZod<T>(
+  zodShaped: T,
+  zodParser: z.ZodType,
+  errorTemplate: ErrorTemplate
+): T {
+  try {
+    return zodParser.parse(zodShaped);
+  } catch (err) {
+    throw new BridgeError(errorTemplate, { parseErrorDetail: err });
+  }
+}
 
 /* Zod to Typescript */
 // Order of these is same as they are used in the txn process.
@@ -97,12 +110,18 @@ const zMintApiParam = z.object({
   to: zAlgoAddr,
   txnId: zNearTxnId,
 });
+function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
+  return parseWithZod(apiParam, zMintApiParam, ERRORS.TXN.INVALID_API_PARAM);
+}
 const zBurnApiParam = z.object({
   amount: zApiAmount,
   from: zAlgoAddr,
   to: zNearAddr,
   txnId: zNearTxnId,
 });
+function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
+  return parseWithZod(apiParam, zBurnApiParam, ERRORS.TXN.INVALID_API_PARAM);
+}
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
 
 // blockchain specific
@@ -137,25 +156,6 @@ const zDbItem = z.object({
   to_txn_id: zTxnId,
   txn_status: zBridgeTxnStatus,
 });
-
-/* PARSE FUNCTIONS */
-
-// TODO: test
-function parseWithZod<T>(
-  zodShaped: T,
-  zodParser: z.ZodType,
-  errorTemplate: ErrorTemplate
-): T {
-  try {
-    return zodParser.parse(zodShaped);
-  } catch (err) {
-    throw new BridgeError(errorTemplate, { parseErrorDetail: err });
-  }
-}
-
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  return parseWithZod(apiParam, zMintApiParam, ERRORS.TXN.INVALID_API_PARAM);
-}
-function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  return parseWithZod(apiParam, zBurnApiParam, ERRORS.TXN.INVALID_API_PARAM);
+function parseDbItem(dbItem: DbItem): DbItem {
+  return parseWithZod(dbItem, zDbItem, ERRORS.EXTERNAL.INVALID_DB_ITEM);
 }

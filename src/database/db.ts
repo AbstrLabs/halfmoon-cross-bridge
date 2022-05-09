@@ -8,7 +8,7 @@ export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxn } from '../blockchain/bridge';
-import { type DbId, type DbItem } from '../utils/type';
+import { parseDbItem, type DbId, type DbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -118,7 +118,8 @@ class Database {
     const result = await this.query(query, params);
     this._verifyResultLength(result, txnId);
 
-    return result[0] as DbItem;
+    const dbItem = parseDbItem(result[0]);
+    return dbItem;
   }
 
   async updateTxn(bridgeTxn: BridgeTxn) {

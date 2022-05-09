@@ -153,6 +153,11 @@ const externalErrors = {
     name: 'Make outgoing transaction failed',
     message: 'Cannot make outgoing transaction on blockchain',
   },
+  INVALID_DB_ITEM: {
+    errId: 307,
+    name: 'Invalid database item',
+    message: 'Invalid database item',
+  },
 };
 
 const ERRORS = {

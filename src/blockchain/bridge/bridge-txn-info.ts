@@ -1,6 +1,6 @@
 export { BridgeTxn };
 
-import { ApiCallParam, DbItem } from '../../utils/type';
+import { ApiCallParam, DbItem, parseDbItem } from '../../utils/type';
 import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
@@ -51,22 +51,23 @@ class BridgeTxn {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDbItem(dbItem: DbItem, dbType: TxnType): BridgeTxn {
+    const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
-      dbId: dbItem.db_id,
+      dbId: _dbItem.db_id,
       txnType: dbType,
 
-      fixedFeeAtom: BigInt(dbItem.fixed_fee_atom),
-      fromAddr: dbItem.from_addr,
-      fromAmountAtom: BigInt(dbItem.from_amount_atom),
+      fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
+      fromAddr: _dbItem.from_addr,
+      fromAmountAtom: BigInt(_dbItem.from_amount_atom),
       fromBlockchain: undefined,
-      fromTxnId: dbItem.from_txn_id,
-      marginFeeAtom: BigInt(dbItem.margin_fee_atom),
-      createdTime: BigInt(dbItem.created_time),
-      toAddr: dbItem.to_addr,
-      toAmountAtom: BigInt(dbItem.to_amount_atom),
+      fromTxnId: _dbItem.from_txn_id,
+      marginFeeAtom: BigInt(_dbItem.margin_fee_atom),
+      createdTime: BigInt(_dbItem.created_time),
+      toAddr: _dbItem.to_addr,
+      toAmountAtom: BigInt(_dbItem.to_amount_atom),
       toBlockchain: undefined,
-      toTxnId: dbItem.to_txn_id,
-      txnStatus: dbItem.txn_status,
+      toTxnId: _dbItem.to_txn_id,
+      txnStatus: _dbItem.txn_status,
     });
     return bridgeTxn;
   }
