@@ -15,6 +15,10 @@ function loadDotEnv() {
     throw new Error(literals.NOT_LOADED_FROM_ENV);
   }
 
+  // ts-node compatibility
+  process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
+  process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
+
   return dpv(env.parsed, {
     assignToProcessEnv: true,
     overrideProcessEnv: true,
