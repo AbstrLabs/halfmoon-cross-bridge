@@ -79,7 +79,7 @@ class Database {
 
     const dbId = result[0]['db_id'];
     // TODO: make `infer` private -> public getter
-    bridgeTxn.txnType = bridgeTxn.inferTxnType();
+    bridgeTxn.txnType = bridgeTxn.getTxnType();
     logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
     return dbId as DbId;

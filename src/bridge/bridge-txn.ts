@@ -130,20 +130,13 @@ class BridgeTxn {
     }
   }
 
-  getToAmountAtom(): bigint {
-    if (this.toAmountAtom === undefined) {
-      this.initiate();
-      this.toAmountAtom = this.calculateToAmountAtom();
-    }
-    return this.toAmountAtom;
-  }
   /**
    * @param  {BridgeTxn} other
    * @returns {boolean} true if the two BridgeTxn are considered same
    *
    * @todo: Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
-  equals(other: BridgeTxn): boolean {
+  public equals(other: BridgeTxn): boolean {
     return (
       this.fromAddr === other.fromAddr &&
       this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
@@ -164,8 +157,19 @@ class BridgeTxn {
       this.createdTime.toString() === other.createdTime.toString()
     );
   }
+  /* GETTERS */
 
-  // methods below are likely to be private
+  public getToAmountAtom(): bigint {
+    if (this.toAmountAtom === undefined) {
+      this.initiate();
+      this.toAmountAtom = this._calculateToAmountAtom();
+    }
+    return this.toAmountAtom;
+  }
+  public getTxnType(): TxnType {
+    return this.txnType ?? this._inferTxnType();
+  }
+  /* PRIVATE METHODS */
 
   /**
    * Initiate the BridgeTxn.
@@ -177,18 +181,18 @@ class BridgeTxn {
    *
    * TODO: link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
    */
-  initiate(): this {
-    this.verify();
-    this.inferTxnType();
-    this.inferBlockchainNames();
-    this.getFixedFeeAtom();
-    this.calculateMarginFeeAtom();
-    this.calculateToAmountAtom();
+  private initiate(): this {
+    this._verifyValidity();
+    this._inferTxnType();
+    this._inferBlockchainNames();
+    this._getFixedFeeAtom();
+    this._calculateMarginFeeAtom();
+    this._calculateToAmountAtom();
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
     return this;
   }
 
-  verify(): this {
+  private _verifyValidity(): this {
     if (
       (this.fromBlockchain === undefined || this.toBlockchain === undefined) &&
       this.txnType === undefined
@@ -197,7 +201,7 @@ class BridgeTxn {
     }
 
     if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this.getFixedFeeAtom();
+      this.fixedFeeAtom = this._getFixedFeeAtom();
     }
 
     if (this.fromAmountAtom < this.fixedFeeAtom) {
@@ -212,7 +216,7 @@ class BridgeTxn {
     return this;
   }
 
-  inferBlockchainNames(): {
+  private _inferBlockchainNames(): {
     fromBlockchain: BlockchainName;
     toBlockchain: BlockchainName;
   } {
@@ -241,7 +245,7 @@ class BridgeTxn {
     return { fromBlockchain, toBlockchain };
   }
 
-  inferTxnType(): TxnType {
+  private _inferTxnType(): TxnType {
     if (this.txnType !== undefined) {
       if (!(this.txnType in TxnType)) {
         throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
@@ -271,13 +275,13 @@ class BridgeTxn {
     return txnType;
   }
 
-  getFixedFeeAtom(): bigint {
+  private _getFixedFeeAtom(): bigint {
     if (this.fixedFeeAtom !== undefined) {
       return this.fixedFeeAtom;
     }
     let fixedFee: bigint;
     if (this.txnType === undefined) {
-      this.inferTxnType();
+      this._inferTxnType();
     }
     if (this.txnType === TxnType.MINT) {
       fixedFee = goNearToAtom(ENV.BURN_FIX_FEE);
@@ -293,7 +297,7 @@ class BridgeTxn {
     return fixedFee;
   }
 
-  calculateMarginFeeAtom(): bigint {
+  private _calculateMarginFeeAtom(): bigint {
     if (this.marginFeeAtom !== undefined) {
       return this.marginFeeAtom;
     }
@@ -301,7 +305,7 @@ class BridgeTxn {
     let marginPercentage: number;
 
     if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this.getFixedFeeAtom();
+      this.fixedFeeAtom = this._getFixedFeeAtom();
     }
 
     if (this.txnType === TxnType.MINT) {
@@ -324,16 +328,16 @@ class BridgeTxn {
     return marginFee;
   }
 
-  calculateToAmountAtom(): bigint {
+  private _calculateToAmountAtom(): bigint {
     if (this.toAmountAtom !== undefined) {
       return this.toAmountAtom;
     }
 
     if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this.getFixedFeeAtom();
+      this.fixedFeeAtom = this._getFixedFeeAtom();
     }
     if (this.marginFeeAtom === undefined) {
-      this.marginFeeAtom = this.calculateMarginFeeAtom();
+      this.marginFeeAtom = this._calculateMarginFeeAtom();
     }
 
     const toAmount: bigint =
