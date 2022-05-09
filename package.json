@@ -1,6 +1,7 @@
 {
   "author": "Pablion <36828324+Pablion@users.noreply.github.com>",
   "commitlint": {
+    "extends": "@commitlint/config-conventional",
     "rules": {
       "type-enum": [
         2,
@@ -84,7 +85,8 @@
     "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils",
-    "postinstall": "husky install .config/husky"
+    "postinstall": "husky install",
+    "prepare": "husky install"
   },
   "version": "1.0.0"
 }
