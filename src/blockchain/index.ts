@@ -4,7 +4,6 @@ export {
   Blockchain,
   ConfirmOutcome,
   TxnType,
-  type Addr,
   type AlgoAcc,
   type AlgoAddr,
   type AlgoAssetTransferTxnOutcome,
@@ -34,6 +33,7 @@ import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { type Account, providers } from 'near-api-js';
 
 import {
+  Addr,
   AlgoTxnId,
   NearTxnId,
   type AlgoAddr,
@@ -44,7 +44,6 @@ import {
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type Addr = AlgoAddr | NearAddr;
 type AlgoAcc = algosdk.Account;
 type AlgoMnemonic = string;
 type AlgoReceipt = Transaction;

@@ -1,23 +1,18 @@
 // TODO: 1. separate database to database.ts from index.ts
-// TODO: 2. DbItem with zod
 // TODO: 3. Wrap this piece below
 /* const tableName = this._inferTableName(bridgeTxn);
 if (!this.isConnected) {
   await this.connect();
 } */
-
-export { db, type DbId };
-
+export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxn } from '../blockchain/bridge';
-import { type DbItem } from '../utils/type';
+import { type DbId, type DbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { postgres } from './aws-rds';
-
-type DbId = number; // TODO: use type.ts
 
 enum TableName {
   MINT_TABLE_NAME = `mint_request`,

@@ -1,6 +1,3 @@
-// TODO: 2. Move types that need parse from src/index
-// TODO: 2.1. DbItem,Addr Collision
-
 /** Zod parser (verifier) and the derived Typescript Types
  * All Zod related types should be here.
  */
