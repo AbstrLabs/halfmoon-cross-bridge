@@ -7,7 +7,7 @@ if (!this.isConnected) {
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { BridgeTxn } from '../blockchain/bridge';
+import { BridgeTxn } from '../bridge';
 import { parseDbItem, type DbId, type DbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';

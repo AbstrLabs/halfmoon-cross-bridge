@@ -1,10 +1,10 @@
 // TODO: mint-burn-test: move more same functions to test helper.
 // TODO: test with <1 NEAR should all fail now (for fee).
 
-import { ApiCallParam } from '../../utils/type';
-import { ENV } from '../../utils/dotenv';
+import { ApiCallParam } from '../utils/type';
+import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { db } from '../../database/db';
+import { db } from '../database/db';
 import { mint } from './mint';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 

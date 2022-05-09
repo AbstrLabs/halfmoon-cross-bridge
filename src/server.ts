@@ -7,13 +7,13 @@ import {
 } from './utils/type';
 import express, { Request, Response } from 'express';
 
-import { BridgeTxn } from './blockchain/bridge';
+import { BridgeTxn } from './bridge';
 import { ENV } from './utils/dotenv';
-import { burn } from './blockchain/bridge/burn';
+import { burn } from './bridge/burn';
 import { ensureString } from './utils/helper';
 import { literals } from './utils/literals';
 import { logger } from './utils/logger';
-import { mint } from './blockchain/bridge/mint';
+import { mint } from './bridge/mint';
 
 async function homePageTest() {
   /* Used once code */

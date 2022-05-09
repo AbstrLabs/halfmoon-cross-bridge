@@ -3,7 +3,7 @@ export { exampleBridgeTxn };
 
 import { BlockchainName, BridgeTxnStatus } from '../..';
 
-import { BridgeTxn } from '../../blockchain/bridge';
+import { BridgeTxn } from '../../bridge';
 
 const FAKE_TXN_ID = 'some_fake_txn_id';
 

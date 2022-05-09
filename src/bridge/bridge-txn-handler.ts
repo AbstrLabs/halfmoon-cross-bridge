@@ -3,17 +3,17 @@
 
 export { handleBridgeTxn as handleBridgeTxn };
 
-import { Blockchain, ConfirmOutcome, TxnType } from '..';
-import { BlockchainName, BridgeTxnStatus } from '../..';
-import { BridgeError, ERRORS } from '../../utils/errors';
+import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
+import { BlockchainName, BridgeTxnStatus } from '..';
+import { BridgeError, ERRORS } from '../utils/errors';
 
 import { BridgeTxn } from '.';
-import { TxnId } from '../../utils/type';
-import { algoBlockchain } from '../algorand';
-import { db } from '../../database/db';
-import { literals } from '../../utils/literals';
-import { logger } from '../../utils/logger';
-import { nearBlockchain } from '../near';
+import { TxnId } from '../utils/type';
+import { algoBlockchain } from '../blockchain/algorand';
+import { db } from '../database/db';
+import { literals } from '../utils/literals';
+import { logger } from '../utils/logger';
+import { nearBlockchain } from '../blockchain/near';
 
 async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* CONFIG */

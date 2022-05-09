@@ -1,11 +1,11 @@
 export { mint };
 
 import { BridgeTxn } from '.';
-import { MintApiParam } from '../../utils/type';
-import { TxnType } from '..';
+import { MintApiParam } from '../utils/type';
+import { TxnType } from '../blockchain';
 import { handleBridgeTxn } from './bridge-txn-handler';
-import { literals } from '../../utils/literals';
-import { logger } from '../../utils/logger';
+import { literals } from '../utils/literals';
+import { logger } from '../utils/logger';
 
 async function mint(mintApiParam: MintApiParam): Promise<BridgeTxn> {
   logger.info(

@@ -2,7 +2,7 @@ export { transferOnNearTestnetFromExampleToMaster };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 
 async function transferOnNearTestnetFromExampleToMaster(

@@ -1,11 +1,11 @@
 // TODO: mint-burn-test: move more same functions to test helper.
 
-import { ApiCallParam } from '../../utils/type';
-import { ENV } from '../../utils/dotenv';
+import { ApiCallParam } from '../utils/type';
+import { ENV } from '../utils/dotenv';
 import { burn } from './burn';
-import { db } from '../../database/db';
-import { goNearToAtom } from '../../utils/formatter';
-import { testAlgo } from '../algorand';
+import { db } from '../database/db';
+import { goNearToAtom } from '../utils/formatter';
+import { testAlgo } from '../blockchain/algorand';
 
 const TIMEOUT_30S = 30_000;
 

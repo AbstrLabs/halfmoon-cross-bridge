@@ -1,11 +1,11 @@
 export { burn };
 
 import { BridgeTxn } from '.';
-import { BurnApiParam } from '../../utils/type';
-import { TxnType } from '..';
+import { BurnApiParam } from '../utils/type';
+import { TxnType } from '../blockchain';
 import { handleBridgeTxn } from './bridge-txn-handler';
-import { literals } from '../../utils/literals';
-import { logger } from '../../utils/logger';
+import { literals } from '../utils/literals';
+import { logger } from '../utils/logger';
 
 async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxn> {
   logger.info(

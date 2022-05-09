@@ -1,12 +1,12 @@
 export { BridgeTxn };
 
-import { ApiCallParam, DbItem, parseDbItem } from '../../utils/type';
-import { BlockchainName, BridgeTxnStatus } from '../..';
-import { BridgeError, ERRORS } from '../../utils/errors';
+import { ApiCallParam, DbItem, parseDbItem } from '../utils/type';
+import { BlockchainName, BridgeTxnStatus } from '..';
+import { BridgeError, ERRORS } from '../utils/errors';
 
-import { ENV } from '../../utils/dotenv';
-import { TxnType } from '..';
-import { goNearToAtom } from '../../utils/formatter';
+import { ENV } from '../utils/dotenv';
+import { TxnType } from '../blockchain';
+import { goNearToAtom } from '../utils/formatter';
 
 class BridgeTxn {
   dbId?: number;

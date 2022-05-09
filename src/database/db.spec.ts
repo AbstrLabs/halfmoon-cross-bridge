@@ -1,4 +1,4 @@
-import { BridgeTxn } from '../blockchain/bridge';
+import { BridgeTxn } from '../bridge';
 import { BridgeTxnStatus } from '..';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
