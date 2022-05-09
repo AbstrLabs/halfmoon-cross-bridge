@@ -1,9 +1,9 @@
 export { BridgeTxn };
 
-import { ApiCallParam, BlockchainName, BridgeTxnStatus } from '../..';
+import { ApiCallParam, DbItem } from '../../utils/type';
+import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
-import { DbItem } from '../../utils/type';
 import { ENV } from '../../utils/dotenv';
 import { TxnType } from '..';
 import { goNearToAtom } from '../../utils/formatter';

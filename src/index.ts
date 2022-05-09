@@ -1,21 +1,12 @@
 // TODO: check {X as X} and Y : Y.
 
-export {
-  BlockchainName,
-  BridgeTxnStatus,
-  type ApiCallParam,
-  type BurnApiParam,
-  type MintApiParam,
-};
-
-import { type BurnApiParam, type MintApiParam } from './utils/type';
-
-type ApiCallParam = MintApiParam | BurnApiParam;
+export { BlockchainName, BridgeTxnStatus };
 
 enum BlockchainName {
   NEAR = 'NEAR',
   ALGO = 'ALGO',
 }
+
 enum BridgeTxnStatus {
   // By order
   ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL', //     General server internal error

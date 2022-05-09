@@ -1,8 +1,8 @@
 export { mint };
 
+import { MintApiParam, TxnType } from '..';
+
 import { BridgeTxn } from '.';
-import { MintApiParam } from '../..';
-import { TxnType } from '..';
 import { handleBridgeTxn } from './bridge-txn-handler';
 import { literals } from '../../utils/literals';
 import { logger } from '../../utils/logger';
