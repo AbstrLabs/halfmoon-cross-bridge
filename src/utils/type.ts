@@ -25,6 +25,7 @@ export {
   parseBurnApiParam,
   parseMintApiParam,
   parseDbItem,
+  parseBigInt,
 };
 
 import { z } from 'zod';
@@ -140,7 +141,20 @@ const zNearTxnParam = z.object({
 const zTxnParam = z.union([zAlgoTxnParam, zNearTxnParam]);
 
 // Used by BridgeTxn Class - Database
-const zBiginter = z.string().regex(/^[1-9][0-9]{0,18}$/);
+
+const zBiginter =
+  // can convert to bigint without loss of precision
+  z.union([
+    z.string().regex(/^[1-9][0-9]{0,18}$/),
+    z.number().int(),
+    z.bigint(),
+  ]);
+function parseBiginter(biginter: Biginter): Biginter {
+  return parseWithZod(biginter, zBiginter, ERRORS.INTERNAL.TYPE_ERR_BIGINT);
+}
+function parseBigInt(biginter: Biginter): bigint {
+  return BigInt(parseBiginter(biginter));
+}
 const zDbId = z.number().int().positive();
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
 const zDbItem = z.object({

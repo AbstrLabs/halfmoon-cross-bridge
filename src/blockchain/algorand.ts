@@ -23,7 +23,7 @@ import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { AlgoTxnParam } from '../utils/type';
+import { AlgoTxnParam, Biginter, parseBigInt } from '../utils/type';
 
 // TODO: constructor: move config to param
 class AlgorandBlockchain extends Blockchain {
@@ -166,7 +166,7 @@ class AlgorandBlockchain extends Blockchain {
   protected async _makeAsaTxn(
     to: AlgoAddr,
     from: AlgoAddr,
-    amountInAtomic: number | bigint,
+    amountInAtomic: Biginter,
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxnId> {
@@ -180,7 +180,7 @@ class AlgorandBlockchain extends Blockchain {
     const txnConfig = {
       to,
       from,
-      amount: amountInAtomic,
+      amount: parseBigInt(amountInAtomic),
       note: undefined, // maybe write the incoming txnId here
       suggestedParams: params,
       assetIndex: asaId,
@@ -282,7 +282,7 @@ class TestAlgo extends AlgorandBlockchain {
     return this._makeAsaTxn(
       algoTxnParam.toAddr,
       algoTxnParam.fromAddr,
-      algoTxnParam.atomAmount,
+      parseBigInt(algoTxnParam.atomAmount).toString(),
       sender,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );

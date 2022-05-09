@@ -62,6 +62,16 @@ const internalErrors = {
     name: 'Unknown confirm outcome',
     message: 'Unknown confirm outcome',
   },
+  TYPE_ERR_BIGINTER: {
+    errId: 110,
+    name: 'Type Error BigInter',
+    message: 'BigInter type parsing error',
+  },
+  TYPE_ERR_BIGINT: {
+    errId: 111,
+    name: 'Type Error BigInt',
+    message: 'BigInt type parsing error',
+  },
 };
 
 const transactionErrors = {

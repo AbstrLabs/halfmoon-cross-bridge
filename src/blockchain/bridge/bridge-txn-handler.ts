@@ -143,7 +143,7 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   // user confirmation via socket/email
 
   /* CLEAN UP */
-  /* await  */ db.disconnect();
+  /* await */ db.disconnect();
 
   return bridgeTxn;
   // check indexer with hash
