@@ -1,4 +1,4 @@
-// TODO: INVALID_TX_ID should ren to TXN
+// TODO: INVALID_TXN_ID should ren to TXN
 
 export { ERRORS };
 
@@ -65,42 +65,42 @@ const internalErrors = {
 };
 
 const transactionErrors = {
-  INVALID_TX_ID: {
+  INVALID_TXN_ID: {
     errId: 200,
     name: 'Invalid transaction id',
     message: 'Blockchain rejected malformed transaction id',
   },
-  TX_NOT_CONFIRMED: {
+  TXN_NOT_CONFIRMED: {
     errId: 201,
     name: 'Transaction not confirmed',
     message: 'Blockchain(indexer) cannot confirm transaction',
   },
-  TX_ASSET_ID_MISMATCH: {
+  TXN_ASSET_ID_MISMATCH: {
     errId: 202,
     name: 'Transaction asset id mismatch',
     message: 'Transaction asset id does not match asset id in blockchain',
   },
-  TX_ID_MISMATCH: {
+  TXN_ID_MISMATCH: {
     errId: 203,
     name: 'Transaction txn id mismatch',
     message: 'Transaction txn id does not match txn id in blockchain',
   },
-  TX_SENDER_MISMATCH: {
+  TXN_SENDER_MISMATCH: {
     errId: 204,
     name: 'Transaction sender mismatch',
     message: 'Transaction sender does not match sender in blockchain',
   },
-  TX_RECEIVER_MISMATCH: {
+  TXN_RECEIVER_MISMATCH: {
     errId: 205,
     name: 'Transaction receiver mismatch',
     message: 'Transaction receiver does not match receiver in blockchain',
   },
-  TX_AMOUNT_MISMATCH: {
+  TXN_AMOUNT_MISMATCH: {
     errId: 206,
     name: 'Transaction amount mismatch',
     message: 'Transaction amount does not match amount in blockchain',
   },
-  TX_NOT_FOUND: {
+  TXN_NOT_FOUND: {
     errId: 207,
     name: 'Transaction not found',
     message: 'Transaction not found in blockchain',
@@ -133,22 +133,22 @@ const externalErrors = {
     name: 'Make transaction failed',
     message: 'Cannot make transaction on blockchain',
   },
-  DB_TX_NOT_FOUND: {
+  DB_TXN_NOT_FOUND: {
     errId: 303,
     name: 'DB transaction not found',
     message: 'Transaction not found in database',
   },
-  DB_TX_NOT_UNIQUE: {
+  DB_TXN_NOT_UNIQUE: {
     errId: 304,
     name: 'DB transaction not unique',
     message: 'Transaction not unique in database',
   },
-  DB_CREATE_TX_FAILED: {
+  DB_CREATE_TXN_FAILED: {
     errId: 305,
     name: 'DB create transaction failed',
     message: 'Cannot create transaction in database',
   },
-  MAKE_OUTGOING_TX_FAILED: {
+  MAKE_OUTGOING_TXN_FAILED: {
     errId: 306,
     name: 'Make outgoing transaction failed',
     message: 'Cannot make outgoing transaction on blockchain',

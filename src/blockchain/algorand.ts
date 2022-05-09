@@ -104,7 +104,7 @@ class AlgorandBlockchain extends Blockchain {
     const txnId = txn.id;
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
-      throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
+      throw new BridgeError(ERRORS.TXN.TXN_NOT_CONFIRMED, {
         currentRound,
         confirmedRound,
         blockchainName: this.name,
@@ -112,7 +112,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare txnID
     if (txnId !== algoTxnParam.txnId) {
-      throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
+      throw new BridgeError(ERRORS.TXN.TXN_ASSET_ID_MISMATCH, {
         blockchainId: txnId,
         receivedId: algoTxnParam.txnId,
         blockchainName: this.name,
@@ -120,7 +120,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare sender
     if (sender !== algoTxnParam.fromAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
+      throw new BridgeError(ERRORS.TXN.TXN_SENDER_MISMATCH, {
         blockchainSender: sender,
         receivedSender: algoTxnParam.fromAddr,
         blockchainName: this.name,
@@ -128,7 +128,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare receiver
     if (receiver !== algoTxnParam.toAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
+      throw new BridgeError(ERRORS.TXN.TXN_RECEIVER_MISMATCH, {
         blockchainReceiver: receiver,
         receivedReceiver: algoTxnParam.toAddr,
         blockchainName: this.name,
@@ -137,7 +137,7 @@ class AlgorandBlockchain extends Blockchain {
     // compare amount
     if (amount !== algoTxnParam.atomAmount.toString()) {
       // Bigint: The trailing "n" is not part of the string.
-      throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
+      throw new BridgeError(ERRORS.TXN.TXN_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
         receivedAmount: algoTxnParam.atomAmount,
         blockchainName: this.name,
@@ -173,7 +173,7 @@ class AlgorandBlockchain extends Blockchain {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
     const params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
-    // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
+    // params.fee = algosdk.ALGORAND_MIN_TXN_FEE;
     // params.flatFee = true;
     // const enc = new TextEncoder();
     // const note = enc.encode('Hello World');

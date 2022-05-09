@@ -100,7 +100,7 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   let bridgeTxn: BridgeTxn;
   logger.info(literals.START_MINTING(amount, from, to));
   res.write(`${literals.START_MINTING(amount, from, to)}\n`);
-  res.write(`${literals.MINT_NEAR_TX_ID(txnId)}\n`);
+  res.write(`${literals.MINT_NEAR_TXN_ID(txnId)}\n`);
   res.write(`${literals.MINT_AWAITING}\n`);
   try {
     bridgeTxn = await mint(mintApiParam);
@@ -122,7 +122,7 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   let bridgeTxn: BridgeTxn;
   logger.info(literals.START_BURNING(amount, from, to));
   res.write(`${literals.START_BURNING(amount, from, to)}\n`);
-  res.write(`${literals.BURN_ALGO_TX_ID(txnId)}\n`);
+  res.write(`${literals.BURN_ALGO_TXN_ID(txnId)}\n`);
   res.write(`${literals.BURN_AWAITING}\n`);
   try {
     bridgeTxn = await burn(burnApiParam);

@@ -15,17 +15,17 @@ import { TxnType } from '../blockchain';
 import { BridgeTxn } from '../blockchain/bridge';
 
 // TODO: move to test-helper + ren
-const FAKE_TX_ID = 'some_fake_txn_id';
+const FAKE_TXN_ID = 'some_fake_txn_id';
 
 // TODO: interface for this exampleDbItem with zod
 const exampleDbItem = {
   db_id: 1,
   from_addr: 'some_from_addr',
   from_amount_atom: '10000000000',
-  from_txn_id: FAKE_TX_ID,
+  from_txn_id: FAKE_TXN_ID,
   to_addr: 'some_to_addr',
   to_amount_atom: '642398',
-  to_txn_id: FAKE_TX_ID,
+  to_txn_id: FAKE_TXN_ID,
   txn_status: 'some_txn_status',
   txn_type: 'some_txn_type',
   created_time: '1650264115011',
@@ -37,13 +37,13 @@ const exampleMintApiTxnInfo: MintApiParam = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
-  txnId: FAKE_TX_ID,
+  txnId: FAKE_TXN_ID,
 };
 const exampleBurnApiTxnInfo: BurnApiParam = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
-  txnId: FAKE_TX_ID,
+  txnId: FAKE_TXN_ID,
 };
 
 describe('param validation and formatting', () => {

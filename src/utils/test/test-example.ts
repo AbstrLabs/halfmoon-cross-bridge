@@ -5,7 +5,7 @@ import { BlockchainName, BridgeTxnStatus } from '../..';
 
 import { BridgeTxn } from '../../blockchain/bridge';
 
-const FAKE_TX_ID = 'some_fake_txn_id';
+const FAKE_TXN_ID = 'some_fake_txn_id';
 
 // TODO: test: user realistic data.
 const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
@@ -21,6 +21,6 @@ const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
   createdTime: BigInt(1650264115011),
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchain: BlockchainName.ALGO,
-  toTxnId: FAKE_TX_ID,
+  toTxnId: FAKE_TXN_ID,
   txnStatus: BridgeTxnStatus.DONE_OUTGOING,
 });

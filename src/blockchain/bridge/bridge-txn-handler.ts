@@ -60,7 +60,7 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   try {
     bridgeTxn.dbId = await db.createTxn(bridgeTxn);
   } catch (e) {
-    throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TX_FAILED, {
+    throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
       bridgeTxn,
     });
   }
@@ -110,18 +110,18 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
     bridgeTxn.toTxnId = outgoingTxnId;
     await db.updateTxn(bridgeTxn);
   } catch {
-    // TODO: same-piece-MAKE_OUTGOING_TX_FAILED
+    // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
     bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
     await db.updateTxn(bridgeTxn);
-    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TX_FAILED, {
+    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
       bridgeTxn,
     });
   }
   if (outgoingTxnId === undefined) {
-    // TODO: same-piece-MAKE_OUTGOING_TX_FAILED
+    // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
     bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
     await db.updateTxn(bridgeTxn);
-    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TX_FAILED, {
+    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
       bridgeTxn,
     });
   }

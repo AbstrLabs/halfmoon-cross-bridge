@@ -196,12 +196,12 @@ class Database {
   private _verifyResultLength(result: unknown[], TxnInfo: DbId | BridgeTxn) {
     // TODO: TxnInfo -> ErrInfoObj
     if (result.length === 0) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_FOUND, {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, {
         TxnInfo: TxnInfo,
       });
     }
     if (result.length > 1) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TX_NOT_UNIQUE, {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE, {
         TxnInfo: TxnInfo,
       });
     }
