@@ -79,7 +79,12 @@ describe('AlgorandBlockchain', () => {
     console.info('algoTxnId : ', algoTxnId);
 
     //verify the txn
-    const rcpt = await algoBlockchain.getTxnStatus(algoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: algoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
     const answer = algoBlockchain.verifyCorrectness(rcpt, newTxnParam);
     expect(answer).toBe(true);
@@ -87,11 +92,21 @@ describe('AlgorandBlockchain', () => {
   }, 30000);
 
   it('get example txn status', async () => {
-    const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: exampleAlgoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
   }, 30000);
   it('verify transaction status on algo', async () => {
-    const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: exampleAlgoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoParam);
     expect(answer).toBe(true);
   });

@@ -1,5 +1,6 @@
 import { ConfirmOutcome } from '.';
 import { goNearToAtom } from '../utils/formatter';
+import { literals } from '../utils/literals';
 import { nearBlockchain } from './near';
 
 const exampleFrom = 'abstrlabs-test.testnet';
@@ -12,7 +13,12 @@ describe('nearBlockchain', () => {
   });
   it('get txn status', async () => {
     expect(
-      await nearBlockchain.getTxnStatus(exampleTxnId, exampleFrom)
+      await nearBlockchain.getTxnStatus({
+        txnId: exampleTxnId,
+        fromAddr: exampleFrom,
+        toAddr: exampleTo,
+        atomAmount: literals.UNUSED_BIGINT,
+      })
     ).toBeDefined();
   });
   it('confirm transaction', async () => {

@@ -64,12 +64,14 @@ class NearBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    txnId: NearTxnId,
-    from: NearAddr
+    txnParam: NearTxnParam
   ): Promise<providers.FinalExecutionOutcome> {
     // TODO: Type FinalExecutionOutcome.transaction.
     logger.silly('nearIndexer: getTxnStatus()');
-    const result = await this.provider.txStatus(txnId, from);
+    const result = await this.provider.txStatus(
+      txnParam.txnId,
+      txnParam.fromAddr
+    );
     logger.info(literals.NEAR_TXN_RESULT(result));
     return result;
   }

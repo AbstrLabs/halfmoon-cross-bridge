@@ -114,10 +114,7 @@ abstract class Blockchain {
       }, this.confirmTxnConfig.timeoutSec * 1000);
 
       const interval = setImmediateInterval(async () => {
-        const txnOutcome = await this.getTxnStatus(
-          txnParam.txnId,
-          txnParam.fromAddr
-        );
+        const txnOutcome = await this.getTxnStatus(txnParam);
         let isCorrect;
 
         try {
@@ -153,7 +150,7 @@ abstract class Blockchain {
     txnOutcome: TxnOutcome,
     txnParam: TxnParam
   ): boolean;
-  public abstract getTxnStatus(txnId: TxnId, from: Addr): Promise<TxnOutcome>; // TODO: use TxnParam.
+  public abstract getTxnStatus(txnParam: TxnParam): Promise<TxnOutcome>; // TODO: use TxnParam.
   public abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnId>;
 
   // getRecentTransactions(limit: number): Promise<TxnID[]>;

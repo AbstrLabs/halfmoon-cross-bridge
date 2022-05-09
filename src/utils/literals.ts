@@ -44,6 +44,7 @@ const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
+const UNUSED_BIGINT = BigInt(0);
 const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
   `Created bridge txn in table ${txnType} with id ${dbId}`;
 
@@ -67,4 +68,5 @@ const literals = {
   START_MINTING,
   TXN_CONFIRMED,
   UNUSED,
+  UNUSED_BIGINT,
 };

@@ -74,11 +74,11 @@ class AlgorandBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    algoTxnId: AlgoTxnId
+    txnParam: AlgoTxnParam
   ): Promise<AlgoAssetTransferTxnOutcome> {
     // will timeout in `confirmTxn` if txn not confirmed
     return (await this.indexer
-      .lookupTransactionByID(algoTxnId)
+      .lookupTransactionByID(txnParam.txnId)
       .do()) as AlgoAssetTransferTxnOutcome;
 
     // the following method only checks new blocks
