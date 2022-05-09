@@ -1,1 +1,1 @@
-export { BridgeTxn as BridgeTxn } from './bridge-txn-info';
+export { BridgeTxn as BridgeTxn } from './bridge-txn';
