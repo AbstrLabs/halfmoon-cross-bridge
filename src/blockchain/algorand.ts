@@ -27,11 +27,12 @@ import { AlgoTxnParam, Biginter, parseBigInt } from '../utils/type';
 
 // TODO: constructor: move config to param
 class AlgorandBlockchain extends Blockchain {
-  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
   public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   public readonly name = BlockchainName.ALGO;
+  public readonly centralizedAssetId: number = ENV.TEST_NET_GO_NEAR_ASSET_ID;
+  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
   protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
     ENV.ALGO_MASTER_PASS
   );
@@ -94,7 +95,6 @@ class AlgorandBlockchain extends Blockchain {
     algoTxnParam: AlgoTxnParam
   ): boolean {
     // parse txnOutcome, parse AlgoAssetTransferTxnOutcome
-    // TODO! verify asset id
     const currentRound = txnOutcome['current-round'];
     const txn = txnOutcome.transaction;
     const confirmedRound = txn['confirmed-round'];
@@ -102,11 +102,20 @@ class AlgorandBlockchain extends Blockchain {
     const sender = txn.sender;
     const receiver = txn['asset-transfer-transaction'].receiver;
     const txnId = txn.id;
+    const assetId = txn['asset-transfer-transaction']['asset-id'];
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
       throw new BridgeError(ERRORS.TXN.TXN_NOT_CONFIRMED, {
         currentRound,
         confirmedRound,
+        blockchainName: this.name,
+      });
+    }
+    // compare assetId
+    if (assetId !== this.centralizedAssetId) {
+      throw new BridgeError(ERRORS.TXN.TXN_ASSET_ID_NOT_MATCH, {
+        blockchainAssetId: assetId,
+        expectedAssetId: this.centralizedAssetId,
         blockchainName: this.name,
       });
     }

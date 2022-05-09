@@ -125,6 +125,11 @@ const transactionErrors = {
     name: 'Invalid API parameter',
     message: 'API call parameters are invalid',
   },
+  TXN_ASSET_ID_NOT_MATCH: {
+    errId: 210,
+    name: 'Transaction asset id not match',
+    message: 'Transaction asset id does not match asset id in blockchain',
+  },
 };
 
 const externalErrors = {

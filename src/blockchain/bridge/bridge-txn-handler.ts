@@ -1,5 +1,4 @@
 // TODO: 1. merge to BridgeTxn class
-// TODO: 2. Check Asset ID!
 // TODO: 3. Check if fromTxnId is reused
 
 export { handleBridgeTxn as handleBridgeTxn };
