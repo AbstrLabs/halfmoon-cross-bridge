@@ -1,8 +1,8 @@
 export { burn };
 
-import { BurnApiParam, TxnType } from '..';
-
 import { BridgeTxn } from '.';
+import { BurnApiParam } from '../../utils/type';
+import { TxnType } from '..';
 import { handleBridgeTxn } from './bridge-txn-handler';
 import { literals } from '../../utils/literals';
 import { logger } from '../../utils/logger';

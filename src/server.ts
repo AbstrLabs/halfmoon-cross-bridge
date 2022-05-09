@@ -1,16 +1,19 @@
 export { startServer };
 
+import {
+  BurnApiParam,
+  parseBurnApiParam,
+  parseMintApiParam,
+} from './utils/type';
 import express, { Request, Response } from 'express';
 
+import { BridgeTxn } from './blockchain/bridge';
 import { ENV } from './utils/dotenv';
-import { type MintApiParam as BurnApiParam } from './';
+import { burn } from './blockchain/bridge/burn';
 import { ensureString } from './utils/helper';
 import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './blockchain/bridge/mint';
-import { BridgeTxn } from './blockchain/bridge';
-import { parseBurnApiParam, parseMintApiParam } from './utils/type';
-import { burn } from './blockchain/bridge/burn';
 
 async function homePageTest() {
   /* Used once code */

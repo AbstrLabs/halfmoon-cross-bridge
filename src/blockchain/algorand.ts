@@ -9,7 +9,6 @@ import {
   AlgoMnemonic,
   AlgoTxnId,
   AlgoAssetTransferTxnOutcome,
-  AlgoTxnParam,
 } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
@@ -24,6 +23,7 @@ import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
+import { AlgoTxnParam } from '../utils/type';
 
 // TODO: constructor: move config to param
 class AlgorandBlockchain extends Blockchain {

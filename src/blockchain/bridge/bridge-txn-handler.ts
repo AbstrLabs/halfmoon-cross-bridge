@@ -4,11 +4,12 @@
 
 export { handleBridgeTxn as handleBridgeTxn };
 
-import { Blockchain, ConfirmOutcome, TxnId, TxnType } from '..';
+import { Blockchain, ConfirmOutcome, TxnType } from '..';
 import { BlockchainName, BridgeTxnStatus } from '../..';
 import { BridgeError, ERRORS } from '../../utils/errors';
 
 import { BridgeTxn } from '.';
+import { TxnId } from '../../utils/type';
 import { algoBlockchain } from '../algorand';
 import { db } from '../../database/db';
 import { literals } from '../../utils/literals';

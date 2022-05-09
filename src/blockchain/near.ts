@@ -11,12 +11,7 @@ import {
   providers,
 } from 'near-api-js';
 
-import {
-  type AlgoTxnId,
-  type NearTxnParam,
-  type NearAddr,
-  type NearTxnId,
-} from '.';
+import { type AlgoTxnId, type NearAddr, type NearTxnId } from '.';
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
@@ -24,6 +19,7 @@ import { Blockchain } from '.';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
+import { NearTxnParam } from '../utils/type';
 
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;

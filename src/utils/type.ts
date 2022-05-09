@@ -10,6 +10,7 @@ export {
   type AlgoAddr,
   type AlgoTxnId,
   type AlgoTxnParam,
+  type Biginter,
   type BurnApiParam,
   type DbId,
   type DbItem,
@@ -19,10 +20,12 @@ export {
   type NearTxnParam,
   type Stringer,
   type TxnId,
+  type TxnParam,
   zDbItem,
   parseBurnApiParam,
   parseMintApiParam,
 };
+
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
@@ -49,10 +52,12 @@ type AlgoTxnId = z.infer<typeof zAlgoTxnId>;
 type TxnId = z.infer<typeof zTxnId>;
 type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
 type NearTxnParam = z.infer<typeof zNearTxnParam>;
+type TxnParam = z.infer<typeof zTxnParam>;
 
-// Used by BridgeTxn Class
+// Used by BridgeTxn Class - database
 type DbItem = z.infer<typeof zDbItem>;
 type DbId = z.infer<typeof zDbId>;
+type Biginter = z.infer<typeof zBiginter>;
 
 // API -> server
 const zAlgoAddr = z
@@ -113,6 +118,7 @@ const zNearTxnParam = z.object({
   toAddr: zNearAddr,
   txnId: zNearTxnId,
 });
+const zTxnParam = z.union([zAlgoTxnParam, zNearTxnParam]);
 
 // Used by BridgeTxn Class - Database
 const zBiginter = z.string().regex(/^[1-9][0-9]{0,18}$/);

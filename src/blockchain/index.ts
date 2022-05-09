@@ -16,44 +16,34 @@ export {
   type NearAddr,
   type NearTxnId,
   type NearTxnOutcome,
-  type TxnId,
   type TxnOutcome,
-  type TxnParam,
   type TxnReceipt,
 };
-export {
-  type AlgoTxnParam,
-  type BurnApiParam,
-  type MintApiParam,
-  type NearTxnParam,
-} from '../utils/type';
 
 import algosdk, { Transaction } from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { type Account, providers } from 'near-api-js';
 
 import {
-  Addr,
-  AlgoTxnId,
-  NearTxnId,
+  type Addr,
+  type AlgoTxnId,
+  type Biginter,
+  type NearTxnId,
+  type TxnId,
   type AlgoAddr,
-  type AlgoTxnParam,
   type NearAddr,
-  type NearTxnParam,
+  TxnParam,
 } from '../utils/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type AlgoAcc = algosdk.Account;
 type AlgoMnemonic = string;
-type AlgoReceipt = Transaction;
-type BigNum = number; // | bigint; // using number now
-type GenericAcc = AlgoAcc | NearAcc;
+type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
+type GenericAcc = AlgoAcc | NearAcc;
+
+type AlgoReceipt = Transaction;
 type NearReceipt = unknown; // TODO: type
-type NearTxnOutcome = providers.FinalExecutionOutcome;
-type TxnId = AlgoTxnId | NearTxnId;
-type TxnParam = AlgoTxnParam | NearTxnParam;
 type TxnReceipt = AlgoReceipt | NearReceipt;
 
 type AlgoAssetTransferTxnOutcome = {
@@ -61,16 +51,16 @@ type AlgoAssetTransferTxnOutcome = {
   'current-round': number;
   transaction: {
     'asset-transfer-transaction': {
-      amount: BigNum;
+      amount: Biginter;
       'asset-id': number;
       'close-amount': number;
       receiver: AlgoAddr;
     };
-    'close-rewards': BigNum;
-    'closing-amount': BigNum;
+    'close-rewards': Biginter;
+    'closing-amount': Biginter;
     'confirmed-round': number;
-    fee: BigNum;
-    'first-valid': BigNum;
+    fee: Biginter;
+    'first-valid': Biginter;
     'genesis-hash': string;
     'genesis-id': 'testnet-v1.0';
     id: AlgoTxnId;
@@ -95,7 +85,9 @@ type AlgoTxnOutcome =
       };
     }
   | AlgoAssetTransferTxnOutcome; // TODO: programmatically check if this type is correct.
+type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
+
 // type TxnStatuesOutcome = TxnReceipt | AlgoTxnOutcome;
 type ConfirmTxnConfig = {
   timeoutSec: number;

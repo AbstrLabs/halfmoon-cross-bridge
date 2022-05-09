@@ -1,5 +1,5 @@
 import { ENV } from '../utils/dotenv';
-import { TxnParam } from '.';
+import { TxnParam } from '../utils/type';
 import { algoBlockchain } from './algorand';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
