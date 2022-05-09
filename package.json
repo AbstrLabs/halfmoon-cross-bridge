@@ -72,7 +72,7 @@
     "build": "tsc",
     "burn": "yarn test:burn",
     "db": "yarn test:db",
-    "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
+    "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "mint": "yarn test:mint",
     "near": "yarn test:near",
     "test": "jest",

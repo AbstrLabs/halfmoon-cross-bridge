@@ -70,9 +70,8 @@ function startServer() {
 
   app.get('/', async (req: Request, res: Response) => {
     if (
-      // TODO: use TS version
-      process.env.NODE_ENV === undefined ||
-      process.env.NODE_ENV === 'development'
+      process.env.TS_NODE_DEV === undefined ||
+      process.env.TS_NODE_DEV === 'development'
     ) {
       await homePageTest();
     }
