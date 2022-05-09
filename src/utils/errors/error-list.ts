@@ -80,7 +80,7 @@ const transactionErrors = {
     name: 'Transaction asset id mismatch',
     message: 'Transaction asset id does not match asset id in blockchain',
   },
-  TX_TX_ID_MISMATCH: {
+  TX_ID_MISMATCH: {
     errId: 203,
     name: 'Transaction txn id mismatch',
     message: 'Transaction txn id does not match txn id in blockchain',

@@ -25,8 +25,7 @@ class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
   readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider({
     url: 'https://archival-rpc.testnet.near.org',
-  }); // TODO: deprecated
-  // TODO: ren to indexer, also in abstract class
+  }); // TODO: ren to indexer, also in abstract class
   protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
   protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
   public readonly confirmTxnConfig = {
@@ -79,13 +78,10 @@ class NearBlockchain extends Blockchain {
     txnOutcome: providers.FinalExecutionOutcome,
     nearTxnParam: NearTxnParam
   ): boolean {
-    // TODO: compare txnId
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
     logger.verbose(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
     const txnReceipt = txnOutcome;
     if (txnReceipt.status instanceof Object) {
-      //TODO: txnId
       // txnReceipt.status = txnReceipt.status as providers.FinalExecutionStatus;
       if (
         txnReceipt.status.Failure !== undefined &&
@@ -109,10 +105,19 @@ class NearBlockchain extends Blockchain {
         });
       }
     }
-    // TODO: more var declaration here
+
     const receivedAtom = yoctoNearToAtom(
       txnReceipt.transaction.actions[0].Transfer.deposit
     );
+
+    // check txnId
+    if (txnReceipt.transaction_outcome.id !== txnId) {
+      throw new BridgeError(ERRORS.TXN.TX_ID_MISMATCH, {
+        expectedId: txnId,
+        blockchainId: txnReceipt.transaction_outcome.id,
+        blockchainName: this.name,
+      });
+    }
 
     // check from address
     if (txnReceipt.transaction.signer_id !== fromAddr) {
