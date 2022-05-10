@@ -1,4 +1,4 @@
-export { BridgeTxn };
+export { BridgeTxn, BridgeTxnObject };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
@@ -168,8 +168,8 @@ class BridgeTxn {
   /* MAKE BRIDGE TRANSACTION */
   // process according to sequence diagram
 
-  async runWholeBridgeTxn(): Promise<BridgeTxn> {
-    // async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
+  // async runWholeBridgeTxn(): Promise<BridgeTxn> {
+  async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
     logger.info(
       literals.MAKING_TXN(
         `${this.fromBlockchain}->${this.toBlockchain}`,
@@ -181,8 +181,8 @@ class BridgeTxn {
     await this.confirmIncomingTxn();
     await this.makeOutgoingTxn();
     await this.verifyOutgoingTxn();
-    // return this.toObject();
-    return this;
+    return this.toObject();
+    // return this;
   }
 
   async confirmIncomingTxn(): Promise<void> {
