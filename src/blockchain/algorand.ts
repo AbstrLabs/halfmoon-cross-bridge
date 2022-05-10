@@ -238,7 +238,7 @@ class AlgorandBlockchain extends Blockchain {
     this._createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
   }
   protected async _genAcc() {
-    // tested, not used
+    // tested, used only once
     const algoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
     const account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);

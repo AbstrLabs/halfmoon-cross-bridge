@@ -155,6 +155,13 @@ const transactionErrors = {
     name: 'Transaction asset id not match',
     message: 'Transaction asset id does not match asset id in blockchain',
   },
+  REUSED_INCOMING_TXN: {
+    errId: 211,
+    name: 'Reused incoming transaction',
+    message:
+      'This incoming transaction is already in our DB. ' +
+      'Outgoing transaction is dropped. We might need to do something with this user',
+  },
 };
 
 const externalErrors = {
