@@ -118,3 +118,28 @@ function stringifyObjWithBigint(obj?: object): string {
     (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
   );
 }
+/* 
+function stringifyObjWithBigint(obj?: object): string {
+  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
+  if (obj === undefined) {
+    return 'undefined';
+  }
+  if (obj === null) {
+    return 'null';
+  }
+  return JSON.stringify(
+    obj,
+    // (key, value) => value.toString() // not working, [object Object] is returned
+    (key, value) => {
+      switch (true) {
+        case typeof value === 'bigint':
+          return value.toString();
+        case value instanceof BridgeTxn:
+          return value.toString();
+        default:
+          value;
+      }
+    } // return everything else unchanged
+  );
+}
+ */

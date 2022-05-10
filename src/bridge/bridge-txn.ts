@@ -49,10 +49,10 @@ class BridgeTxn {
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
   txnType?: TxnType;
-  private _db = db;
-  private _fromBlockchain!: Blockchain;
-  private _toBlockchain!: Blockchain;
-  /* private  */ _isInitializedPromise: Promise<boolean>;
+  #db = db;
+  #fromBlockchain!: Blockchain;
+  #toBlockchain!: Blockchain;
+  /* private # */ _isInitializedPromise: Promise<boolean>;
 
   /* CONSTRUCTORS  */
 
@@ -182,10 +182,10 @@ class BridgeTxn {
 
     let confirmOutcome;
     try {
-      confirmOutcome = await this._fromBlockchain.confirmTxn({
+      confirmOutcome = await this.#fromBlockchain.confirmTxn({
         fromAddr: this.fromAddr,
         atomAmount: this.fromAmountAtom,
-        toAddr: this._fromBlockchain.centralizedAddr,
+        toAddr: this.#fromBlockchain.centralizedAddr,
         txnId: this.fromTxnId,
       });
     } finally {
@@ -212,8 +212,8 @@ class BridgeTxn {
     try {
       this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
       await db.updateTxn(this);
-      outgoingTxnId = await this._toBlockchain.makeOutgoingTxn({
-        fromAddr: this._toBlockchain.centralizedAddr,
+      outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
+        fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
         atomAmount: this.toAmountAtom,
         txnId: literals.UNUSED,
@@ -240,10 +240,10 @@ class BridgeTxn {
   }
 
   async verifyOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DOING_OUTGOING, 'verifyOutgoingTxn');
+    this._checkStatus(BridgeTxnStatus.DONE_OUTGOING, 'verifyOutgoingTxn');
     try {
-      await this._toBlockchain.confirmTxn({
-        fromAddr: this._toBlockchain.centralizedAddr,
+      await this.#toBlockchain.confirmTxn({
+        fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         atomAmount: this.toAmountAtom!,
@@ -456,9 +456,9 @@ class BridgeTxn {
   }
   private _hookFromBlockchain(): void {
     if (this.fromBlockchain === BlockchainName.NEAR) {
-      this._fromBlockchain = nearBlockchain;
+      this.#fromBlockchain = nearBlockchain;
     } else if (this.fromBlockchain === BlockchainName.ALGO) {
-      this._fromBlockchain = algoBlockchain;
+      this.#fromBlockchain = algoBlockchain;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
         fromBlockchain: this.fromBlockchain,
@@ -468,9 +468,9 @@ class BridgeTxn {
   }
   private _hookToBlockchain(): void {
     if (this.toBlockchain === BlockchainName.NEAR) {
-      this._toBlockchain = nearBlockchain;
+      this.#toBlockchain = nearBlockchain;
     } else if (this.toBlockchain === BlockchainName.ALGO) {
-      this._toBlockchain = algoBlockchain;
+      this.#toBlockchain = algoBlockchain;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
         toBlockchain: this.toBlockchain,
@@ -554,14 +554,14 @@ class BridgeTxn {
   /* PRIVATE METHODS - DATABASE */
 
   private async _createInDb(): Promise<DbId> {
-    if (!this._db.isConnected) {
+    if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._createInDb',
-        db: this._db,
+        db: this.#db,
       });
     }
     try {
-      this.dbId = await this._db.createTxn(this);
+      this.dbId = await this.#db.createTxn(this);
     } catch (e) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
         at: 'BridgeTxn._createDbEntry',
@@ -569,7 +569,7 @@ class BridgeTxn {
         bridgeTxn: this,
       });
     }
-    if (!this._db.isConnected) {
+    if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._updateTxnStatus',
       });
@@ -586,12 +586,12 @@ class BridgeTxn {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    if (!this._db.isConnected) {
+    if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    return await this._db.updateTxn(this);
+    return await this.#db.updateTxn(this);
   }
   /* PRIVATE METHODS - DATABASE */
   private _checkStatus(expected: BridgeTxnStatus, at: string): void {
