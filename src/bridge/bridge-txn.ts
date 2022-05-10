@@ -1,8 +1,8 @@
-// TODO: add a toString() method to BridgeTxn
+// TODO: rm all  `await db.updateTxn(this);`
 
 export { BridgeTxn };
 
-import { ApiCallParam, DbId, DbItem, parseDbItem } from '../utils/type';
+import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
 import { BlockchainName, BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -11,6 +11,7 @@ import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
+import { literals } from '../utils/literals';
 import { nearBlockchain } from '../blockchain/near';
 
 interface InitializeOptions {
@@ -175,12 +176,7 @@ class BridgeTxn {
         bridgeTxn: this,
       });
     }
-    if (!(this.txnStatus === BridgeTxnStatus.DONE_INITIALIZE)) {
-      throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
-        at: 'BridgeTxn.confirmIncomingTxn',
-        bridgeTxn: this,
-      });
-    }
+    this._checkStatus(BridgeTxnStatus.DONE_INITIALIZE, 'confirmIncomingTxn');
 
     await this._updateTxnStatus(BridgeTxnStatus.DOING_INCOMING);
 
@@ -205,6 +201,61 @@ class BridgeTxn {
           break;
       }
     }
+    await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
+  }
+
+  async makeOutgoingTxn(): Promise<void> {
+    this._checkStatus(BridgeTxnStatus.DONE_INCOMING, 'makeOutgoingTxn');
+
+    let outgoingTxnId: TxnId;
+    this.toAmountAtom = this.getToAmountAtom();
+    try {
+      this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+      await db.updateTxn(this);
+      outgoingTxnId = await this._toBlockchain.makeOutgoingTxn({
+        fromAddr: this._toBlockchain.centralizedAddr,
+        toAddr: this.toAddr,
+        atomAmount: this.toAmountAtom,
+        txnId: literals.UNUSED,
+      });
+      this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+      this.toTxnId = outgoingTxnId;
+      await db.updateTxn(this);
+    } catch {
+      // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
+      this.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+      await db.updateTxn(this);
+      throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+        bridgeTxn: this,
+      });
+    }
+    if (outgoingTxnId === undefined) {
+      // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
+      this.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+      await db.updateTxn(this);
+      throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+        bridgeTxn: this,
+      });
+    }
+  }
+
+  async verifyOutgoingTxn(): Promise<void> {
+    this._checkStatus(BridgeTxnStatus.DOING_OUTGOING, 'verifyOutgoingTxn');
+    try {
+      await this._toBlockchain.confirmTxn({
+        fromAddr: this._toBlockchain.centralizedAddr,
+        toAddr: this.toAddr,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        atomAmount: this.toAmountAtom!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        txnId: this.toTxnId!,
+      });
+    } catch {
+      this.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
+    }
+
+    this.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+    await db.updateTxn(this);
   }
   /* MISCELLANEOUS */
 
@@ -525,7 +576,6 @@ class BridgeTxn {
     }
     return this.dbId;
   }
-
   private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
     this.txnStatus = status;
     return await this._updateTxn();
@@ -542,5 +592,14 @@ class BridgeTxn {
       });
     }
     return await this._db.updateTxn(this);
+  }
+  /* PRIVATE METHODS - DATABASE */
+  private _checkStatus(expected: BridgeTxnStatus, at: string): void {
+    if (!(this.txnStatus === expected)) {
+      throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
+        at: `BridgeTxn.${at}`,
+        bridgeTxn: this,
+      });
+    }
   }
 }

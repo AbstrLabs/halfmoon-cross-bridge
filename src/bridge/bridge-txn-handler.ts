@@ -1,24 +1,19 @@
-// TODO: 1. merge to BridgeTxn class
 // TODO: 3. Check if fromTxnId is reused
 
 export { handleBridgeTxn as handleBridgeTxn };
 
-import { Blockchain, TxnType } from '../blockchain';
-import { BlockchainName, BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
+import { BlockchainName } from '..';
 import { BridgeTxn } from '.';
-import { TxnId } from '../utils/type';
-import { algoBlockchain } from '../blockchain/algorand';
+import { TxnType } from '../blockchain';
 import { db } from '../database/db';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
-import { nearBlockchain } from '../blockchain/near';
 
 async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* CONFIG */
   // let incomingBlockchain: Blockchain;
-  let outgoingBlockchain: Blockchain;
 
   let txnType;
   if (
@@ -27,14 +22,12 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   ) {
     txnType = TxnType.MINT;
     // incomingBlockchain = nearBlockchain;
-    outgoingBlockchain = algoBlockchain;
   } else if (
     bridgeTxn.fromBlockchain === BlockchainName.ALGO &&
     bridgeTxn.toBlockchain === BlockchainName.NEAR
   ) {
     txnType = TxnType.BURN;
     // incomingBlockchain = algoBlockchain;
-    outgoingBlockchain = nearBlockchain;
   } else {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       txnType: txnType,
@@ -100,55 +93,60 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   //   }
   // }
 
-  bridgeTxn.txnStatus = BridgeTxnStatus.DONE_INCOMING;
-  await db.updateTxn(bridgeTxn);
+  // bridgeTxn.txnStatus = BridgeTxnStatus.DONE_INCOMING;
+  // await db.updateTxn(bridgeTxn);
 
   // make outgoing txn
-  let outgoingTxnId: TxnId;
-  bridgeTxn.toAmountAtom = bridgeTxn.getToAmountAtom();
-  try {
-    bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-    await db.updateTxn(bridgeTxn);
-    outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
-      fromAddr: outgoingBlockchain.centralizedAddr,
-      toAddr: bridgeTxn.toAddr,
-      atomAmount: bridgeTxn.toAmountAtom,
-      txnId: literals.UNUSED,
-    });
-    bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-    bridgeTxn.toTxnId = outgoingTxnId;
-    await db.updateTxn(bridgeTxn);
-  } catch {
-    // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
-    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-    await db.updateTxn(bridgeTxn);
-    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
-      bridgeTxn,
-    });
-  }
-  if (outgoingTxnId === undefined) {
-    // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
-    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-    await db.updateTxn(bridgeTxn);
-    throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
-      bridgeTxn,
-    });
-  }
-
-  try {
-    await outgoingBlockchain.confirmTxn({
-      fromAddr: outgoingBlockchain.centralizedAddr,
-      toAddr: bridgeTxn.toAddr,
-      atomAmount: bridgeTxn.toAmountAtom,
-      txnId: outgoingTxnId,
-    });
-  } catch {
-    bridgeTxn.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
-  }
+  await bridgeTxn.makeOutgoingTxn();
+  // let outgoingTxnId: TxnId;
+  // bridgeTxn.toAmountAtom = bridgeTxn.getToAmountAtom();
+  // try {
+  //   bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+  //   await db.updateTxn(bridgeTxn);
+  //   outgoingTxnId = await outgoingBlockchain.makeOutgoingTxn({
+  //     fromAddr: outgoingBlockchain.centralizedAddr,
+  //     toAddr: bridgeTxn.toAddr,
+  //     atomAmount: bridgeTxn.toAmountAtom,
+  //     txnId: literals.UNUSED,
+  //   });
+  //   bridgeTxn.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+  //   bridgeTxn.toTxnId = outgoingTxnId;
+  //   await db.updateTxn(bridgeTxn);
+  // } catch {
+  //   // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
+  //   bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+  //   await db.updateTxn(bridgeTxn);
+  //   throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+  //     bridgeTxn,
+  //   });
+  // }
+  // if (outgoingTxnId === undefined) {
+  //   // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
+  //   bridgeTxn.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+  //   await db.updateTxn(bridgeTxn);
+  //   throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+  //     bridgeTxn,
+  //   });
+  // }
 
   // verify outgoing txn
-  bridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-  await db.updateTxn(bridgeTxn);
+  await bridgeTxn.verifyOutgoingTxn();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // const outgoingTxnId = bridgeTxn.toTxnId!;
+  // try {
+  //   await outgoingBlockchain.confirmTxn({
+  //     fromAddr: outgoingBlockchain.centralizedAddr,
+  //     toAddr: bridgeTxn.toAddr,
+  //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //     atomAmount: bridgeTxn.toAmountAtom!,
+  //     txnId: outgoingTxnId,
+  //   });
+  // } catch {
+  //   bridgeTxn.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
+  // }
+
+  // bridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+  // await db.updateTxn(bridgeTxn);
   // user confirmation via socket/email
 
   /* CLEAN UP */
