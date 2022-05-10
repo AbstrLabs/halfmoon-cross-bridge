@@ -1,5 +1,3 @@
-// TODO: Add logger level to .env
-
 /* This file is an logger interface */
 // UNRESOLVED: https://github.com/facebook/jest/issues/8790
 

@@ -92,6 +92,11 @@ const internalErrors = {
     name: 'Unknown Blockchain Name',
     message: 'Blockchain Name not in BlockchainName enum',
   },
+  CANNOT_DOTENV_LOAD: {
+    errId: 116,
+    name: 'Cannot Load .env',
+    message: 'Cannot load .env file',
+  },
 };
 
 const transactionErrors = {
