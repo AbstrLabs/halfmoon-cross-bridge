@@ -72,6 +72,16 @@ const internalErrors = {
     name: 'Type Error BigInt',
     message: 'BigInt type parsing error',
   },
+  DB_NOT_CONNECTED: {
+    errId: 112,
+    name: 'DB Not Connected',
+    message: 'DB is not connected when it should be.',
+  },
+  BRIDGE_TXN_INITIALIZATION_ERROR: {
+    errId: 113,
+    name: 'Bridge Transaction Initialization Error',
+    message: 'Bridge Transaction initialization error',
+  },
 };
 
 const transactionErrors = {

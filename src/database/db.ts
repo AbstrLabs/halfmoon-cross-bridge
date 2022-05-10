@@ -155,7 +155,7 @@ class Database {
     this._verifyResultLength(result, bridgeTxn);
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
-    return result[0].db_id;
+    return result[0].db_id as DbId; // TODO: parse DbId
   }
   async deleteTxn(dbId: DbId, txnType: TxnType) {
     // never used.

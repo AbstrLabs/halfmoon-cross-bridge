@@ -55,14 +55,17 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* MAKE BRIDGE TRANSACTION */
   // update as sequence diagram
 
-  // TODO: should move err-handling to db.
+  /* created in BridgeError constructor
+  
   try {
     bridgeTxn.dbId = await db.createTxn(bridgeTxn);
   } catch (e) {
     throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
       bridgeTxn,
     });
-  }
+  } 
+  
+  */
 
   bridgeTxn.txnStatus = BridgeTxnStatus.DOING_INCOMING;
   await db.updateTxn(bridgeTxn);

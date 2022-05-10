@@ -1,11 +1,12 @@
 export { BridgeTxn };
 
-import { ApiCallParam, DbItem, parseDbItem } from '../utils/type';
+import { ApiCallParam, DbId, DbItem, parseDbItem } from '../utils/type';
 import { BlockchainName, BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
+import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 
 class BridgeTxn {
@@ -23,6 +24,8 @@ class BridgeTxn {
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
   txnType?: TxnType;
+  private _db = db;
+  /* private  */ _isInitializedPromise: Promise<boolean>;
 
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
@@ -121,14 +124,17 @@ class BridgeTxn {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
-    try {
-      this.initiate();
-    } catch (e) {
-      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
-      // TODO: upload to db
-      throw e;
-    }
+    this._isInitializedPromise = new Promise((resolve) => {
+      this._initialize().then(() => {
+        resolve(true);
+      });
+    });
   }
+
+  /* MAKE BRIDGE TRANSACTION */
+  // process according to sequence diagram
+
+  /* MISCELLANEOUS */
 
   /**
    * @param  {BridgeTxn} other
@@ -157,11 +163,11 @@ class BridgeTxn {
       this.createdTime.toString() === other.createdTime.toString()
     );
   }
+
   /* GETTERS */
 
   public getToAmountAtom(): bigint {
     if (this.toAmountAtom === undefined) {
-      this.initiate();
       this.toAmountAtom = this._calculateToAmountAtom();
     }
     return this.toAmountAtom;
@@ -169,7 +175,8 @@ class BridgeTxn {
   public getTxnType(): TxnType {
     return this.txnType ?? this._inferTxnType();
   }
-  /* PRIVATE METHODS */
+
+  /* PRIVATE METHODS - CLASS INIT */
 
   /**
    * Initiate the BridgeTxn.
@@ -177,18 +184,26 @@ class BridgeTxn {
    * 3 Exceptions: `dbId`, `toTxnId` are allowed to be assigned once.
    * Field `txnStatus` is allowed to be assigned by the ${@link enum BridgeTxnStatus}.
    *
-   * @returns {BridgeTxn} this
+   * @returns ???
    *
    * TODO: link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
    */
-  private initiate(): this {
-    this._verifyValidity();
-    this._inferTxnType();
-    this._inferBlockchainNames();
-    this._getFixedFeeAtom();
-    this._calculateMarginFeeAtom();
-    this._calculateToAmountAtom();
+  private async _initialize() {
+    try {
+      this._verifyValidity();
+      this._inferTxnType();
+      this._inferBlockchainNames();
+      this._getFixedFeeAtom();
+      this._calculateMarginFeeAtom();
+      this._calculateToAmountAtom();
+    } catch (err) {
+      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
+      await this._createInDb();
+      throw err;
+    }
+
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
+    await this._createInDb();
     return this;
   }
 
@@ -345,5 +360,39 @@ class BridgeTxn {
 
     this.toAmountAtom = toAmount;
     return toAmount;
+  }
+
+  /* PRIVATE METHODS - DATABASE */
+
+  private async _createInDb(): Promise<DbId> {
+    try {
+      this.dbId = await db.createTxn(this);
+    } catch (e) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
+        at: 'BridgeTxn._createDbEntry',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
+    if (!this._db.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: 'BridgeTxn._updateTxnStatus',
+      });
+    }
+    return this.dbId;
+  }
+
+  private async _updateTxnStatus(): Promise<DbId> {
+    if (this.txnStatus === undefined) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn._updateTxnStatus',
+      });
+    }
+    if (!this._db.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: 'BridgeTxn._updateTxnStatus',
+      });
+    }
+    return await this._db.updateTxn(this);
   }
 }
