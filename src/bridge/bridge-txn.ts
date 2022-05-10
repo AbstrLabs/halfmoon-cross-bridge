@@ -3,13 +3,15 @@
 export { BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, parseDbItem } from '../utils/type';
+import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
 import { BlockchainName, BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { ENV } from '../utils/dotenv';
-import { TxnType } from '../blockchain';
+import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
+import { nearBlockchain } from '../blockchain/near';
 
 interface InitializeOptions {
   notCreateInDb?: boolean;
@@ -31,7 +33,11 @@ class BridgeTxn {
   toTxnId?: string;
   txnType?: TxnType;
   private _db = db;
+  private _fromBlockchain!: Blockchain;
+  private _toBlockchain!: Blockchain;
   /* private  */ _isInitializedPromise: Promise<boolean>;
+
+  /* CONSTRUCTORS  */
 
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
@@ -145,7 +151,45 @@ class BridgeTxn {
 
   /* MAKE BRIDGE TRANSACTION */
   // process according to sequence diagram
+  async confirmIncomingTxn(): Promise<void> {
+    await this._isInitializedPromise;
+    if (!this._isInitializedPromise) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn.confirmIncomingTxn',
+        bridgeTxn: this,
+      });
+    }
+    if (!(this.txnStatus === BridgeTxnStatus.DONE_INITIALIZE)) {
+      throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
+        at: 'BridgeTxn.confirmIncomingTxn',
+        bridgeTxn: this,
+      });
+    }
 
+    await this._updateTxnStatus(BridgeTxnStatus.DOING_INCOMING);
+
+    let confirmOutcome;
+    try {
+      confirmOutcome = await this._fromBlockchain.confirmTxn({
+        fromAddr: this.fromAddr,
+        atomAmount: this.fromAmountAtom,
+        toAddr: this._fromBlockchain.centralizedAddr,
+        txnId: this.fromTxnId,
+      });
+    } finally {
+      switch (confirmOutcome) {
+        case ConfirmOutcome.SUCCESS:
+          break;
+        case ConfirmOutcome.WRONG_INFO:
+          await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+          break;
+        case ConfirmOutcome.TIMEOUT:
+          await this._updateTxnStatus(BridgeTxnStatus.ERR_TIMEOUT_INCOMING);
+          await db.updateTxn(this);
+          break;
+      }
+    }
+  }
   /* MISCELLANEOUS */
 
   /**
@@ -207,6 +251,7 @@ class BridgeTxn {
       this._verifyValidity();
       this._inferTxnType();
       this._inferBlockchainNames();
+      this._hookBlockchain();
       this._getFixedFeeAtom();
       this._calculateMarginFeeAtom();
       this._calculateToAmountAtom();
@@ -307,6 +352,41 @@ class BridgeTxn {
     this.txnType = txnType;
     return txnType;
   }
+  private _hookBlockchain(): void {
+    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
+        fromBlockchain: this.fromBlockchain,
+        toBlockchain: this.toBlockchain,
+        at: 'BridgeTxn._hookBlockchain',
+      });
+    }
+    this._hookFromBlockchain();
+    this._hookToBlockchain();
+  }
+  private _hookFromBlockchain(): void {
+    if (this.fromBlockchain === BlockchainName.NEAR) {
+      this._fromBlockchain = nearBlockchain;
+    } else if (this.fromBlockchain === BlockchainName.ALGO) {
+      this._fromBlockchain = algoBlockchain;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
+        fromBlockchain: this.fromBlockchain,
+        at: 'BridgeTxn._hookBlockchain',
+      });
+    }
+  }
+  private _hookToBlockchain(): void {
+    if (this.toBlockchain === BlockchainName.NEAR) {
+      this._toBlockchain = nearBlockchain;
+    } else if (this.toBlockchain === BlockchainName.ALGO) {
+      this._toBlockchain = algoBlockchain;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
+        toBlockchain: this.toBlockchain,
+        at: 'BridgeTxn._hookBlockchain',
+      });
+    }
+  }
 
   private _getFixedFeeAtom(): bigint {
     if (this.fixedFeeAtom !== undefined) {
@@ -406,7 +486,11 @@ class BridgeTxn {
     return this.dbId;
   }
 
-  private async _updateTxnStatus(): Promise<DbId> {
+  private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
+    this.txnStatus = status;
+    return await this._updateTxn();
+  }
+  private async _updateTxn(): Promise<DbId> {
     if (this.txnStatus === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn._updateTxnStatus',

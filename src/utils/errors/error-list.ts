@@ -82,6 +82,16 @@ const internalErrors = {
     name: 'Bridge Transaction Initialization Error',
     message: 'Bridge Transaction initialization error',
   },
+  ILLEGAL_TXN_STATUS: {
+    errId: 114,
+    name: 'Illegal Transaction Status',
+    message: 'Transaction Status can only move in a certain sequence',
+  },
+  UNKNOWN_BLOCKCHAIN_NAME: {
+    errId: 115,
+    name: 'Unknown Blockchain Name',
+    message: 'Blockchain Name not in BlockchainName enum',
+  },
 };
 
 const transactionErrors = {

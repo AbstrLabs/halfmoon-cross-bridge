@@ -3,7 +3,7 @@
 
 export { handleBridgeTxn as handleBridgeTxn };
 
-import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
+import { Blockchain, TxnType } from '../blockchain';
 import { BlockchainName, BridgeTxnStatus } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
@@ -17,7 +17,7 @@ import { nearBlockchain } from '../blockchain/near';
 
 async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   /* CONFIG */
-  let incomingBlockchain: Blockchain;
+  // let incomingBlockchain: Blockchain;
   let outgoingBlockchain: Blockchain;
 
   let txnType;
@@ -26,14 +26,14 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
     bridgeTxn.toBlockchain === BlockchainName.ALGO
   ) {
     txnType = TxnType.MINT;
-    incomingBlockchain = nearBlockchain;
+    // incomingBlockchain = nearBlockchain;
     outgoingBlockchain = algoBlockchain;
   } else if (
     bridgeTxn.fromBlockchain === BlockchainName.ALGO &&
     bridgeTxn.toBlockchain === BlockchainName.NEAR
   ) {
     txnType = TxnType.BURN;
-    incomingBlockchain = algoBlockchain;
+    // incomingBlockchain = algoBlockchain;
     outgoingBlockchain = nearBlockchain;
   } else {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
@@ -56,7 +56,6 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   // update as sequence diagram
 
   /* created in BridgeError constructor
-  
   try {
     bridgeTxn.dbId = await db.createTxn(bridgeTxn);
   } catch (e) {
@@ -64,41 +63,42 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
       bridgeTxn,
     });
   } 
-  
   */
 
-  await bridgeTxn._isInitializedPromise;
-  if (!bridgeTxn._isInitializedPromise) {
-    throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-      at: 'handleBridgeTxn',
-      bridgeTxn,
-    });
-  }
-  bridgeTxn.txnStatus = BridgeTxnStatus.DOING_INCOMING;
-  await db.updateTxn(bridgeTxn);
+  await bridgeTxn.confirmIncomingTxn();
+  // await bridgeTxn._isInitializedPromise;
+  // if (!bridgeTxn._isInitializedPromise) {
+  //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+  //     at: 'handleBridgeTxn',
+  //     bridgeTxn,
+  //   });
+  // }
 
-  let confirmOutcome;
-  try {
-    confirmOutcome = await incomingBlockchain.confirmTxn({
-      fromAddr: bridgeTxn.fromAddr,
-      atomAmount: bridgeTxn.fromAmountAtom,
-      toAddr: incomingBlockchain.centralizedAddr,
-      txnId: bridgeTxn.fromTxnId,
-    });
-  } finally {
-    switch (confirmOutcome) {
-      case ConfirmOutcome.SUCCESS:
-        break;
-      case ConfirmOutcome.WRONG_INFO:
-        bridgeTxn.txnStatus = BridgeTxnStatus.ERR_VERIFY_INCOMING;
-        await db.updateTxn(bridgeTxn);
-        break;
-      case ConfirmOutcome.TIMEOUT:
-        bridgeTxn.txnStatus = BridgeTxnStatus.ERR_TIMEOUT_INCOMING;
-        await db.updateTxn(bridgeTxn);
-        break;
-    }
-  }
+  // bridgeTxn.txnStatus = BridgeTxnStatus.DOING_INCOMING;
+  // await db.updateTxn(bridgeTxn);
+
+  // let confirmOutcome;
+  // try {
+  //   confirmOutcome = await incomingBlockchain.confirmTxn({
+  //     fromAddr: bridgeTxn.fromAddr,
+  //     atomAmount: bridgeTxn.fromAmountAtom,
+  //     toAddr: incomingBlockchain.centralizedAddr,
+  //     txnId: bridgeTxn.fromTxnId,
+  //   });
+  // } finally {
+  //   switch (confirmOutcome) {
+  //     case ConfirmOutcome.SUCCESS:
+  //       break;
+  //     case ConfirmOutcome.WRONG_INFO:
+  //       bridgeTxn.txnStatus = BridgeTxnStatus.ERR_VERIFY_INCOMING;
+  //       await db.updateTxn(bridgeTxn);
+  //       break;
+  //     case ConfirmOutcome.TIMEOUT:
+  //       bridgeTxn.txnStatus = BridgeTxnStatus.ERR_TIMEOUT_INCOMING;
+  //       await db.updateTxn(bridgeTxn);
+  //       break;
+  //   }
+  // }
 
   bridgeTxn.txnStatus = BridgeTxnStatus.DONE_INCOMING;
   await db.updateTxn(bridgeTxn);
