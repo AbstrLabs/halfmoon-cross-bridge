@@ -21,8 +21,15 @@ class Database {
   private instance = postgres;
   private mintTableName: TableName = TableName.MINT_TABLE_NAME;
   private burnTableName: TableName = TableName.BURN_TABLE_NAME;
-  private __debugRandomId = Math.random().toString(36).substring(2, 15);
+  private __debugRandomId: string;
 
+  constructor() {
+    const trace = new Error().stack;
+    this.__debugRandomId = Math.random().toString(36).substring(2, 15);
+    console.log(
+      `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
+    );
+  }
   get isConnected() {
     return this.instance.isConnected;
   }
@@ -34,6 +41,7 @@ class Database {
   }
 
   async query(query: string, params: unknown[] = []) {
+    // console.log('__debugRandomId : ', this.__debugRandomId); // DEV_LOG_TO_REMOVE
     return await this.instance.query(query, params);
   }
 
@@ -209,4 +217,14 @@ class Database {
   }
 }
 
-const db = new Database();
+class DbSingleton {
+  private static instance: Database;
+
+  public static getInstance() {
+    if (DbSingleton.instance === undefined) {
+      DbSingleton.instance = new Database();
+    }
+    return DbSingleton.instance;
+  }
+}
+const db = DbSingleton.getInstance();
