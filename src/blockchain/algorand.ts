@@ -25,7 +25,18 @@ import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { AlgoTxnParam, Biginter, parseBigInt } from '../utils/type';
 
-// TODO: constructor: move config to param
+interface ClientParam {
+  token: { 'X-API-Key': string };
+  port: string;
+  server: string;
+}
+
+interface IndexerParam {
+  token: { 'X-API-Key': string };
+  port: string;
+  server: string;
+}
+
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
@@ -41,23 +52,10 @@ class AlgorandBlockchain extends Blockchain {
     intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
     algoRound: ENV.ALGO_CONFIRM_ROUND,
   };
-  constructor() {
+  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
     super();
-    const PURE_STAKE_CLIENT = {
-      token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
-      port: '', // from https://developer.purestake.io/code-samples
-    };
-    const PURE_STAKE_DAEMON_CLIENT = {
-      ...PURE_STAKE_CLIENT,
-      server: 'https://testnet-algorand.api.purestake.io/ps2',
-    };
-    const PURE_STAKE_INDEXER_CLIENT = {
-      ...PURE_STAKE_CLIENT,
-      server: 'https://testnet-algorand.api.purestake.io/idx2',
-    };
-    // TODO: switch network
-    const algodClientParamSource = PURE_STAKE_DAEMON_CLIENT;
-    const algoIndexerParamSource = PURE_STAKE_INDEXER_CLIENT;
+    const algodClientParamSource = clientParam;
+    const algoIndexerParamSource = indexerParam;
 
     this.client = new AlgodClient(
       algodClientParamSource.token,
@@ -280,8 +278,8 @@ class AlgorandBlockchain extends Blockchain {
 
 // For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
 class TestAlgo extends AlgorandBlockchain {
-  constructor() {
-    super();
+  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
+    super(clientParam, indexerParam);
   }
   async emulateFrontendTxn(
     algoTxnParam: AlgoTxnParam,
@@ -309,5 +307,25 @@ class TestAlgo extends AlgorandBlockchain {
   }
 }
 
-const algoBlockchain = new AlgorandBlockchain();
-const testAlgo = new TestAlgo();
+const PURE_STAKE_CLIENT = {
+  token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
+  port: '', // from https://developer.purestake.io/code-samples
+};
+const PURE_STAKE_DAEMON_CLIENT = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/ps2',
+};
+const PURE_STAKE_INDEXER_CLIENT = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/idx2',
+};
+// TODO: switch network
+
+const algoBlockchain = new AlgorandBlockchain(
+  PURE_STAKE_DAEMON_CLIENT,
+  PURE_STAKE_INDEXER_CLIENT
+);
+const testAlgo = new TestAlgo(
+  PURE_STAKE_DAEMON_CLIENT,
+  PURE_STAKE_INDEXER_CLIENT
+);
