@@ -10,6 +10,7 @@ import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
+import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 
 interface InitializeOptions {
@@ -166,6 +167,24 @@ class BridgeTxn {
 
   /* MAKE BRIDGE TRANSACTION */
   // process according to sequence diagram
+
+  async runWholeBridgeTxn(): Promise<BridgeTxn> {
+    // async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
+    logger.info(
+      literals.MAKING_TXN(
+        `${this.fromBlockchain}->${this.toBlockchain}`,
+        this.fromAmountAtom,
+        this.fromAddr,
+        this.toAddr
+      )
+    );
+    await this.confirmIncomingTxn();
+    await this.makeOutgoingTxn();
+    await this.verifyOutgoingTxn();
+    // return this.toObject();
+    return this;
+  }
+
   async confirmIncomingTxn(): Promise<void> {
     await this._isInitializedPromise;
     if (!this._isInitializedPromise) {
@@ -249,6 +268,7 @@ class BridgeTxn {
     }
     await this._updateTxnStatus(BridgeTxnStatus.DONE_OUTGOING);
   }
+
   /* MISCELLANEOUS */
 
   /**
