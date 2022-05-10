@@ -5,6 +5,8 @@ module.exports = async function (globalConfig, projectConfig) {
   // globalThis.__MONGOD__ = mongod;
   process.on('unhandledRejection', (reason) => {
     console.log(reason); // log the reason including the stack trace
-    throw e;
+    // throw e;
   });
+  var { db } = await require('./src/database/db');
+  db.connect();
 };

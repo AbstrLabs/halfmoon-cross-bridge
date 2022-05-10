@@ -1,5 +1,7 @@
 // TODO: 1. separate database to database.ts from index.ts
 // TODO: 2. Wrap this piece below
+// TODO: 3. add a toString() method to BridgeTxn
+
 /* const tableName = this._inferTableName(bridgeTxn);
 if (!this.isConnected) {
   await this.connect();
@@ -19,6 +21,7 @@ class Database {
   private instance = postgres;
   private mintTableName: TableName = TableName.MINT_TABLE_NAME;
   private burnTableName: TableName = TableName.BURN_TABLE_NAME;
+  private __debugRandomId = Math.random().toString(36).substring(2, 15);
 
   get isConnected() {
     return this.instance.isConnected;
@@ -43,11 +46,13 @@ class Database {
   }
 
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
-    // will assign a dbId on creation.
-    // TODO: Err handling, like sending alert email when db cannot connect.
+    // TODO: sent alert email when db cannot connect.
+    // will assign and return a dbId on creation.
+
     const tableName = this._inferTableName(bridgeTxn);
     if (!this.isConnected) {
-      await this.connect();
+      logger.error('db is not connected while it should');
+      // await this.connect();
     }
 
     const query = `

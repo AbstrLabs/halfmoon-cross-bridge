@@ -6,13 +6,6 @@ import { db } from './db';
 import { exampleBridgeTxn } from '../utils/test/test-example';
 
 describe('DATABASE test', () => {
-  beforeAll(async () => {
-    await db.connect();
-  });
-  afterAll(async () => {
-    db.disconnect();
-    await db.end();
-  });
   describe('AWS-RDS capability test', () => {
     ENV; // to load .env file
 
@@ -27,9 +20,9 @@ describe('DATABASE test', () => {
         test_date BIGINT NOT NULL
         );`;
 
-      await db.connect();
+      // await db.connect();
       const res = await db.query(query);
-      await db.disconnect();
+      // await db.disconnect();
 
       expect(res.length).toBe(0);
       const res2 = await db.query(`DROP TABLE ${tableName};`);

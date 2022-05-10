@@ -1,3 +1,5 @@
+// TODO: add a toString() method to BridgeTxn
+
 export { BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, parseDbItem } from '../utils/type';
@@ -124,6 +126,7 @@ class BridgeTxn {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
+    // TODO: maybe a `static async asyncConstruct(){}` is better?
     this._isInitializedPromise = new Promise((resolve) => {
       this._initialize().then(() => {
         resolve(true);
@@ -365,8 +368,14 @@ class BridgeTxn {
   /* PRIVATE METHODS - DATABASE */
 
   private async _createInDb(): Promise<DbId> {
+    if (!this._db.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: 'BridgeTxn._createInDb',
+        db: this._db,
+      });
+    }
     try {
-      this.dbId = await db.createTxn(this);
+      this.dbId = await this._db.createTxn(this);
     } catch (e) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
         at: 'BridgeTxn._createDbEntry',

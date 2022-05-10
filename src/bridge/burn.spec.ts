@@ -3,19 +3,12 @@
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { burn } from './burn';
-import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 import { testAlgo } from '../blockchain/algorand';
 
 const TIMEOUT_30S = 30_000;
 
 describe('burn test', () => {
-  beforeAll(async () => {
-    await db.connect();
-  });
-  afterAll(async () => {
-    await db.end();
-  });
   // TODO: should in near test.
   // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(

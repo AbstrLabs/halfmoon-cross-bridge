@@ -67,6 +67,13 @@ async function handleBridgeTxn(bridgeTxn: BridgeTxn): Promise<BridgeTxn> {
   
   */
 
+  await bridgeTxn._isInitializedPromise;
+  if (!bridgeTxn._isInitializedPromise) {
+    throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+      at: 'handleBridgeTxn',
+      bridgeTxn,
+    });
+  }
   bridgeTxn.txnStatus = BridgeTxnStatus.DOING_INCOMING;
   await db.updateTxn(bridgeTxn);
 

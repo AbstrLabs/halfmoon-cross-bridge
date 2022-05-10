@@ -58,6 +58,21 @@
     "ts-node-dev": "^1.1.8",
     "winston": "^3.7.2"
   },
+  "jest": {
+    "globalSetup": "./src/utils/test/jest-setup.ts",
+    "globalTeardown": "./src/utils/test/jest-teardown.ts",
+    "globals": {
+      "ts-jest": {
+        "tsconfig": {
+          "module": "ESNext",
+          "target": "ES2017"
+        },
+        "useESM": true
+      }
+    },
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
   "license": "gpl-3.0",
   "lint-staged": {
     "*.ts": "eslint --cache --fix --max-warnings=0",
@@ -74,19 +89,19 @@
     "burn": "yarn test:burn",
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
+    "lint": "eslint . --ext .ts",
     "mint": "yarn test:mint",
     "near": "yarn test:near",
+    "postinstall": "husky install",
+    "prepare": "husky install",
     "test": "jest",
-    "lint": "eslint . --ext .ts",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
     "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
     "test:db": "jest --testPathPattern=src/database",
     "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils",
-    "postinstall": "husky install",
-    "prepare": "husky install"
+    "test:util": "jest --testPathPattern=src/utils"
   },
   "version": "1.0.0"
 }

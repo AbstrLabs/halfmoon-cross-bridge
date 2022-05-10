@@ -1,7 +1,6 @@
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '../utils/type';
 import { algoBlockchain } from './algorand';
-import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -46,9 +45,6 @@ const exampleRcpt = {
 };
 
 describe('AlgorandBlockchain', () => {
-  afterAll(() => {
-    db.end();
-  });
   it('should be defined', () => {
     expect(algoBlockchain).toBeDefined();
   });

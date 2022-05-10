@@ -28,6 +28,7 @@ class Postgres {
 
   async connect() {
     if (this.isConnected) {
+      logger.verbose('db is already connected');
       return;
     }
     this.client = await this.pool.connect();
@@ -39,13 +40,11 @@ class Postgres {
   }
 
   async query(query: string, params: unknown[] = []) {
-    if (!this.client) {
-      logger.info('Not connected to database, connecting now...');
-      await this.connect();
+    if (!this.isConnected || !this.client) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED);
+      // await this.connect();
     }
-    if (!this.client) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
-    }
+
     const res = await this.client.query(query, params);
     return res.rows;
   }

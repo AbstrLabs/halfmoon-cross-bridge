@@ -1,3 +1,4 @@
+// TODO! security: check if error will be shown to user.
 // TODO: check {X as X} and Y : Y.
 
 export { BlockchainName, BridgeTxnStatus };
