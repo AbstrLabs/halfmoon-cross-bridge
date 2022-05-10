@@ -1,5 +1,3 @@
-// TODO: rm all  `await db.updateTxn(this);`
-
 export { BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
@@ -197,7 +195,6 @@ class BridgeTxn {
           break;
         case ConfirmOutcome.TIMEOUT:
           await this._updateTxnStatus(BridgeTxnStatus.ERR_TIMEOUT_INCOMING);
-          await db.updateTxn(this);
           break;
       }
     }
@@ -210,8 +207,7 @@ class BridgeTxn {
     let outgoingTxnId: TxnId;
     this.toAmountAtom = this.getToAmountAtom();
     try {
-      this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-      await db.updateTxn(this);
+      await this._updateTxnStatus(BridgeTxnStatus.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
@@ -219,20 +215,18 @@ class BridgeTxn {
         txnId: literals.UNUSED,
       });
       this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
-      this.toTxnId = outgoingTxnId;
-      await db.updateTxn(this);
+      await this._updateToTxnId(outgoingTxnId);
     } catch {
       // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
       this.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-      await db.updateTxn(this);
+      await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
       });
     }
     if (outgoingTxnId === undefined) {
       // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
-      this.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
-      await db.updateTxn(this);
+      await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
       });
@@ -251,11 +245,9 @@ class BridgeTxn {
         txnId: this.toTxnId!,
       });
     } catch {
-      this.txnStatus = BridgeTxnStatus.ERR_CONFIRM_OUTGOING;
+      await this._updateTxnStatus(BridgeTxnStatus.ERR_CONFIRM_OUTGOING);
     }
-
-    this.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
-    await db.updateTxn(this);
+    await this._updateTxnStatus(BridgeTxnStatus.DONE_OUTGOING);
   }
   /* MISCELLANEOUS */
 
@@ -576,10 +568,7 @@ class BridgeTxn {
     }
     return this.dbId;
   }
-  private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
-    this.txnStatus = status;
-    return await this._updateTxn();
-  }
+
   private async _updateTxn(): Promise<DbId> {
     if (this.txnStatus === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
@@ -593,7 +582,16 @@ class BridgeTxn {
     }
     return await this.#db.updateTxn(this);
   }
-  /* PRIVATE METHODS - DATABASE */
+  private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
+    this.txnStatus = status;
+    return await this._updateTxn();
+  }
+  private async _updateToTxnId(toTxnId: TxnId): Promise<DbId> {
+    this.toTxnId = toTxnId;
+    return await this._updateTxn();
+  }
+  /* PRIVATE METHODS - HELPERS */
+
   private _checkStatus(expected: BridgeTxnStatus, at: string): void {
     if (!(this.txnStatus === expected)) {
       throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
