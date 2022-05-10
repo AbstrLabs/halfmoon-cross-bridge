@@ -7,7 +7,7 @@ import {
 } from './utils/type';
 import express, { Request, Response } from 'express';
 
-import { BridgeTxn } from './bridge';
+import { BridgeTxnObject } from './bridge';
 import { ENV } from './utils/dotenv';
 import { burn } from './bridge/burn';
 import { ensureString } from './utils/helper';
@@ -26,15 +26,15 @@ function startServer() {
 
   apiRouter
     .route('/mint')
-    .get(async (req: Request, res: Response) => {
-      const [from, to, amount, txnId] = [
-        ensureString(req.query.from),
-        ensureString(req.query.to),
-        ensureString(req.query.amount),
-        ensureString(req.query.txnId),
-      ];
-      await mintResp({ from, to, amount, txnId }, res);
-    })
+    // .get(async (req: Request, res: Response) => {
+    //   const [from, to, amount, txnId] = [
+    //     ensureString(req.query.from),
+    //     ensureString(req.query.to),
+    //     ensureString(req.query.amount),
+    //     ensureString(req.query.txnId),
+    //   ];
+    //   await mintResp({ from, to, amount, txnId }, res);
+    // })
     .post(async (req: Request, res: Response) => {
       // res.json(req.body);
       const [from, to, amount, txnId] = [
@@ -48,15 +48,15 @@ function startServer() {
 
   apiRouter
     .route('/burn')
-    .get(async (req: Request, res: Response) => {
-      const [from, to, amount, txnId] = [
-        ensureString(req.query.from),
-        ensureString(req.query.to),
-        ensureString(req.query.amount),
-        ensureString(req.query.txnId),
-      ];
-      await burnResp({ from, to, amount, txnId }, res);
-    })
+    // .get(async (req: Request, res: Response) => {
+    //   const [from, to, amount, txnId] = [
+    //     ensureString(req.query.from),
+    //     ensureString(req.query.to),
+    //     ensureString(req.query.amount),
+    //     ensureString(req.query.txnId),
+    //   ];
+    //   await burnResp({ from, to, amount, txnId }, res);
+    // })
     .post(async (req: Request, res: Response) => {
       // res.json(req.body);
       const [from, to, amount, txnId] = [
@@ -97,13 +97,15 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
-  let bridgeTxn: BridgeTxn;
+  let bridgeTxnObject: BridgeTxnObject;
   logger.info(literals.START_MINTING(amount, from, to));
-  res.write(`${literals.START_MINTING(amount, from, to)}\n`);
-  res.write(`${literals.MINT_NEAR_TXN_ID(txnId)}\n`);
-  res.write(`${literals.MINT_AWAITING}\n`);
+  res.write(
+    `${literals.START_MINTING(amount, from, to)}\n` +
+      `${literals.MINT_NEAR_TXN_ID(txnId)}\n` +
+      `${literals.MINT_AWAITING}\n`
+  );
   try {
-    bridgeTxn = await mint(mintApiParam);
+    bridgeTxnObject = await mint(mintApiParam);
     logger.info(literals.DONE_MINT);
     res.end();
   } catch (e) {
@@ -111,7 +113,7 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
     res.end();
     throw e;
   }
-  return bridgeTxn;
+  return bridgeTxnObject;
 }
 
 // TODO: 2-func: ref mintResp and burnResp since they are in same structure.
@@ -119,19 +121,21 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   /* CONFIG */
   const burnApiParam = parseBurnApiParam(apiCallParam);
   const { from, to, amount, txnId } = burnApiParam;
-  let bridgeTxn: BridgeTxn;
+  let bridgeTxnObject: BridgeTxnObject;
   logger.info(literals.START_BURNING(amount, from, to));
-  res.write(`${literals.START_BURNING(amount, from, to)}\n`);
-  res.write(`${literals.BURN_ALGO_TXN_ID(txnId)}\n`);
-  res.write(`${literals.BURN_AWAITING}\n`);
+  res.write(
+    `${literals.START_BURNING(amount, from, to)}\n` +
+      `${literals.BURN_ALGO_TXN_ID(txnId)}\n` +
+      `${literals.BURN_AWAITING}\n`
+  );
+  res.end();
   try {
-    bridgeTxn = await burn(burnApiParam);
+    bridgeTxnObject = await burn(burnApiParam);
     logger.info(literals.DONE_BURN);
-    res.end();
   } catch (e) {
     res.status(400).send('Missing required query params');
     res.end();
     throw e;
   }
-  return bridgeTxn;
+  return bridgeTxnObject;
 }

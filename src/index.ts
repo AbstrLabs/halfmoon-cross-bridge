@@ -1,5 +1,4 @@
 // TODO: check {X as X} and Y : Y.
-// TODO: Check if fromTxnId is reused
 
 export { BlockchainName, BridgeTxnStatus };
 
