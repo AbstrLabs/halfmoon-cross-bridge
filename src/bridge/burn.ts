@@ -3,7 +3,6 @@ export { burn };
 import { BridgeTxn } from '.';
 import { BurnApiParam } from '../utils/type';
 import { TxnType } from '../blockchain';
-import { handleBridgeTxn } from './bridge-txn-handler';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
@@ -20,7 +19,7 @@ async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxn> {
     TxnType.BURN,
     BigInt(Date.now())
   );
-  const bridgeTxn = await handleBridgeTxn(rawBridgeTxn);
+  const bridgeTxn = await rawBridgeTxn.runWholeBridgeTxn();
   // ERR handler .burn success
   logger.info(literals.DONE_BURN);
   return bridgeTxn;
