@@ -23,7 +23,7 @@ import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { AlgoTxnParam, Biginter, parseBigInt } from '../utils/type';
+import { AlgoTxnParam, parseBigInt } from '../utils/type';
 
 interface ClientParam {
   token: { 'X-API-Key': string };
@@ -154,16 +154,20 @@ class AlgorandBlockchain extends Blockchain {
   }
   async makeOutgoingTxn(algoTxnParam: AlgoTxnParam): Promise<AlgoTxnId> {
     // abstract class implementation.
-    return await this._makeGoNearTxnFromAdmin(
-      algoTxnParam.toAddr,
-      algoTxnParam.atomAmount
-    );
+    // txnId, fromAddr are never used
+    return await this._makeGoNearTxnFromAdmin(algoTxnParam);
   }
-  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atomAmount: bigint) {
+  protected async _makeGoNearTxnFromAdmin(
+    algoTxnParam: AlgoTxnParam
+    // txnId, fromAddr are never used
+  ): Promise<AlgoTxnId> {
     return await this._makeAsaTxn(
-      to,
-      this.centralizedAcc.addr,
-      atomAmount,
+      {
+        toAddr: algoTxnParam.toAddr,
+        fromAddr: this.centralizedAcc.addr,
+        atomAmount: algoTxnParam.atomAmount,
+        txnId: literals.UNUSED,
+      },
       this.centralizedAcc,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
@@ -171,9 +175,7 @@ class AlgorandBlockchain extends Blockchain {
   // TODO: makeAsaTxn needs an err handler.
   // TODO: use AlgoTxnParam here
   protected async _makeAsaTxn(
-    to: AlgoAddr,
-    from: AlgoAddr,
-    amountInAtomic: Biginter,
+    algoTxnParam: AlgoTxnParam,
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxnId> {
@@ -185,9 +187,9 @@ class AlgorandBlockchain extends Blockchain {
     // const enc = new TextEncoder();
     // const note = enc.encode('Hello World');
     const txnConfig = {
-      to,
-      from,
-      amount: parseBigInt(amountInAtomic),
+      to: algoTxnParam.toAddr,
+      from: algoTxnParam.fromAddr,
+      amount: parseBigInt(algoTxnParam.atomAmount),
       note: undefined, // maybe write the incoming txnId here
       suggestedParams: params,
       assetIndex: asaId,
@@ -220,9 +222,9 @@ class AlgorandBlockchain extends Blockchain {
     //Get the completed Transaction
     logger.verbose(
       literals.TXN_CONFIRMED(
-        from,
-        to,
-        amountInAtomic,
+        algoTxnParam.fromAddr,
+        algoTxnParam.toAddr,
+        algoTxnParam.atomAmount,
         txnId,
         confirmedTxn['confirmed-round']
       )
@@ -287,9 +289,12 @@ class TestAlgo extends AlgorandBlockchain {
   ) {
     const sender = algosdk.mnemonicToSecretKey(senderPassPhrase);
     return this._makeAsaTxn(
-      algoTxnParam.toAddr,
-      algoTxnParam.fromAddr,
-      parseBigInt(algoTxnParam.atomAmount).toString(),
+      {
+        toAddr: algoTxnParam.toAddr,
+        fromAddr: algoTxnParam.fromAddr,
+        atomAmount: parseBigInt(algoTxnParam.atomAmount),
+        txnId: literals.UNUSED,
+      },
       sender,
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
