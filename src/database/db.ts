@@ -21,15 +21,16 @@ class Database {
   private instance = postgres;
   private mintTableName: TableName = TableName.MINT_TABLE_NAME;
   private burnTableName: TableName = TableName.BURN_TABLE_NAME;
-  private __debugRandomId: string;
+  // private __debugRandomId: string;
 
-  constructor() {
-    const trace = new Error().stack;
-    this.__debugRandomId = Math.random().toString(36).substring(2, 15);
-    console.log(
-      `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
-    );
-  }
+  // constructor() {
+  // const trace = new Error().stack;
+  // this.__debugRandomId = Math.random().toString(36).substring(2, 15);
+  // console.log(
+  //   `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
+  // );
+  // }
+
   get isConnected() {
     return this.instance.isConnected;
   }
