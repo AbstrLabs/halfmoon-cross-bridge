@@ -17,6 +17,22 @@ interface InitializeOptions {
   notCreateInDb?: boolean;
 }
 
+interface BridgeTxnObject {
+  dbId?: number;
+  fixedFeeAtom: bigint;
+  marginFeeAtom: bigint;
+  timestamp: bigint;
+  fromAddr: string;
+  fromAmountAtom: bigint;
+  fromBlockchain: BlockchainName;
+  fromTxnId: string;
+  toAddr: string;
+  toAmountAtom: bigint;
+  toBlockchain: BlockchainName;
+  toTxnId?: string;
+  txnStatus: BridgeTxnStatus;
+}
+
 class BridgeTxn {
   dbId?: number;
   fixedFeeAtom?: bigint;
@@ -218,6 +234,30 @@ class BridgeTxn {
       this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
       this.createdTime.toString() === other.createdTime.toString()
     );
+  }
+
+  public toObject(): BridgeTxnObject {
+    this._initialize({ notCreateInDb: true }); // this makes all fields non-null
+    const bridgeTxnObject: BridgeTxnObject = {
+      dbId: this.dbId,
+      fixedFeeAtom: this.fixedFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      marginFeeAtom: this.marginFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      timestamp: this.createdTime,
+      fromAddr: this.fromAddr,
+      fromAmountAtom: this.fromAmountAtom,
+      fromBlockchain: this.fromBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      fromTxnId: this.fromTxnId,
+      toAddr: this.toAddr,
+      toAmountAtom: this.toAmountAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      toBlockchain: this.toBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      toTxnId: this.toTxnId,
+      txnStatus: this.txnStatus,
+    };
+    return Object.assign(bridgeTxnObject, this);
+  }
+
+  public toString(): string {
+    return JSON.stringify(this.toObject());
   }
 
   /* GETTERS */
