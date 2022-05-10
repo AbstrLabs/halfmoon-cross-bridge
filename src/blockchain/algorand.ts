@@ -324,21 +324,24 @@ const PURE_STAKE_CLIENT = {
   token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
   port: '', // from https://developer.purestake.io/code-samples
 };
-const PURE_STAKE_DAEMON_CLIENT = {
+const PURE_STAKE_DAEMON_CLIENT_TESTNET = {
   ...PURE_STAKE_CLIENT,
   server: 'https://testnet-algorand.api.purestake.io/ps2',
 };
-const PURE_STAKE_INDEXER_CLIENT = {
+const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
   ...PURE_STAKE_CLIENT,
   server: 'https://testnet-algorand.api.purestake.io/idx2',
 };
-// TODO: switch network
 
-const algoBlockchain = new AlgorandBlockchain(
-  PURE_STAKE_DAEMON_CLIENT,
-  PURE_STAKE_INDEXER_CLIENT
-);
-const testAlgo = new TestAlgo(
-  PURE_STAKE_DAEMON_CLIENT,
-  PURE_STAKE_INDEXER_CLIENT
-);
+let clientParam, indexerParam;
+if (ENV.ALGO_NETWORK === 'testnet') {
+  clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
+  indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    network: ENV.ALGO_NETWORK,
+    currentSupportedNetworks: ['testnet'],
+  });
+}
+const algoBlockchain = new AlgorandBlockchain(clientParam, indexerParam);
+const testAlgo = new TestAlgo(clientParam, indexerParam);

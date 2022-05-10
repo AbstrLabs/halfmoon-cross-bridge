@@ -39,6 +39,8 @@ const default_ENV = {
   NEAR_TOTAL: 1_000_000_000,
   DB_ORIGIN: 'NEDB',
   ALGO_CONFIRM_ROUND: 60,
+  ALGO_NETWORK: 'testnet',
+  NEAR_NETWORK: 'testnet',
   MINT_FIX_FEE: 1,
   MINT_PERCENT_FEE: 0,
   BURN_FIX_FEE: 1,

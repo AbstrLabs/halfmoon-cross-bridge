@@ -97,6 +97,11 @@ const internalErrors = {
     name: 'Cannot Load .env',
     message: 'Cannot load .env file',
   },
+  NETWORK_NOT_SUPPORTED: {
+    errId: 117,
+    name: 'Blockchain network Not Supported',
+    message: 'Blockchain network not supported',
+  },
 };
 
 const transactionErrors = {
