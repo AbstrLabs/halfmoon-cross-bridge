@@ -95,7 +95,7 @@ class Database {
     return dbId as DbId;
   }
 
-  public async readTxn(txnId: DbId, txnType: TxnType): Promise<DbItem> {
+  public async readTxn(txnId: DbId, txnType: TxnType): Promise<DbItem[]> {
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const tableName = this._inferTableName(txnType);
@@ -109,10 +109,7 @@ class Database {
     `;
     const params = [txnId];
     const result = await this.query(query, params);
-    this._verifyResultLength(result, txnId);
-
-    const dbItem = parseDbItem(result[0]);
-    return dbItem;
+    return result;
   }
 
   public async updateTxn(bridgeTxn: BridgeTxn) {
@@ -158,7 +155,19 @@ class Database {
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
     return result[0].db_id as DbId; // TODO: parse DbId
   }
-  async deleteTxn(dbId: DbId, txnType: TxnType) {
+
+  public async readUniqueTxn(txnId: DbId, txnType: TxnType): Promise<DbItem> {
+    // currently only used in test. not fixing.
+    // should return an BridgeTxn
+    // should use BridgeTxn.fromDbItem to convert to BridgeTxn
+
+    const result = await this.readTxn(txnId, txnType);
+    this._verifyResultLength(result, txnId);
+    const dbItem = parseDbItem(result[0]);
+    return dbItem;
+  }
+
+  private async deleteTxn(dbId: DbId, txnType: TxnType) {
     // never used.
 
     // const query = `

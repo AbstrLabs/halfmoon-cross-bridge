@@ -85,7 +85,7 @@ describe('DATABASE test', () => {
       // skip: serialize
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
+      const res = await db.readUniqueTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
       console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
       console.log(
         'typeof res.from_amount_atom : ',
@@ -105,7 +105,7 @@ describe('DATABASE test', () => {
       // read the updated transaction
       // TODO: BT-dbId: have a getter for dbId
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res2 = await db.readTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
+      const res2 = await db.readUniqueTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(BridgeTxn.fromDbItem(res2, TxnType.MINT)).toEqual(
