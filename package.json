@@ -61,6 +61,9 @@
   "jest": {
     "globalSetup": "./src/utils/test/jest-setup.ts",
     "globalTeardown": "./src/utils/test/jest-teardown.ts",
+    "setupFilesAfterEnv": [
+      "./src/utils/test/global-beforeAll.ts"
+    ],
     "globals": {
       "ts-jest": {
         "tsconfig": {

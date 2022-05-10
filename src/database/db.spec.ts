@@ -34,10 +34,10 @@ describe('DATABASE test', () => {
       const date = +new Date();
       const query = `INSERT INTO ${tableName} (test_date) VALUES ($1);`;
 
-      await db.connect();
+      // await db.connect();
       const res = await db.query(query, [date]);
       const res2 = await db.query(`SELECT * FROM ${tableName};`);
-      db.disconnect();
+      // db.disconnect();
 
       expect(res.length).toBe(0);
       expect(res2.at(-1).test_date).toBe(date.toString());

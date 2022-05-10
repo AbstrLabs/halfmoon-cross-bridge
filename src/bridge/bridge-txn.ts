@@ -11,6 +11,10 @@ import { TxnType } from '../blockchain';
 import { db } from '../database/db';
 import { goNearToAtom } from '../utils/formatter';
 
+interface InitializeOptions {
+  notCreateInDb?: boolean;
+}
+
 class BridgeTxn {
   dbId?: number;
   fixedFeeAtom?: bigint;
@@ -77,40 +81,45 @@ class BridgeTxn {
     return bridgeTxn;
   }
 
-  constructor({
-    fixedFeeAtom,
-    marginFeeAtom,
-    createdTime,
-    fromAddr,
-    fromAmountAtom,
-    fromBlockchain,
-    fromTxnId,
-    toAddr,
-    toAmountAtom,
-    toBlockchain,
-    txnStatus,
-    txnType,
-    toTxnId,
-    dbId,
-  }: {
-    dbId?: number;
-    createdTime?: bigint;
+  constructor(
+    {
+      fixedFeeAtom,
+      marginFeeAtom,
+      createdTime,
+      fromAddr,
+      fromAmountAtom,
+      fromBlockchain,
+      fromTxnId,
+      toAddr,
+      toAmountAtom,
+      toBlockchain,
+      txnStatus,
+      txnType,
+      toTxnId,
+      dbId,
+    }: {
+      dbId?: number;
+      createdTime?: bigint;
 
-    fromAddr: string;
-    fromAmountAtom: bigint;
-    fromBlockchain?: BlockchainName;
-    fromTxnId: string;
+      fromAddr: string;
+      fromAmountAtom: bigint;
+      fromBlockchain?: BlockchainName;
+      fromTxnId: string;
 
-    toAddr: string;
-    toAmountAtom?: bigint;
-    toBlockchain?: BlockchainName;
-    toTxnId?: string;
+      toAddr: string;
+      toAmountAtom?: bigint;
+      toBlockchain?: BlockchainName;
+      toTxnId?: string;
 
-    txnStatus?: BridgeTxnStatus;
-    fixedFeeAtom?: bigint;
-    marginFeeAtom?: bigint;
-    txnType?: TxnType;
-  }) {
+      txnStatus?: BridgeTxnStatus;
+      fixedFeeAtom?: bigint;
+      marginFeeAtom?: bigint;
+      txnType?: TxnType;
+    },
+    initializeOptions: InitializeOptions = {
+      notCreateInDb: false,
+    }
+  ) {
     this.fixedFeeAtom = fixedFeeAtom;
     this.marginFeeAtom = marginFeeAtom;
     this.createdTime = createdTime ?? BigInt(+Date.now());
@@ -128,7 +137,7 @@ class BridgeTxn {
 
     // TODO: maybe a `static async asyncConstruct(){}` is better?
     this._isInitializedPromise = new Promise((resolve) => {
-      this._initialize().then(() => {
+      this._initialize(initializeOptions).then(() => {
         resolve(true);
       });
     });
@@ -191,7 +200,9 @@ class BridgeTxn {
    *
    * TODO: link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
    */
-  private async _initialize() {
+  private async _initialize(
+    initializeOptions: InitializeOptions
+  ): Promise<this> {
     try {
       this._verifyValidity();
       this._inferTxnType();
@@ -201,12 +212,16 @@ class BridgeTxn {
       this._calculateToAmountAtom();
     } catch (err) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
-      await this._createInDb();
+      if (initializeOptions.notCreateInDb === false) {
+        await this._createInDb();
+      }
       throw err;
     }
 
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
-    await this._createInDb();
+    if (initializeOptions.notCreateInDb === false) {
+      await this._createInDb();
+    }
     return this;
   }
 

@@ -1,6 +1,3 @@
-import { db } from '../../database/db';
-import { jest } from '@jest/globals';
-
 module.exports = async function (
   globalConfig: any, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   projectConfig: any // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
@@ -14,7 +11,5 @@ module.exports = async function (
     console.log(reason); // log the reason including the stack trace
     // throw e;
   });
-  await db.connect();
-  console.log('db : ', db); // DEV_LOG_TO_REMOVE
-  jest.mock('../../database/db', () => ({ db }));
+  // await db.connect();
 };
