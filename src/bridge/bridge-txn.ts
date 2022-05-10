@@ -240,7 +240,7 @@ class BridgeTxn {
   }
 
   async verifyOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DONE_OUTGOING, 'verifyOutgoingTxn');
+    this._checkStatus(BridgeTxnStatus.DOING_OUTGOING, 'verifyOutgoingTxn');
     try {
       await this.#toBlockchain.confirmTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
