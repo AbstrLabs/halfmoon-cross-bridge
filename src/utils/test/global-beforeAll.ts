@@ -5,7 +5,6 @@ jest.setTimeout(10 * SECOND); // in milliseconds
 
 beforeAll(async () => {
   await db.connect();
-  console.log();
 });
 afterAll(async () => {
   await db.end();
