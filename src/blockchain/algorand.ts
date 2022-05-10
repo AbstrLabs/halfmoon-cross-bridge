@@ -172,8 +172,7 @@ class AlgorandBlockchain extends Blockchain {
       ENV.TEST_NET_GO_NEAR_ASSET_ID
     );
   }
-  // TODO: makeAsaTxn needs an err handler.
-  // TODO: use AlgoTxnParam here
+
   protected async _makeAsaTxn(
     algoTxnParam: AlgoTxnParam,
     senderAccount: AlgoAcc,
@@ -203,7 +202,16 @@ class AlgorandBlockchain extends Blockchain {
     // Sign the transaction
     const txnId = txn.txID().toString();
     const rawSignedTxn = txn.signTxn(senderAccount.sk);
-    const rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
+
+    const rcpt = await this.client
+      .sendRawTransaction(rawSignedTxn)
+      .do()
+      .catch((err) => {
+        throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+          blockchainName: this.name,
+          err: err,
+        });
+      });
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(
       this.client,
