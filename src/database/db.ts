@@ -1,11 +1,5 @@
-// TODO: 1. separate database to database.ts from index.ts
-// TODO: 2. Wrap this piece below
-// TODO: 3. add a toString() method to BridgeTxn
+// TODO: send an alert email when db cannot connect.
 
-/* const tableName = this._inferTableName(bridgeTxn);
-if (!this.isConnected) {
-  await this.connect();
-} */
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
@@ -58,7 +52,9 @@ class Database {
     // TODO: sent alert email when db cannot connect.
     // will assign and return a dbId on creation.
 
-    const tableName = this._inferTableName(bridgeTxn);
+    // next line: if null, will throw error.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const tableName = this._inferTableName(bridgeTxn.txnType!);
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
       // await this.connect();
@@ -100,21 +96,9 @@ class Database {
   }
 
   public async readTxn(txnId: DbId, txnType: TxnType): Promise<DbItem> {
-    // currently only used in test. not fixing.
-    // should return an BridgeTxn
-    // should use BridgeTxn.fromDbItem to convert to BridgeTxn
-
-    // TODO: param of _inferTableName should be TxnType
-    let tableName: TableName;
-    if (txnType === TxnType.MINT) {
-      tableName = this.mintTableName;
-    } else if (txnType === TxnType.BURN) {
-      tableName = this.burnTableName;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: txnType,
-      });
-    }
+    // next line: if null, will throw error.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const tableName = this._inferTableName(txnType);
 
     if (!this.isConnected) {
       await this.connect();
@@ -131,12 +115,15 @@ class Database {
     return dbItem;
   }
 
-  async updateTxn(bridgeTxn: BridgeTxn) {
+  public async updateTxn(bridgeTxn: BridgeTxn) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch
     // TODO: should confirm current status as well. Status can be "stage"
-    const tableName = this._inferTableName(bridgeTxn);
+
+    // next line: if null, will throw error.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const tableName = this._inferTableName(bridgeTxn.txnType!);
     if (!this.isConnected) {
       await this.connect();
     }
@@ -188,15 +175,15 @@ class Database {
 
   // PRIVATE METHODS
 
-  private _inferTableName(bridgeTxn: BridgeTxn) {
+  private _inferTableName(txnType: TxnType) {
     let tableName: TableName;
-    if (bridgeTxn.txnType === TxnType.MINT) {
+    if (txnType === TxnType.MINT) {
       tableName = this.mintTableName;
-    } else if (bridgeTxn.txnType === TxnType.BURN) {
+    } else if (txnType === TxnType.BURN) {
       tableName = this.burnTableName;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: bridgeTxn.txnType,
+        txnType: txnType,
       });
     }
     return tableName;
@@ -218,6 +205,10 @@ class Database {
   }
 }
 
+const db = new Database();
+
+/* failed attempt on singleton for jest
+
 class DbSingleton {
   private static instance: Database;
 
@@ -229,3 +220,4 @@ class DbSingleton {
   }
 }
 const db = DbSingleton.getInstance();
+ */
