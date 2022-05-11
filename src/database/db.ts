@@ -201,8 +201,8 @@ class Database {
     // const result = await this.query(query, params);
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',
-      dbId: dbId,
-      txnType: txnType,
+      dbId,
+      txnType,
     });
   }
 
@@ -216,7 +216,7 @@ class Database {
       tableName = this.burnTableName;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: txnType,
+        txnType,
       });
     }
     return tableName;

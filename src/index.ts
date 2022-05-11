@@ -1,4 +1,3 @@
-// TODO: check {X as X} and Y : Y, in vscode `(.+) as (?1)` not working
 // TODO: validate in dotenv that ENV.ALGO_NETWORK is same as ENV.NEAR_NETWORK
 
 export { BlockchainName, BridgeTxnStatus };

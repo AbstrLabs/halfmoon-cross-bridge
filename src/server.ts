@@ -43,7 +43,7 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txnId']),
       ];
-      await mintResp({ from, to, amount, txnId: txnId }, res);
+      await mintResp({ from, to, amount, txnId }, res);
     });
 
   apiRouter
@@ -65,7 +65,7 @@ function startServer() {
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txnId']),
       ];
-      await burnResp({ from, to, amount, txnId: txnId }, res);
+      await burnResp({ from, to, amount, txnId }, res);
     });
 
   app.get('/', async (req: Request, res: Response) => {

@@ -59,8 +59,7 @@
   "devDependencies-COMMENT": "json-bigint might not be needed",
   "eslintConfig": {
     "env": {
-      "node": true,
-      "node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code"
+      "node": true
     },
     "extends": [
       "eslint:recommended",
@@ -72,6 +71,7 @@
     ],
     "root": true
   },
+  "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",
   "jest": {
     "globalSetup": "./src/utils/test/jest-setup.ts",
     "globalTeardown": "./src/utils/test/jest-teardown.ts",

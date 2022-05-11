@@ -27,7 +27,7 @@ async function transferOnNearTestnet(
 
   const config = {
     networkId: 'testnet',
-    keyStore: keyStore,
+    keyStore,
     nodeUrl: 'https://rpc.testnet.near.org',
     walletUrl: 'https://wallet.testnet.near.org',
     helperUrl: 'https://helper.testnet.near.org',

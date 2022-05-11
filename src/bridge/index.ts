@@ -1,1 +1,1 @@
-export { BridgeTxn as BridgeTxn, BridgeTxnObject } from './bridge-txn';
+export { BridgeTxn, BridgeTxnObject } from './bridge-txn';

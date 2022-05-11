@@ -233,7 +233,7 @@ class AlgorandBlockchain extends Blockchain {
       .catch((err) => {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
           blockchainName: this.name,
-          err: err,
+          err,
         });
       });
     // Wait for confirmation
@@ -341,7 +341,7 @@ class TestAlgo extends AlgorandBlockchain {
       {
         toAddr: ENV.ALGO_MASTER_ADDR,
         fromAddr: ENV.ALGO_EXAMPL_ADDR,
-        atomAmount: atomAmount,
+        atomAmount,
         txnId: literals.UNUSED,
       },
       ENV.ALGO_EXAMPL_PASS
