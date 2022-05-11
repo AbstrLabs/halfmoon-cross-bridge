@@ -3,8 +3,8 @@
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { BridgeTxn } from '../bridge';
-import { parseDbItem, type DbId, type DbItem } from '../utils/type';
+import { type BridgeTxn } from '../bridge';
+import { type DbId, type DbItem, parseDbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';

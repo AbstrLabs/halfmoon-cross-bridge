@@ -1,4 +1,4 @@
-export { BridgeTxn, BridgeTxnObject };
+export { type BridgeTxnObject, type CriticalBridgeTxnObject, BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
@@ -17,11 +17,26 @@ interface InitializeOptions {
   notCreateInDb?: boolean;
 }
 
-interface BridgeTxnObject {
+interface CriticalBridgeTxnObject {
+  dbId?: number;
+  fixedFeeAtom?: bigint;
+  marginFeeAtom?: bigint;
+  fromAddr: string;
+  fromAmountAtom: bigint;
+  fromBlockchain?: BlockchainName;
+  fromTxnId: string;
+  toAddr: string;
+  toAmountAtom?: bigint;
+  toBlockchain?: BlockchainName;
+  txnStatus: BridgeTxnStatus;
+  toTxnId?: string;
+  txnType?: TxnType;
+}
+interface BridgeTxnObject extends CriticalBridgeTxnObject {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
-  timestamp: bigint;
+  createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
   fromBlockchain: BlockchainName;
@@ -33,7 +48,7 @@ interface BridgeTxnObject {
   txnStatus: BridgeTxnStatus;
 }
 
-class BridgeTxn {
+class BridgeTxn implements CriticalBridgeTxnObject {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
@@ -81,11 +96,11 @@ class BridgeTxn {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static fromDbItem(dbItem: DbItem, dbType: TxnType): BridgeTxn {
+  static fromDbItem(dbItem: DbItem, dbName: TxnType): BridgeTxn {
     const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: _dbItem.db_id,
-      txnType: dbType,
+      txnType: dbName,
 
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
@@ -178,6 +193,13 @@ class BridgeTxn {
         this.toAddr
       )
     );
+    const isInitialized = await this._isInitializedPromise;
+    if (!isInitialized) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        bridgeTxn: this,
+      });
+    }
+
     await this.confirmIncomingTxn();
     await this.makeOutgoingTxn();
     await this.verifyOutgoingTxn();
@@ -284,8 +306,12 @@ class BridgeTxn {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         txnId: this.toTxnId!,
       });
-    } catch {
+    } catch (e) {
       await this._updateTxnStatus(BridgeTxnStatus.ERR_CONFIRM_OUTGOING);
+      throw new BridgeError(ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED, {
+        bridgeTxn: this,
+        err: e,
+      });
     }
     await this._updateTxnStatus(BridgeTxnStatus.DONE_OUTGOING);
   }
@@ -326,7 +352,7 @@ class BridgeTxn {
       dbId: this.dbId,
       fixedFeeAtom: this.fixedFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       marginFeeAtom: this.marginFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      timestamp: this.createdTime,
+      createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
       fromBlockchain: this.fromBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion

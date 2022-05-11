@@ -210,6 +210,11 @@ const externalErrors = {
     name: 'Invalid database item',
     message: 'Invalid database item',
   },
+  CONFIRM_OUTGOING_TXN_FAILED: {
+    errId: 308,
+    name: 'Confirm outgoing transaction failed',
+    message: 'Cannot confirm outgoing transaction on blockchain',
+  }, // maybe not in this categoryA?
 };
 
 const ERRORS = {
