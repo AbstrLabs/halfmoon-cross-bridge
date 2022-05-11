@@ -32,4 +32,5 @@ describe('nearBlockchain', () => {
       })
     ).toBe(ConfirmOutcome.SUCCESS);
   });
+  // it.skip('transfer 0.123 Near from example to master', async () => {});
 });

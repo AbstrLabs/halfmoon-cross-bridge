@@ -1,5 +1,4 @@
 // TODO: mint-burn-test: move more same functions to test helper.
-// TODO: test with <1 NEAR should all fail now (for fee).
 
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
@@ -10,8 +9,6 @@ import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 const TIMEOUT_30S = 30_000;
 
 describe('mint test', () => {
-  // TODO: should in near test.
-  // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
     'mint 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
@@ -19,7 +16,6 @@ describe('mint test', () => {
 
       // config
       const amount = '1.2345678901';
-      // TODO: not uuid some blockchain doesn't have the note field.
       // simulate frontend: make NEAR txn
       const mintResponse: FinalExecutionOutcome =
         await transferOnNearTestnetFromExampleToMaster(amount);

@@ -9,8 +9,6 @@ import { testAlgo } from '../blockchain/algorand';
 const TIMEOUT_30S = 30_000;
 
 describe('burn test', () => {
-  // TODO: should in near test.
-  // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
     'burn 1.2345678901 goNEAR from ALGO to NEAR',
     async () => {
@@ -18,7 +16,6 @@ describe('burn test', () => {
       const amount = '1.2345678901';
 
       // simulate frontend: make NEAR txn
-      // TODO: return txnId is nice. Should do the same on mint.
       const burnResponse = await testAlgo.sendFromExampleToMaster(
         goNearToAtom(amount)
       );

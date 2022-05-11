@@ -289,10 +289,10 @@ class TestAlgo extends AlgorandBlockchain {
   constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
     super(clientParam, indexerParam);
   }
-  async emulateFrontendTxn(
+  async simulateFrontendTxn(
     algoTxnParam: AlgoTxnParam,
     senderPassPhrase: string
-  ) {
+  ): Promise<AlgoTxnId> {
     const sender = algosdk.mnemonicToSecretKey(senderPassPhrase);
     return this._makeAsaTxn(
       {
@@ -306,7 +306,7 @@ class TestAlgo extends AlgorandBlockchain {
     );
   }
   async sendFromExampleToMaster(atomAmount: bigint): Promise<AlgoTxnId> {
-    return this.emulateFrontendTxn(
+    return this.simulateFrontendTxn(
       {
         toAddr: ENV.ALGO_MASTER_ADDR,
         fromAddr: ENV.ALGO_EXAMPL_ADDR,
