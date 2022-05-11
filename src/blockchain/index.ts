@@ -52,7 +52,7 @@ type AlgoTxnOutcome =
         id: string;
       };
     }
-  | AlgoAssetTransferTxnOutcome; // TODO: programmatically check if this type is correct.
+  | AlgoAssetTransferTxnOutcome;
 type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
