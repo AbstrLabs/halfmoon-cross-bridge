@@ -35,23 +35,36 @@ type IndexerParam = {
   server: string;
 };
 
+type BridgeConfig = {
+  centralizedAssetId: number;
+  centralizedAddr: AlgoAddr;
+  centralizedPassPhrase: string;
+};
+
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
   public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   public readonly name = BlockchainName.ALGO;
-  public readonly centralizedAssetId: number = ENV.TEST_NET_GO_NEAR_ASSET_ID;
-  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
-  protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
-    ENV.ALGO_MASTER_PASS
-  );
+  public readonly centralizedAssetId: number;
+  public readonly centralizedAddr: AlgoAddr;
+  protected readonly centralizedAcc: algosdk.Account;
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.ALGO_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
     algoRound: ENV.ALGO_CONFIRM_ROUND,
   };
-  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
     super();
+    this.centralizedAssetId = bridgeConfig.centralizedAssetId;
+    this.centralizedAddr = bridgeConfig.centralizedAddr;
+    this.centralizedAcc = algosdk.mnemonicToSecretKey(
+      bridgeConfig.centralizedPassPhrase
+    );
     const algodClientParamSource = clientParam;
     const algoIndexerParamSource = indexerParam;
 
@@ -180,7 +193,7 @@ class AlgorandBlockchain extends Blockchain {
         txnId: literals.UNUSED,
       },
       this.centralizedAcc,
-      ENV.TEST_NET_GO_NEAR_ASSET_ID
+      this.centralizedAssetId
     );
   }
 
@@ -300,8 +313,12 @@ class AlgorandBlockchain extends Blockchain {
 
 // For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
 class TestAlgo extends AlgorandBlockchain {
-  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
-    super(clientParam, indexerParam);
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
+    super(clientParam, indexerParam, bridgeConfig);
   }
   async simulateFrontendTxn(
     algoTxnParam: AlgoTxnParam,
@@ -316,7 +333,7 @@ class TestAlgo extends AlgorandBlockchain {
         txnId: literals.UNUSED,
       },
       sender,
-      ENV.TEST_NET_GO_NEAR_ASSET_ID
+      this.centralizedAssetId
     );
   }
   async sendFromExampleToMaster(atomAmount: bigint): Promise<AlgoTxnId> {
@@ -345,10 +362,18 @@ const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
   server: 'https://testnet-algorand.api.purestake.io/idx2',
 };
 
-let clientParam: ClientParam, indexerParam: IndexerParam;
+let clientParam: ClientParam,
+  indexerParam: IndexerParam,
+  bridgeConfig: BridgeConfig;
+
 if (ENV.ALGO_NETWORK === 'testnet') {
   clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
   indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
+  bridgeConfig = {
+    centralizedAssetId: ENV.TEST_NET_GO_NEAR_ASSET_ID,
+    centralizedAddr: ENV.ALGO_MASTER_ADDR,
+    centralizedPassPhrase: ENV.ALGO_MASTER_PASS,
+  };
 } else {
   throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
     blockchainName: BlockchainName.ALGO,
@@ -356,5 +381,10 @@ if (ENV.ALGO_NETWORK === 'testnet') {
     currentSupportedNetworks: ['testnet'], // TODO: make this a constant
   });
 }
-const algoBlockchain = new AlgorandBlockchain(clientParam, indexerParam);
-const testAlgo = new TestAlgo(clientParam, indexerParam);
+
+const algoBlockchain = new AlgorandBlockchain(
+  clientParam,
+  indexerParam,
+  bridgeConfig
+);
+const testAlgo = new TestAlgo(clientParam, indexerParam, bridgeConfig);

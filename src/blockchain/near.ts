@@ -39,8 +39,14 @@ type IndexerParam = {
   url: string;
 };
 
+type BridgeConfig = {
+  centralizedAssetId: number;
+  centralizedAddr: NearAddr;
+  centralizedPrivateKey: string;
+};
+
 class NearBlockchain extends Blockchain {
-  public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
+  public readonly centralizedAddr: NearAddr;
   readonly indexer: providers.JsonRpcProvider;
   protected /* readonly */ centralizedAcc!: Account;
   protected /* readonly */ client!: Near;
@@ -51,8 +57,13 @@ class NearBlockchain extends Blockchain {
   private _keyStore: keyStores.KeyStore;
   public readonly name = BlockchainName.NEAR;
 
-  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
     super();
+    this.centralizedAddr = bridgeConfig.centralizedAddr;
     this._keyStore = new keyStores.InMemoryKeyStore();
     this.indexer = new providers.JsonRpcProvider(indexerParam);
 
@@ -61,7 +72,7 @@ class NearBlockchain extends Blockchain {
       this.client = near;
 
       // setup centralizedAcc
-      const centralizedAccPrivKey = ENV.NEAR_MASTER_PRIV;
+      const centralizedAccPrivKey = bridgeConfig.centralizedPrivateKey;
       const keyPair = KeyPair.fromString(centralizedAccPrivKey);
       this._keyStore
         .setKey('testnet', this.centralizedAddr, keyPair)
@@ -185,7 +196,9 @@ class NearBlockchain extends Blockchain {
   }
 }
 
-let clientParam: ClientParam, indexerParam: IndexerParam;
+let clientParam: ClientParam,
+  indexerParam: IndexerParam,
+  bridgeConfig: BridgeConfig;
 if (ENV.NEAR_NETWORK === 'testnet') {
   clientParam = {
     networkId: 'testnet',
@@ -198,6 +211,11 @@ if (ENV.NEAR_NETWORK === 'testnet') {
   indexerParam = {
     url: 'https://archival-rpc.testnet.near.org',
   };
+  bridgeConfig = {
+    centralizedAssetId: 0, // not used
+    centralizedAddr: ENV.NEAR_MASTER_ADDR,
+    centralizedPrivateKey: ENV.NEAR_MASTER_PRIV,
+  };
 } else {
   throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
     blockchainName: BlockchainName.NEAR,
@@ -206,4 +224,8 @@ if (ENV.NEAR_NETWORK === 'testnet') {
   });
 }
 
-const nearBlockchain = new NearBlockchain(clientParam, indexerParam);
+const nearBlockchain = new NearBlockchain(
+  clientParam,
+  indexerParam,
+  bridgeConfig
+);
