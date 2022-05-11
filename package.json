@@ -34,7 +34,6 @@
     "zod": "^3.14.4"
   },
   "description": "Unidirectional bridge for Algorand <- NEAR",
-  "devDependenciesComment": "json-bigint might not be needed",
   "devDependencies": {
     "@commitlint/cli": "^16.2.4",
     "@commitlint/config-conventional": "^16.2.4",
@@ -57,12 +56,10 @@
     "ts-node-dev": "^1.1.8",
     "winston": "^3.7.2"
   },
+  "devDependenciesComment": "json-bigint might not be needed",
   "jest": {
     "globalSetup": "./src/utils/test/jest-setup.ts",
     "globalTeardown": "./src/utils/test/jest-teardown.ts",
-    "setupFilesAfterEnv": [
-      "./src/utils/test/global-beforeAll.ts"
-    ],
     "globals": {
       "ts-jest": {
         "tsconfig": {
@@ -73,6 +70,9 @@
       }
     },
     "preset": "ts-jest",
+    "setupFilesAfterEnv": [
+      "./src/utils/test/global-beforeAll.ts"
+    ],
     "testEnvironment": "node"
   },
   "license": "gpl-3.0",
@@ -82,6 +82,12 @@
   },
   "main": "src/main.ts",
   "name": "algorand-near-bridge",
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
+  },
   "private": true,
   "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
   "scripts": {
@@ -98,10 +104,10 @@
     "prepare": "husky install",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
-    "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
-    "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
+    "test:bridge": "jest --testPathPattern=src/bridge",
+    "test:burn": "jest --testPathPattern=src/bridge/burn",
     "test:db": "jest --testPathPattern=src/database",
-    "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
+    "test:mint": "jest --testPathPattern=src/bridge/mint",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils"
   },
