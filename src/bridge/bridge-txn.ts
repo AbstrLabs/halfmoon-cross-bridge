@@ -374,6 +374,10 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     }
     return this.toAmountAtom;
   }
+
+  /**
+   * @returns TxnType
+   */
   public getTxnType(): TxnType {
     return this.txnType ?? this._inferTxnType();
   }
@@ -386,9 +390,9 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * 3 Exceptions: `dbId`, `toTxnId` are allowed to be assigned once.
    * Field `txnStatus` is allowed to be assigned by the ${@link enum BridgeTxnStatus}.
    *
-   * @returns ???
+   * @returns Promise<BridgeTxn>
    *
-   * TODO: link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
+   * @todo link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
    */
   private async _initialize(
     initializeOptions: InitializeOptions
@@ -434,7 +438,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    // TODO: verify to address is legal.
+    // TODO: verify to address is legal with indexer.
 
     // TODO: (later) we can also do a min/max of amount check here.
     return this;
@@ -563,24 +567,18 @@ class BridgeTxn implements CriticalBridgeTxnObject {
 
     let marginPercentage: number;
 
-    if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this._getFixedFeeAtom();
-    }
-
     if (this.txnType === TxnType.MINT) {
-      marginPercentage = ENV.MINT_PERCENT_FEE;
+      marginPercentage = ENV.MINT_MARGIN_FEE_BIPS;
     } else if (this.txnType === TxnType.BURN) {
-      marginPercentage = ENV.BURN_PERCENT_FEE;
+      marginPercentage = ENV.BURN_MARGIN_FEE_BIPS;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
       });
     }
 
-    const marginFee: bigint =
-      // TODO: fix marginPercentage cannot be 0.2% (rounding)
-      ((this.fromAmountAtom - this.fixedFeeAtom) * BigInt(marginPercentage)) /
-        BigInt(100) +
+    const marginFee: bigint = // suppose no bigint overflow
+      (this.fromAmountAtom * BigInt(marginPercentage)) / BigInt(10000) +
       BigInt(1); // +1 for rounding up
 
     this.marginFeeAtom = marginFee;

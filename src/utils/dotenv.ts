@@ -42,9 +42,9 @@ const default_ENV = {
   ALGO_NETWORK: 'testnet',
   NEAR_NETWORK: 'testnet',
   MINT_FIX_FEE: 1,
-  MINT_PERCENT_FEE: 0,
+  MINT_MARGIN_FEE_BIPS: 0,
   BURN_FIX_FEE: 1,
-  BURN_PERCENT_FEE: 2,
+  BURN_MARGIN_FEE_BIPS: 20,
 };
 
 const secret_ENV = {
