@@ -6,10 +6,11 @@
 
 export {
   type Addr,
-  type ApiCallParam,
   type AlgoAddr,
+  type AlgoAssetTransferTxnOutcome,
   type AlgoTxnId,
   type AlgoTxnParam,
+  type ApiCallParam,
   type Biginter,
   type BurnApiParam,
   type DbId,
@@ -67,7 +68,7 @@ type TxnId = z.infer<typeof zTxnId>;
 type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
 type NearTxnParam = z.infer<typeof zNearTxnParam>;
 type TxnParam = z.infer<typeof zTxnParam>;
-
+type AlgoAssetTransferTxnOutcome = z.infer<typeof zAlgoAssetTransferTxnOutcome>;
 // Used by BridgeTxn Class - database
 type DbItem = z.infer<typeof zDbItem>;
 type DbId = z.infer<typeof zDbId>;
@@ -140,8 +141,6 @@ const zNearTxnParam = z.object({
 });
 const zTxnParam = z.union([zAlgoTxnParam, zNearTxnParam]);
 
-// Used by BridgeTxn Class - Database
-
 const zBiginter =
   // can convert to bigint without loss of precision
   z.union([
@@ -149,6 +148,39 @@ const zBiginter =
     z.number().int(),
     z.bigint(),
   ]);
+
+const zAlgoAssetTransferTxnOutcome = z.object({
+  // from Indexer JSON response
+  'current-round': z.number(),
+  transaction: z.object({
+    'asset-transfer-transaction': z.object({
+      amount: zBiginter,
+      'asset-id': z.number(),
+      'close-amount': z.number(),
+      receiver: zAlgoAddr,
+    }),
+    'close-rewards': zBiginter,
+    'closing-amount': zBiginter,
+    'confirmed-round': z.number(),
+    fee: zBiginter,
+    'first-valid': zBiginter,
+    'genesis-hash': z.string(),
+    'genesis-id': z.literal('testnet-v1.0'),
+    id: zAlgoTxnId,
+    'intra-round-offset': z.number(),
+    'last-valid': z.number(),
+    'receiver-rewards': z.number(),
+    'round-time': z.number(),
+    sender: zAlgoAddr,
+    'sender-rewards': z.number(),
+    signature: z.object({
+      sig: z.string(),
+    }),
+    'tx-type': z.literal('axfer'),
+  }),
+});
+// Used by BridgeTxn Class - Database
+
 function parseBiginter(biginter: Biginter): Biginter {
   return parseWithZod(biginter, zBiginter, ERRORS.INTERNAL.TYPE_ERR_BIGINT);
 }

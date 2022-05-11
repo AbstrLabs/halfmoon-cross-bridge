@@ -11,7 +11,6 @@ export {
   TxnType,
   type AlgoAcc,
   type AlgoAddr,
-  type AlgoAssetTransferTxnOutcome,
   type AlgoMnemonic,
   type AlgoTxnId,
   type AlgoTxnOutcome,
@@ -30,12 +29,12 @@ import { type Account, providers } from 'near-api-js';
 import {
   type Addr,
   type AlgoTxnId,
-  type Biginter,
   type NearTxnId,
   type TxnId,
   type AlgoAddr,
   type NearAddr,
   TxnParam,
+  AlgoAssetTransferTxnOutcome,
 } from '../utils/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
@@ -45,36 +44,6 @@ type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
 type GenericAcc = AlgoAcc | NearAcc;
 
-type AlgoAssetTransferTxnOutcome = {
-  // from Indexer JSON response
-  'current-round': number;
-  transaction: {
-    'asset-transfer-transaction': {
-      amount: Biginter;
-      'asset-id': number;
-      'close-amount': number;
-      receiver: AlgoAddr;
-    };
-    'close-rewards': Biginter;
-    'closing-amount': Biginter;
-    'confirmed-round': number;
-    fee: Biginter;
-    'first-valid': Biginter;
-    'genesis-hash': string;
-    'genesis-id': 'testnet-v1.0';
-    id: AlgoTxnId;
-    'intra-round-offset': number;
-    'last-valid': number;
-    'receiver-rewards': number;
-    'round-time': number;
-    sender: AlgoAddr;
-    'sender-rewards': number;
-    signature: {
-      sig: string;
-    };
-    'tx-type': 'axfer';
-  };
-}; // TODO: programmatically check if this type is correct.
 type AlgoTxnOutcome =
   | {
       'current-round': number;

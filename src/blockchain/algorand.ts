@@ -3,13 +3,7 @@ export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
-import {
-  AlgoAcc,
-  AlgoAddr,
-  AlgoMnemonic,
-  AlgoTxnId,
-  AlgoAssetTransferTxnOutcome,
-} from '.';
+import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
   AsaConfig,
@@ -23,7 +17,11 @@ import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { AlgoTxnParam, parseBigInt } from '../utils/type';
+import {
+  AlgoAssetTransferTxnOutcome,
+  AlgoTxnParam,
+  parseBigInt,
+} from '../utils/type';
 
 interface ClientParam {
   token: { 'X-API-Key': string };
