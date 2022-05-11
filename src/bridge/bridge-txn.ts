@@ -253,7 +253,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     );
     if (dbEntryWithTxnId.length > 0) {
       await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
-      throw new BridgeError(ERRORS.TXN.REUSED_INCOMING_TXN, {
+      throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
         txnId: this.fromTxnId,

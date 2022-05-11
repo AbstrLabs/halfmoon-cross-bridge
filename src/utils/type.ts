@@ -115,7 +115,7 @@ const zMintApiParam = z.object({
   txnId: zNearTxnId,
 });
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  return parseWithZod(apiParam, zMintApiParam, ERRORS.TXN.INVALID_API_PARAM);
+  return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zBurnApiParam = z.object({
   amount: zApiAmount,
@@ -124,7 +124,7 @@ const zBurnApiParam = z.object({
   txnId: zNearTxnId,
 });
 function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  return parseWithZod(apiParam, zBurnApiParam, ERRORS.TXN.INVALID_API_PARAM);
+  return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
 

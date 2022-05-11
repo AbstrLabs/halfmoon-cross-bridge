@@ -1,181 +1,173 @@
 export { ERRORS };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ERROR_RANGES = {
-  // TODO: Ren TXN, to API, and its number to 100.
-  INTERNAL: { min: 100, max: 199, title: 'API call and server errors' },
-  TXN: { min: 200, max: 299, title: 'Transaction related errors' },
-  EXTERNAL: { min: 300, max: 399, title: 'DB service and blockchain errors' },
+const apiCallErrors = {
+  INVALID_TXN_ID: {
+    errId: 100,
+    name: 'Invalid transaction id',
+    message: 'Blockchain rejected malformed transaction id',
+  },
+  TXN_NOT_CONFIRMED: {
+    errId: 101,
+    name: 'Transaction not confirmed',
+    message: 'Blockchain(indexer) cannot confirm transaction',
+  },
+  TXN_ASSET_ID_MISMATCH: {
+    errId: 102,
+    name: 'Transaction asset id mismatch',
+    message: 'Transaction asset id does not match asset id in blockchain',
+  },
+  TXN_ID_MISMATCH: {
+    errId: 103,
+    name: 'Transaction txn id mismatch',
+    message: 'Transaction txn id does not match txn id in blockchain',
+  },
+  TXN_SENDER_MISMATCH: {
+    errId: 104,
+    name: 'Transaction sender mismatch',
+    message: 'Transaction sender does not match sender in blockchain',
+  },
+  TXN_RECEIVER_MISMATCH: {
+    errId: 105,
+    name: 'Transaction receiver mismatch',
+    message: 'Transaction receiver does not match receiver in blockchain',
+  },
+  TXN_AMOUNT_MISMATCH: {
+    errId: 106,
+    name: 'Transaction amount mismatch',
+    message: 'Transaction amount does not match amount in blockchain',
+  },
+  TXN_NOT_FOUND: {
+    errId: 107,
+    name: 'Transaction not found',
+    message: 'Transaction not found in blockchain',
+  },
+  MISSING_PARAM: {
+    errId: 108,
+    name: 'Missing parameter',
+    message: 'API call parameters are missing',
+  },
+  INVALID_API_PARAM: {
+    errId: 109,
+    name: 'Invalid API parameter',
+    message: 'API call parameters are invalid',
+  },
+  TXN_ASSET_ID_NOT_MATCH: {
+    errId: 110,
+    name: 'Transaction asset id not match',
+    message: 'Transaction asset id does not match asset id in blockchain',
+  },
+  REUSED_INCOMING_TXN: {
+    errId: 111,
+    name: 'Reused incoming transaction',
+    message:
+      'This incoming transaction is already in our DB. ' +
+      'Outgoing transaction is dropped. We might need to do something with this user',
+  },
 };
 
 const internalErrors = {
   NOT_IMPLEMENTED: {
-    errId: 100,
+    errId: 200,
     name: 'Not Implemented',
     message: 'Not implemented',
   },
   UNKNOWN_TXN_TYPE: {
-    errId: 101,
+    errId: 201,
     name: 'Unknown Transaction Type',
     message: 'Wrong internal Transaction Type. Should be MINT or BURN',
   },
   DB_CLASS_LOGIC_ERROR: {
-    errId: 102,
+    errId: 202,
     name: 'DB Class Logic Error',
     message: 'client and isConnected do not match',
   },
   DB_UNAUTHORIZED_ACTION: {
-    errId: 103,
+    errId: 203,
     name: 'DB Unauthorized Action',
     message: 'Trying to execute an unauthorized DB action',
   },
   INVALID_GO_NEAR_AMOUNT: {
-    errId: 104,
+    errId: 204,
     name: 'Invalid Go Near Amount',
     message: 'Go Near amount is not valid, cannot parse.',
   },
   TYPE_ERROR: {
-    errId: 105,
+    errId: 205,
     name: 'Type Error',
     message: 'Variable type error',
   },
   INVALID_YOCTO_NEAR_AMOUNT: {
-    errId: 106,
+    errId: 206,
     name: 'Invalid Yocto Near Amount',
     message: 'Yocto Near amount is not valid, cannot parse.',
   },
   INVALID_AMOUNT: {
-    errId: 107,
+    errId: 207,
     name: 'Invalid Amount',
     message: 'Amount is not valid (internal error).',
   },
   INVALID_BRIDGE_TXN_PARAM: {
-    errId: 108,
+    errId: 208,
     name: 'Invalid Bridge Transaction Parameter',
     message:
       'Both group of (fromBlockchain,toBlockchain) and (txnType) are undefined.',
   },
   UNKNOWN_CONFIRM_OUTCOME: {
-    errId: 109,
+    errId: 209,
     name: 'Unknown confirm outcome',
     message: 'Unknown confirm outcome',
   },
   TYPE_ERR_BIGINTER: {
-    errId: 110,
+    errId: 210,
     name: 'Type Error BigInter',
     message: 'BigInter type parsing error',
   },
   TYPE_ERR_BIGINT: {
-    errId: 111,
+    errId: 211,
     name: 'Type Error BigInt',
     message: 'BigInt type parsing error',
   },
   DB_NOT_CONNECTED: {
-    errId: 112,
+    errId: 212,
     name: 'DB Not Connected',
     message: 'DB is not connected when it should be.',
   },
   BRIDGE_TXN_INITIALIZATION_ERROR: {
-    errId: 113,
+    errId: 213,
     name: 'Bridge Transaction Initialization Error',
     message: 'Bridge Transaction initialization error',
   },
   ILLEGAL_TXN_STATUS: {
-    errId: 114,
+    errId: 214,
     name: 'Illegal Transaction Status',
     message: 'Transaction Status can only move in a certain sequence',
   },
   UNKNOWN_BLOCKCHAIN_NAME: {
-    errId: 115,
+    errId: 215,
     name: 'Unknown Blockchain Name',
     message: 'Blockchain Name not in BlockchainName enum',
   },
   CANNOT_DOTENV_LOAD: {
-    errId: 116,
+    errId: 216,
     name: 'Cannot Load .env',
     message: 'Cannot load .env file',
   },
   NETWORK_NOT_SUPPORTED: {
-    errId: 117,
+    errId: 217,
     name: 'Blockchain network Not Supported',
     message: 'Blockchain network not supported',
   },
   BRIDGE_TXN_NOT_INITIALIZED: {
-    errId: 118,
+    errId: 218,
     name: 'Bridge Transaction Not Initialized',
     message: 'Bridge Transaction not initialized as expected',
   },
   OVERWRITE_ERROR_TXN_STATUS: {
-    errId: 119,
+    errId: 219,
     name: 'Overwrite Error Transaction Status',
     message:
       'Trying to overwrite error status in in bridge transaction status.' +
       'When a bridge transaction has error status, manual fix is needed.',
-  },
-};
-
-const transactionErrors = {
-  INVALID_TXN_ID: {
-    errId: 200,
-    name: 'Invalid transaction id',
-    message: 'Blockchain rejected malformed transaction id',
-  },
-  TXN_NOT_CONFIRMED: {
-    errId: 201,
-    name: 'Transaction not confirmed',
-    message: 'Blockchain(indexer) cannot confirm transaction',
-  },
-  TXN_ASSET_ID_MISMATCH: {
-    errId: 202,
-    name: 'Transaction asset id mismatch',
-    message: 'Transaction asset id does not match asset id in blockchain',
-  },
-  TXN_ID_MISMATCH: {
-    errId: 203,
-    name: 'Transaction txn id mismatch',
-    message: 'Transaction txn id does not match txn id in blockchain',
-  },
-  TXN_SENDER_MISMATCH: {
-    errId: 204,
-    name: 'Transaction sender mismatch',
-    message: 'Transaction sender does not match sender in blockchain',
-  },
-  TXN_RECEIVER_MISMATCH: {
-    errId: 205,
-    name: 'Transaction receiver mismatch',
-    message: 'Transaction receiver does not match receiver in blockchain',
-  },
-  TXN_AMOUNT_MISMATCH: {
-    errId: 206,
-    name: 'Transaction amount mismatch',
-    message: 'Transaction amount does not match amount in blockchain',
-  },
-  TXN_NOT_FOUND: {
-    errId: 207,
-    name: 'Transaction not found',
-    message: 'Transaction not found in blockchain',
-  },
-  MISSING_PARAM: {
-    errId: 208,
-    name: 'Missing parameter',
-    message: 'API call parameters are missing',
-  },
-  INVALID_API_PARAM: {
-    errId: 209,
-    name: 'Invalid API parameter',
-    message: 'API call parameters are invalid',
-  },
-  TXN_ASSET_ID_NOT_MATCH: {
-    errId: 210,
-    name: 'Transaction asset id not match',
-    message: 'Transaction asset id does not match asset id in blockchain',
-  },
-  REUSED_INCOMING_TXN: {
-    errId: 211,
-    name: 'Reused incoming transaction',
-    message:
-      'This incoming transaction is already in our DB. ' +
-      'Outgoing transaction is dropped. We might need to do something with this user',
   },
 };
 
@@ -234,6 +226,13 @@ const externalErrors = {
 
 const ERRORS = {
   INTERNAL: internalErrors,
-  TXN: transactionErrors,
+  API: apiCallErrors,
   EXTERNAL: externalErrors,
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ERROR_RANGES = {
+  API: { min: 100, max: 199, title: 'Transaction related errors' },
+  INTERNAL: { min: 200, max: 299, title: 'API call and server errors' },
+  EXTERNAL: { min: 300, max: 399, title: 'DB service and blockchain errors' },
 };

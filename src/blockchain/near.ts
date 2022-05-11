@@ -116,7 +116,7 @@ class NearBlockchain extends Blockchain {
         txnOutcome.status === providers.FinalExecutionStatusBasic.NotStarted ||
         txnOutcome.status === providers.FinalExecutionStatusBasic.Failure
       ) {
-        throw new BridgeError(ERRORS.TXN.TXN_NOT_CONFIRMED, {
+        throw new BridgeError(ERRORS.API.TXN_NOT_CONFIRMED, {
           blockchainName: this.name,
         });
       }
@@ -128,7 +128,7 @@ class NearBlockchain extends Blockchain {
 
     // check txnId
     if (txnOutcome.transaction_outcome.id !== txnId) {
-      throw new BridgeError(ERRORS.TXN.TXN_ID_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_ID_MISMATCH, {
         expectedId: txnId,
         blockchainId: txnOutcome.transaction_outcome.id,
         blockchainName: this.name,
@@ -137,7 +137,7 @@ class NearBlockchain extends Blockchain {
 
     // check from address
     if (txnOutcome.transaction.signer_id !== fromAddr) {
-      throw new BridgeError(ERRORS.TXN.TXN_SENDER_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_SENDER_MISMATCH, {
         blockchainName: this.name,
         receivedSender: fromAddr,
         blockchainSender: txnOutcome.transaction.signer_id,
@@ -145,7 +145,7 @@ class NearBlockchain extends Blockchain {
     } // TODO: later: maybe signer != sender?
     // check to address
     if (txnOutcome.transaction.receiver_id !== toAddr) {
-      throw new BridgeError(ERRORS.TXN.TXN_RECEIVER_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_RECEIVER_MISMATCH, {
         blockchainName: this.name,
         receivedReceiver: toAddr,
         blockchainReceiver: txnOutcome.transaction.receiver_id,
@@ -160,7 +160,7 @@ class NearBlockchain extends Blockchain {
         blockchainAmount: receivedAtom,
       }); // DEV_LOG_TO_REMOVE
 
-      throw new BridgeError(ERRORS.TXN.TXN_AMOUNT_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_AMOUNT_MISMATCH, {
         blockchainName: this.name,
         receivedAmount: atomAmount,
         blockchainAmount: receivedAtom,
