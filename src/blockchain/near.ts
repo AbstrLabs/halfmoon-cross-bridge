@@ -28,9 +28,9 @@ import { NearTxnParam } from '../utils/type';
 
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
-  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider({
+  readonly indexer: providers.JsonRpcProvider = new providers.JsonRpcProvider({
     url: 'https://archival-rpc.testnet.near.org',
-  }); // TODO: ren to indexer, also in abstract class
+  }); // TODO: move config to constructor.
   protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
   protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
   public readonly confirmTxnConfig = {
@@ -71,7 +71,7 @@ class NearBlockchain extends Blockchain {
   async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
     // TODO: Type FinalExecutionOutcome.transaction.
     logger.silly('nearIndexer: getTxnStatus()');
-    const result = await this.provider.txStatus(
+    const result = await this.indexer.txStatus(
       txnParam.txnId,
       txnParam.fromAddr
     );

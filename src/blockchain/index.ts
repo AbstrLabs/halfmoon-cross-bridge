@@ -43,6 +43,9 @@ type AlgoMnemonic = string;
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
 type GenericAcc = AlgoAcc | NearAcc;
+type AlgoIndexer = algosdk.Indexer;
+type NearIndexer = providers.JsonRpcProvider;
+type Indexer = AlgoIndexer | NearIndexer;
 
 type AlgoTxnOutcome =
   | {
@@ -111,6 +114,7 @@ abstract class Blockchain {
   public abstract readonly centralizedAddr: Addr;
   public abstract readonly confirmTxnConfig: ConfirmTxnConfig;
   public abstract readonly name: string;
+  protected abstract indexer: Indexer;
   protected abstract readonly centralizedAcc: GenericAcc;
 
   public abstract verifyCorrectness(
