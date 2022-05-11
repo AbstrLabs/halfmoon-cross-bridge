@@ -1,5 +1,10 @@
-/* All blockchain functionalities wrapped up with our centralized account */
-// TODO: Make singleton
+/* All blockchain functionalities wrapped up
+ * with
+ * 1. our centralized account (private key)
+ * 2. client (to make transaction)
+ * 3. indexer (to confirm transaction)
+ */
+
 export {
   Blockchain,
   ConfirmOutcome,
@@ -8,7 +13,6 @@ export {
   type AlgoAddr,
   type AlgoAssetTransferTxnOutcome,
   type AlgoMnemonic,
-  type AlgoReceipt,
   type AlgoTxnId,
   type AlgoTxnOutcome,
   type GenericAcc,
@@ -17,10 +21,9 @@ export {
   type NearTxnId,
   type NearTxnOutcome,
   type TxnOutcome,
-  type TxnReceipt,
 };
 
-import algosdk, { Transaction } from 'algosdk';
+import algosdk from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { type Account, providers } from 'near-api-js';
 
@@ -41,10 +44,6 @@ type AlgoMnemonic = string;
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
 type GenericAcc = AlgoAcc | NearAcc;
-
-type AlgoReceipt = Transaction;
-type NearReceipt = unknown; // TODO: type
-type TxnReceipt = AlgoReceipt | NearReceipt;
 
 type AlgoAssetTransferTxnOutcome = {
   // from Indexer JSON response
@@ -88,7 +87,6 @@ type AlgoTxnOutcome =
 type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
-// type TxnStatuesOutcome = TxnReceipt | AlgoTxnOutcome;
 type ConfirmTxnConfig = {
   timeoutSec: number;
   intervalSec: number;
@@ -150,7 +148,7 @@ abstract class Blockchain {
     txnOutcome: TxnOutcome,
     txnParam: TxnParam
   ): boolean;
-  public abstract getTxnStatus(txnParam: TxnParam): Promise<TxnOutcome>; // TODO: use TxnParam.
+  public abstract getTxnStatus(txnParam: TxnParam): Promise<TxnOutcome>;
   public abstract makeOutgoingTxn(txnParam: TxnParam): Promise<TxnId>;
 
   // getRecentTransactions(limit: number): Promise<TxnID[]>;
