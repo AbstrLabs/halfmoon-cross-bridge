@@ -1,4 +1,4 @@
-// TODO: send an alert email when db cannot connect.
+// TODO(alert): send an alert email when db cannot connect.
 
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';

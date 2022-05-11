@@ -8,14 +8,15 @@ import { exampleBridgeTxn } from '../utils/test/test-example';
 describe('DATABASE test', () => {
   describe.skip('CRUD test with Bridge Txn', () => {
     it('create a transaction', async () => {
+      // should test with bridgeTxn
       const res = await db.createTxn(exampleBridgeTxn);
       expect(typeof res).toBe('number');
     });
     it.skip('read a transaction', async () => {
-      // skip: serialize
-      // TODO: BT-dbId: have a getter for dbId
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res = await db.readUniqueTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
+      // skip: serialize bigint
+      // should test with bridgeTxn
+      exampleBridgeTxn.dbId = exampleBridgeTxn.getDbId();
+      const res = await db.readUniqueTxn(exampleBridgeTxn.dbId, TxnType.MINT);
       console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
       console.log(
         'typeof res.from_amount_atom : ',
@@ -33,9 +34,9 @@ describe('DATABASE test', () => {
       expect(typeof res1).toBe('number');
 
       // read the updated transaction
-      // TODO: BT-dbId: have a getter for dbId
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const res2 = await db.readUniqueTxn(exampleBridgeTxn.dbId!, TxnType.MINT);
+      // should test with bridgeTxn
+      exampleBridgeTxn.dbId = exampleBridgeTxn.getDbId();
+      const res2 = await db.readUniqueTxn(exampleBridgeTxn.dbId, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(BridgeTxn.fromDbItem(res2, TxnType.MINT)).toEqual(

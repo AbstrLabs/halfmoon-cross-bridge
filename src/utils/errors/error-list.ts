@@ -102,6 +102,11 @@ const internalErrors = {
     name: 'Blockchain network Not Supported',
     message: 'Blockchain network not supported',
   },
+  BRIDGE_TXN_NOT_INITIALIZED: {
+    errId: 118,
+    name: 'Bridge Transaction Not Initialized',
+    message: 'Bridge Transaction not initialized as expected',
+  },
 };
 
 const transactionErrors = {

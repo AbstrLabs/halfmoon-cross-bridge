@@ -382,6 +382,28 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     return this.txnType ?? this._inferTxnType();
   }
 
+  public getDbId(): number {
+    let isInitialized = false;
+    this._isInitializedPromise.then(() => {
+      isInitialized = true;
+      if (this.dbId === undefined) {
+        throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+          at: 'BridgeTxn.getDbId',
+        });
+      }
+    });
+    if (isInitialized) {
+      // the parte before ensures non-null
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this.dbId!;
+    } else {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
+        extraMsg: 'try to get dbId before BridgeTxn is initialized',
+        at: 'BridgeTxn.getDbId',
+      });
+    }
+  }
+
   /* PRIVATE METHODS - CLASS INIT */
 
   /**
