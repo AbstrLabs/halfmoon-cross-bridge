@@ -214,7 +214,12 @@ const externalErrors = {
     errId: 308,
     name: 'Confirm outgoing transaction failed',
     message: 'Cannot confirm outgoing transaction on blockchain',
-  }, // maybe not in this categoryA?
+  }, // maybe not in this category?
+  EMPTY_NEW_TXN_ID: {
+    errId: 309,
+    name: 'Empty new transaction id',
+    message: 'New transaction id is undefined',
+  },
 };
 
 const ERRORS = {

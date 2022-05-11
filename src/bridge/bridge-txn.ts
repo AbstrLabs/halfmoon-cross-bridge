@@ -276,21 +276,17 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         atomAmount: this.toAmountAtom,
         txnId: literals.UNUSED,
       });
-      this.txnStatus = BridgeTxnStatus.DOING_OUTGOING;
+      if (outgoingTxnId === undefined) {
+        throw new BridgeError(ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID, {
+          at: 'BridgeTxn.makeOutgoingTxn',
+        });
+      }
       await this._updateToTxnId(outgoingTxnId);
-    } catch {
-      // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
-      this.txnStatus = BridgeTxnStatus.ERR_MAKE_OUTGOING;
+    } catch (err) {
       await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
-      });
-    }
-    if (outgoingTxnId === undefined) {
-      // TODO: same-piece-MAKE_OUTGOING_TXN_FAILED
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
-      throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
-        bridgeTxn: this,
+        err,
       });
     }
   }
@@ -438,9 +434,9 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    //TODO: verify to address is legal.
+    // TODO: verify to address is legal.
 
-    // we can also do a min/max check here.
+    // TODO: (later) we can also do a min/max of amount check here.
     return this;
   }
 
@@ -657,6 +653,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     this.toTxnId = toTxnId;
     return await this._updateTxn();
   }
+
   /* PRIVATE METHODS - HELPERS */
 
   private _checkStatus(expected: BridgeTxnStatus, at: string): void {
