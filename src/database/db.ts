@@ -90,14 +90,13 @@ class Database {
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
-    this._verifyResultLength(result, bridgeTxn);
+    this._verifyResultLength(result, { bridgeTxn });
 
-    const dbId = result[0]['db_id'];
-    // TODO: make `infer` private -> public getter
+    const dbId = parseDbItem(result[0])['db_id'];
     bridgeTxn.txnType = bridgeTxn.getTxnType();
     logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
-    return dbId as DbId;
+    return dbId;
   }
 
   public async readTxn(dbId: DbId, txnType: TxnType): Promise<DbItem[]> {
@@ -154,10 +153,11 @@ class Database {
     ];
     const result = await this.query(query, params);
 
-    this._verifyResultLength(result, bridgeTxn);
+    this._verifyResultLength(result, { bridgeTxn });
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
-    return result[0].db_id as DbId; // TODO: parse DbId
+    const dbItem = parseDbItem(result[0]);
+    return dbItem.db_id;
   }
 
   public async readUniqueTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
@@ -166,7 +166,7 @@ class Database {
     // should use BridgeTxn.fromDbItem to convert to BridgeTxn
 
     const result = await this.readTxn(dbId, txnType);
-    this._verifyResultLength(result, dbId);
+    this._verifyResultLength(result, { dbId });
     const dbItem = parseDbItem(result[0]);
     return dbItem;
   }
@@ -222,17 +222,12 @@ class Database {
     return tableName;
   }
 
-  private _verifyResultLength(result: unknown[], TxnInfo: DbId | BridgeTxn) {
-    // TODO: TxnInfo -> ErrInfoObj
+  private _verifyResultLength(result: unknown[], extraErrInfo?: object) {
     if (result.length === 0) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, {
-        TxnInfo: TxnInfo,
-      });
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, extraErrInfo);
     }
     if (result.length > 1) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE, {
-        TxnInfo: TxnInfo,
-      });
+      throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE, extraErrInfo);
     }
     return true;
   }

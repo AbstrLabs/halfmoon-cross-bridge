@@ -56,7 +56,7 @@ describe('AWS-RDS capability test', () => {
   });
   it.skip('delete last entry in test_table', async () => {
     // TODO: should run sequentially. skipped for now
-    // todo: maybe just check MAX(id)?
+    // maybe just check MAX(id)?
     const tableName = 'test_table';
     const query = `DELETE FROM ${tableName} WHERE id = (SELECT MAX(id) FROM ${tableName});`;
 
