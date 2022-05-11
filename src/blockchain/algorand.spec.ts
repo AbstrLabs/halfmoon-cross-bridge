@@ -1,9 +1,9 @@
 import { ENV } from '../utils/dotenv';
 import { TxnParam } from '../utils/type';
 import { algoBlockchain } from './algorand';
-import { goNearToAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
+import { toGoNearAtom } from '../utils/formatter';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
@@ -68,12 +68,12 @@ describe('AlgorandBlockchain', () => {
       fromAddr: literals.UNUSED,
       txnId: literals.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
-      atomAmount: goNearToAtom(amount),
+      atomAmount: toGoNearAtom(amount),
     };
     const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
     newTxnParam.txnId = algoTxnId;
     console.info('algoTxnId : ', algoTxnId);
-
+    toGoNearAtom;
     //verify the txn
     const rcpt = await algoBlockchain.getTxnStatus({
       txnId: algoTxnId,

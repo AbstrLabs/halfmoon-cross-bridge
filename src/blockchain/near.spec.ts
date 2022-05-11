@@ -1,12 +1,12 @@
 import { ConfirmOutcome } from '.';
 import { ENV } from '../utils/dotenv';
-import { goNearToAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { nearBlockchain } from './near';
+import { toGoNearAtom } from '../utils/formatter';
 
 const exampleFrom = ENV.NEAR_EXAMPL_ADDR;
 const exampleTo = ENV.NEAR_MASTER_ADDR;
-const exampleAmount = goNearToAtom('1');
+const exampleAmount = toGoNearAtom('1');
 const exampleTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7';
 describe('nearBlockchain', () => {
   it.skip('should be defined', () => {

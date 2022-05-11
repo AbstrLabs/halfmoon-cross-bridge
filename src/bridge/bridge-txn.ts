@@ -8,7 +8,7 @@ import { BridgeError, ERRORS } from '../utils/errors';
 import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
-import { goNearToAtom } from '../utils/formatter';
+import { toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
@@ -81,7 +81,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       txnType,
       fixedFeeAtom: undefined,
       fromAddr: from,
-      fromAmountAtom: goNearToAtom(amount),
+      fromAmountAtom: toGoNearAtom(amount),
       fromBlockchain: undefined,
       fromTxnId: txnId,
       marginFeeAtom: undefined,
@@ -569,9 +569,9 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this._inferTxnType();
     }
     if (this.txnType === TxnType.MINT) {
-      fixedFee = goNearToAtom(ENV.BURN_FIX_FEE);
+      fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
     } else if (this.txnType === TxnType.BURN) {
-      fixedFee = goNearToAtom(ENV.MINT_FIX_FEE);
+      fixedFee = toGoNearAtom(ENV.MINT_FIX_FEE);
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,

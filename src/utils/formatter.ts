@@ -1,7 +1,5 @@
-//TODO: separate to type file.
-
 export {
-  goNearToAtom,
+  toGoNearAtom as toGoNearAtom,
   stringifyObjWithBigint,
   yoctoNearToAtom,
   atomToYoctoNear,
@@ -13,12 +11,8 @@ import { ENV } from './dotenv';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
 
-// param validation and formatting
-
 // goNear related
-// TODO: rename. it converts all format to goNEAR atom.
-
-function goNearToAtom(goNearPlain: string | number): bigint {
+function toGoNearAtom(goNearPlain: string | number): bigint {
   // TODO: typing: return value should be a BigInt
 
   // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
@@ -48,7 +42,8 @@ function goNearToAtom(goNearPlain: string | number): bigint {
   const atomAmount = BigInt(
     trimLeadingZeroes(wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0'))
   );
-  logger.debug('goNearToAtom', {
+  logger.debug({
+    at: 'toGoNearAtom',
     goNearPlain: goNear,
     wholePart,
     fracPart,
@@ -98,16 +93,16 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
       yNear,
     });
   }
-  return goNearToAtom(nearPlain);
+  return toGoNearAtom(nearPlain);
 }
 
-// TODO: add test.
+// TODO(test): ADD TEST
 function atomToYoctoNear(atom: bigint): string {
   const coeStr = '0'.repeat(24 - ENV.GO_NEAR_DECIMALS);
   return atom.toString() + coeStr;
 }
 
-// TODO: ADD TEST
+// TODO(test): ADD TEST
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
   if (!obj) {
@@ -118,6 +113,7 @@ function stringifyObjWithBigint(obj?: object): string {
     (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
   );
 }
+
 /* 
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30

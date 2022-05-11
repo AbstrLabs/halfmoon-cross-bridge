@@ -3,8 +3,8 @@
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { burn } from './burn';
-import { goNearToAtom } from '../utils/formatter';
 import { testAlgo } from '../blockchain/algorand';
+import { toGoNearAtom } from '../utils/formatter';
 
 const TIMEOUT_30S = 30_000;
 
@@ -17,7 +17,7 @@ describe('burn test', () => {
 
       // simulate frontend: make NEAR txn
       const burnResponse = await testAlgo.sendFromExampleToMaster(
-        goNearToAtom(amount)
+        toGoNearAtom(amount)
       );
       // manually checked the amount is correct.
       const algoTxnId = burnResponse;
