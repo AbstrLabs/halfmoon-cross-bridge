@@ -53,7 +53,7 @@ describe('AlgorandBlockchain', () => {
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
-    expect(ENV.ALGO_MASTER_ADDR).not.toBe(literals.NOT_LOADED_FROM_ENV);
+    expect(ENV.ALGO_MASTER_ADDR).not.toBe(literals.NOT_LOADED_FROM_ENV_STR);
     expect(typeof ENV.TEST_NET_GO_NEAR_ASSET_ID).toBe('number');
   });
   // it.skip('user not opted in', () => {});

@@ -4,6 +4,7 @@ export { postgres };
 import { BridgeError, ERRORS } from '../utils/errors';
 import { Pool, PoolClient } from 'pg';
 
+import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 
 type PgConfig = {
@@ -65,13 +66,12 @@ class Postgres {
   }
 
   static _configFromEnv(): PgConfig {
-    // TODO: Use ENV from utils/dotenv.ts
     return {
-      host: process.env.PGHOST!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      user: process.env.PGUSER!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      database: process.env.PGDATABASE!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      password: process.env.PGPASSWORD!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      port: process.env.PGPORT as unknown as number,
+      host: ENV.PGHOST,
+      user: ENV.PGUSER,
+      database: ENV.PGDATABASE,
+      password: ENV.PGPASSWORD,
+      port: ENV.PGPORT as unknown as number,
     };
   }
 

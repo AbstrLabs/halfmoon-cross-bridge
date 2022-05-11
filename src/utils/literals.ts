@@ -2,7 +2,8 @@ export { literals };
 
 import { Stringer } from './type';
 
-const NOT_LOADED_FROM_ENV = 'NOT_LOADED_FROM_ENV';
+const NOT_LOADED_FROM_ENV_STR = 'NOT_LOADED_FROM_ENV';
+const NOT_LOADED_FROM_ENV_NUM = 1234567890;
 
 const MAKING_TXN = (
   txnType: Stringer,
@@ -62,7 +63,8 @@ const literals = {
   MINT_NEAR_TXN_ID,
   NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
-  NOT_LOADED_FROM_ENV,
+  NOT_LOADED_FROM_ENV_STR,
+  NOT_LOADED_FROM_ENV_NUM,
   SILLY_LOG,
   START_BURNING,
   START_MINTING,
