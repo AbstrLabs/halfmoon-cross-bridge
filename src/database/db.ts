@@ -1,4 +1,6 @@
-// TODO(alert): send an alert email when db cannot connect.
+// TODO(alert): send an alert email when:
+// - db cannot connect.
+// - db cannot query.
 
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -8,28 +10,32 @@ import { type DbId, type DbItem, parseDbItem } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
-import { postgres } from './aws-rds';
+import { type Postgres, postgres } from './aws-rds';
 import { TableName } from '.';
 
 class Database {
-  private instance = postgres;
-  private mintTableName: TableName = TableName.MINT_TABLE_NAME;
-  private burnTableName: TableName = TableName.BURN_TABLE_NAME;
-  // private __debugRandomId: string;
+  private instance;
+  private mintTableName;
+  private burnTableName;
 
-  // constructor() {
-  // const trace = new Error().stack;
-  // this.__debugRandomId = Math.random().toString(36).substring(2, 15);
-  // console.log(
-  //   `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
-  // );
-  // }
+  constructor(
+    instance: Postgres,
+    tableNames: { mintTableName: TableName; burnTableName: TableName }
+  ) {
+    this.instance = instance;
+    this.mintTableName = tableNames.mintTableName;
+    this.burnTableName = tableNames.burnTableName;
+
+    // const trace = new Error().stack;
+    // this.__debugRandomId = Math.random().toString(36).substring(2, 15);
+    // console.log(
+    //   `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
+    // );
+  }
 
   get isConnected() {
     return this.instance.isConnected;
   }
-
-  // TODO: add with settings constructor() {}
 
   async connect() {
     await this.instance.connect();
@@ -49,7 +55,6 @@ class Database {
   }
 
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
-    // TODO: sent alert email when db cannot connect.
     // will assign and return a dbId on creation.
 
     // next line: if null, will throw error.
@@ -115,8 +120,7 @@ class Database {
   public async updateTxn(bridgeTxn: BridgeTxn) {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
-    // will raise err if data mismatch
-    // TODO: should confirm current status as well. Status can be "stage"
+    // will raise err if data mismatch.
 
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -234,7 +238,10 @@ class Database {
   }
 }
 
-const db = new Database();
+const db = new Database(postgres, {
+  mintTableName: TableName.MINT_TABLE_NAME,
+  burnTableName: TableName.BURN_TABLE_NAME,
+});
 
 /* failed attempt on singleton for jest
 

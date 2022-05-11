@@ -666,6 +666,22 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     return await this.#db.updateTxn(this);
   }
   private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
+    // will raise err if current txnStatus is error.
+    if (
+      ![
+        BridgeTxnStatus.ERR_AWS_RDS_DB,
+        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
+        BridgeTxnStatus.ERR_INITIALIZE,
+        BridgeTxnStatus.ERR_MAKE_OUTGOING,
+        BridgeTxnStatus.ERR_SEVER_INTERNAL,
+        BridgeTxnStatus.ERR_TIMEOUT_INCOMING,
+        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
+      ].includes(this.txnStatus)
+    ) {
+      throw new BridgeError(ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS, {
+        bridgeTxn: this,
+      });
+    }
     this.txnStatus = status;
     return await this._updateTxn();
   }

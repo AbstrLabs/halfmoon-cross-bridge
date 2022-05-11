@@ -1,5 +1,5 @@
 /* Wrapping up AWS-RDS service */
-export { postgres };
+export { postgres, type Postgres };
 
 import { BridgeError, ERRORS } from '../utils/errors';
 import { Pool, PoolClient } from 'pg';

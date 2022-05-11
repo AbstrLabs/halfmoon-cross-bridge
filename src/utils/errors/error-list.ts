@@ -107,6 +107,13 @@ const internalErrors = {
     name: 'Bridge Transaction Not Initialized',
     message: 'Bridge Transaction not initialized as expected',
   },
+  OVERWRITE_ERROR_TXN_STATUS: {
+    errId: 119,
+    name: 'Overwrite Error Transaction Status',
+    message:
+      'Trying to overwrite error status in in bridge transaction status.' +
+      'When a bridge transaction has error status, manual fix is needed.',
+  },
 };
 
 const transactionErrors = {
