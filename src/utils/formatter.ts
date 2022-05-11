@@ -1,5 +1,5 @@
 export {
-  toGoNearAtom as toGoNearAtom,
+  toGoNearAtom,
   stringifyObjWithBigint,
   yoctoNearToAtom,
   atomToYoctoNear,

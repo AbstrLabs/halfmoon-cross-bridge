@@ -81,6 +81,6 @@ const pgConfig: PgConfig = {
   user: ENV.PGUSER,
   database: ENV.PGDATABASE,
   password: ENV.PGPASSWORD,
-  port: ENV.PGPORT as unknown as number,
+  port: ENV.PGPORT,
 };
 const postgres = new Postgres(pgConfig);
