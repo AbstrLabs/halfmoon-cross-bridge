@@ -77,6 +77,17 @@ class NearBlockchain extends Blockchain {
       txnParam.txnId,
       txnParam.fromAddr
     );
+    logger.verbose(
+      literals.TXN_CONFIRMED(
+        txnParam.fromAddr,
+        txnParam.toAddr,
+        this.name,
+        txnParam.atomAmount,
+        txnParam.txnId,
+        'round unknown'
+      )
+    );
+
     logger.info(literals.NEAR_TXN_RESULT(result));
     return result;
   }

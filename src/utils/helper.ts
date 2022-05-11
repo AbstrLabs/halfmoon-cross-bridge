@@ -26,7 +26,7 @@ const sleep = (milliseconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
-// TODO: ADD TEST
+// TODO(test): ADD TEST
 function optionalBigInt(value: Biginter): bigint;
 function optionalBigInt(value: undefined): undefined;
 function optionalBigInt(value: Biginter | undefined): bigint | undefined {

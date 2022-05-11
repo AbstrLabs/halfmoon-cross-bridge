@@ -74,9 +74,22 @@ class AlgorandBlockchain extends Blockchain {
     txnParam: AlgoTxnParam
   ): Promise<AlgoAssetTransferTxnOutcome> {
     // will timeout in `confirmTxn` if txn not confirmed
-    return (await this.indexer
+    const outcome = (await this.indexer
       .lookupTransactionByID(txnParam.txnId)
       .do()) as AlgoAssetTransferTxnOutcome;
+
+    logger.verbose(
+      literals.TXN_CONFIRMED(
+        txnParam.fromAddr,
+        txnParam.toAddr,
+        this.name,
+        txnParam.atomAmount,
+        txnParam.txnId,
+        'round unknown'
+      )
+    );
+
+    return outcome;
 
     // the following method only checks new blocks
     // return await algosdk.waitForConfirmation(
@@ -230,6 +243,7 @@ class AlgorandBlockchain extends Blockchain {
       literals.TXN_CONFIRMED(
         algoTxnParam.fromAddr,
         algoTxnParam.toAddr,
+        this.name,
         algoTxnParam.atomAmount,
         txnId,
         confirmedTxn['confirmed-round']

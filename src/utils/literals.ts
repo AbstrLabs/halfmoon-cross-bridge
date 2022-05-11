@@ -31,12 +31,12 @@ const BURN_AWAITING =
 const TXN_CONFIRMED = (
   from: Stringer,
   to: Stringer,
+  blockchain: Stringer,
   amount: Stringer,
   txnID: Stringer,
   confirmRound: Stringer
 ) =>
-  //TODO: on what chain??
-  `Transaction from ${from} to ${to} of amount ${amount} (atomic unit) with id ${txnID} confirmed in round ${confirmRound}`;
+  `Transaction from ${from} to ${to} on ${blockchain} blockchain of amount ${amount} (atomic unit) with id ${txnID} confirmed in round ${confirmRound}`;
 
 const ASA_CREATED = (assetName: Stringer, txnId: Stringer, assetId: Stringer) =>
   `New ASA ${assetName} created with ${txnId} having id ${assetId}.`;
