@@ -1,5 +1,3 @@
-// TODO: INVALID_TXN_ID should ren to TXN
-
 export { ERRORS };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

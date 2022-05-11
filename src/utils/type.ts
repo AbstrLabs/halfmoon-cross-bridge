@@ -77,6 +77,7 @@ type Biginter = z.infer<typeof zBiginter>;
 // API -> server
 const zAlgoAddr = z
   // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
+  // also in algosdk repo has some fixed value of 58.
   .string()
   .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
 const zNearAddr = z
@@ -103,8 +104,9 @@ const zApiAmount = z
     return true;
   });
 
-const zNearTxnId = z.string(); // TODO: unfinished
-const zAlgoTxnId = z.string(); // TODO: unfinished
+// TODO: unfinished zNearTxnId, zAlgoTxnId
+const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
+const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
 const zMintApiParam = z.object({
   amount: zApiAmount,
