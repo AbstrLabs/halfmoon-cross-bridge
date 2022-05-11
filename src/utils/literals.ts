@@ -48,7 +48,7 @@ const UNUSED = 'not required value';
 const UNUSED_BIGINT = BigInt(0);
 const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
   `Created bridge txn in table ${txnType} with id ${dbId}`;
-
+const FOURTEEN_ZEROS = '0'.repeat(14);
 const SILLY_LOG = {};
 
 const literals = {
@@ -58,6 +58,7 @@ const literals = {
   DB_ENTRY_CREATED,
   DONE_BURN,
   DONE_MINT,
+  FOURTEEN_ZEROS,
   MAKING_TXN,
   MINT_AWAITING,
   MINT_NEAR_TXN_ID,
