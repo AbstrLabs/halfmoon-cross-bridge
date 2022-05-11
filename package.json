@@ -56,7 +56,22 @@
     "ts-node-dev": "^1.1.8",
     "winston": "^3.7.2"
   },
-  "devDependenciesComment": "json-bigint might not be needed",
+  "devDependencies-COMMENT": "json-bigint might not be needed",
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code"
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "root": true
+  },
   "jest": {
     "globalSetup": "./src/utils/test/jest-setup.ts",
     "globalTeardown": "./src/utils/test/jest-teardown.ts",
