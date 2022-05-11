@@ -1,12 +1,10 @@
+/* Wrapping up AWS-RDS service */
+export { postgres };
+
 import { BridgeError, ERRORS } from '../utils/errors';
 import { Pool, PoolClient } from 'pg';
 
 import { logger } from '../utils/logger';
-
-// this file is tested in database.spec.ts
-// TODO: Make singleton
-
-export { postgres };
 
 type PgConfig = {
   host: string;
