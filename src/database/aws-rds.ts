@@ -65,16 +65,6 @@ class Postgres {
     await this.pool.end();
   }
 
-  static _configFromEnv(): PgConfig {
-    return {
-      host: ENV.PGHOST,
-      user: ENV.PGUSER,
-      database: ENV.PGDATABASE,
-      password: ENV.PGPASSWORD,
-      port: ENV.PGPORT as unknown as number,
-    };
-  }
-
   async _connectionTest() {
     await this.connect();
     const res = await this.query('SELECT $1::text as message', [
@@ -86,4 +76,11 @@ class Postgres {
 }
 
 // not `new Postgres()` because jest won't initialize with process.env
-const postgres = new Postgres(Postgres._configFromEnv());
+const pgConfig: PgConfig = {
+  host: ENV.PGHOST,
+  user: ENV.PGUSER,
+  database: ENV.PGDATABASE,
+  password: ENV.PGPASSWORD,
+  port: ENV.PGPORT as unknown as number,
+};
+const postgres = new Postgres(pgConfig);
