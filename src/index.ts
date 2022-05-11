@@ -1,4 +1,5 @@
 // TODO: check {X as X} and Y : Y.
+// TODO: validate in dotenv that ENV.ALGO_NETWORK is same as ENV.NEAR_NETWORK
 
 export { BlockchainName, BridgeTxnStatus };
 

@@ -56,7 +56,7 @@ type AlgoTxnOutcome =
       };
     }
   | AlgoAssetTransferTxnOutcome;
-type NearTxnOutcome = providers.FinalExecutionOutcome;
+type NearTxnOutcome = providers.FinalExecutionOutcome; // TODO: Type FinalExecutionOutcome.transaction.
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
 type ConfirmTxnConfig = {

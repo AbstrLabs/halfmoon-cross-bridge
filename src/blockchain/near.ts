@@ -26,13 +26,24 @@ import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 import { NearTxnParam } from '../utils/type';
 
+type ClientParam = {
+  networkId: string;
+  nodeUrl: string;
+  walletUrl: string;
+  helperUrl: string;
+  explorerUrl: string;
+  headers: Record<never, never>;
+};
+
+type IndexerParam = {
+  url: string;
+};
+
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
-  readonly indexer: providers.JsonRpcProvider = new providers.JsonRpcProvider({
-    url: 'https://archival-rpc.testnet.near.org',
-  }); // TODO: move config to constructor.
-  protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
-  protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
+  readonly indexer: providers.JsonRpcProvider;
+  protected /* readonly */ centralizedAcc!: Account;
+  protected /* readonly */ client!: Near;
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
@@ -40,21 +51,13 @@ class NearBlockchain extends Blockchain {
   private _keyStore: keyStores.KeyStore;
   public readonly name = BlockchainName.NEAR;
 
-  constructor() {
+  constructor(clientParam: ClientParam, indexerParam: IndexerParam) {
     super();
     this._keyStore = new keyStores.InMemoryKeyStore();
+    this.indexer = new providers.JsonRpcProvider(indexerParam);
 
     // setup client
-    const config = {
-      networkId: 'testnet',
-      keyStore: this._keyStore,
-      nodeUrl: 'https://rpc.testnet.near.org',
-      walletUrl: 'https://wallet.testnet.near.org',
-      helperUrl: 'https://helper.testnet.near.org',
-      explorerUrl: 'https://explorer.testnet.near.org',
-      headers: {},
-    };
-    connect(config).then((near) => {
+    connect({ ...clientParam, keyStore: this._keyStore }).then((near) => {
       this.client = near;
 
       // setup centralizedAcc
@@ -69,7 +72,6 @@ class NearBlockchain extends Blockchain {
   }
 
   async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
-    // TODO: Type FinalExecutionOutcome.transaction.
     logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.indexer.txStatus(
       txnParam.txnId,
@@ -172,4 +174,25 @@ class NearBlockchain extends Blockchain {
   }
 }
 
-const nearBlockchain = new NearBlockchain();
+let clientParam: ClientParam, indexerParam: IndexerParam;
+if (ENV.NEAR_NETWORK === 'testnet') {
+  clientParam = {
+    networkId: 'testnet',
+    nodeUrl: 'https://rpc.testnet.near.org',
+    walletUrl: 'https://wallet.testnet.near.org',
+    helperUrl: 'https://helper.testnet.near.org',
+    explorerUrl: 'https://explorer.testnet.near.org',
+    headers: {},
+  };
+  indexerParam = {
+    url: 'https://archival-rpc.testnet.near.org',
+  };
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    blockchainName: BlockchainName.NEAR,
+    network: ENV.NEAR_NETWORK,
+    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+  });
+}
+
+const nearBlockchain = new NearBlockchain(clientParam, indexerParam);

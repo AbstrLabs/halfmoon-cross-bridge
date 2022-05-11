@@ -23,17 +23,17 @@ import {
   parseBigInt,
 } from '../utils/type';
 
-interface ClientParam {
+type ClientParam = {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-}
+};
 
-interface IndexerParam {
+type IndexerParam = {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-}
+};
 
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
@@ -331,14 +331,15 @@ const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
   server: 'https://testnet-algorand.api.purestake.io/idx2',
 };
 
-let clientParam, indexerParam;
+let clientParam: ClientParam, indexerParam: IndexerParam;
 if (ENV.ALGO_NETWORK === 'testnet') {
   clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
   indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
 } else {
   throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    blockchainName: BlockchainName.ALGO,
     network: ENV.ALGO_NETWORK,
-    currentSupportedNetworks: ['testnet'],
+    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
   });
 }
 const algoBlockchain = new AlgorandBlockchain(clientParam, indexerParam);
