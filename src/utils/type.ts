@@ -22,8 +22,10 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
-  zDbItem,
+  parseBigInt,
   parseBurnApiParam,
+  parseDbId,
+  parseDbItem,
   parseMintApiParam,
   parseDbItem,
   parseBigInt,
@@ -190,6 +192,9 @@ function parseBigInt(biginter: Biginter): bigint {
   return BigInt(parseBiginter(biginter));
 }
 const zDbId = z.number().int().positive();
+function parseDbId(dbId: DbId): DbId {
+  return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
 const zDbItem = z.object({
   db_id: zDbId,
@@ -205,5 +210,5 @@ const zDbItem = z.object({
   txn_status: zBridgeTxnStatus,
 });
 function parseDbItem(dbItem: DbItem): DbItem {
-  return parseWithZod(dbItem, zDbItem, ERRORS.EXTERNAL.INVALID_DB_ITEM);
+  return parseWithZod(dbItem, zDbItem, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }

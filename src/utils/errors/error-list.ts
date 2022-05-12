@@ -174,6 +174,11 @@ const internalErrors = {
     name: 'Network Mismatch',
     message: 'Network (testnet / mainnet) mismatch',
   },
+  TYPE_PARSING_ERROR: {
+    errId: 221,
+    name: 'Type Parse Error',
+    message: 'Error parsing type.',
+  },
 };
 
 const externalErrors = {
