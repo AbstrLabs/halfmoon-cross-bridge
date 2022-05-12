@@ -1,128 +1,27 @@
 export {
-  type AlgoAddr,
-  type AlgoTxnId,
-  type AlgoTxnParam,
-  type BurnApiParam,
-  type MintApiParam,
-  type NearAddr,
-  type NearTxnId,
-  type NearTxnParam,
-  goNearToAtom,
-  parseBurnApiParam,
-  parseMintApiParam,
+  toGoNearAtom,
   stringifyObjWithBigint,
   yoctoNearToAtom,
   atomToYoctoNear,
 };
 
-import { ENV } from './dotenv';
 import { BridgeError, ERRORS } from './errors';
-import { z } from 'zod';
+
+import { ENV } from './dotenv';
+import { literals } from './literals';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
 
-type MintApiParam = z.infer<typeof mintApiParamParser>;
-type BurnApiParam = z.infer<typeof burnApiParamParser>;
-
-type AlgoTxnParam = z.infer<typeof algoTxnParamParser>;
-type NearTxnParam = z.infer<typeof nearTxnParamParser>;
-
-type AlgoAddr = z.infer<typeof algoAddr>;
-type NearAddr = z.infer<typeof nearAddr>;
-
-type NearTxnId = z.infer<typeof nearTxnId>;
-type AlgoTxnId = z.infer<typeof algoTxnId>;
-// param validation and formatting
-
-const nearAddr = z
-  // from https://wallet.testnet.near.org/create
-  // cannot start with `-` and `_`
-  .string()
-  .regex(
-    /^[0-9a-z][0-9a-z\-_]{1,64}.(testnet|mainnet)$/,
-    'malformed near address'
-  );
-const algoAddr = z
-  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
-  .string()
-  .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
-const parsableAmount = z
-  .string()
-  .regex(/^ *[0-9,]{1,}\.?[0-9]{0,10} *$/, 'malformed amount address')
-  .refine((str: string) => {
-    const num = Number(str);
-    if (isNaN(num)) {
-      return false;
-    }
-    if (num < 1 || num > Number.MAX_SAFE_INTEGER) {
-      return false;
-    }
-    return true;
-  });
-
-const nearTxnId = z.string(); // TODO: unfinished
-const algoTxnId = z.string(); // TODO: unfinished
-
-const mintApiParamParser = z.object({
-  amount: parsableAmount,
-  from: nearAddr,
-  to: algoAddr,
-  txnId: nearTxnId,
-});
-const burnApiParamParser = z.object({
-  amount: parsableAmount,
-  from: algoAddr,
-  to: nearAddr,
-  txnId: nearTxnId,
-});
-
-const algoTxnParamParser = z.object({
-  atomAmount: z.bigint(),
-  fromAddr: algoAddr,
-  toAddr: algoAddr,
-  txnId: algoTxnId,
-});
-const nearTxnParamParser = z.object({
-  atomAmount: z.bigint(),
-  fromAddr: nearAddr,
-  toAddr: nearAddr,
-  txnId: nearTxnId,
-});
-
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  try {
-    return mintApiParamParser.parse(apiParam);
-  } catch (e) {
-    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-      parseErrorDetail: e,
-    });
-  }
-}
-
-function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  try {
-    return burnApiParamParser.parse(apiParam);
-  } catch (e) {
-    throw new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
-      parseErrorDetail: e,
-    });
-  }
-}
-
 // goNear related
-// TODO: rename. it converts all format to goNEAR atom.
-
-function goNearToAtom(goNearPlain: string | number): bigint {
-  // TODO: typing: return value should be a BigInt
-
-  // TODO: l10n: this only converts 1,234,567.0123456789 to 12345670123456789
-  // TODO: l10n: and won't work for separators like 123_4567.0123456789 nor 1.234.567,0123456789
+function toGoNearAtom(goNearPlain: string | number): bigint {
   // TODO: l10n: temp-fix: added an regex to make sure that the input is in correct format
-  let goNear: string;
+  // l10n: this only converts 1,234,567.0123456789 to 12345670123456789
+  // l10n: and won't work for separators like 123_4567.0123456789 nor 1.234.567,0123456789
+  let goNearString: string;
   if (typeof goNearPlain === 'number') {
-    goNear = goNearPlain.toString();
+    goNearString = goNearPlain.toString();
   } else if (typeof goNearPlain === 'string') {
-    goNear = goNearPlain;
+    goNearString = goNearPlain;
   } else {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
       goNearType: typeof goNearPlain,
@@ -130,20 +29,21 @@ function goNearToAtom(goNearPlain: string | number): bigint {
   }
 
   // from https://github.com/near/near-api-js/blob/6f83d39f47624b4223746c0d27d10f78471575f7/src/utils/format.ts#L46-L53
-  goNear.replace(/,/g, '').trim(); // remove comma
-  const split = goNear.split('.');
+  goNearString.replace(/,/g, '').trim(); // remove comma
+  const split = goNearString.split('.');
   const wholePart = split[0];
   const fracPart = split[1] || ''; // maybe ?? is better?
   if (split.length > 2 || fracPart.length > ENV.GO_NEAR_DECIMALS) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_GO_NEAR_AMOUNT, {
-      goNearPlain: goNear,
+      goNearPlain: goNearString,
     });
   }
   const atomAmount = BigInt(
     trimLeadingZeroes(wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0'))
   );
-  logger.debug('goNearToAtom', {
-    goNearPlain: goNear,
+  logger.debug({
+    at: 'toGoNearAtom',
+    goNearPlain: goNearString,
     wholePart,
     fracPart,
     atomAmount,
@@ -166,42 +66,57 @@ function trimLeadingZeroes(value: string): string {
 }
 
 function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
-  // TODO: rounding
-  let yNear: string;
-
+  // format to string
+  let yoctoNearStr: string;
   if (typeof yoctoNear === 'number') {
-    yNear = yoctoNear.toString();
-    if (yNear.includes('.')) {
-      throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
-        yoctoNear: yNear,
-      });
-    }
+    yoctoNearStr = yoctoNear.toString();
   } else if (typeof yoctoNear === 'string') {
-    yNear = yoctoNear;
+    yoctoNearStr = yoctoNear;
   } else if (typeof yoctoNear === 'bigint') {
-    yNear = yoctoNear.toString();
+    yoctoNearStr = yoctoNear.toString();
   } else {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
       goNearType: typeof yoctoNear,
     });
   }
-
-  const nearPlain = utils.format.formatNearAmount(yNear);
-  if (nearPlain === null) {
+  if (yoctoNearStr.includes('.')) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
-      yNear,
+      yoctoNear: yoctoNearStr,
     });
   }
-  return goNearToAtom(nearPlain);
+
+  // overflow
+  if (yoctoNearStr.length > 19) {
+    throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
+      yoctoNear: yoctoNearStr,
+      problem: 'too long, overflow',
+    });
+  }
+
+  // rounding
+  // TODO(test): with '0987654321098765432109876543210987654321' -> '0987654321098765432109876500000000000000'
+  if (yoctoNearStr.endsWith(literals.FOURTEEN_ZEROS)) {
+    logger.warn('yoctoNearToAtom: rounding DOWN to nearest atom');
+    yoctoNearStr = yoctoNearStr.slice(0, -14) + literals.FOURTEEN_ZEROS;
+  }
+
+  // to goNear
+  const nearPlain = utils.format.formatNearAmount(yoctoNearStr);
+  if (nearPlain === null) {
+    throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
+      yNear: yoctoNearStr,
+    });
+  }
+  return toGoNearAtom(nearPlain);
 }
 
-// TODO: add test.
+// TODO(test): ADD TEST
 function atomToYoctoNear(atom: bigint): string {
   const coeStr = '0'.repeat(24 - ENV.GO_NEAR_DECIMALS);
   return atom.toString() + coeStr;
 }
 
-// TODO: ADD TEST
+// TODO(test): ADD TEST
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
   if (!obj) {
@@ -212,3 +127,29 @@ function stringifyObjWithBigint(obj?: object): string {
     (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
   );
 }
+
+/* 
+function stringifyObjWithBigint(obj?: object): string {
+  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
+  if (obj === undefined) {
+    return 'undefined';
+  }
+  if (obj === null) {
+    return 'null';
+  }
+  return JSON.stringify(
+    obj,
+    // (key, value) => value.toString() // not working, [object Object] is returned
+    (key, value) => {
+      switch (true) {
+        case typeof value === 'bigint':
+          return value.toString();
+        case value instanceof BridgeTxn:
+          return value.toString();
+        default:
+          value;
+      }
+    } // return everything else unchanged
+  );
+}
+ */

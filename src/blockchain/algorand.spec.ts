@@ -1,11 +1,9 @@
-import { NOT_LOADED_FROM_ENV, literal } from '../utils/literal';
-
 import { ENV } from '../utils/dotenv';
-import { TxnParam } from '.';
+import { TxnParam } from '../utils/type';
 import { algoBlockchain } from './algorand';
-import { db } from '../database';
-import { goNearToAtom } from '../utils/formatter';
+import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
+import { toGoNearAtom } from '../utils/formatter';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;
@@ -47,9 +45,6 @@ const exampleRcpt = {
 };
 
 describe('AlgorandBlockchain', () => {
-  afterAll(() => {
-    db.end();
-  });
   it('should be defined', () => {
     expect(algoBlockchain).toBeDefined();
   });
@@ -58,7 +53,7 @@ describe('AlgorandBlockchain', () => {
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
-    expect(ENV.ALGO_MASTER_ADDR).not.toBe(NOT_LOADED_FROM_ENV);
+    expect(ENV.ALGO_MASTER_ADDR).not.toBe(literals.NOT_LOADED_FROM_ENV_STR);
     expect(typeof ENV.TEST_NET_GO_NEAR_ASSET_ID).toBe('number');
   });
   // it.skip('user not opted in', () => {});
@@ -70,17 +65,22 @@ describe('AlgorandBlockchain', () => {
     // make a txn (then verify)
     const amount = '0.767';
     const newTxnParam: TxnParam = {
-      fromAddr: literal.UNUSED,
-      txnId: literal.UNUSED,
+      fromAddr: literals.UNUSED,
+      txnId: literals.UNUSED,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
-      atomAmount: goNearToAtom(amount),
+      atomAmount: toGoNearAtom(amount),
     };
     const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
     newTxnParam.txnId = algoTxnId;
     console.info('algoTxnId : ', algoTxnId);
-
+    toGoNearAtom;
     //verify the txn
-    const rcpt = await algoBlockchain.getTxnStatus(algoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: algoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
     const answer = algoBlockchain.verifyCorrectness(rcpt, newTxnParam);
     expect(answer).toBe(true);
@@ -88,11 +88,21 @@ describe('AlgorandBlockchain', () => {
   }, 30000);
 
   it('get example txn status', async () => {
-    const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: exampleAlgoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
   }, 30000);
   it('verify transaction status on algo', async () => {
-    const rcpt = await algoBlockchain.getTxnStatus(exampleAlgoTxnId);
+    const rcpt = await algoBlockchain.getTxnStatus({
+      txnId: exampleAlgoTxnId,
+      fromAddr: literals.UNUSED,
+      toAddr: literals.UNUSED,
+      atomAmount: literals.UNUSED_BIGINT,
+    });
     const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoParam);
     expect(answer).toBe(true);
   });

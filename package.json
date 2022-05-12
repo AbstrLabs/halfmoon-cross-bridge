@@ -1,6 +1,7 @@
 {
   "author": "Pablion <36828324+Pablion@users.noreply.github.com>",
   "commitlint": {
+    "extends": "@commitlint/config-conventional",
     "rules": {
       "type-enum": [
         2,
@@ -43,19 +44,51 @@
     "@types/pg": "^8.6.5",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
-    "concurrently": "^7.1.0",
     "eslint": "^8.14.0",
     "husky": "^7.0.0",
     "jest": "^27.5.1",
     "json-bigint": "^1.0.0",
     "lint-staged": "^12.4.1",
-    "nodemon": "^2.0.15",
     "pg": "^8.7.3",
     "prettier": "^2.6.2",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^1.1.8",
     "winston": "^3.7.2"
+  },
+  "devDependencies-COMMENT": "json-bigint might not be needed",
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "root": true
+  },
+  "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",
+  "jest": {
+    "globalSetup": "./src/utils/test/jest-setup.ts",
+    "globalTeardown": "./src/utils/test/jest-teardown.ts",
+    "globals": {
+      "ts-jest": {
+        "tsconfig": {
+          "module": "ESNext",
+          "target": "ES2017"
+        },
+        "useESM": true
+      }
+    },
+    "preset": "ts-jest",
+    "setupFilesAfterEnv": [
+      "./src/utils/test/global-beforeAll.ts"
+    ],
+    "testEnvironment": "node"
   },
   "license": "gpl-3.0",
   "lint-staged": {
@@ -64,6 +97,12 @@
   },
   "main": "src/main.ts",
   "name": "algorand-near-bridge",
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
+  },
   "private": true,
   "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
   "scripts": {
@@ -72,19 +111,20 @@
     "build": "tsc",
     "burn": "yarn test:burn",
     "db": "yarn test:db",
-    "dev": "NODE_ENV=development yarn tsnd --respawn src/index.ts --inspector --debug",
+    "dev": "tsnd --respawn src/main.ts --inspector --debug",
+    "lint": "eslint . --ext .ts",
     "mint": "yarn test:mint",
     "near": "yarn test:near",
+    "postinstall": "husky install",
+    "prepare": "husky install",
     "test": "jest",
-    "lint": "eslint . --ext .ts",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
-    "test:bridge": "jest --testPathPattern=src/blockchain/bridge",
-    "test:burn": "jest --testPathPattern=src/blockchain/bridge/burn",
+    "test:bridge": "jest --testPathPattern=src/bridge",
+    "test:burn": "jest --testPathPattern=src/bridge/burn",
     "test:db": "jest --testPathPattern=src/database",
-    "test:mint": "jest --testPathPattern=src/blockchain/bridge/mint ",
+    "test:mint": "jest --testPathPattern=src/bridge/mint",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils",
-    "postinstall": "husky install .config/husky"
+    "test:util": "jest --testPathPattern=src/utils"
   },
   "version": "1.0.0"
 }

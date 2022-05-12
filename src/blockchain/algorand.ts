@@ -3,14 +3,7 @@ export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
-import {
-  AlgoAcc,
-  AlgoAddr,
-  AlgoMnemonic,
-  AlgoTxnId,
-  AlgoAssetTransferTxnOutcome,
-  AlgoTxnParam,
-} from '.';
+import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
   AsaConfig,
@@ -22,41 +15,58 @@ import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
 import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
-import { literal } from '../utils/literal';
+import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
+import {
+  AlgoAssetTransferTxnOutcome,
+  AlgoTxnParam,
+  parseBigInt,
+} from '../utils/type';
 
-// TODO: constructor: move config to param
+type ClientParam = {
+  token: { 'X-API-Key': string };
+  port: string;
+  server: string;
+};
+
+type IndexerParam = {
+  token: { 'X-API-Key': string };
+  port: string;
+  server: string;
+};
+
+type BridgeConfig = {
+  centralizedAssetId: number;
+  centralizedAddr: AlgoAddr;
+  centralizedPassPhrase: string;
+};
+
 class AlgorandBlockchain extends Blockchain {
-  public readonly centralizedAddr: AlgoAddr = ENV.ALGO_MASTER_ADDR;
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
   public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   public readonly name = BlockchainName.ALGO;
-  protected readonly centralizedAcc = algosdk.mnemonicToSecretKey(
-    ENV.ALGO_MASTER_PASS
-  );
+  public readonly centralizedAssetId: number;
+  public readonly centralizedAddr: AlgoAddr;
+  protected readonly centralizedAcc: algosdk.Account;
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.ALGO_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.ALGO_CONFIRM_INTERVAL_SEC,
     algoRound: ENV.ALGO_CONFIRM_ROUND,
   };
-  constructor() {
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
     super();
-    const PURE_STAKE_CLIENT = {
-      token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
-      port: '', // from https://developer.purestake.io/code-samples
-    };
-    const PURE_STAKE_DAEMON_CLIENT = {
-      ...PURE_STAKE_CLIENT,
-      server: 'https://testnet-algorand.api.purestake.io/ps2',
-    };
-    const PURE_STAKE_INDEXER_CLIENT = {
-      ...PURE_STAKE_CLIENT,
-      server: 'https://testnet-algorand.api.purestake.io/idx2',
-    };
-    // TODO: switch network
-    const algodClientParamSource = PURE_STAKE_DAEMON_CLIENT;
-    const algoIndexerParamSource = PURE_STAKE_INDEXER_CLIENT;
+    this.centralizedAssetId = bridgeConfig.centralizedAssetId;
+    this.centralizedAddr = bridgeConfig.centralizedAddr;
+    this.centralizedAcc = algosdk.mnemonicToSecretKey(
+      bridgeConfig.centralizedPassPhrase
+    );
+    const algodClientParamSource = clientParam;
+    const algoIndexerParamSource = indexerParam;
 
     this.client = new AlgodClient(
       algodClientParamSource.token,
@@ -74,12 +84,25 @@ class AlgorandBlockchain extends Blockchain {
   }
 
   async getTxnStatus(
-    algoTxnId: AlgoTxnId
+    txnParam: AlgoTxnParam
   ): Promise<AlgoAssetTransferTxnOutcome> {
     // will timeout in `confirmTxn` if txn not confirmed
-    return (await this.indexer
-      .lookupTransactionByID(algoTxnId)
+    const outcome = (await this.indexer
+      .lookupTransactionByID(txnParam.txnId)
       .do()) as AlgoAssetTransferTxnOutcome;
+
+    logger.verbose(
+      literals.TXN_CONFIRMED(
+        txnParam.fromAddr,
+        txnParam.toAddr,
+        this.name,
+        txnParam.atomAmount,
+        txnParam.txnId,
+        'round unknown'
+      )
+    );
+
+    return outcome;
 
     // the following method only checks new blocks
     // return await algosdk.waitForConfirmation(
@@ -94,7 +117,6 @@ class AlgorandBlockchain extends Blockchain {
     algoTxnParam: AlgoTxnParam
   ): boolean {
     // parse txnOutcome, parse AlgoAssetTransferTxnOutcome
-    // TODO! verify asset id
     const currentRound = txnOutcome['current-round'];
     const txn = txnOutcome.transaction;
     const confirmedRound = txn['confirmed-round'];
@@ -102,17 +124,26 @@ class AlgorandBlockchain extends Blockchain {
     const sender = txn.sender;
     const receiver = txn['asset-transfer-transaction'].receiver;
     const txnId = txn.id;
+    const assetId = txn['asset-transfer-transaction']['asset-id'];
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
-      throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
+      throw new BridgeError(ERRORS.API.TXN_NOT_CONFIRMED, {
         currentRound,
         confirmedRound,
         blockchainName: this.name,
       });
     }
+    // compare assetId
+    if (assetId !== this.centralizedAssetId) {
+      throw new BridgeError(ERRORS.API.TXN_ASSET_ID_NOT_MATCH, {
+        blockchainAssetId: assetId,
+        expectedAssetId: this.centralizedAssetId,
+        blockchainName: this.name,
+      });
+    }
     // compare txnID
     if (txnId !== algoTxnParam.txnId) {
-      throw new BridgeError(ERRORS.TXN.TX_ASSET_ID_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_ASSET_ID_MISMATCH, {
         blockchainId: txnId,
         receivedId: algoTxnParam.txnId,
         blockchainName: this.name,
@@ -120,7 +151,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare sender
     if (sender !== algoTxnParam.fromAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_SENDER_MISMATCH, {
         blockchainSender: sender,
         receivedSender: algoTxnParam.fromAddr,
         blockchainName: this.name,
@@ -128,7 +159,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare receiver
     if (receiver !== algoTxnParam.toAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_RECEIVER_MISMATCH, {
         blockchainReceiver: receiver,
         receivedReceiver: algoTxnParam.toAddr,
         blockchainName: this.name,
@@ -137,7 +168,7 @@ class AlgorandBlockchain extends Blockchain {
     // compare amount
     if (amount !== algoTxnParam.atomAmount.toString()) {
       // Bigint: The trailing "n" is not part of the string.
-      throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_AMOUNT_MISMATCH, {
         blockchainAmount: amount,
         receivedAmount: algoTxnParam.atomAmount,
         blockchainName: this.name,
@@ -147,40 +178,41 @@ class AlgorandBlockchain extends Blockchain {
   }
   async makeOutgoingTxn(algoTxnParam: AlgoTxnParam): Promise<AlgoTxnId> {
     // abstract class implementation.
-    return await this._makeGoNearTxnFromAdmin(
-      algoTxnParam.toAddr,
-      algoTxnParam.atomAmount
-    );
+    // txnId, fromAddr are never used
+    return await this._makeGoNearTxnFromAdmin(algoTxnParam);
   }
-  protected async _makeGoNearTxnFromAdmin(to: AlgoAddr, atomAmount: bigint) {
+  protected async _makeGoNearTxnFromAdmin(
+    algoTxnParam: AlgoTxnParam
+    // txnId, fromAddr are never used
+  ): Promise<AlgoTxnId> {
     return await this._makeAsaTxn(
-      to,
-      this.centralizedAcc.addr,
-      atomAmount,
+      {
+        toAddr: algoTxnParam.toAddr,
+        fromAddr: this.centralizedAcc.addr,
+        atomAmount: algoTxnParam.atomAmount,
+        txnId: literals.UNUSED,
+      },
       this.centralizedAcc,
-      ENV.TEST_NET_GO_NEAR_ASSET_ID
+      this.centralizedAssetId
     );
   }
-  // TODO: makeAsaTxn needs an err handler.
-  // TODO: use AlgoTxnParam here
+
   protected async _makeAsaTxn(
-    to: AlgoAddr,
-    from: AlgoAddr,
-    amountInAtomic: number | bigint,
+    algoTxnParam: AlgoTxnParam,
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxnId> {
     // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
     const params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
-    // params.fee = algosdk.ALGORAND_MIN_TX_FEE;
+    // params.fee = algosdk.ALGORAND_MIN_TXN_FEE;
     // params.flatFee = true;
     // const enc = new TextEncoder();
     // const note = enc.encode('Hello World');
     const txnConfig = {
-      to,
-      from,
-      amount: amountInAtomic,
+      to: algoTxnParam.toAddr,
+      from: algoTxnParam.fromAddr,
+      amount: parseBigInt(algoTxnParam.atomAmount),
       note: undefined, // maybe write the incoming txnId here
       suggestedParams: params,
       assetIndex: asaId,
@@ -194,7 +226,16 @@ class AlgorandBlockchain extends Blockchain {
     // Sign the transaction
     const txnId = txn.txID().toString();
     const rawSignedTxn = txn.signTxn(senderAccount.sk);
-    const rcpt = await this.client.sendRawTransaction(rawSignedTxn).do();
+
+    const rcpt = await this.client
+      .sendRawTransaction(rawSignedTxn)
+      .do()
+      .catch((err) => {
+        throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
+          blockchainName: this.name,
+          err,
+        });
+      });
     // Wait for confirmation
     const confirmedTxn = await algosdk.waitForConfirmation(
       this.client,
@@ -212,10 +253,11 @@ class AlgorandBlockchain extends Blockchain {
 
     //Get the completed Transaction
     logger.verbose(
-      literal.TXN_CONFIRMED(
-        from,
-        to,
-        amountInAtomic,
+      literals.TXN_CONFIRMED(
+        algoTxnParam.fromAddr,
+        algoTxnParam.toAddr,
+        this.name,
+        algoTxnParam.atomAmount,
         txnId,
         confirmedTxn['confirmed-round']
       )
@@ -229,7 +271,7 @@ class AlgorandBlockchain extends Blockchain {
     this._createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
   }
   protected async _genAcc() {
-    // tested, not used
+    // tested, used only once
     const algoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
     const account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
@@ -259,10 +301,10 @@ class AlgorandBlockchain extends Blockchain {
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
     logger.info(
-      literal.ASA_CREATED(
+      literals.ASA_CREATED(
         noParamAsaConfig.assetName,
         tx.txId,
-        noParamAsaConfig.assetId
+        noParamAsaConfig.assetId! // eslint-disable-line @typescript-eslint/no-non-null-assertion
       )
     );
     return noParamAsaConfig;
@@ -271,34 +313,78 @@ class AlgorandBlockchain extends Blockchain {
 
 // For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
 class TestAlgo extends AlgorandBlockchain {
-  constructor() {
-    super();
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
+    super(clientParam, indexerParam, bridgeConfig);
   }
-  async emulateFrontendTxn(
+  async simulateFrontendTxn(
     algoTxnParam: AlgoTxnParam,
     senderPassPhrase: string
-  ) {
+  ): Promise<AlgoTxnId> {
     const sender = algosdk.mnemonicToSecretKey(senderPassPhrase);
     return this._makeAsaTxn(
-      algoTxnParam.toAddr,
-      algoTxnParam.fromAddr,
-      algoTxnParam.atomAmount,
+      {
+        toAddr: algoTxnParam.toAddr,
+        fromAddr: algoTxnParam.fromAddr,
+        atomAmount: parseBigInt(algoTxnParam.atomAmount),
+        txnId: literals.UNUSED,
+      },
       sender,
-      ENV.TEST_NET_GO_NEAR_ASSET_ID
+      this.centralizedAssetId
     );
   }
   async sendFromExampleToMaster(atomAmount: bigint): Promise<AlgoTxnId> {
-    return this.emulateFrontendTxn(
+    return this.simulateFrontendTxn(
       {
         toAddr: ENV.ALGO_MASTER_ADDR,
         fromAddr: ENV.ALGO_EXAMPL_ADDR,
-        atomAmount: atomAmount,
-        txnId: '', // TODO: should support undefined
+        atomAmount,
+        txnId: literals.UNUSED,
       },
       ENV.ALGO_EXAMPL_PASS
     );
   }
 }
 
-const algoBlockchain = new AlgorandBlockchain();
-const testAlgo = new TestAlgo();
+const PURE_STAKE_CLIENT = {
+  token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
+  port: '', // from https://developer.purestake.io/code-samples
+};
+const PURE_STAKE_DAEMON_CLIENT_TESTNET = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/ps2',
+};
+const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/idx2',
+};
+
+let clientParam: ClientParam,
+  indexerParam: IndexerParam,
+  bridgeConfig: BridgeConfig;
+
+if (ENV.ALGO_NETWORK === 'testnet') {
+  clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
+  indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
+  bridgeConfig = {
+    centralizedAssetId: ENV.TEST_NET_GO_NEAR_ASSET_ID,
+    centralizedAddr: ENV.ALGO_MASTER_ADDR,
+    centralizedPassPhrase: ENV.ALGO_MASTER_PASS,
+  };
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    blockchainName: BlockchainName.ALGO,
+    network: ENV.ALGO_NETWORK,
+    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+  });
+}
+
+const algoBlockchain = new AlgorandBlockchain(
+  clientParam,
+  indexerParam,
+  bridgeConfig
+);
+const testAlgo = new TestAlgo(clientParam, indexerParam, bridgeConfig);

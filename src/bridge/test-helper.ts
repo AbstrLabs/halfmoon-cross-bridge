@@ -2,7 +2,7 @@ export { transferOnNearTestnetFromExampleToMaster };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 
 async function transferOnNearTestnetFromExampleToMaster(
@@ -27,7 +27,7 @@ async function transferOnNearTestnet(
 
   const config = {
     networkId: 'testnet',
-    keyStore: keyStore,
+    keyStore,
     nodeUrl: 'https://rpc.testnet.near.org',
     walletUrl: 'https://wallet.testnet.near.org',
     helperUrl: 'https://helper.testnet.near.org',

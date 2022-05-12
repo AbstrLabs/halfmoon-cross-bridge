@@ -1,9 +1,12 @@
-import { goNearToAtom } from '../utils/formatter';
+import { ConfirmOutcome } from '.';
+import { ENV } from '../utils/dotenv';
+import { literals } from '../utils/literals';
 import { nearBlockchain } from './near';
+import { toGoNearAtom } from '../utils/formatter';
 
-const exampleFrom = 'abstrlabs-test.testnet';
-const exampleTo = 'abstrlabs.testnet';
-const exampleAmount = goNearToAtom('1');
+const exampleFrom = ENV.NEAR_EXAMPL_ADDR;
+const exampleTo = ENV.NEAR_MASTER_ADDR;
+const exampleAmount = toGoNearAtom('1');
 const exampleTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7';
 describe('nearBlockchain', () => {
   it.skip('should be defined', () => {
@@ -11,7 +14,12 @@ describe('nearBlockchain', () => {
   });
   it('get txn status', async () => {
     expect(
-      await nearBlockchain.getTxnStatus(exampleTxnId, exampleFrom)
+      await nearBlockchain.getTxnStatus({
+        txnId: exampleTxnId,
+        fromAddr: exampleFrom,
+        toAddr: exampleTo,
+        atomAmount: literals.UNUSED_BIGINT,
+      })
     ).toBeDefined();
   });
   it('confirm transaction', async () => {
@@ -22,6 +30,7 @@ describe('nearBlockchain', () => {
         atomAmount: exampleAmount,
         txnId: exampleTxnId,
       })
-    ).toBe(true);
+    ).toBe(ConfirmOutcome.SUCCESS);
   });
+  // it.skip('transfer 0.123 Near from example to master', async () => {});
 });

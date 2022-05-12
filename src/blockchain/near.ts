@@ -12,8 +12,8 @@ import {
 } from 'near-api-js';
 
 import {
+  NearTxnOutcome,
   type AlgoTxnId,
-  type NearTxnParam,
   type NearAddr,
   type NearTxnId,
 } from '.';
@@ -21,18 +21,35 @@ import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 import { Blockchain } from '.';
-import { literal } from '../utils/literal';
+import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
+import { NearTxnParam } from '../utils/type';
+
+type ClientParam = {
+  networkId: string;
+  nodeUrl: string;
+  walletUrl: string;
+  helperUrl: string;
+  explorerUrl: string;
+  headers: Record<never, never>;
+};
+
+type IndexerParam = {
+  url: string;
+};
+
+type BridgeConfig = {
+  centralizedAssetId: number;
+  centralizedAddr: NearAddr;
+  centralizedPrivateKey: string;
+};
 
 class NearBlockchain extends Blockchain {
-  public readonly centralizedAddr: NearAddr = ENV.NEAR_MASTER_ADDR;
-  readonly provider: providers.JsonRpcProvider = new providers.JsonRpcProvider({
-    url: 'https://archival-rpc.testnet.near.org',
-  }); // TODO: deprecated
-  // TODO: ren to indexer, also in abstract class
-  protected /* readonly */ centralizedAcc!: Account; // TODO: async-constructor: add the readonly property
-  protected /* readonly */ client!: Near; // TODO: async-constructor: add the readonly property
+  public readonly centralizedAddr: NearAddr;
+  readonly indexer: providers.JsonRpcProvider;
+  protected /* readonly */ centralizedAcc!: Account;
+  protected /* readonly */ client!: Near;
   public readonly confirmTxnConfig = {
     timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
@@ -40,25 +57,22 @@ class NearBlockchain extends Blockchain {
   private _keyStore: keyStores.KeyStore;
   public readonly name = BlockchainName.NEAR;
 
-  constructor() {
+  constructor(
+    clientParam: ClientParam,
+    indexerParam: IndexerParam,
+    bridgeConfig: BridgeConfig
+  ) {
     super();
+    this.centralizedAddr = bridgeConfig.centralizedAddr;
     this._keyStore = new keyStores.InMemoryKeyStore();
+    this.indexer = new providers.JsonRpcProvider(indexerParam);
 
     // setup client
-    const config = {
-      networkId: 'testnet',
-      keyStore: this._keyStore,
-      nodeUrl: 'https://rpc.testnet.near.org',
-      walletUrl: 'https://wallet.testnet.near.org',
-      helperUrl: 'https://helper.testnet.near.org',
-      explorerUrl: 'https://explorer.testnet.near.org',
-      headers: {},
-    };
-    connect(config).then((near) => {
+    connect({ ...clientParam, keyStore: this._keyStore }).then((near) => {
       this.client = near;
 
       // setup centralizedAcc
-      const centralizedAccPrivKey = ENV.NEAR_MASTER_PRIV;
+      const centralizedAccPrivKey = bridgeConfig.centralizedPrivateKey;
       const keyPair = KeyPair.fromString(centralizedAccPrivKey);
       this._keyStore
         .setKey('testnet', this.centralizedAddr, keyPair)
@@ -68,35 +82,40 @@ class NearBlockchain extends Blockchain {
     });
   }
 
-  async getTxnStatus(
-    txnId: NearTxnId,
-    from: NearAddr
-  ): Promise<providers.FinalExecutionOutcome> {
-    // TODO: Type FinalExecutionOutcome.transaction.
+  async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
     logger.silly('nearIndexer: getTxnStatus()');
-    const result = await this.provider.txStatus(txnId, from);
-    logger.info(literal.NEAR_TXN_RESULT(result));
+    const result = await this.indexer.txStatus(
+      txnParam.txnId,
+      txnParam.fromAddr
+    );
+    logger.verbose(
+      literals.TXN_CONFIRMED(
+        txnParam.fromAddr,
+        txnParam.toAddr,
+        this.name,
+        txnParam.atomAmount,
+        txnParam.txnId,
+        'round unknown'
+      )
+    );
+
+    logger.info(literals.NEAR_TXN_RESULT(result));
     return result;
   }
 
   verifyCorrectness(
-    txnOutcome: providers.FinalExecutionOutcome,
+    txnOutcome: NearTxnOutcome,
     nearTxnParam: NearTxnParam
   ): boolean {
-    // TODO: compare txnId
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
-    logger.verbose(literal.NEAR_VERIFY_OUTCOME(txnOutcome));
-    const txnReceipt = txnOutcome;
-    if (txnReceipt.status instanceof Object) {
-      //TODO: txnId
-      // txnReceipt.status = txnReceipt.status as providers.FinalExecutionStatus;
+    logger.verbose(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
+    if (txnOutcome.status instanceof Object) {
       if (
-        txnReceipt.status.Failure !== undefined &&
-        txnReceipt.status.Failure !== null
+        txnOutcome.status.Failure !== undefined &&
+        txnOutcome.status.Failure !== null
       ) {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
-          txnReceipt,
+          txnOutcome,
           to: toAddr,
           from: fromAddr,
           amount: atomAmount,
@@ -105,33 +124,42 @@ class NearBlockchain extends Blockchain {
       }
     } else {
       if (
-        txnReceipt.status === providers.FinalExecutionStatusBasic.NotStarted ||
-        txnReceipt.status === providers.FinalExecutionStatusBasic.Failure
+        txnOutcome.status === providers.FinalExecutionStatusBasic.NotStarted ||
+        txnOutcome.status === providers.FinalExecutionStatusBasic.Failure
       ) {
-        throw new BridgeError(ERRORS.TXN.TX_NOT_CONFIRMED, {
+        throw new BridgeError(ERRORS.API.TXN_NOT_CONFIRMED, {
           blockchainName: this.name,
         });
       }
     }
-    // TODO: more var declaration here
+
     const receivedAtom = yoctoNearToAtom(
-      txnReceipt.transaction.actions[0].Transfer.deposit
+      txnOutcome.transaction.actions[0].Transfer.deposit
     );
 
+    // check txnId
+    if (txnOutcome.transaction_outcome.id !== txnId) {
+      throw new BridgeError(ERRORS.API.TXN_ID_MISMATCH, {
+        expectedId: txnId,
+        blockchainId: txnOutcome.transaction_outcome.id,
+        blockchainName: this.name,
+      });
+    }
+
     // check from address
-    if (txnReceipt.transaction.signer_id !== fromAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_SENDER_MISMATCH, {
+    if (txnOutcome.transaction.signer_id !== fromAddr) {
+      throw new BridgeError(ERRORS.API.TXN_SENDER_MISMATCH, {
         blockchainName: this.name,
         receivedSender: fromAddr,
-        blockchainSender: txnReceipt.transaction.signer_id,
+        blockchainSender: txnOutcome.transaction.signer_id,
       });
     } // TODO: later: maybe signer != sender?
     // check to address
-    if (txnReceipt.transaction.receiver_id !== toAddr) {
-      throw new BridgeError(ERRORS.TXN.TX_RECEIVER_MISMATCH, {
+    if (txnOutcome.transaction.receiver_id !== toAddr) {
+      throw new BridgeError(ERRORS.API.TXN_RECEIVER_MISMATCH, {
         blockchainName: this.name,
         receivedReceiver: toAddr,
-        blockchainReceiver: txnReceipt.transaction.receiver_id,
+        blockchainReceiver: txnOutcome.transaction.receiver_id,
       });
     }
     // check amount
@@ -143,7 +171,7 @@ class NearBlockchain extends Blockchain {
         blockchainAmount: receivedAtom,
       }); // DEV_LOG_TO_REMOVE
 
-      throw new BridgeError(ERRORS.TXN.TX_AMOUNT_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_AMOUNT_MISMATCH, {
         blockchainName: this.name,
         receivedAmount: atomAmount,
         blockchainAmount: receivedAtom,
@@ -156,7 +184,7 @@ class NearBlockchain extends Blockchain {
       nearTxnParam.toAddr, // receiver account
       atomToYoctoNear(nearTxnParam.atomAmount) // amount in yoctoNEAR
     );
-    console.log('response : ', response); // DEV_LOG_TO_REMOVE
+    // console.log('response : ', response); // DEV_LOG_TO_REMOVE
 
     return response.transaction_outcome.id;
   }
@@ -168,4 +196,36 @@ class NearBlockchain extends Blockchain {
   }
 }
 
-const nearBlockchain = new NearBlockchain();
+let clientParam: ClientParam,
+  indexerParam: IndexerParam,
+  bridgeConfig: BridgeConfig;
+if (ENV.NEAR_NETWORK === 'testnet') {
+  clientParam = {
+    networkId: 'testnet',
+    nodeUrl: 'https://rpc.testnet.near.org',
+    walletUrl: 'https://wallet.testnet.near.org',
+    helperUrl: 'https://helper.testnet.near.org',
+    explorerUrl: 'https://explorer.testnet.near.org',
+    headers: {},
+  };
+  indexerParam = {
+    url: 'https://archival-rpc.testnet.near.org',
+  };
+  bridgeConfig = {
+    centralizedAssetId: 0, // not used
+    centralizedAddr: ENV.NEAR_MASTER_ADDR,
+    centralizedPrivateKey: ENV.NEAR_MASTER_PRIV,
+  };
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    blockchainName: BlockchainName.NEAR,
+    network: ENV.NEAR_NETWORK,
+    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+  });
+}
+
+const nearBlockchain = new NearBlockchain(
+  clientParam,
+  indexerParam,
+  bridgeConfig
+);

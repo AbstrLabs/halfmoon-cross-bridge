@@ -1,12 +1,11 @@
+/* Wrapping up AWS-RDS service */
+export { postgres, type Postgres };
+
 import { BridgeError, ERRORS } from '../utils/errors';
 import { Pool, PoolClient } from 'pg';
 
+import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
-
-// this file is tested in database.spec.ts
-// TODO: Make singleton
-
-export { postgres };
 
 type PgConfig = {
   host: string;
@@ -28,6 +27,7 @@ class Postgres {
 
   async connect() {
     if (this.isConnected) {
+      logger.verbose('db is already connected');
       return;
     }
     this.client = await this.pool.connect();
@@ -39,13 +39,11 @@ class Postgres {
   }
 
   async query(query: string, params: unknown[] = []) {
-    if (!this.client) {
-      logger.info('Not connected to database, connecting now...');
-      await this.connect();
+    if (!this.isConnected || !this.client) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED);
+      // await this.connect();
     }
-    if (!this.client) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
-    }
+
     const res = await this.client.query(query, params);
     return res.rows;
   }
@@ -67,17 +65,6 @@ class Postgres {
     await this.pool.end();
   }
 
-  static _configFromEnv(): PgConfig {
-    // TODO: Use ENV from utils/dotenv.ts
-    return {
-      host: process.env.PGHOST!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      user: process.env.PGUSER!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      database: process.env.PGDATABASE!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      password: process.env.PGPASSWORD!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      port: process.env.PGPORT as unknown as number,
-    };
-  }
-
   async _connectionTest() {
     await this.connect();
     const res = await this.query('SELECT $1::text as message', [
@@ -89,4 +76,11 @@ class Postgres {
 }
 
 // not `new Postgres()` because jest won't initialize with process.env
-const postgres = new Postgres(Postgres._configFromEnv());
+const pgConfig: PgConfig = {
+  host: ENV.PGHOST,
+  user: ENV.PGUSER,
+  database: ENV.PGDATABASE,
+  password: ENV.PGPASSWORD,
+  port: ENV.PGPORT,
+};
+const postgres = new Postgres(pgConfig);

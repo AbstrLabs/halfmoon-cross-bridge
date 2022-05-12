@@ -1,19 +1,10 @@
-export {
-  BlockchainName,
-  BridgeTxnStatus,
-  type ApiCallParam,
-  type BurnApiParam,
-  type MintApiParam,
-};
-
-import { type BurnApiParam, type MintApiParam } from './utils/formatter';
-
-type ApiCallParam = MintApiParam | BurnApiParam;
+export { BlockchainName, BridgeTxnStatus };
 
 enum BlockchainName {
   NEAR = 'NEAR',
   ALGO = 'ALGO',
 }
+
 enum BridgeTxnStatus {
   // By order
   ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL', //     General server internal error

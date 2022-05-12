@@ -7,28 +7,28 @@ it('test place holder to fix', () => {
 
 import { type BurnApiParam, type MintApiParam } from '..';
 import { BridgeError, ERRORS } from './errors';
-import { parseBurnApiParam, parseMintApiParam } from './formatter';
+import { parseBurnApiParam, parseMintApiParam } from './type';
 import JsonBig from 'json-bigint';
 import { ENV } from './dotenv';
-import { exampleBridgeTxnInfo } from './test-helper';
+import { exampleBridgeTxn } from './test-helper';
 import { TxnType } from '../blockchain';
-import { BridgeTxnInfo } from '../blockchain/bridge';
+import { BridgeTxn } from '../blockchain/bridge';
 
 // TODO: move to test-helper + ren
-const FAKE_TX_ID = 'some_fake_txn_id';
+const FAKE_TXN_ID = 'some_fake_txn_id';
 
 // TODO: interface for this exampleDbItem with zod
 const exampleDbItem = {
   db_id: 1,
   from_addr: 'some_from_addr',
   from_amount_atom: '10000000000',
-  from_txn_id: FAKE_TX_ID,
+  from_txn_id: FAKE_TXN_ID,
   to_addr: 'some_to_addr',
   to_amount_atom: '642398',
-  to_txn_id: FAKE_TX_ID,
+  to_txn_id: FAKE_TXN_ID,
   txn_status: 'some_txn_status',
   txn_type: 'some_txn_type',
-  create_time: '1650264115011',
+  created_time: '1650264115011',
   fixed_fee_atom: '567890',
   margin_fee_atom: '53789243',
 };
@@ -37,13 +37,13 @@ const exampleMintApiTxnInfo: MintApiParam = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
-  txnId: FAKE_TX_ID,
+  txnId: FAKE_TXN_ID,
 };
 const exampleBurnApiTxnInfo: BurnApiParam = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
-  txnId: FAKE_TX_ID,
+  txnId: FAKE_TXN_ID,
 };
 
 describe('param validation and formatting', () => {
@@ -56,8 +56,8 @@ describe('param validation and formatting', () => {
     const JsonStringifySpy = jest.spyOn(JSON, 'stringify');
     JsonStringifySpy.mockImplementation(jest.fn(JsonBig.stringify));
 
-    expect(BridgeTxnInfo.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
-      exampleBridgeTxnInfo
+    expect(BridgeTxn.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
+      exampleBridgeTxn
     ); // need --workers=1 flag
   });
 

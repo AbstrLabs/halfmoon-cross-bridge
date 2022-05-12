@@ -1,23 +1,14 @@
 // TODO: mint-burn-test: move more same functions to test helper.
 
-import { ApiCallParam } from '../..';
-import { ENV } from '../../utils/dotenv';
+import { ApiCallParam } from '../utils/type';
+import { ENV } from '../utils/dotenv';
 import { burn } from './burn';
-import { db } from '../../database';
-import { goNearToAtom } from '../../utils/formatter';
-import { testAlgo } from '../algorand';
+import { testAlgo } from '../blockchain/algorand';
+import { toGoNearAtom } from '../utils/formatter';
 
 const TIMEOUT_30S = 30_000;
 
 describe('burn test', () => {
-  beforeAll(async () => {
-    await db.connect();
-  });
-  afterAll(async () => {
-    await db.end();
-  });
-  // TODO: should in near test.
-  // it.skip('transfer 0.123 Near from example to master', async () => {});
   it(
     'burn 1.2345678901 goNEAR from ALGO to NEAR',
     async () => {
@@ -25,9 +16,8 @@ describe('burn test', () => {
       const amount = '1.2345678901';
 
       // simulate frontend: make NEAR txn
-      // TODO: return txnId is nice. Should do the same on mint.
       const burnResponse = await testAlgo.sendFromExampleToMaster(
-        goNearToAtom(amount)
+        toGoNearAtom(amount)
       );
       // manually checked the amount is correct.
       const algoTxnId = burnResponse;
@@ -40,12 +30,12 @@ describe('burn test', () => {
       };
 
       // call API
-      const bridgeTxnInfo = await burn(apiCallParam);
+      const bridgeTxn = await burn(apiCallParam);
 
       // should return AlgoTxnId,etc.
 
       // verification
-      expect(bridgeTxnInfo.toTxnId).toBeDefined();
+      expect(bridgeTxn.toTxnId).toBeDefined();
     },
     TIMEOUT_30S * 3
   );
