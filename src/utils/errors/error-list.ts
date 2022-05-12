@@ -61,7 +61,7 @@ const apiCallErrors = {
     name: 'Reused incoming transaction',
     message:
       'This incoming transaction is already in our DB. ' +
-      'Outgoing transaction is dropped. We might need to do something with this user',
+      'Outgoing transaction is dropped. Might need manually interfere.',
   },
 };
 
@@ -173,6 +173,11 @@ const internalErrors = {
     errId: 220,
     name: 'Network Mismatch',
     message: 'Network (testnet / mainnet) mismatch',
+  },
+  TYPE_PARSING_ERROR: {
+    errId: 221,
+    name: 'Type Parse Error',
+    message: 'Error parsing type.',
   },
 };
 

@@ -22,20 +22,25 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
-  zDbItem,
-  parseBurnApiParam,
-  parseMintApiParam,
-  parseDbItem,
   parseBigInt,
+  parseBurnApiParam,
+  parseDbId,
+  parseDbItem,
+  parseMintApiParam,
 };
 
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
+import { logger } from './logger';
+
+/* NON-ZOD TYPES */
 
 type Stringer = {
   toString(): string;
 };
+
+/* ZOD TYPES (WITH PARSER) */
 
 function parseWithZod<T>(
   zodShaped: T,
@@ -45,7 +50,11 @@ function parseWithZod<T>(
   try {
     return zodParser.parse(zodShaped);
   } catch (err) {
-    throw new BridgeError(errorTemplate, { parseErrorDetail: err });
+    logger.error(err);
+    throw new BridgeError(errorTemplate, {
+      parsing: zodShaped,
+      parseErrorDetail: err,
+    });
   }
 }
 
@@ -190,6 +199,9 @@ function parseBigInt(biginter: Biginter): bigint {
   return BigInt(parseBiginter(biginter));
 }
 const zDbId = z.number().int().positive();
+function parseDbId(dbId: DbId): DbId {
+  return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
 const zDbItem = z.object({
   db_id: zDbId,
@@ -205,5 +217,5 @@ const zDbItem = z.object({
   txn_status: zBridgeTxnStatus,
 });
 function parseDbItem(dbItem: DbItem): DbItem {
-  return parseWithZod(dbItem, zDbItem, ERRORS.EXTERNAL.INVALID_DB_ITEM);
+  return parseWithZod(dbItem, zDbItem, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }

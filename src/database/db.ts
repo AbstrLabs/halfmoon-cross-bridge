@@ -6,7 +6,7 @@ export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
-import { type DbId, type DbItem, parseDbItem } from '../utils/type';
+import { type DbId, type DbItem, parseDbItem, parseDbId } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -92,9 +92,8 @@ class Database {
     const result = await this.query(query, params);
     this._verifyResultLength(result, { bridgeTxn });
 
-    const dbId = parseDbItem(result[0])['db_id'];
-    bridgeTxn.txnType = bridgeTxn.getTxnType();
-    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
+    const dbId = parseDbId(result[0].db_id);
+    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.getTxnType(), dbId));
     bridgeTxn.dbId = dbId;
     return dbId;
   }
@@ -116,7 +115,7 @@ class Database {
     return result;
   }
 
-  public async updateTxn(bridgeTxn: BridgeTxn) {
+  public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
     // will raise err if data mismatch.
@@ -156,8 +155,7 @@ class Database {
     this._verifyResultLength(result, { bridgeTxn });
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
-    const dbItem = parseDbItem(result[0]);
-    return dbItem.db_id;
+    return parseDbId(result[0].db_id);
   }
 
   public async readUniqueTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {

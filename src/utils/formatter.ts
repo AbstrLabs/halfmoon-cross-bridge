@@ -82,11 +82,12 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
   if (yoctoNearStr.includes('.')) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
       yoctoNear: yoctoNearStr,
+      problem: 'contains a decimal point, not integer',
     });
   }
 
   // overflow
-  if (yoctoNearStr.length > 19) {
+  if (yoctoNearStr.length > 19 + 14) {
     throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
       yoctoNear: yoctoNearStr,
       problem: 'too long, overflow',
@@ -95,7 +96,7 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
 
   // rounding
   // TODO(test): with '0987654321098765432109876543210987654321' -> '0987654321098765432109876500000000000000'
-  if (yoctoNearStr.endsWith(literals.FOURTEEN_ZEROS)) {
+  if (!yoctoNearStr.endsWith(literals.FOURTEEN_ZEROS)) {
     logger.warn('yoctoNearToAtom: rounding DOWN to nearest atom');
     yoctoNearStr = yoctoNearStr.slice(0, -14) + literals.FOURTEEN_ZEROS;
   }
@@ -117,17 +118,38 @@ function atomToYoctoNear(atom: bigint): string {
 }
 
 // TODO(test): ADD TEST
+// function stringifyObjWithBigint(obj?: object): string {
+//   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
+//   if (!obj) {
+//     return '';
+//   }
+//   return JSON.stringify(
+//     obj,
+//     (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+//   );
+// }
+
 function stringifyObjWithBigint(obj?: object): string {
-  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
   if (!obj) {
     return '';
   }
-  return JSON.stringify(
-    obj,
-    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
-  );
+  return JSON.stringify(stringifyBigintInObj(obj));
 }
+type Obj = Record<string, unknown>;
 
+function stringifyBigintInObj(obj: object): object {
+  const newObj: Obj = { ...obj };
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'bigint') {
+      newObj[key] = value.toString();
+    } else if (typeof value === 'object') {
+      newObj[key] = stringifyBigintInObj(value);
+    } else {
+      newObj[key] = value;
+    }
+  }
+  return newObj;
+}
 /* 
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30

@@ -50,6 +50,7 @@ describe('AlgorandBlockchain', () => {
   });
   it('manually check ENV VARS', () => {
     logger.warn({
+      why: 'manually check ENV VARS',
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
