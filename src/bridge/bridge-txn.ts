@@ -642,10 +642,10 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     }
     try {
       this.dbId = await this.#db.createTxn(this);
-    } catch (e) {
+    } catch (err) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
         at: 'BridgeTxn._createDbEntry',
-        error: e,
+        error: err,
         bridgeTxn: this,
       });
     }
@@ -673,7 +673,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
     // will raise err if current txnStatus is error.
     if (
-      ![
+      [
         BridgeTxnStatus.ERR_AWS_RDS_DB,
         BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
         BridgeTxnStatus.ERR_INITIALIZE,
