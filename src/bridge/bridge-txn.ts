@@ -244,22 +244,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       // for TS
       this.txnType = this._inferTxnType();
     }
-
-    // make sure fromTxnId is not reused
-    // possible improvement: make sure transaction is finished recently, check a wider range in db
-    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
-      this.fromTxnId,
-      this.txnType
-    );
-    if (dbEntryWithTxnId.length > 0) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
-      throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
-        at: 'BridgeTxn.confirmIncomingTxn',
-        bridgeTxn: this,
-        txnId: this.fromTxnId,
-      });
-    }
-
     await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
   }
 
@@ -640,6 +624,22 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         db: this.#db,
       });
     }
+
+    // make sure fromTxnId is not reused
+    // possible improvement: make sure transaction is finished recently, check a wider range in db
+    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
+      this.fromTxnId,
+      this.getTxnType()
+    );
+    if (dbEntryWithTxnId.length > 0) {
+      await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+      throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
+        at: 'BridgeTxn.confirmIncomingTxn',
+        bridgeTxn: this,
+        txnId: this.fromTxnId,
+      });
+    }
+
     try {
       this.dbId = await this.#db.createTxn(this);
     } catch (err) {
