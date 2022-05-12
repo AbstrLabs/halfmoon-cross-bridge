@@ -27,17 +27,20 @@ export {
   parseDbId,
   parseDbItem,
   parseMintApiParam,
-  parseDbItem,
-  parseBigInt,
 };
 
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
+import { logger } from './logger';
+
+/* NON-ZOD TYPES */
 
 type Stringer = {
   toString(): string;
 };
+
+/* ZOD TYPES (WITH PARSER) */
 
 function parseWithZod<T>(
   zodShaped: T,
@@ -47,7 +50,11 @@ function parseWithZod<T>(
   try {
     return zodParser.parse(zodShaped);
   } catch (err) {
-    throw new BridgeError(errorTemplate, { parseErrorDetail: err });
+    logger.error(err);
+    throw new BridgeError(errorTemplate, {
+      parsing: zodShaped,
+      parseErrorDetail: err,
+    });
   }
 }
 
