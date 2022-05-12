@@ -45,7 +45,7 @@ type BridgeConfig = {
 };
 
 /**
- * @classdesc Algorand blockchain wrapper, Implements {@link Blockchain}. with centralized account.
+ * @classdesc Algorand blockchain wrapper, with centralized account. Implements {@link Blockchain}.
  *
  * @param  {ClientParam} clientParam
  * @param  {IndexerParam} indexerParam
@@ -97,7 +97,7 @@ class AlgorandBlockchain extends Blockchain {
    * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
    *
    * @async
-   * @inheritdoc from {@link Blockchain}
+   * @inheritdoc {@link Blockchain}
    * @param  {AlgoTxnParam} txnParam - transaction parameters on algorand blockchain
    * @returns {Promise<AlgoAssetTransferTxnOutcome>} transaction outcome
    */
@@ -134,7 +134,7 @@ class AlgorandBlockchain extends Blockchain {
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
    * @async
-   * @inheritdoc from {@link Blockchain}
+   * @inheritdoc {@link Blockchain}
    * @param  {AlgoAssetTransferTxnOutcome} txnOutcome
    * @param  {AlgoTxnParam} algoTxnParam
    * @returns boolean
@@ -205,10 +205,11 @@ class AlgorandBlockchain extends Blockchain {
   }
 
   /**
-   * Send a transaction. Implements the abstract method in {@link Blockchain}.
+   * Send a transaction of the amount in `AlgoTxnParam` from centralized account to target in `AlgoTxnParam`.
+   * Implements the abstract method in {@link Blockchain}.
    *
    * @async
-   * @inheritdoc from {@link Blockchain}
+   * @inheritdoc {@link Blockchain}
    * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
    * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
    */
