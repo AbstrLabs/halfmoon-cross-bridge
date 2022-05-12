@@ -1,4 +1,5 @@
-/* Wrapping up AWS-RDS service */
+/* Wrapping up AWS-RDS service of postgreSQL into one singleton instance `postgres` */
+
 export { postgres, type Postgres };
 
 import { BridgeError, ERRORS } from '../utils/errors';

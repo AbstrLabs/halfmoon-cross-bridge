@@ -102,3 +102,10 @@ I assume you can find which file to add after reading this list.
 ### Unit test
 
 1. Test all functions. (All = 100% coverage.)
+
+## TODO
+
+### send an alert email when
+
+- db cannot connect.
+- db cannot query.

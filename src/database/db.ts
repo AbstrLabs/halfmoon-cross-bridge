@@ -1,6 +1,4 @@
-// TODO(alert): send an alert email when:
-// - db cannot connect.
-// - db cannot query.
+/* Export a singleton instance `db` to handle all database requests */
 
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -18,6 +16,12 @@ class Database {
   private mintTableName;
   private burnTableName;
 
+  /**
+   * Construct a database instance. Used as a singleton.
+   *
+   * @param  {Postgres} instance - a postgres instance
+   * @param  {{mintTableName:TableName;burnTableName:TableName}} tableNames - table names in the database
+   */
   constructor(
     instance: Postgres,
     tableNames: { mintTableName: TableName; burnTableName: TableName }
@@ -25,35 +29,63 @@ class Database {
     this.instance = instance;
     this.mintTableName = tableNames.mintTableName;
     this.burnTableName = tableNames.burnTableName;
-
-    // const trace = new Error().stack;
-    // this.__debugRandomId = Math.random().toString(36).substring(2, 15);
-    // console.log(
-    //   `DB with __debugRandomId: ${this.__debugRandomId} is created at ${trace}`
-    // );
   }
 
-  get isConnected() {
+  /**
+   * Wrapped getter of isConnected.
+   *
+   * @returns {boolean} true if connected, false otherwise
+   */
+  get isConnected(): boolean {
     return this.instance.isConnected;
   }
 
-  async connect() {
+  /**
+   * Connects to the database.
+   *
+   * @returns {Promise<void>} promise of `void`
+   */
+  async connect(): Promise<void> {
     await this.instance.connect();
   }
 
-  async query(query: string, params: unknown[] = []) {
-    // console.log('__debugRandomId : ', this.__debugRandomId); // DEV_LOG_TO_REMOVE
+  /**
+   * Generic database query method.
+   *
+   * @param {string} query a sql query string
+   * @param {any[]} params
+   *
+   * @returns {Promise<any[]>} query result
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async query(query: string, params: any[] = []): Promise<any[]> {
     return await this.instance.query(query, params);
   }
 
-  disconnect() {
+  /**
+   * Disconnects pool thread from the database.
+   *
+   * @returns {void} no return value
+   */
+  disconnect(): void {
     this.instance.disconnect();
   }
 
-  async end() {
+  /**
+   * Stop the database pool.
+   *
+   * @returns {Promise<void>} promise of `void`
+   */
+  async end(): Promise<void> {
     await this.instance.end();
   }
 
+  /**
+   * Create a new {@link BridgeTxn} in the database.
+   *
+   * @param   {BridgeTxn} bridgeTxn - a {@link BridgeTxn} to be inserted into the database
+   * @returns {Promise<DbId>}  promise of the created dbId
+   */
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
 
@@ -90,7 +122,7 @@ class Database {
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
-    this._verifyResultLength(result, { bridgeTxn });
+    this._verifyResultUniqueness(result, { bridgeTxn });
 
     const dbId = parseDbId(result[0].db_id);
     logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.getTxnType(), dbId));
@@ -98,6 +130,13 @@ class Database {
     return dbId;
   }
 
+  /**
+   * Read a {@link BridgeTxn} from the database with its ID.
+   *
+   * @param   {DbId} dbId - database primary key
+   * @param   {TxnType} txnType - transaction type, will search in the corresponding table
+   * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
+   */
   public async readTxn(dbId: DbId, txnType: TxnType): Promise<DbItem[]> {
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -115,6 +154,12 @@ class Database {
     return result;
   }
 
+  /**
+   * Update a {@link BridgeTxn} in the database. Only `txnStatus` and `toTxnId` can be updated:
+   *
+   * @param  {BridgeTxn} bridgeTxn - the {@link BridgeTxn} to be updated in the database
+   * @returns {Promise<DbId>} promise of the updated dbId
+   */
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
     // they are the only two fields that are allowed to change after created.
@@ -122,7 +167,7 @@ class Database {
 
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(bridgeTxn.txnType!);
+    const tableName = this._inferTableName(bridgeTxn.getTxnType());
     if (!this.isConnected) {
       await this.connect();
     }
@@ -152,28 +197,40 @@ class Database {
     ];
     const result = await this.query(query, params);
 
-    this._verifyResultLength(result, { bridgeTxn });
+    this._verifyResultUniqueness(result, { bridgeTxn });
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
     return parseDbId(result[0].db_id);
   }
 
+  /**
+   * Read a unique {@link BridgeTxn} from the database with its database primary key.
+   * @param  {DbId} dbId - database primary key
+   * @param  {TxnType} txnType - transaction type, will search in the corresponding table
+   * @returns {Promise<DbItem>} promise of the unique {@link DbItem} of the query result
+   */
   public async readUniqueTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
     // currently only used in test. not fixing.
     // should return an BridgeTxn
     // should use BridgeTxn.fromDbItem to convert to BridgeTxn
 
     const result = await this.readTxn(dbId, txnType);
-    this._verifyResultLength(result, { dbId });
+    this._verifyResultUniqueness(result, { dbId });
     const dbItem = parseDbItem(result[0]);
     return dbItem;
   }
-
+  /**
+   * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
+   *
+   * @param  {string} fromTxnId
+   * @param  {TxnType} txnType
+   * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
+   */
   public async readTxnFromTxnId(
-    txnId: string,
+    fromTxnId: string,
     txnType: TxnType
   ): Promise<DbItem[]> {
-    // next line: if null, will throw error.
+    // next line: if txnType is null, _inferTableName will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const tableName = this._inferTableName(txnType);
 
@@ -184,12 +241,22 @@ class Database {
     const query = `
       SELECT * FROM ${tableName} WHERE from_txn_id = $1;
     `;
-    const params = [txnId];
+    const params = [fromTxnId];
     const result = await this.query(query, params);
     return result;
   }
 
-  private async deleteTxn(dbId: DbId, txnType: TxnType) {
+  /* PRIVATE METHODS */
+
+  /**
+   * Unused for now.
+   *
+   * @private
+   * @param  {DbId} dbId
+   * @param  {TxnType} txnType
+   * @returns {Promise<void>} promise of `void`
+   */
+  private async deleteTxn(dbId: DbId, txnType: TxnType): Promise<void> {
     // never used.
 
     // const query = `
@@ -203,10 +270,14 @@ class Database {
       txnType,
     });
   }
-
-  // PRIVATE METHODS
-
-  private _inferTableName(txnType: TxnType) {
+  /**
+   * infer the table name from a transaction type.
+   *
+   * @private
+   * @param  {TxnType} txnType
+   * @returns {TableName} table name
+   */
+  private _inferTableName(txnType: TxnType): TableName {
     let tableName: TableName;
     if (txnType === TxnType.MINT) {
       tableName = this.mintTableName;
@@ -220,7 +291,17 @@ class Database {
     return tableName;
   }
 
-  private _verifyResultLength(result: unknown[], extraErrInfo?: object) {
+  /**
+   * Verify the length of the result is 1.
+   *
+   * @param  {unknown[]} result - query result to be verified
+   * @param  {object} extraErrInfo? - extra error info
+   * @returns {boolean} - true if result is not empty
+   */
+  private _verifyResultUniqueness(
+    result: unknown[],
+    extraErrInfo?: object
+  ): boolean {
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, extraErrInfo);
     }
@@ -235,18 +316,3 @@ const db = new Database(postgres, {
   mintTableName: TableName.MINT_TABLE_NAME,
   burnTableName: TableName.BURN_TABLE_NAME,
 });
-
-/* failed attempt on singleton for jest
-
-class DbSingleton {
-  private static instance: Database;
-
-  public static getInstance() {
-    if (DbSingleton.instance === undefined) {
-      DbSingleton.instance = new Database();
-    }
-    return DbSingleton.instance;
-  }
-}
-const db = DbSingleton.getInstance();
- */
