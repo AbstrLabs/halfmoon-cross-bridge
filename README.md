@@ -1,9 +1,16 @@
 # Algorand-NEAR-bridge
 
+Backend of the unidirectional bridge of Algorand <- NEAR with asset `goNEAR`.
+
 ## Implementation
 
 1. All amount and fee values are in unit of `10^-{GO_NEAR_DECIMALS}` goNEAR/NEAR, where `env.GO_NEAR_DECIMALS` is the number of decimal places in the goNEAR token (using 10).
 2. Using bigint for atomic unit (`atomAmount`) of cryptocurrency after api call.
+3. We have 3 units of the NEAR token:
+   1. plain NEAR token: 1 of this unit == 1 NEAR == 1 goNEAR.
+   2. `atomNEAR`: atomic unit of the goNEAR token. 1 of this unit == 1e-10 goNEAR == 1e-10 NEAR.
+   3. `yoctoNEAR`: atomic unit of the NEAR token. 1 of this unit == 1e-24 goNEAR == 1e-24 NEAR. We cannot implement this to `goNEAR`.
+   4. Most numbers (and all bigint type) in this repo is in unit of `atomNEAR`.
 
 ## Contribute
 
@@ -21,6 +28,10 @@ To run this locally, the `.env` file is required.
 
 1. To run the example frontend (we'll have a better frontend soon), use `yarn dev` command.
 2. The pre-push `git hook` will run `yarn jest --onlyChanged` which may contain a mint and a burn transaction. We need transfer back the money (from fee in the MASTER_ACC on each blockchain) when the centralized accounts hold too much transaction fee. (maybe automate this later)
+
+### Code-style
+
+1. we don't use nude `process.env`. Instead, use `ENV` from `src/utils/dotenv.ts`
 
 ### Current Structure
 

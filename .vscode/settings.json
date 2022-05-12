@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["commitlint", "tsnd"]
+  "cSpell.words": [
+    "commitlint",
+    "EXAMPL",
+    "PGDATABASE",
+    "PGHOST",
+    "PGPASSWORD",
+    "PGPORT",
+    "PGUSER",
+    "tsnd"
+  ]
 }
