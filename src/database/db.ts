@@ -1,4 +1,6 @@
-/* Export a singleton instance `db` to handle all database requests */
+/**
+ * Export a singleton instance `db` to handle all database requests
+ */
 
 export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -11,17 +13,17 @@ import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
 import { TableName } from '.';
 
+/**
+ * A database class to handle all database requests. Should be used as a singleton.
+ *
+ * @param  {Postgres} instance - an instance of {@link Postgres}
+ * @param  {{mintTableName:TableName;burnTableName:TableName}} tableNames - table names in the database
+ */
 class Database {
   private instance;
   private mintTableName;
   private burnTableName;
 
-  /**
-   * Construct a database instance. Used as a singleton.
-   *
-   * @param  {Postgres} instance - a postgres instance
-   * @param  {{mintTableName:TableName;burnTableName:TableName}} tableNames - table names in the database
-   */
   constructor(
     instance: Postgres,
     tableNames: { mintTableName: TableName; burnTableName: TableName }
@@ -43,6 +45,7 @@ class Database {
   /**
    * Connects to the database.
    *
+   * @async
    * @returns {Promise<void>} promise of `void`
    */
   async connect(): Promise<void> {
@@ -52,9 +55,9 @@ class Database {
   /**
    * Generic database query method.
    *
+   * @async
    * @param {string} query a sql query string
    * @param {any[]} params
-   *
    * @returns {Promise<any[]>} query result
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,6 +77,7 @@ class Database {
   /**
    * Stop the database pool.
    *
+   * @async
    * @returns {Promise<void>} promise of `void`
    */
   async end(): Promise<void> {
@@ -83,6 +87,7 @@ class Database {
   /**
    * Create a new {@link BridgeTxn} in the database.
    *
+   * @async
    * @param   {BridgeTxn} bridgeTxn - a {@link BridgeTxn} to be inserted into the database
    * @returns {Promise<DbId>}  promise of the created dbId
    */
@@ -133,6 +138,7 @@ class Database {
   /**
    * Read a {@link BridgeTxn} from the database with its ID.
    *
+   * @async
    * @param   {DbId} dbId - database primary key
    * @param   {TxnType} txnType - transaction type, will search in the corresponding table
    * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
@@ -157,6 +163,7 @@ class Database {
   /**
    * Update a {@link BridgeTxn} in the database. Only `txnStatus` and `toTxnId` can be updated:
    *
+   * @async
    * @param  {BridgeTxn} bridgeTxn - the {@link BridgeTxn} to be updated in the database
    * @returns {Promise<DbId>} promise of the updated dbId
    */
@@ -205,6 +212,8 @@ class Database {
 
   /**
    * Read a unique {@link BridgeTxn} from the database with its database primary key.
+   *
+   * @async
    * @param  {DbId} dbId - database primary key
    * @param  {TxnType} txnType - transaction type, will search in the corresponding table
    * @returns {Promise<DbItem>} promise of the unique {@link DbItem} of the query result
@@ -222,6 +231,7 @@ class Database {
   /**
    * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
    *
+   * @async
    * @param  {string} fromTxnId
    * @param  {TxnType} txnType
    * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
@@ -251,6 +261,7 @@ class Database {
   /**
    * Unused for now.
    *
+   * @async
    * @private
    * @param  {DbId} dbId
    * @param  {TxnType} txnType

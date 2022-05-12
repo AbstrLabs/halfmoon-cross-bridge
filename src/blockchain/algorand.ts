@@ -1,9 +1,12 @@
-/* Algorand functionalities wrapped up with our centralized account */
+/**
+ * Algorand functionalities wrapped up with our centralized account
+ */
+
 export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoMnemonic, AlgoTxnId } from '.';
+import { AlgoAcc, AlgoAddr, AlgoTxnId } from '.';
 import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
 import {
   AsaConfig,
@@ -38,9 +41,16 @@ type IndexerParam = {
 type BridgeConfig = {
   centralizedAssetId: number;
   centralizedAddr: AlgoAddr;
-  centralizedPassPhrase: string;
+  centralizedAccPassPhrase: string;
 };
 
+/**
+ * @classdesc Algorand blockchain wrapper, Implements {@link Blockchain}. with centralized account.
+ *
+ * @param  {ClientParam} clientParam
+ * @param  {IndexerParam} indexerParam
+ * @param  {BridgeConfig} bridgeConfig
+ */
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
@@ -63,7 +73,7 @@ class AlgorandBlockchain extends Blockchain {
     this.centralizedAssetId = bridgeConfig.centralizedAssetId;
     this.centralizedAddr = bridgeConfig.centralizedAddr;
     this.centralizedAcc = algosdk.mnemonicToSecretKey(
-      bridgeConfig.centralizedPassPhrase
+      bridgeConfig.centralizedAccPassPhrase
     );
     const algodClientParamSource = clientParam;
     const algoIndexerParamSource = indexerParam;
@@ -83,6 +93,14 @@ class AlgorandBlockchain extends Blockchain {
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
+  /**
+   * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
+   *
+   * @async
+   * @inheritdoc from {@link Blockchain}
+   * @param  {AlgoTxnParam} txnParam - transaction parameters on algorand blockchain
+   * @returns {Promise<AlgoAssetTransferTxnOutcome>} transaction outcome
+   */
   async getTxnStatus(
     txnParam: AlgoTxnParam
   ): Promise<AlgoAssetTransferTxnOutcome> {
@@ -112,6 +130,15 @@ class AlgorandBlockchain extends Blockchain {
     // );
   }
 
+  /**
+   * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
+   *
+   * @async
+   * @inheritdoc from {@link Blockchain}
+   * @param  {AlgoAssetTransferTxnOutcome} txnOutcome
+   * @param  {AlgoTxnParam} algoTxnParam
+   * @returns boolean
+   */
   verifyCorrectness(
     txnOutcome: AlgoAssetTransferTxnOutcome,
     algoTxnParam: AlgoTxnParam
@@ -176,11 +203,28 @@ class AlgorandBlockchain extends Blockchain {
     }
     return true;
   }
+
+  /**
+   * Send a transaction. Implements the abstract method in {@link Blockchain}.
+   *
+   * @async
+   * @inheritdoc from {@link Blockchain}
+   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
+   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
+   */
   async makeOutgoingTxn(algoTxnParam: AlgoTxnParam): Promise<AlgoTxnId> {
     // abstract class implementation.
     // txnId, fromAddr are never used
     return await this._makeGoNearTxnFromAdmin(algoTxnParam);
   }
+
+  /**
+   * Send a transaction of goNEAR from admin to the target address.
+   *
+   * @async
+   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
+   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
+   */
   protected async _makeGoNearTxnFromAdmin(
     algoTxnParam: AlgoTxnParam
     // txnId, fromAddr are never used
@@ -197,12 +241,21 @@ class AlgorandBlockchain extends Blockchain {
     );
   }
 
+  /**
+   * Send a transaction of ASA. Using example from algorand documentation (modified).
+   *
+   * @tutorial https://developer.algorand.org/docs/sdks/javascript/#complete-example
+   * @async
+   * @param  {AlgoTxnParam} algoTxnParam
+   * @param  {AlgoAcc} senderAccount
+   * @param  {number} asaId
+   * @returns Promise
+   */
   protected async _makeAsaTxn(
     algoTxnParam: AlgoTxnParam,
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxnId> {
-    // modified from https://developer.algorand.org/docs/sdks/javascript/#complete-example
     const params = await this.defaultTxnParamsPromise;
     // comment out the next two lines to use suggested fee
     // params.fee = algosdk.ALGORAND_MIN_TXN_FEE;
@@ -267,12 +320,25 @@ class AlgorandBlockchain extends Blockchain {
 
   /* Methods below are designed to run once */
 
-  protected async _createGoNearWithAdmin() {
-    this._createAsaWithMnemonic(noParamGoNearConfig, ENV.ALGO_MASTER_PASS);
+  /**
+   *  Create a new asset on algorand.
+   *
+   * @async
+   * @returns {Promise<void>} promise of void
+   */
+  protected async _createGoNearWithAdmin(): Promise<void> {
+    this._createAsaWithAccount(noParamGoNearConfig, this.centralizedAcc);
   }
-  protected async _genAcc() {
+
+  /**
+   * Create a new account on algorand.
+   *
+   * @async
+   * @returns {Promise<AlgoAcc>} promise of {@link AlgoAcc} account created
+   */
+  protected async _genAcc(): Promise<AlgoAcc> {
     // tested, used only once
-    const algoAcc = algosdk.generateAccount();
+    const algoAcc: AlgoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
     const account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
     logger.warn('Account Mnemonic = ' + account_mnemonic);
@@ -281,22 +347,26 @@ class AlgorandBlockchain extends Blockchain {
     logger.warn('https://dispenser.testnet.aws.algodev.network/ ');
     return algoAcc;
   }
-  protected async _createAsaWithMnemonic(
+
+  /**
+   * @param  {NoParamAsaConfig} noParamAsaConfig
+   * @param  {AlgoAcc} creatorAccount
+   */
+  protected async _createAsaWithAccount(
     // tested, used once
     // modified from https://developer.algorand.org/docs/get-details/asa/
     noParamAsaConfig: NoParamAsaConfig,
-    creatorMnemonic: AlgoMnemonic
+    creatorAccount: AlgoAcc
   ) {
     const asaConfigWithSuggestedParams: AsaConfig = {
       ...noParamAsaConfig,
       suggestedParams: await this.defaultTxnParamsPromise,
     };
-    const createTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
+    const createdTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
       asaConfigWithSuggestedParams
     );
-    const creatorSk = algosdk.mnemonicToSecretKey(creatorMnemonic).sk;
-    const recoveredAccount1 = { sk: creatorSk };
-    const rawSignedTxn = createTxn.signTxn(recoveredAccount1.sk);
+
+    const rawSignedTxn = createdTxn.signTxn(creatorAccount.sk);
     const tx = await this.client.sendRawTransaction(rawSignedTxn).do();
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     noParamAsaConfig.assetId = ptx['asset-index'];
@@ -311,7 +381,54 @@ class AlgorandBlockchain extends Blockchain {
   }
 }
 
-// For jest only, to expose _makeAsaTxn but not class AlgorandBlockchain
+const PURE_STAKE_CLIENT = {
+  token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
+  port: '', // from https://developer.purestake.io/code-samples
+};
+const PURE_STAKE_DAEMON_CLIENT_TESTNET = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/ps2',
+};
+const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
+  ...PURE_STAKE_CLIENT,
+  server: 'https://testnet-algorand.api.purestake.io/idx2',
+};
+
+let clientParam: ClientParam,
+  indexerParam: IndexerParam,
+  bridgeConfig: BridgeConfig;
+
+if (ENV.ALGO_NETWORK === 'testnet') {
+  clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
+  indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
+  bridgeConfig = {
+    centralizedAssetId: ENV.TEST_NET_GO_NEAR_ASSET_ID,
+    centralizedAddr: ENV.ALGO_MASTER_ADDR,
+    centralizedAccPassPhrase: ENV.ALGO_MASTER_PASS,
+  };
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
+    blockchainName: BlockchainName.ALGO,
+    network: ENV.ALGO_NETWORK,
+    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+  });
+}
+
+const algoBlockchain = new AlgorandBlockchain(
+  clientParam,
+  indexerParam,
+  bridgeConfig
+);
+
+/**
+ * @classdesc AlgorandBlockchain subclass only for jest, to expose _makeAsaTxn
+ *
+ * @param  {ClientParam} clientParam
+ * @param  {IndexerParam} indexerParam
+ * @param  {BridgeConfig} bridgeConfig
+ *
+ * @todo move to test helper
+ */
 class TestAlgo extends AlgorandBlockchain {
   constructor(
     clientParam: ClientParam,
@@ -348,43 +465,4 @@ class TestAlgo extends AlgorandBlockchain {
     );
   }
 }
-
-const PURE_STAKE_CLIENT = {
-  token: { 'X-API-Key': ENV.PURE_STAKE_API_KEY },
-  port: '', // from https://developer.purestake.io/code-samples
-};
-const PURE_STAKE_DAEMON_CLIENT_TESTNET = {
-  ...PURE_STAKE_CLIENT,
-  server: 'https://testnet-algorand.api.purestake.io/ps2',
-};
-const PURE_STAKE_INDEXER_CLIENT_TESTNET = {
-  ...PURE_STAKE_CLIENT,
-  server: 'https://testnet-algorand.api.purestake.io/idx2',
-};
-
-let clientParam: ClientParam,
-  indexerParam: IndexerParam,
-  bridgeConfig: BridgeConfig;
-
-if (ENV.ALGO_NETWORK === 'testnet') {
-  clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
-  indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
-  bridgeConfig = {
-    centralizedAssetId: ENV.TEST_NET_GO_NEAR_ASSET_ID,
-    centralizedAddr: ENV.ALGO_MASTER_ADDR,
-    centralizedPassPhrase: ENV.ALGO_MASTER_PASS,
-  };
-} else {
-  throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
-    blockchainName: BlockchainName.ALGO,
-    network: ENV.ALGO_NETWORK,
-    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
-  });
-}
-
-const algoBlockchain = new AlgorandBlockchain(
-  clientParam,
-  indexerParam,
-  bridgeConfig
-);
 const testAlgo = new TestAlgo(clientParam, indexerParam, bridgeConfig);

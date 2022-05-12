@@ -11,7 +11,6 @@ export {
   TxnType,
   type AlgoAcc,
   type AlgoAddr,
-  type AlgoMnemonic,
   type AlgoTxnId,
   type AlgoTxnOutcome,
   type GenericAcc,
@@ -39,7 +38,6 @@ import {
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type AlgoMnemonic = string;
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
 type GenericAcc = AlgoAcc | NearAcc;
