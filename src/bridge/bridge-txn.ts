@@ -383,6 +383,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   }
 
   public getDbId(): number {
+    // TODO: this is not used in production. But it's incorrect because it
+    // ++ should always throw error. However, we can have a #isInitialized
+    // ++ and make it true when _isInitializedPromise is settled. In this
+    // ++ way it should work
+
     let isInitialized = false;
     this._isInitializedPromise.then(() => {
       isInitialized = true;

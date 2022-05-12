@@ -1,6 +1,7 @@
 // load and parse .env file
 // TODO: 1. separate ENV file to a new variable instead of exporting all.
-// TODO: 1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
+//  1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
+//  1. I dont know where this was shown, maybe in console.log(ENV)?
 
 export { loadDotEnv, ENV };
 
@@ -71,3 +72,8 @@ const secret_ENV = {
 const parsed_ENV = loadDotEnv();
 
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
+
+// validate in dotenv that ENV.ALGO_NETWORK is same as ENV.NEAR_NETWORK
+if (ENV.ALGO_NETWORK !== ENV.NEAR_NETWORK) {
+  throw new BridgeError(ERRORS.INTERNAL.NETWORK_MISMATCH);
+}

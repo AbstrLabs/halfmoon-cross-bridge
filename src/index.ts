@@ -1,5 +1,3 @@
-// TODO: validate in dotenv that ENV.ALGO_NETWORK is same as ENV.NEAR_NETWORK
-
 export { BlockchainName, BridgeTxnStatus };
 
 enum BlockchainName {

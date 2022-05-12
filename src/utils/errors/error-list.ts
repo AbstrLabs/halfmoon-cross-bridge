@@ -169,6 +169,11 @@ const internalErrors = {
       'Trying to overwrite error status in in bridge transaction status.' +
       'When a bridge transaction has error status, manual fix is needed.',
   },
+  NETWORK_MISMATCH: {
+    errId: 220,
+    name: 'Network Mismatch',
+    message: 'Network (testnet / mainnet) mismatch',
+  },
 };
 
 const externalErrors = {
@@ -225,8 +230,8 @@ const externalErrors = {
 };
 
 const ERRORS = {
-  INTERNAL: internalErrors,
   API: apiCallErrors,
+  INTERNAL: internalErrors,
   EXTERNAL: externalErrors,
 };
 
