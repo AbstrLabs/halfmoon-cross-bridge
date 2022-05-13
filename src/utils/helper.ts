@@ -1,9 +1,14 @@
-export { ensureString, setImmediateInterval, sleep, optionalBigInt };
+export { ensureString, setImmediateInterval };
 
 import { BridgeError, ERRORS } from './errors';
 
-import { Biginter } from './type';
-
+/**
+ * Ensure that the given value is a string.
+ *
+ * @throws {ERRORS.INTERNAL.TYPE_ERROR} if the value is not a string
+ * @param  {unknown} value - the value to check
+ * @returns {string} the value as a string
+ */
 function ensureString(value: unknown): string {
   if (typeof value !== 'string') {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
@@ -14,25 +19,17 @@ function ensureString(value: unknown): string {
   return value as string;
 }
 
+/**
+ * Set an interval whose callback will be called immediately.
+ *
+ * @param  {()=>unknown} func - the callback to call
+ * @param  {number} interval - the interval in milliseconds
+ * @returns {NodeJS.Timer} object same as setInterval
+ */
 function setImmediateInterval(
   func: () => unknown,
   interval: number
 ): NodeJS.Timer {
   func();
   return setInterval(func, interval);
-}
-
-const sleep = (milliseconds: number) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
-
-// TODO(test): ADD TEST
-function optionalBigInt(value: Biginter): bigint;
-function optionalBigInt(value: undefined): undefined;
-function optionalBigInt(value: Biginter | undefined): bigint | undefined {
-  if (value === undefined) {
-    return undefined;
-  } else {
-    return BigInt(value);
-  }
 }

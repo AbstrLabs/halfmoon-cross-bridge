@@ -1,3 +1,8 @@
+/**
+ * Helper function to convert between different formats, like units of NEAR, type of object, etc.
+ *
+ * typed with @throws
+ */
 export {
   toGoNearAtom,
   stringifyObjWithBigint,
@@ -12,7 +17,16 @@ import { literals } from './literals';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
 
-// goNear related
+/* UNIT CONVERSION OF goNear */
+
+/**
+ * Convert a human-readable string or number of NEAR amount to a bigint of atomNEAR.
+ * Throw Error if input is not valid.
+ *
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR}
+ * @param  {string|number} goNearPlain - a human readable string of goNear
+ * @return {bigint} - a bigint representation of the goNear
+ */
 function toGoNearAtom(goNearPlain: string | number): bigint {
   // TODO: l10n: temp-fix: added an regex to make sure that the input is in correct format
   // l10n: this only converts 1,234,567.0123456789 to 12345670123456789
@@ -52,9 +66,10 @@ function toGoNearAtom(goNearPlain: string | number): bigint {
 }
 
 /**
- * Removes leading zeroes from an input
- * @param value A value that may contain leading zeroes
- * @returns string The value without the leading zeroes
+ * Remove leading zeroes from an input.
+ *
+ * @param {string} value a value that may contain leading zeroes
+ * @returns {string} the value without the leading zeroes
  */
 function trimLeadingZeroes(value: string): string {
   // from https://github.com/near/near-api-js/blob/6f83d39f47624b4223746c0d27d10f78471575f7/src/utils/format.ts#L83-L88
@@ -65,6 +80,17 @@ function trimLeadingZeroes(value: string): string {
   return value;
 }
 
+/**
+ * Convert a human string of yoctoNEAR amount to a bigint of atomNEAR.
+ *
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR}
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT}
+ * @param  {string|number|bigint} yoctoNear
+ * @returns {bigint} a bigint representation of the atomNEAR.
+ *
+ * @todo rename to yoctoNearToAtomNear
+ *
+ */
 function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
   // format to string
   let yoctoNearStr: string;
@@ -111,24 +137,29 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
   return toGoNearAtom(nearPlain);
 }
 
-// TODO(test): ADD TEST
+/**
+ * Convert atomNEAR to yoctoNear.
+ *
+ * @param  {bigint} atom - a bigint representation of the atomNEAR
+ * @returns {string} a string of yoctoNEAR amount
+ *
+ * @todo rename to atomNearToYoctoNear
+ * @todo add test
+ */
 function atomToYoctoNear(atom: bigint): string {
   const coeStr = '0'.repeat(24 - ENV.GO_NEAR_DECIMALS);
   return atom.toString() + coeStr;
 }
 
-// TODO(test): ADD TEST
-// function stringifyObjWithBigint(obj?: object): string {
-//   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
-//   if (!obj) {
-//     return '';
-//   }
-//   return JSON.stringify(
-//     obj,
-//     (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
-//   );
-// }
-
+/**
+ * JSON.stringify() an object with bigint without serializing problem.
+ *
+ *
+ * @param  {object} obj?
+ * @returns {string}
+ *
+ * @todo add test
+ */
 function stringifyObjWithBigint(obj?: object): string {
   if (!obj) {
     return '';
@@ -137,6 +168,12 @@ function stringifyObjWithBigint(obj?: object): string {
 }
 type Obj = Record<string, unknown>;
 
+/**
+ * Stringify all bigint in an object recursively.
+ *
+ * @param  {object} obj
+ * @returns object
+ */
 function stringifyBigintInObj(obj: object): object {
   const newObj: Obj = { ...obj };
   for (const [key, value] of Object.entries(obj)) {
@@ -150,7 +187,21 @@ function stringifyBigintInObj(obj: object): object {
   }
   return newObj;
 }
-/* 
+
+/* two older versions of stringifyObjWithBigint
+
+function stringifyObjWithBigint(obj?: object): string {
+  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
+  if (!obj) {
+    return '';
+  }
+  return JSON.stringify(
+    obj,
+    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+  );
+}
+
+
 function stringifyObjWithBigint(obj?: object): string {
   // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
   if (obj === undefined) {

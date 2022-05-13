@@ -7,9 +7,9 @@ Backend of the unidirectional bridge of Algorand <- NEAR with asset `goNEAR`.
 1. All amount and fee values are in unit of `10^-{GO_NEAR_DECIMALS}` goNEAR/NEAR, where `env.GO_NEAR_DECIMALS` is the number of decimal places in the goNEAR token (using 10).
 2. Using bigint for atomic unit (`atomAmount`) of cryptocurrency after api call.
 3. We have 3 units of the NEAR token:
-   1. plain NEAR token: 1 of this unit == 1 NEAR == 1 goNEAR.
-   2. `atomNEAR`: atomic unit of the goNEAR token. 1 of this unit == 1e-10 goNEAR == 1e-10 NEAR.
-   3. `yoctoNEAR`: atomic unit of the NEAR token. 1 of this unit == 1e-24 goNEAR == 1e-24 NEAR. We cannot implement this to `goNEAR`.
+   1. plain NEAR token: 1 of this unit == 1 NEAR == 1 goNEAR. Usually stored in type `string` or `number`.
+   2. `atomNEAR`: atomic unit of the goNEAR token. 1 of this unit == 1e-10 goNEAR == 1e-10 NEAR. Usually stored in type `bigint`.
+   3. `yoctoNEAR`: atomic unit of the NEAR token. 1 of this unit == 1e-24 goNEAR == 1e-24 NEAR. We cannot implement this to `goNEAR`. Usually stored in type `string`.
    4. Most numbers (and all bigint type) in this repo is in unit of `atomNEAR`.
 
 ## Contribute

@@ -1,4 +1,6 @@
-/* This file stores the config of all used ASA: Algorand Standard Asset(s) */
+/**
+ * This file stores the config of all used ASA: Algorand Standard Asset(s)
+ */
 
 export { type AsaConfig, type NoParamAsaConfig, noParamGoNearConfig };
 

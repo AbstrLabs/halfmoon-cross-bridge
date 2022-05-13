@@ -1,3 +1,9 @@
+/**
+ * All the literal templates used in the application.
+ * Try to gather all strings in one place (here).
+ *
+ * named literals instead of literal to avoid conflict with zod package.
+ */
 export { literals };
 
 import { Stringer } from './type';

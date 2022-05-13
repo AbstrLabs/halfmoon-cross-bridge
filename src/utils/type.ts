@@ -1,4 +1,5 @@
-/** Zod parser (verifier) and the derived Typescript Types
+/**
+ * Zod parser (verifier) and the derived Typescript Types
  * All Zod related types should be here.
  */
 

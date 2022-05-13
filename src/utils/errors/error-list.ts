@@ -1,3 +1,6 @@
+/**
+ * Instead of native Error(). We use BridgeError(). This file stores all the error templates.
+ */
 export { ERRORS };
 
 const apiCallErrors = {

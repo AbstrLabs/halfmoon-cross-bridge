@@ -1,9 +1,12 @@
-// load and parse .env file
-// TODO: 1. separate ENV file to a new variable instead of exporting all.
-//  1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
-//  1. I dont know where this was shown, maybe in console.log(ENV)?
+/**
+ * load and parse .env file
+ *
+ * @todo 1. separate ENV file to a new variable instead of exporting all.
+ * 1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
+ * 1. I dont know where this was shown, maybe in console.log(ENV)?
+ */
 
-export { parseDotEnv, ENV };
+export { ENV };
 
 import { BridgeError, ERRORS } from './errors';
 
@@ -12,9 +15,10 @@ import dpv from 'dotenv-parse-variables';
 import { literals } from './literals';
 
 /**
- * @returns dpv.ParsedVariables
+ * Load and Parse .env file.
+ *
+ * @returns {dpv.ParsedVariables} parsed .env variables
  */
-
 function parseDotEnv(): dpv.ParsedVariables {
   const env = config();
   if (env.parsed === undefined) {
