@@ -1,5 +1,7 @@
 /**
  * Export a singleton instance `db` to handle all database requests
+ *
+ * @exports db
  */
 
 export { db };

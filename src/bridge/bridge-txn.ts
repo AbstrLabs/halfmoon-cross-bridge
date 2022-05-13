@@ -450,7 +450,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     }
   }
 
-  /* PRIVATE METHODS - CLASS INIT */
+  /**  PRIVATE METHODS - CLASS INIT  **/
 
   /**
    * Initiate the BridgeTxn.
@@ -460,7 +460,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @private
-   * @param {BridgeTxnInitOptions} [options] the options for initiating the {@link BridgeTxn}
+   * @param {InitializeOptions} initializeOptions - [optional] the options for initiating the {@link BridgeTxn}
    * @returns {Promise<BridgeTxn>} the initiated {@link BridgeTxn}
    *
    * @todo try to fix the readonly
@@ -747,7 +747,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @private
-   * @returns Promise
+   * @returns {Promise<DbId>} the id of the created {@link BridgeTxn}
    */
   private async _createInDb(): Promise<DbId> {
     if (!this.#db.isConnected) {
@@ -757,7 +757,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    // make sure fromTxnId is not reused
+    // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
     const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
       this.fromTxnId,

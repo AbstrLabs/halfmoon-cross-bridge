@@ -75,19 +75,17 @@ class AlgorandBlockchain extends Blockchain {
     this.centralizedAcc = algosdk.mnemonicToSecretKey(
       bridgeConfig.centralizedAccPassPhrase
     );
-    const algodClientParamSource = clientParam;
-    const algoIndexerParamSource = indexerParam;
 
     this.client = new AlgodClient(
-      algodClientParamSource.token,
-      algodClientParamSource.server,
-      algodClientParamSource.port
+      clientParam.token,
+      clientParam.server,
+      clientParam.port
     );
 
     this.indexer = new Indexer(
-      algoIndexerParamSource.token,
-      algoIndexerParamSource.server,
-      algoIndexerParamSource.port
+      indexerParam.token,
+      indexerParam.server,
+      indexerParam.port
     );
 
     this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
@@ -133,7 +131,6 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
-   * @async
    * @inheritdoc {@link Blockchain}
    * @param  {AlgoAssetTransferTxnOutcome} txnOutcome
    * @param  {AlgoTxnParam} algoTxnParam
@@ -244,13 +241,13 @@ class AlgorandBlockchain extends Blockchain {
 
   /**
    * Send a transaction of ASA. Using example from algorand documentation (modified).
-   *
    * @tutorial https://developer.algorand.org/docs/sdks/javascript/#complete-example
+   *
    * @async
    * @param  {AlgoTxnParam} algoTxnParam
    * @param  {AlgoAcc} senderAccount
    * @param  {number} asaId
-   * @returns Promise
+   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
    */
   protected async _makeAsaTxn(
     algoTxnParam: AlgoTxnParam,
@@ -350,15 +347,19 @@ class AlgorandBlockchain extends Blockchain {
   }
 
   /**
+   * Create a new asset on algorand with the given account.
+   *
+   * @async
    * @param  {NoParamAsaConfig} noParamAsaConfig
    * @param  {AlgoAcc} creatorAccount
+   * @returns {Promise<NoParamAsaConfig>} the asa config created
    */
   protected async _createAsaWithAccount(
     // tested, used once
     // modified from https://developer.algorand.org/docs/get-details/asa/
     noParamAsaConfig: NoParamAsaConfig,
     creatorAccount: AlgoAcc
-  ) {
+  ): Promise<NoParamAsaConfig> {
     const asaConfigWithSuggestedParams: AsaConfig = {
       ...noParamAsaConfig,
       suggestedParams: await this.defaultTxnParamsPromise,
