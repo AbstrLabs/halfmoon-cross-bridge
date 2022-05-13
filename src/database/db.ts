@@ -161,17 +161,17 @@ class Database {
   }
 
   /**
-   * Update a {@link BridgeTxn} in the database. Only `txnStatus` and `toTxnId` can be updated:
+   * Update a {@link BridgeTxn} in the database. Only `txnStatus` and `toTxnId` can be updated.
+   *
+   * This action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
+   * They are the only two fields that are allowed to change after created.
+   * Will raise err if other fields mismatch.
    *
    * @async
    * @param  {BridgeTxn} bridgeTxn - the {@link BridgeTxn} to be updated in the database
    * @returns {Promise<DbId>} promise of the updated dbId
    */
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
-    // this action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
-    // they are the only two fields that are allowed to change after created.
-    // will raise err if data mismatch.
-
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const tableName = this._inferTableName(bridgeTxn.getTxnType());
