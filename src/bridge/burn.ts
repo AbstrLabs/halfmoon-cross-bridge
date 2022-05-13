@@ -1,3 +1,6 @@
+/**
+ * @exports burn - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for burning and execute the transaction.
+ */
 export { burn };
 
 import { BridgeTxn, BridgeTxnObject } from '.';
@@ -7,6 +10,13 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
+/**
+ * Create a {@link BridgeTxn} instance from {@link BurnApiParam} for burning and execute the transaction.
+ *
+ * @async
+ * @param  {BurnApiParam} burnApiParam
+ * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
+ */
 async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxnObject> {
   logger.info(
     literals.START_MINTING(
