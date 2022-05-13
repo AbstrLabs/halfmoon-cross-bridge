@@ -1,4 +1,5 @@
-/** Zod parser (verifier) and the derived Typescript Types
+/**
+ * Zod parser (verifier) and the derived Typescript Types
  * All Zod related types should be here.
  */
 
@@ -42,6 +43,15 @@ type Stringer = {
 
 /* ZOD TYPES (WITH PARSER) */
 
+/**
+ * Parses the given object with the given Zod schema.
+ * If the parsing fails, throws a {@link BridgeError} with the given {@link ErrorTemplate}.
+ *
+ * @param  {T} zodShaped
+ * @param  {z.ZodType} zodParser
+ * @param  {ErrorTemplate} errorTemplate
+ * @returns T
+ */
 function parseWithZod<T>(
   zodShaped: T,
   zodParser: z.ZodType,

@@ -1,4 +1,10 @@
-/* Wrapping up AWS-RDS service */
+/**
+ * Wrapping up AWS-RDS service of postgreSQL into one singleton instance `postgres`
+ *
+ * @exports postgres
+ * @typedef {Postgres} : Class {@link Postgres}
+ */
+
 export { postgres, type Postgres };
 
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -15,6 +21,12 @@ type PgConfig = {
   port: number;
 };
 
+/**
+ * Wrap up AWS-RDS service of postgreSQL into one singleton instance `postgres`.
+ * @classdesc A class for AWS-RDS,  singleton instance of postgres.
+ *
+ * @param  {PgConfig} pgConfig
+ */
 class Postgres {
   // private readonly pgConfig = getEnvConfig();
   private client?: PoolClient;
@@ -25,7 +37,13 @@ class Postgres {
     this.pool = new Pool(pgConfig);
   }
 
-  async connect() {
+  /**
+   * Connect to the database.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async connect(): Promise<void> {
     if (this.isConnected) {
       logger.verbose('db is already connected');
       return;
@@ -38,7 +56,16 @@ class Postgres {
     logger.info('database connected');
   }
 
-  async query(query: string, params: unknown[] = []) {
+  /**
+   * Generic query method.
+   *
+   * @async
+   * @param  {string} query - SQL query string
+   * @param  {unknown[]} params - parameters for the query
+   * @returns  {Promise<any[]>} result of the query.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async query(query: string, params: unknown[] = []): Promise<any[]> {
     if (!this.isConnected || !this.client) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED);
       // await this.connect();
@@ -48,7 +75,12 @@ class Postgres {
     return res.rows;
   }
 
-  disconnect() {
+  /**
+   * Disconnect thread from the database POOL.
+   *
+   * @returns {void} void
+   */
+  disconnect(): void {
     if (this.isConnected) {
       if (!this.client) {
         throw new BridgeError(ERRORS.INTERNAL.DB_CLASS_LOGIC_ERROR);
@@ -58,14 +90,28 @@ class Postgres {
     }
   }
 
-  async end() {
+  /**
+   * End the database pool connection.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async end(): Promise<void> {
     if (this.isConnected) {
       this.disconnect();
     }
     await this.pool.end();
   }
 
-  async _connectionTest() {
+  /**
+   * Create a new database table.
+   * Only for testing purpose.
+   *
+   * @async
+   * @returns Promise
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async _connectionTest(): Promise<any> {
     await this.connect();
     const res = await this.query('SELECT $1::text as message', [
       'Hello world!',

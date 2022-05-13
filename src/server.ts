@@ -108,10 +108,10 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
     bridgeTxnObject = await mint(mintApiParam);
     logger.info(literals.DONE_MINT);
     res.end();
-  } catch (e) {
+  } catch (err) {
     res.status(400).send('Missing required query params');
     res.end();
-    throw e;
+    throw err;
   }
   return bridgeTxnObject;
 }
@@ -132,10 +132,10 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   try {
     bridgeTxnObject = await burn(burnApiParam);
     logger.info(literals.DONE_BURN);
-  } catch (e) {
+  } catch (err) {
     res.status(400).send('Missing required query params');
     res.end();
-    throw e;
+    throw err;
   }
   return bridgeTxnObject;
 }

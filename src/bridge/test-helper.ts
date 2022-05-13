@@ -1,3 +1,9 @@
+/**
+ * Test helper used across tests.
+ *
+ * @todo: move to utils/test
+ */
+
 export { transferOnNearTestnetFromExampleToMaster };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
@@ -5,6 +11,14 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 
+/**
+ * Transfer testnet NEAR faucet from example account to master account.
+ * @inheritdoc {@Link Blockchain}
+ *
+ * @async
+ * @param  {string} amountInNEAR
+ * @returns {Promise<FinalExecutionOutcome>} promise of outcome of the transaction
+ */
 async function transferOnNearTestnetFromExampleToMaster(
   amountInNEAR: string
 ): Promise<FinalExecutionOutcome> {
@@ -15,6 +29,17 @@ async function transferOnNearTestnetFromExampleToMaster(
     amountInNEAR
   );
 }
+
+/**
+ * Transfer testnet NEAR faucet from one account to another.
+ *
+ * @async
+ * @param  {string} fromPrivKey
+ * @param  {string} fromAddr
+ * @param  {string} toAddr
+ * @param  {string} amountInNEAR
+ * @returns {Promise<FinalExecutionOutcome>} promise of outcome of the transaction
+ */
 async function transferOnNearTestnet(
   fromPrivKey: string,
   fromAddr: string,

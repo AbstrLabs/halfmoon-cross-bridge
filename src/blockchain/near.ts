@@ -1,4 +1,7 @@
-/* NEAR functionalities wrapped up with our centralized account */
+/**
+ * NEAR functionalities wrapped up with our centralized account
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
+ */
 
 export { nearBlockchain, type NearBlockchain };
 
@@ -45,6 +48,13 @@ type BridgeConfig = {
   centralizedPrivateKey: string;
 };
 
+/**
+ * NEAR blockchain wrapper, with centralized account. Implements {@link Blockchain}.
+ *
+ * @param  {ClientParam} clientParam
+ * @param  {IndexerParam} indexerParam
+ * @param  {BridgeConfig} bridgeConfig
+ */
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr;
   readonly indexer: providers.JsonRpcProvider;
@@ -81,7 +91,14 @@ class NearBlockchain extends Blockchain {
         });
     });
   }
-
+  /**
+   * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
+   *
+   * @async
+   * @inheritdoc {@link Blockchain}
+   * @param  {NearTxnParam} txnParam
+   * @returns {Promise<NearTxnOutcome> }
+   */
   async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
     logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.indexer.txStatus(
@@ -103,6 +120,20 @@ class NearBlockchain extends Blockchain {
     return result;
   }
 
+  /**
+   * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
+   *
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if the transaction is not valid.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_NOT_CONFIRMED} if the transaction is not confirmed.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_ID_MISMATCH} if the transaction id is not correct.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_SENDER_MISMATCH} if the transaction sender is not correct.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if the transaction receiver is not correct.
+   * @throws {BridgeError} - {@link API.TXN_AMOUNT_MISMATCH} if the transaction amount is not correct.
+   * @inheritdoc {@link Blockchain}
+   * @param  {NearTxnOutcome} txnOutcome
+   * @param  {NearTxnParam} nearTxnParam
+   * @returns boolean
+   */
   verifyCorrectness(
     txnOutcome: NearTxnOutcome,
     nearTxnParam: NearTxnParam
@@ -179,6 +210,16 @@ class NearBlockchain extends Blockchain {
     }
     return true;
   }
+
+  /**
+   * Send a transaction of the amount in `NearTxnParam` from centralized account to target in `NearTxnParam`.
+   * Implements the abstract method in {@link Blockchain}.
+   *
+   * @async
+   * @inheritdoc {@link Blockchain}
+   * @param  {NearTxnParam} nearTxnParam
+   * @returns Promise
+   */
   async makeOutgoingTxn(nearTxnParam: NearTxnParam): Promise<AlgoTxnId> {
     const response = await this.centralizedAcc.sendMoney(
       nearTxnParam.toAddr, // receiver account
@@ -188,7 +229,15 @@ class NearBlockchain extends Blockchain {
 
     return response.transaction_outcome.id;
   }
-  // not used.
+
+  /**
+   * Unused slot for get recent transactions of an account.
+   *
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
+   * @param  {address} addr - not implemented yet
+   * @param  {number} limit
+   * @returns {Promise<NearTxnId[]>} - list of transaction ids
+   */
   protected static async getRecentTransactions(
     limit: number
   ): Promise<NearTxnId[]> {

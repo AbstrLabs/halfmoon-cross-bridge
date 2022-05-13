@@ -1,4 +1,8 @@
-/* This file is an logger interface */
+/**
+ * An implementation of winston logger.
+ *
+ * @exports winston.Logger - {@link logger}
+ */
 // UNRESOLVED: https://github.com/facebook/jest/issues/8790
 
 import { createLogger, format, transports } from 'winston';

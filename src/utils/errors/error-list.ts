@@ -1,3 +1,6 @@
+/**
+ * Instead of native Error(). We use BridgeError(). This file stores all the error templates.
+ */
 export { ERRORS };
 
 const apiCallErrors = {
@@ -178,6 +181,13 @@ const internalErrors = {
     errId: 221,
     name: 'Type Parse Error',
     message: 'Error parsing type.',
+  },
+  OVERWRITE_TO_TXN_ID: {
+    errId: 222,
+    name: 'Overwrite Outgoing Transaction Id',
+    message:
+      'Trying to overwrite outgoing transaction ID in in bridge transaction.' +
+      'When a bridge transaction has error status, manual fix is needed.',
   },
 };
 

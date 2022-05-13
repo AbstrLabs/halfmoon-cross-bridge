@@ -1,3 +1,6 @@
+/**
+ * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting, and execute the transaction.
+ */
 export { mint };
 
 import { BridgeTxn, BridgeTxnObject } from '.';
@@ -7,6 +10,13 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
+/**
+ * Create a {@link BridgeTxn} instance from {@link MintApiParam} for minting, and execute the transaction.
+ *
+ * @async
+ * @param  {MintApiParam} mintApiParam
+ * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
+ */
 async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnObject> {
   logger.info(
     literals.START_MINTING(

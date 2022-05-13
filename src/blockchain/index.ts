@@ -1,8 +1,6 @@
-/* All blockchain functionalities wrapped up
- * with
- * 1. our centralized account (private key)
- * 2. client (to make transaction)
- * 3. indexer (to confirm transaction)
+/**
+ * Type definitions for the blockchain module.
+ * Abstract class {@link Blockchain}.
  */
 
 export {
@@ -11,7 +9,6 @@ export {
   TxnType,
   type AlgoAcc,
   type AlgoAddr,
-  type AlgoMnemonic,
   type AlgoTxnId,
   type AlgoTxnOutcome,
   type GenericAcc,
@@ -39,7 +36,6 @@ import {
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 
-type AlgoMnemonic = string;
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
 type GenericAcc = AlgoAcc | NearAcc;
@@ -75,6 +71,16 @@ enum ConfirmOutcome {
   TIMEOUT = 'TIMEOUT',
 }
 
+/**
+ * All blockchain functionalities wrapped up with
+ *
+ * 1. our centralized account (private key / passphrase)
+ * 2. client (to make transaction)
+ * 3. indexer (to confirm transaction)
+ *
+ * @abstract
+ * @classdesc Abstract of all Blockchain classes.
+ */
 abstract class Blockchain {
   async confirmTxn(txnParam: TxnParam): Promise<ConfirmOutcome> {
     logger.silly('Blockchain: confirmTransaction()', txnParam);

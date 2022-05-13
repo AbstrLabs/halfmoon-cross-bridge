@@ -1,9 +1,12 @@
-// load and parse .env file
-// TODO: 1. separate ENV file to a new variable instead of exporting all.
-//  1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
-//  1. I dont know where this was shown, maybe in console.log(ENV)?
+/**
+ * load and parse .env file
+ *
+ * @todo 1. separate ENV file to a new variable instead of exporting all.
+ * 1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
+ * 1. I dont know where this was shown, maybe in console.log(ENV)?
+ */
 
-export { loadDotEnv, ENV };
+export { ENV };
 
 import { BridgeError, ERRORS } from './errors';
 
@@ -11,7 +14,13 @@ import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
 import { literals } from './literals';
 
-function loadDotEnv() {
+/**
+ * Load and Parse .env file.
+ *
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.CANNOT_DOTENV_LOAD} if cannot load .env file
+ * @returns {dpv.ParsedVariables} parsed .env variables
+ */
+function parseDotEnv(): dpv.ParsedVariables {
   const env = config();
   if (env.parsed === undefined) {
     throw new BridgeError(ERRORS.INTERNAL.CANNOT_DOTENV_LOAD);
@@ -69,7 +78,7 @@ const secret_ENV = {
   ALGO_EXAMPL_PASS: literals.NOT_LOADED_FROM_ENV_STR,
   PURE_STAKE_API_KEY: literals.NOT_LOADED_FROM_ENV_STR,
 };
-const parsed_ENV = loadDotEnv();
+const parsed_ENV = parseDotEnv();
 
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
 
