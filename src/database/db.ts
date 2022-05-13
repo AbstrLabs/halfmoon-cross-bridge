@@ -265,6 +265,7 @@ class Database {
    *
    * @async
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION} if not connected
    * @param  {DbId} dbId
    * @param  {TxnType} txnType
    * @returns {Promise<void>} promise of `void`
@@ -287,6 +288,7 @@ class Database {
    * infer the table name from a transaction type.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if {@link txnType} is not valid
    * @param  {TxnType} txnType
    * @returns {TableName} table name
    */
@@ -307,6 +309,8 @@ class Database {
   /**
    * Verify the length of the result is 1.
    *
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_TXN_NOT_FOUND} if length is 0
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE} if length is more than 1
    * @param  {unknown[]} result - query result to be verified
    * @param  {object} extraErrInfo? - extra error info
    * @returns {boolean} - true if result is not empty

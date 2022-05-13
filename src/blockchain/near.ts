@@ -1,4 +1,7 @@
-/* NEAR functionalities wrapped up with our centralized account */
+/**
+ * NEAR functionalities wrapped up with our centralized account
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
+ */
 
 export { nearBlockchain, type NearBlockchain };
 
@@ -120,6 +123,12 @@ class NearBlockchain extends Blockchain {
   /**
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if the transaction is not valid.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_NOT_CONFIRMED} if the transaction is not confirmed.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_ID_MISMATCH} if the transaction id is not correct.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_SENDER_MISMATCH} if the transaction sender is not correct.
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if the transaction receiver is not correct.
+   * @throws {BridgeError} - {@link API.TXN_AMOUNT_MISMATCH} if the transaction amount is not correct.
    * @inheritdoc {@link Blockchain}
    * @param  {NearTxnOutcome} txnOutcome
    * @param  {NearTxnParam} nearTxnParam
@@ -224,6 +233,7 @@ class NearBlockchain extends Blockchain {
   /**
    * Unused slot for get recent transactions of an account.
    *
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
    * @param  {address} addr - not implemented yet
    * @param  {number} limit
    * @returns {Promise<NearTxnId[]>} - list of transaction ids

@@ -1,7 +1,5 @@
 /**
  * Helper function to convert between different formats, like units of NEAR, type of object, etc.
- *
- * typed with @throws
  */
 export {
   toGoNearAtom,
@@ -23,7 +21,7 @@ import { utils } from 'near-api-js';
  * Convert a human-readable string or number of NEAR amount to a bigint of atomNEAR.
  * Throw Error if input is not valid.
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR}
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a string or number
  * @param  {string|number} goNearPlain - a human readable string of goNear
  * @return {bigint} - a bigint representation of the goNear
  */
@@ -81,10 +79,10 @@ function trimLeadingZeroes(value: string): string {
 }
 
 /**
- * Convert a human string of yoctoNEAR amount to a bigint of atomNEAR.
+ * Convert a string of yoctoNEAR to a bigint of atomNEAR.
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR}
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT}
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a `string|number|bigint`
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT} if input is not a valid yoctoNEAR amount
  * @param  {string|number|bigint} yoctoNear
  * @returns {bigint} a bigint representation of the atomNEAR.
  *

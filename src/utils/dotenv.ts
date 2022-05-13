@@ -17,6 +17,7 @@ import { literals } from './literals';
 /**
  * Load and Parse .env file.
  *
+ * @throws {BridgeError} - {@link ERRORS.INTERNAL.CANNOT_DOTENV_LOAD} if cannot load .env file
  * @returns {dpv.ParsedVariables} parsed .env variables
  */
 function parseDotEnv(): dpv.ParsedVariables {

@@ -1,5 +1,7 @@
 /**
  * Algorand functionalities wrapped up with our centralized account
+ *
+ * @throws {BridgeError} - {@link BridgeError.ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} - if network is not supported
  */
 
 export { algoBlockchain, type AlgorandBlockchain, testAlgo };
@@ -132,9 +134,15 @@ class AlgorandBlockchain extends Blockchain {
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
    * @inheritdoc {@link Blockchain}
-   * @param  {AlgoAssetTransferTxnOutcome} txnOutcome
-   * @param  {AlgoTxnParam} algoTxnParam
-   * @returns boolean
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_NOT_CONFIRMED} if transaction not confirmed
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_ASSET_ID_NOT_MATCH} if transaction asset id not match
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_ID_MISMATCH} if transaction id mismatch
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_SENDER_MISMATCH} if transaction sender mismatch
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if transaction receiver mismatch
+   * @throws {BridgeError} - {@link ERRORS.API.TXN_AMOUNT_MISMATCH} if transaction amount mismatch
+   * @param  {AlgoAssetTransferTxnOutcome} txnOutcome - transaction outcome
+   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
+   * @returns boolean - true if transaction is verified
    */
   verifyCorrectness(
     txnOutcome: AlgoAssetTransferTxnOutcome,
@@ -167,7 +175,7 @@ class AlgorandBlockchain extends Blockchain {
     }
     // compare txnID
     if (txnId !== algoTxnParam.txnId) {
-      throw new BridgeError(ERRORS.API.TXN_ASSET_ID_MISMATCH, {
+      throw new BridgeError(ERRORS.API.TXN_ID_MISMATCH, {
         blockchainId: txnId,
         receivedId: algoTxnParam.txnId,
         blockchainName: this.name,
@@ -242,6 +250,9 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Send a transaction of ASA. Using example from algorand documentation (modified).
    * @tutorial https://developer.algorand.org/docs/sdks/javascript/#complete-example
+   *
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if transaction failed
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if transaction failed
    *
    * @async
    * @param  {AlgoTxnParam} algoTxnParam

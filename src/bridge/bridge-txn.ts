@@ -194,6 +194,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This should be the only way used outside the {@link BridgeTxn} class.
    *
    * @async
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
@@ -223,6 +224,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Confirm the incoming transaction of the {@link BridgeTxn}.
    *
    * @async
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @emit change the txnStatus from {@link BridgeTxnStatus.DONE_INITIALIZE} to {@link BridgeTxnStatus.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
@@ -270,6 +272,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Make the outgoing transaction of the {@link BridgeTxn}.
    *
    * @async
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchain} fails to make the outgoing transaction.
    * @emit change the txnStatus from {@link BridgeTxnStatus.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatus.DOING_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
@@ -305,6 +309,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Verify the outgoing transaction of the {@link BridgeTxn}.
    *
    * @async
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
    * @emit change the txnStatus from {@link BridgeTxnStatus.DOING_OUTGOING} to {@link BridgeTxnStatus.DONE_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
@@ -421,6 +426,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
    * @returns {number} the dbId of the {@link BridgeTxn}
    */
   public getDbId(): number {
@@ -499,6 +506,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This is one step of the initialization.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM} if the {@link BridgeTxn.txnParam} is invalid
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_AMOUNT} if the {@link BridgeTxn.fromAmountAtom} is less than fixed fee
    * @returns {BridgeTxn} the {@link BridgeTxn} itself
    */
   private _selfValidate(): this {
@@ -530,6 +539,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This is one step of the initialization.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn} is invalid
    * @returns {{fromBlockchain: BlockchainName; toBlockchain: BlockchainName;}} the blockchain names
    */
   private _inferBlockchainNames(): {
@@ -565,6 +575,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Infer the txnType of the {@link BridgeTxn} from fromBlockchain and toBlockchain.
    * This is one step of the initialization.
    *
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is not valid
    * @returns {TxnType} the txnType
    */
   private _inferTxnType(): TxnType {
@@ -602,6 +613,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This is one step of the initialization.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
    * @returns void
    */
   private _hookBlockchain(): void {
@@ -620,6 +632,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Only used in {@link _hookBlockchain}
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the blockchain name is unknown
    * @returns void
    */
   private _hookFromBlockchain(): void {
@@ -639,6 +652,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Only used in {@link _hookBlockchain}
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns void
    */
   private _hookToBlockchain(): void {
@@ -658,6 +672,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Get the {@link fixedFeeAtom} of the {@link BridgeTxn}.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the fixedFeeAtom
    */
   private _getFixedFeeAtom(): bigint {
@@ -686,6 +701,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Calculate the {@link marginFeeAtom} of the {@link BridgeTxn}.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the marginFeeAtom
    */
   private _calculateMarginFeeAtom(): bigint {
@@ -747,6 +763,9 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
+   * @throws {BridgeError} - {@link ERRORS.API.REUSED_INCOMING_TXN} if the incoming txn is already used
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED} if the database create txn failed
    * @returns {Promise<DbId>} the id of the created {@link BridgeTxn}
    */
   private async _createInDb(): Promise<DbId> {
@@ -796,6 +815,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
    * @returns Promise
    */
   private async _updateTxn(): Promise<DbId> {
@@ -813,10 +834,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   }
 
   /**
-   * Update the {@link BridgeTxn.toTxnId} field in the instance and database.
+   * Update the {@link BridgeTxn.txnStatus} field in the instance and database.
    *
    * @async
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
    * @param  {BridgeTxnStatus} status
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
@@ -846,6 +868,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_TO_TXN_ID} if the {@link BridgeTxn.toTxnId} is already set
    * @param  {TxnId} toTxnId
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
@@ -865,6 +888,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
    *
    * @private
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
    * @param  {BridgeTxnStatus} expected
    * @param  {string} at
    * @returns void
