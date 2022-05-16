@@ -60,6 +60,7 @@ class Postgres {
    * Generic query method.
    *
    * @async
+   * @inheritdoc {@link Pool.query}
    * @param  {string} query - SQL query string
    * @param  {unknown[]} params - parameters for the query
    * @returns  {Promise<any[]>} result of the query.

@@ -27,6 +27,7 @@ function parseDotEnv(): dpv.ParsedVariables {
   }
 
   // ts-node compatibility
+  // TODO: not sure if this is working!
   process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
   process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
 
