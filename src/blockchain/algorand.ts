@@ -100,6 +100,8 @@ class AlgorandBlockchain extends Blockchain {
    * @inheritdoc {@link Blockchain}
    * @param  {AlgoTxnParam} txnParam - transaction parameters on algorand blockchain
    * @returns {Promise<AlgoAssetTransferTxnOutcome>} transaction outcome
+   *
+   * @todo: unhandled error `Received status 400: invalid input: unable to parse base32 digest data 'txid': illegal base32 data at input byte 0`
    */
   async getTxnStatus(
     txnParam: AlgoTxnParam
