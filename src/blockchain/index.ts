@@ -105,6 +105,8 @@ abstract class Blockchain {
             resolve(ConfirmOutcome.WRONG_INFO);
           }
         } catch (err) {
+          // TODO: use BridgeError
+          console.log('err : ', err); // DEV_LOG_TO_REMOVE
           clearTimeout(timeout);
           clearInterval(interval);
           resolve(ConfirmOutcome.WRONG_INFO);
@@ -122,7 +124,13 @@ abstract class Blockchain {
   public abstract readonly name: string;
   protected abstract indexer: Indexer;
   protected abstract readonly centralizedAcc: GenericAcc;
-
+  /**
+   * @param  {TxnOutcome} txnOutcome
+   * @param  {TxnParam} txnParam
+   *
+   * @todo: rename var names to expected, received.
+   * @returns boolean
+   */
   public abstract verifyCorrectness(
     txnOutcome: TxnOutcome,
     txnParam: TxnParam
