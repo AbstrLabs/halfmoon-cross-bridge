@@ -1,0 +1,329 @@
+<!-- This page is a simple frontend to show instruction and to run API calls -->
+<!-- TODO: dynamically remove default values -->
+<!-- TODO: 2. before mint, user should opt in to goNEAR ASA -->
+<!-- TODO: 3. before API call, user should make a transaction, and use the returned txnId -->
+<!-- TODO: 4. on button click: pass 4 params(to,from,amount,txnId) to API in server.ts -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css">
+    <title>Algorand - NEAR Bridge</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Algorand - NEAR Bridge</h1>
+      <p>This is a demo of the Algorand Bridge for NEAR.</p>
+    </header>
+
+    <div role="body">
+      <div id="account-nav">
+        <!-- TODO: we don't need connect both wallet. Move them to respective process -->
+        <div id="near-group">
+          <button id="near-connect-btn">Connect NEAR Wallet</button>
+          <p id="near-address"></p>
+          <button id="near-signout-btn" style="display: none;">Sign Out</button>
+        </div>
+
+        <div id="algorand-group">
+          <button id="algorand-connect-btn" onclick="connectToMyAlgo()">Connect My Algo Wallet</button>
+          <p id="algo-address"></p>
+          <button id="algorand-optin" onclick="optInGoNear()" style="display: none;">goNEAR Opt In(skip if finished
+            first time)</button>
+        </div>
+      </div>
+
+      <div id="txn">
+        <!-- todo: merge #txn to body -->
+        <div role="tab-switch">
+          <ul class="tabs func-selection" role="tablist">
+            <li class="func-selection">
+              <input type="radio" name="tabs" id="tab1" checked class="func-selection">
+              <label for="tab1" role="tab" aria-controls="mint" class="panel1 func-selection" tabindex="0">
+                mint
+              </label>
+            </li>
+            <li class="func-selection">
+              <input type="radio" name="tabs" id="tab2" class="func-selection">
+              <label for="tab2" role="tab" aria-controls="burn" class="panel2 func-selection" tabindex="1">
+                burn
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div id="mint" role="tab-panel" class="two-columns">
+          <div role="left-column">
+            <form>
+              <label>
+                Amount (in NEAR or goNEAR)
+                <br />
+                <input type="number" name="mint_amount" id="mint_amount" value="1.357" step="0.0000000001" required />
+              </label>
+              <br />
+              <label>
+                To (Algorand public address)
+                <br />
+                <input type="text" name="mint_to" id="mint_to"
+                  value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA" size="50" required />
+              </label>
+            </form>
+          </div>
+
+          <div role="right-steps">
+            <h3>0. Opt In</h3>
+            <span>Make sure your Algorand account has Opted In to the goNEAR asset</span>
+            <h3>1. Transfer NEAR token to Escrow account</h3>
+            <p>After you finish the transaction, please click 'View on Explorer' button to get the transaction hash for
+              next step</p>
+            <a href="https://wallet.testnet.near.org/send-money" target="_blank">
+              <button id="near-transfer" class="clickBtn" disabled>Transfer</button>
+            </a>
+            <button id="request-near-transfer" class="clickBtn" onclick="nearTest($('input#mint_amount').val())">Make
+              the
+              Transfer</button>
+
+            <div>
+              <h3>2. Fill in the transaction hash from first step</h3>
+              <button id="check-tx" onclick="checkNearTx()" class="clickBtn">Hash Check</button>
+
+            </div>
+
+            <div>
+              <h3>3. Confirm algorand receiver to get goNEAR from Escrow account</h3>
+              <form>
+                <button id="mint-confirm" class="clickBtn" onclick="confirmMint()">Confirm</button>
+              </form>
+            </div>
+          </div>
+
+          <div id="mint-confirm-page" style="display: none;">
+            <ul>
+              <li>
+                <p id="mint_from_filled"></p>
+              </li>
+              <li>
+                <p id="mint_to_filled"></p>
+              </li>
+              <li>
+                <p id="mint_amount_filled"></p>
+              </li>
+              <li>
+                <p id="mint_txnId_filled"></p>
+              </li>
+            </ul>
+            <button id="mint-button" class="clickBtn" disabled onclick="startMint()">Mint</button>
+            <p id="mint-finished">Start Minting</p>
+          </div>
+        </div>
+
+        <div id="burn" role="tab-panel" style="display: none;">
+          <div>
+            <h3>1. Transfer goNEAR token to Escrow account</h3>
+            <form>
+              <label>
+                Amount
+                <input type="number" name="burn_amount" id="burn_amount" placeholder="10" step="0.0000000001"
+                  required />
+              </label>
+              <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button>
+            </form>
+          </div>
+
+          <div>
+            <h3>2. Fill in the transaction ID</h3>
+            <form>
+              <label>Transaction ID
+                <input type="text" name="burn_txnId" id="burn_txnId"
+                  placeholder="Am1ZQx651WwYXZzBbtKV35YYPP6Tc5epvCfebv5XRn4K" size="50" required>
+              </label>
+              <br />
+              <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button>
+            </form>
+          </div>
+
+          <div>
+            <h3>3. Confirm NEAR account to get NEAR from Escrow account</h3>
+            <form>
+              <label>
+                To (NEAR public address)
+                <input type="text" name="burn_to" placeholder="abstrlabs-test.testnet" required />
+              </label>
+              <br />
+              <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">Confirm</button>
+            </form>
+          </div>
+
+          <div id="burn-confirm-page" style="display: none;">
+            <ul>
+              <li>
+                <p id="burn_from_filled"></p>
+              </li>
+              <li>
+                <p id="burn_to_filled"></p>
+              </li>
+              <li>
+                <p id="burn_amount_filled"></p>
+              </li>
+              <li>
+                <p id="burn_txnId_filled"></p>
+              </li>
+            </ul>
+            <button id="burn-button" class="clickBtn" disabled onclick="startBurn()">Burn</button>
+            <p id="burn-finished">Start Burning</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/algosdk@v1.16.0/dist/browser/algosdk.min.js"
+    crossorigin="anonymous"></script>
+  <script src="./js/dependencies/myalgo.min.js"></script>
+  <script src="./js/near.js"></script>
+
+  <script comment="Algorand wallet connect">
+
+    const myAlgoWallet = new MyAlgoConnect();
+    let algoAccountButton = document.getElementById('algorand-connect-btn');
+    let algoAddressContext = document.getElementById('algo-address');
+    let algoOptInButton = document.getElementById('algorand-optin');
+    let algoTransferButton = document.getElementById('algorand-transfer');
+    let algoTxInput = document.getElementById('burn_txnId')
+    let algorandAddress;
+
+    const connectToMyAlgo = async () => {
+      try {
+        const accounts = await myAlgoWallet.connect();
+        algorandAddress = accounts[0].address;
+        algoAccountButton.textContent = algoAccountButton.textContent
+        algoAddressContext.textContent = algorandAddress
+        algoAccountButton.disabled = true;
+        algoOptInButton.style.display = 'block';
+        algoTransferButton.disabled = false;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    const algodClient = new algosdk.Algodv2('', 'https://node.testnet.algoexplorerapi.io', '');
+    const to = 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE';
+
+    /*Warning: Browser will block pop-up if user doesn't trigger myAlgoWallet.connect() with a button interation */
+
+    /* Algorand wallet transfer function */
+    async function signTransaction(from, to, amountAlgo) {
+      try {
+        const suggestedParams = await algodClient.getTransactionParams().do();
+        const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({ suggestedParams, from, to, amount: amountAlgo, assetIndex: 83251085 });
+        const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+        const response = await algodClient.sendRawTransaction(signedTxn.blob).do();
+        return response
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    let algoAmount = document.getElementById('burn_amount');
+    const algo_unit = 10000000000;
+    const goNEARTransfer = async (event) => {
+      event.preventDefault()
+      try {
+        const from = algorandAddress; // change
+        const amountAlgo = algoAmount.value * 10000000000;
+        const response = await signTransaction(from, to, amountAlgo);
+        console.log(response)
+        algoTxInput.value = response.txId
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    const optInGoNear = async () => {
+      const from = algorandAddress;
+      const amountAlgo = 0;
+      const response = await signTransaction(from, from, amountAlgo);
+      console.log(response)
+    }
+
+    /* check algo transaction */
+    const indexerParam = {
+      token: { 'X-API-Key': 'WLJDqY55G5560kyCJVp647ERNZ5kJkdZ8OUdGNnV' },
+      server: 'https://testnet-algorand.api.purestake.io/idx2',
+      port: '', // from https://developer.purestake.io/code-samples
+    };
+
+    const indexer = new algosdk.Indexer(
+      indexerParam.token,
+      indexerParam.server,
+      indexerParam.port
+    );
+
+    let goNearAmount = document.getElementById('burn_amount_filled');
+    let algoFilledTx = document.getElementById('burn_txnId_filled');
+    let algoFilledAccount = document.getElementById('burn_from_filled');
+
+    const checkAlgoTx = async (event) => {
+      event.preventDefault()
+      try {
+        const result = await indexer.lookupTransactionByID(algoTxInput.value).do()
+        console.log(result)
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* confirm burn */
+    let burnConfirmPage = document.getElementById('burn-confirm-page');
+    let burnReceiver = document.getElementById('burn_to');
+    let burnFilledReceiver = document.getElementById('burn_to_filled');
+    const confirmBurn = (event) => {
+      event.preventDefault()
+      burnConfirmPage.style.display = 'block';
+      burnFilledReceiver.textContent = burnReceiver.value
+      document.getElementById('burn-button').disabled = false
+    }
+
+    /* burn */
+    const startBurn = async () => {
+      //change after api
+    }
+  </script>
+
+  <script comment="tab-switch-handler">
+    /*tab selection for mint and burn*/
+    let tab1Button = document.getElementById('tab1');
+    let tab2Button = document.getElementById('tab2');
+    let mintForm = document.getElementById('mint');
+    let burnForm = document.getElementById('burn');
+
+    tab1Button.addEventListener('change', (event) => {
+      if (tab1Button.checked === true) {
+        mintForm.style.display = "block"
+        burnForm.style.display = "none"
+      } else {
+        mintForm.style.display = "none"
+        burn.style.display = "block"
+      }
+    })
+
+    tab2Button.addEventListener('change', (event) => {
+      if (tab2Button.checked === true) {
+        mintForm.style.display = "none"
+        burn.style.display = "block"
+      } else {
+        mintForm.style.display = "block"
+        burnForm.style.display = "none"
+      }
+    })
+  </script>
+
+</html>
