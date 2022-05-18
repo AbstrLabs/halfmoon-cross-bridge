@@ -1,6 +1,7 @@
 <!-- This page is a simple frontend to show instruction and to run API calls -->
 <!-- TODO: dynamically remove default values -->
-<!-- TODO: 2. before mint, user should opt in to goNEAR ASA -->
+<!-- TODO: what if NEAR RPC is down? https://status.nearprotocol.com/ -->
+<!-- TODO: 2. before mint, user should opt in to goNEAR ASA [check with code] -->
 <!-- TODO: 3. before API call, user should make a transaction, and use the returned txnId -->
 <!-- TODO: 4. on button click: pass 4 params(to,from,amount,txnId) to API in server.ts -->
 
@@ -48,6 +49,7 @@
           <div role="left-column">
             <h3>NOTE:</h3>
             <span>(TEMP,can check with wallet) Make sure your Algorand account has Opted In to the goNEAR asset</span>
+            <br />
             <div id="" class="wallet-wrap">
               <button id="near-connect-btn">Connect NEAR Wallet</button>
               <p id="near-address"></p>
@@ -75,13 +77,16 @@
                 <input type="text" name="mint_from" id="mint_to" value="abstrlabs-test.testnet" size="50" disabled />
               </label> -->
               <br />
-              <button id="request-near-transfer" class="clickBtn" onclick="nearTest($('input#mint_amount').val())">
-                Make the Transfer(test)
-              </button>
-              <button id="request-near-transfer" class="clickBtn" onclick="nearTest($('input#mint_amount').val())">
+
+              <button id="near-request-transfer" class="clickBtn" onclick="">
                 Post form
               </button>
             </form>
+            Receiving XXX goNEAR on Algorand Account YYY
+            <button id="near-request-transfer" class="clickBtn"
+              onclick="requestSignNearTxn($('input#mint_amount').val())">
+              Make the Transfer(test)
+            </button>
           </div>
         </div>
 
@@ -93,7 +98,6 @@
               <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
                 first time)</button>
             </div>
-            <h3>1. Transfer goNEAR token to Escrow account</h3>
             <form>
               <label>
                 Amount
@@ -101,19 +105,20 @@
                   required />
               </label>
               <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button>
-            </form>
-          </div>
 
-          <div>
-            <h3>2. Fill in the transaction ID</h3>
-            <form>
-              <label>Transaction ID
+              <label>Transaction ID (Algorand)
                 <input type="text" name="burn_txnId" id="burn_txnId"
                   placeholder="Am1ZQx651WwYXZzBbtKV35YYPP6Tc5epvCfebv5XRn4K" size="50" required>
               </label>
               <br />
               <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button>
             </form>
+            <h3>1. Transfer goNEAR token to Escrow account</h3>
+          </div>
+
+          <div>
+            <h3>2. Fill in the transaction ID</h3>
+
           </div>
 
           <div>
@@ -169,10 +174,10 @@
     burnTabSwitch.addEventListener('change', (event) => {
       renderTabSwitch()
     })
+
   </script>
   <script comment="run on start">
     renderTabSwitch()
-
   </script>
 
 </html>

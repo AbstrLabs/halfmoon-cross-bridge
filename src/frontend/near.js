@@ -21,13 +21,14 @@ const near = new nearApi.Near({
 // connect to the NEAR Wallet
 const nearWallet = new nearApi.WalletConnection(near, 'algorand-bridge');
 
-let nearConnectButton = document.getElementById('near-connect-btn');
-let nearSignOutButton = document.getElementById('near-signout-btn');
-let nearAddress = document.getElementById('near-address');
-let nearTransferButton = document.getElementById('near-transfer');
+let nearConnectButton = $('#near-connect-btn')[0];
+let nearSignOutButton = $('#near-signout-btn')[0];
+let nearAddress = $('#near-address')[0];
+let nearTransferButton = $('#near-request-transfer')[0];
 
 if (!nearWallet.isSignedIn()) {
   nearConnectButton.textContent = 'Sign In with NEAR wallet'
+  nearTransferButton.disabled = 'Sign In to mint'
   nearTransferButton.disabled = true
 } else if (nearWallet.isSignedIn()) {
   nearConnectButton.textContent = 'NEAR Wallet Connected'
@@ -61,11 +62,11 @@ const nearWalletAccount = nearWallet.account();
 /* MAKE TXN */
 
 async function createNearTxn({
-  receiver: receiverId,
-  amount: amountStr
+  receiverId,
+  amountStr
 }) {
   const action = new nearApi.transactions.transfer(nearApi.utils.format.parseNearAmount(amountStr));
-  const ak = await nearWallet.account().findAccessKey(nearWallet.getAccountId(), []);
+  const ak = await nearWalletAccount.findAccessKey(nearWallet.getAccountId(), []);
 
   const recentBlockHash = nearApi.utils.serialize.base_decode(
     // https://docs.near.org/docs/tutorials/create-transactions#6-blockhash
@@ -83,17 +84,16 @@ async function createNearTxn({
   return tx;
 }
 
-function requestSignNearTxn(tx) {
-  nearWallet.requestSignTransactions({ transactions: [tx] });
-}
+async function requestSignNearTxn(amountStr) {
+  const callbackUrl = window.location.origin + '/redirect'
+  console.log('callbackUrl : ', callbackUrl); // DEV_LOG_TO_REMOVE
 
-async function nearTest(amount) {
-  console.log('amount : ', amount); // DEV_LOG_TO_REMOVE
+  let tx = await createNearTxn({ receiverId: 'abstrlabs.testnet', amountStr })
 
-  let tx = await createNearTxn({ receiver: 'abstrlabs.testnet', amount })
-  requestSignNearTxn(tx)
+  nearWallet.requestSignTransactions({ transactions: [tx], callbackUrl });
   return
 }
+
 
 /* NEAR transaction check*/
 let nearTxhash = document.getElementById('mint_txnId');
@@ -102,22 +102,6 @@ let nearSigner = document.getElementById('mint_from');
 let nearAmount = document.getElementById('mint_amount_filled');
 let filledTx = document.getElementById('mint_txnId_filled');
 let filledAccount = document.getElementById('mint_from_filled');
-
-const checkNearTx = async (event) => {
-  event.preventDefault()
-  try {
-    const result = await near.connection.provider.txStatus(nearTxhash.value, nearSigner.value)
-    console.log(result.status.SuccessValue === "")
-    let NEARamount = nearApi.utils.format.formatNearAmount(result.transaction.actions[0].Transfer.deposit)
-    if (result.status.SuccessValue === "") {
-      nearAmount.textContent = NEARamount
-      filledTx.textContent = result.transaction.hash
-      filledAccount.textContent = result.transaction.signer_id
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}// change after get api method
 
 /* confirm mint */
 let mintConfirmPage = document.getElementById('mint-confirm-page');
