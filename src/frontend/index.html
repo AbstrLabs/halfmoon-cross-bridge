@@ -300,10 +300,10 @@
 
   <script comment="tab-switch-handler">
     /*tab selection for mint and burn*/
-    let mintTabSwitch = document.getElementById('mint-tab-switch');
-    let burnTabSwitch = document.getElementById('burn-tab-switch');
-    let mintTabContent = document.getElementById('mint');
-    let burnTabContent = document.getElementById('burn');
+    let mintTabSwitch = $('#mint-tab-switch')[0];
+    let burnTabSwitch = $('#burn-tab-switch')[0];
+    let mintTabContent = $('#mint')[0];
+    let burnTabContent = $('#burn')[0];
 
     const renderTabSwitch = () => {
       if (mintTabSwitch.checked === true) {
