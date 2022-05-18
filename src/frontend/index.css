@@ -158,17 +158,6 @@ ul {
   margin-bottom: 20px;
 }
 
-input {
-  font-size: 16px;
-  font-size: Max(16px, 1em);
-  font-family: inherit;
-  background-color: rgb(244, 255, 239);
-  border: 2px solid rgb(237, 255, 226);
-  border-radius: 4px;
-  transition: 180ms box-shadow ease-in-out;
-  margin: 2px;
-}
-
 .two-columns {
   margin: 2% 25%;
   text-align: left;
@@ -178,9 +167,20 @@ input {
   place-items: center;
 }
 
+label,
 input[type='text'],
 input[type='number'] {
   font-size: x-large;
   width: 30%;
   margin: 20px;
+  border-radius: 4px;
+  transition: 180ms box-shadow ease-in-out;
+  margin: 20px;
+}
+input[type='text'],
+input[type='number'] {
+  background-color: rgb(244, 255, 239);
+  border: 2px solid rgb(237, 255, 226);
+  border-radius: 4px;
+  transition: 180ms box-shadow ease-in-out;
 }
