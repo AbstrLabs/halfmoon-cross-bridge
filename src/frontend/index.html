@@ -33,7 +33,7 @@
         <div id="algorand-group">
           <button id="algorand-connect-btn" onclick="connectToMyAlgo()">Connect My Algo Wallet</button>
           <p id="algo-address"></p>
-          <button id="algorand-optin" onclick="optInGoNear()" style="display: none;">goNEAR Opt In(skip if finished
+          <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
             first time)</button>
         </div>
       </div>
@@ -43,14 +43,14 @@
         <div role="tab-switch">
           <ul class="tabs func-selection" role="tablist">
             <li class="func-selection">
-              <input type="radio" name="tabs" id="tab1" checked class="func-selection">
-              <label for="tab1" role="tab" aria-controls="mint" class="panel1 func-selection" tabindex="0">
+              <input type="radio" name="tabs" id="mint-tab-switch" checked class="func-selection">
+              <label for="mint-tab-switch" role="tab" aria-controls="mint" class="func-selection" tabindex="0">
                 mint
               </label>
             </li>
             <li class="func-selection">
-              <input type="radio" name="tabs" id="tab2" class="func-selection">
-              <label for="tab2" role="tab" aria-controls="burn" class="panel2 func-selection" tabindex="1">
+              <input type="radio" name="tabs" id="burn-tab-switch" class="func-selection">
+              <label for="burn-tab-switch" role="tab" aria-controls="burn" class="func-selection" tabindex="1">
                 burn
               </label>
             </li>
@@ -122,7 +122,7 @@
           </div>
         </div>
 
-        <div id="burn" role="tab-panel" style="display: none;">
+        <div id="burn" role="tab-panel">
           <div>
             <h3>1. Transfer goNEAR token to Escrow account</h3>
             <form>
@@ -300,30 +300,34 @@
 
   <script comment="tab-switch-handler">
     /*tab selection for mint and burn*/
-    let tab1Button = document.getElementById('tab1');
-    let tab2Button = document.getElementById('tab2');
-    let mintForm = document.getElementById('mint');
-    let burnForm = document.getElementById('burn');
+    let mintTabSwitch = document.getElementById('mint-tab-switch');
+    let burnTabSwitch = document.getElementById('burn-tab-switch');
+    let mintTabContent = document.getElementById('mint');
+    let burnTabContent = document.getElementById('burn');
 
-    tab1Button.addEventListener('change', (event) => {
-      if (tab1Button.checked === true) {
-        mintForm.style.display = "block"
-        burnForm.style.display = "none"
+    const renderTabSwitch = () => {
+      if (mintTabSwitch.checked === true) {
+        mintTabContent.style.display = "grid";
       } else {
-        mintForm.style.display = "none"
-        burn.style.display = "block"
+        mintTabContent.style.display = "none";
       }
+      if (burnTabSwitch.checked === true) {
+        burnTabContent.style.display = "grid"
+      } else {
+        burnTabContent.style.display = "none"
+      }
+    }
+    mintTabSwitch.addEventListener('change', (event) => {
+      renderTabSwitch()
     })
 
-    tab2Button.addEventListener('change', (event) => {
-      if (tab2Button.checked === true) {
-        mintForm.style.display = "none"
-        burn.style.display = "block"
-      } else {
-        mintForm.style.display = "block"
-        burnForm.style.display = "none"
-      }
+    burnTabSwitch.addEventListener('change', (event) => {
+      renderTabSwitch()
     })
+  </script>
+  <script comment="run on start">
+    renderTabSwitch()
+
   </script>
 
 </html>

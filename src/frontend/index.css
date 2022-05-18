@@ -127,7 +127,7 @@ ul {
   left: -9999px;
 }
 
-.tabs.func-selection [id^='tab'].func-selection:checked + label.func-selection {
+.tabs.func-selection .func-selection:checked + label.func-selection {
   background-color: #982eff;
   z-index: 100;
   outline: none;
