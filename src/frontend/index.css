@@ -4,10 +4,9 @@
     format('woff');
 }
 
-html,
-body {
-  margin: 0;
+html {
   height: 100vh;
+  margin: 0;
 }
 
 body {
@@ -17,6 +16,8 @@ body {
   width: 100vw;
   height: 100%;
   text-align: center;
+  box-sizing: content-box;
+  margin: 30px;
 }
 
 h1,
@@ -54,11 +55,10 @@ p {
   margin-bottom: 5px;
 }
 
-#near-group,
-#algorand-group {
-  display: flex;
+.wallet-wrap {
+  display: inline-flex;
   align-items: center;
-  margin: auto 10px;
+  margin: 10px;
 }
 
 #near-connect-btn,
@@ -176,4 +176,11 @@ input {
   grid-template: auto/50% 50%;
   gap: 20px;
   place-items: center;
+}
+
+input[type='text'],
+input[type='number'] {
+  font-size: x-large;
+  width: 30%;
+  margin: 20px;
 }
