@@ -95,9 +95,9 @@ function startServer() {
     ) {
       await homePageTest();
     }
-    res.sendFile('example-frontend.html', { root: __dirname });
+    res.sendFile('./frontend/index.html', { root: __dirname });
   });
-
+  app.use('/frontend', express.static(__dirname + '/frontend'));
   /* Express setup */
   app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
   app.use(express.json()); // parse application/json

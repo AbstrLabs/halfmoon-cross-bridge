@@ -1,11 +1,11 @@
 @font-face {
-  font-family: "Interstate Light";
-  src: url("/font/InterstateLightRegular/InterstateLightRegular.otf")
-    format("woff");
+  font-family: 'Interstate Light';
+  src: url('dependencies/font/InterstateLightRegular/InterstateLightRegular.otf')
+    format('woff');
 }
 
 body {
-  font-family: "Interstate Light";
+  font-family: 'Interstate Light';
   color: #ffffff;
   background-color: #1b242c;
   width: 100vw;
@@ -21,7 +21,7 @@ h5,
 h6 {
   letter-spacing: 0.5px;
   font-weight: bold;
-  font-family: "Interstate Light";
+  font-family: 'Interstate Light';
 }
 
 h1 {
@@ -121,13 +121,13 @@ ul {
   color: white;
 }
 
-.tabs.func-selection input[type="radio"].func-selection.func-selection {
+.tabs.func-selection input[type='radio'].func-selection.func-selection {
   position: absolute;
   top: 0;
   left: -9999px;
 }
 
-.tabs.func-selection [id^="tab"].func-selection:checked + label.func-selection {
+.tabs.func-selection [id^='tab'].func-selection:checked + label.func-selection {
   background-color: #982eff;
   z-index: 100;
   outline: none;
