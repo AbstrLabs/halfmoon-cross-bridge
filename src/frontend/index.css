@@ -4,12 +4,18 @@
     format('woff');
 }
 
+html,
+body {
+  margin: 0;
+  height: 100vh;
+}
+
 body {
   font-family: 'Interstate Light';
   color: #ffffff;
   background-color: #1b242c;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   text-align: center;
 }
 
@@ -27,6 +33,7 @@ h6 {
 h1 {
   font-size: 40px;
   line-height: 56px;
+  margin-top: auto;
 }
 
 h3 {
@@ -168,4 +175,5 @@ input {
   display: grid;
   grid-template: auto/50% 50%;
   gap: 20px;
+  place-items: center;
 }
