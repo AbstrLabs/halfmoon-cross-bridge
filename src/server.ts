@@ -7,6 +7,7 @@ import {
 } from './utils/type';
 import express, { Request, Response } from 'express';
 
+import { BlockchainName } from '.';
 import { BridgeTxnObject } from './bridge';
 import { ENV } from './utils/dotenv';
 import { burn } from './bridge/burn';
@@ -14,6 +15,7 @@ import { ensureString } from './utils/helper';
 import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './bridge/mint';
+import { verifyBlockchainTxn } from './blockchain/verify';
 
 async function homePageTest() {
   /* Used once code */
@@ -24,49 +26,67 @@ function startServer() {
   const app = express();
   const apiRouter = express.Router();
 
-  apiRouter
-    .route('/mint')
-    // .get(async (req: Request, res: Response) => {
-    //   const [from, to, amount, txnId] = [
-    //     ensureString(req.query.from),
-    //     ensureString(req.query.to),
-    //     ensureString(req.query.amount),
-    //     ensureString(req.query.txnId),
-    //   ];
-    //   await mintResp({ from, to, amount, txnId }, res);
-    // })
-    .post(async (req: Request, res: Response) => {
-      // res.json(req.body);
-      const [from, to, amount, txnId] = [
-        ensureString(req.body['mint_from']),
-        ensureString(req.body['mint_to']),
-        `${req.body['mint_amount']}`,
-        ensureString(req.body['mint_txnId']),
-      ];
-      await mintResp({ from, to, amount, txnId }, res);
-    });
+  apiRouter.route('/mint').post(async (req: Request, res: Response) => {
+    // res.json(req.body);
+    const [from, to, amount, txnId] = [
+      ensureString(req.body['mint_from']),
+      ensureString(req.body['mint_to']),
+      `${req.body['mint_amount']}`,
+      ensureString(req.body['mint_txnId']),
+    ];
+    await mintResp({ from, to, amount, txnId }, res);
+  });
+
+  apiRouter.route('/burn').post(async (req: Request, res: Response) => {
+    // res.json(req.body);
+    const [from, to, amount, txnId] = [
+      ensureString(req.body['mint_from']),
+      ensureString(req.body['mint_to']),
+      `${req.body['mint_amount']}`,
+      ensureString(req.body['mint_txnId']),
+    ];
+    await burnResp({ from, to, amount, txnId }, res);
+  });
 
   apiRouter
-    .route('/burn')
-    // .get(async (req: Request, res: Response) => {
-    //   const [from, to, amount, txnId] = [
-    //     ensureString(req.query.from),
-    //     ensureString(req.query.to),
-    //     ensureString(req.query.amount),
-    //     ensureString(req.query.txnId),
-    //   ];
-    //   await burnResp({ from, to, amount, txnId }, res);
-    // })
+    .route('/algorand/verify')
     .post(async (req: Request, res: Response) => {
-      // res.json(req.body);
       const [from, to, amount, txnId] = [
         ensureString(req.body['mint_from']),
         ensureString(req.body['mint_to']),
         `${req.body['mint_amount']}`,
         ensureString(req.body['mint_txnId']),
       ];
-      await burnResp({ from, to, amount, txnId }, res);
+      const verifyResult = await verifyBlockchainTxn(
+        {
+          from,
+          to,
+          amount,
+          txnId,
+        },
+        BlockchainName.ALGO
+      );
+      res.send(`Verification result: ${verifyResult}`);
     });
+
+  apiRouter.route('/near/verify').post(async (req: Request, res: Response) => {
+    const [from, to, amount, txnId] = [
+      ensureString(req.body['mint_from']),
+      ensureString(req.body['mint_to']),
+      `${req.body['mint_amount']}`,
+      ensureString(req.body['mint_txnId']),
+    ];
+    const verifyResult = await verifyBlockchainTxn(
+      {
+        from,
+        to,
+        amount,
+        txnId,
+      },
+      BlockchainName.NEAR
+    );
+    res.send(`Verification result: ${verifyResult}`);
+  });
 
   app.get('/', async (req: Request, res: Response) => {
     if (
@@ -139,3 +159,5 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   }
   return bridgeTxnObject;
 }
+
+// const apiCallParam: ApiCallParam;
