@@ -8,7 +8,6 @@
 <!-- TODO: input place holder, upto 10 digits, address -->
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -21,8 +20,15 @@
     <header>
       <h1>Algorand - NEAR Bridge</h1>
       <p>This is a demo of the Algorand Bridge for NEAR.</p>
-      <input type="checkbox" name="use-example-data" id="use-example-data-checkbox" checked />
-      Use Example Data
+      <label>
+        <input
+          type="checkbox"
+          name="example-data"
+          id="example-data-checkbox"
+          checked
+        />
+        Use Example Data
+      </label>
     </header>
 
     <div role="body">
@@ -33,14 +39,37 @@
         <div role="tab-switch">
           <ul class="tabs func-selection" role="tablist">
             <li class="func-selection">
-              <input type="radio" name="tabs" id="mint-tab-switch" class="func-selection" />
-              <label for="mint-tab-switch" role="tab" aria-controls="mint" class="func-selection" tabindex="0">
+              <input
+                type="radio"
+                name="tabs"
+                id="mint-tab-switch"
+                class="func-selection"
+              />
+              <label
+                for="mint-tab-switch"
+                role="tab"
+                aria-controls="mint"
+                class="func-selection"
+                tabindex="0"
+              >
                 mint
               </label>
             </li>
             <li class="func-selection">
-              <input type="radio" name="tabs" id="burn-tab-switch" checked class="func-selection" />
-              <label for="burn-tab-switch" role="tab" aria-controls="burn" class="func-selection" tabindex="1">
+              <input
+                type="radio"
+                name="tabs"
+                id="burn-tab-switch"
+                checked
+                class="func-selection"
+              />
+              <label
+                for="burn-tab-switch"
+                role="tab"
+                aria-controls="burn"
+                class="func-selection"
+                tabindex="1"
+              >
                 burn
               </label>
             </li>
@@ -50,8 +79,10 @@
         <div id="mint" role="tab-panel">
           <div role="left-column">
             <h3>NOTE:</h3>
-            <span>(TEMP,can check with wallet) Make sure your Algorand account has
-              Opted In to the goNEAR asset</span>
+            <span
+              >(TEMP,can check with wallet) Make sure your Algorand account has
+              Opted In to the goNEAR asset</span
+            >
             <br />
 
             <div id="" class="wallet-wrap">
@@ -67,14 +98,26 @@
               <label>
                 Amount (NEAR)
                 <br />
-                <input type="number" name="mint_amount" id="mint_amount" value="1.357" step="0.0000000001" required />
+                <input
+                  type="number"
+                  name="mint_amount"
+                  id="mint_amount"
+                  placeholder="like 1.357, up to 10 decimals"
+                  step="0.0000000001"
+                  required
+                />
               </label>
               <br />
               <label>
-                To (Algorand public address)
+                Beneficiary (Algorand public address)
                 <br />
-                <input type="text" name="mint_to" id="mint_to"
-                  value="ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA" size="50" required />
+                <input
+                  type="text"
+                  name="mint_to"
+                  id="mint_to"
+                  placeholder="like ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA"
+                  required
+                />
               </label>
               <!-- <br />
               <label>
@@ -86,8 +129,11 @@
             </form>
             Receiving XXX goNEAR on Algorand Account YYY
             <br />
-            <button id="near-request-transfer" class="clickBtn"
-              onclick="requestSignNearTxn($('input#mint_amount').val())">
+            <button
+              id="near-request-transfer"
+              class="clickBtn"
+              onclick="requestSignNearTxn($('input#mint_amount').val())"
+            >
               Authorize Mint Transaction
             </button>
           </div>
@@ -107,13 +153,25 @@
               <label>
                 Amount (goNEAR)
                 <br />
-                <input type="number" name="burn_amount" id="burn_amount" value="10" step="0.0000000001" required />
+                <input
+                  type="number"
+                  name="burn_amount"
+                  id="burn_amount"
+                  placeholder="like 1.357, up to 10 decimals"
+                  step="0.0000000001"
+                  required
+                />
               </label>
               <br />
               <label>
-                To (NEAR public address)
+                Beneficiary (NEAR public address)
                 <br />
-                <input type="text" name="burn_to" value="abstrlabs-test.testnet" required />
+                <input
+                  type="text"
+                  id="burn_to"
+                  placeholder="like abstrlabs-test.testnet"
+                  required
+                />
               </label>
               <!-- <label>
                 Transaction ID (Algorand)
@@ -136,13 +194,27 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/algosdk@v1.16.0/dist/browser/algosdk.min.js"
-    crossorigin="anonymous"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/algosdk@v1.16.0/dist/browser/algosdk.min.js"
+    crossorigin="anonymous"
+  ></script>
 
   <!-- <script src="index.js" type="module"></script> -->
   <script src="./dependencies/myalgo.min.js"></script>
   <script src="./near.js" comment="NEAR wallet connect"></script>
   <script src="./algo.js" comment="Algorand wallet connect"></script>
+
+  <!-- RENDER PAGE -->
+  <script comment="constants">
+    window.CONSTANT = {
+      ALGO_MASTER_ACCOUNT: '',
+      EXAMPLE_MINT_BENEFICIARY:
+        'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
+      EXAMPLE_MINT_AMOUNT: '1.3579',
+      EXAMPLE_BURN_BENEFICIARY: 'abstrlabs-test.testnet',
+      EXAMPLE_BURN_AMOUNT: '1.2345',
+    };
+  </script>
 
   <script comment="tab-switch-handler">
     /*tab selection for mint and burn*/
@@ -171,8 +243,28 @@
       renderTabSwitch();
     });
   </script>
+  <script comment="example-data">
+    let box = $('#example-data-checkbox')[0];
+    console.log('box : ', box); // DEV_LOG_TO_REMOVE
+    const renderExampleData = () => {
+      if (box.checked === true) {
+        $('input#mint_amount').val(window.CONSTANT.EXAMPLE_MINT_AMOUNT);
+        $('input#mint_to').val(window.CONSTANT.EXAMPLE_MINT_BENEFICIARY);
+        $('input#burn_amount').val(window.CONSTANT.EXAMPLE_BURN_AMOUNT);
+        $('input#burn_to').val(window.CONSTANT.EXAMPLE_BURN_BENEFICIARY);
+      } else {
+        $('input#mint_amount').val('');
+        $('input#mint_to').val('');
+        $('input#burn_amount').val('');
+        $('input#burn_to').val('');
+      }
+    };
+    box.addEventListener('change', (event) => {
+      renderExampleData();
+    });
+  </script>
   <script comment="run on start">
     renderTabSwitch();
+    renderExampleData();
   </script>
-
 </html>
