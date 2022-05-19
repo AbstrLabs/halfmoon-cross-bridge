@@ -11,11 +11,14 @@ import express, { Request, Response } from 'express';
 import { BlockchainName } from '.';
 import { BridgeTxnObject } from './bridge';
 import { ENV } from './utils/dotenv';
+import { RequestOptions } from 'https';
 import { burn } from './bridge/burn';
 import { ensureString } from './utils/helper';
 import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './bridge/mint';
+import { request } from 'http';
+import { stringifyBigintInObj } from './utils/formatter';
 import { verifyBlockchainTxn } from './blockchain/verify';
 
 async function homePageTest() {
@@ -45,33 +48,30 @@ function startServer() {
     const oldUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
     // from https://stackoverflow.com/questions/66748591/hey-can-you-help-me-out-my-url-parse-is-deprecated
 
-    enum RedirectType {
-      MINT = 'MINT',
-      BURN = 'BURN',
+    enum RedirectPath {
+      MINT = '/api/mint',
+      BURN = '/api/burn',
     }
-    res.json(req.query);
-    const type = req.query.type as RedirectType;
-    if (type === undefined) {
+    const newPath: RedirectPath = req.query.path as RedirectPath;
+    if (newPath === undefined) {
       return res.status(400).send('Missing required query params "type"');
     }
-    // TODO: improve this newPath logic. Just read it from the query params then verify.
-    let newPath: string;
     let newParam: Record<string, Stringer>;
-    if (!(type in RedirectType)) {
-      return res.status(400).send('Wrong query params "type"');
+    if (!Object.values(RedirectPath).includes(newPath)) {
+      console.log('newPath : ', newPath); // DEV_LOG_TO_REMOVE
+
+      return res.status(400).send('Wrong query params "path"');
     } else {
-      switch (type) {
-        case RedirectType.MINT:
-          newPath = '/api/mint';
+      switch (newPath) {
+        case RedirectPath.MINT:
           newParam = {
-            mint_from: literals.NOT_LOADED_FROM_ENV_STR,
-            mint_to: literals.NOT_LOADED_FROM_ENV_STR,
-            mint_amount: literals.NOT_LOADED_FROM_ENV_STR,
+            mint_from: ensureString(req.query.mint_from),
+            mint_to: ensureString(req.query.mint_to),
+            mint_amount: ensureString(req.query.mint_amount),
             mint_txnId: ensureString(req.query.transactionHashes),
           };
           break;
-        case RedirectType.BURN:
-          newPath = '/api/burn';
+        case RedirectPath.BURN:
           newParam = {
             burn_from: literals.NOT_LOADED_FROM_ENV_STR,
             burn_to: literals.NOT_LOADED_FROM_ENV_STR,
@@ -81,7 +81,6 @@ function startServer() {
           break;
         default:
           // will never happen, only for typing
-          newPath = '/';
           newParam = {};
           break;
       }
@@ -94,26 +93,87 @@ function startServer() {
         encodeURIComponent(newParam[key].toString())
       );
     }
-    newUrl.searchParams.set('txnId', 'a');
     const newStr = newUrl.toString();
     console.log('newStr : ', newStr); // DEV_LOG_TO_REMOVE
-
-    // res.redirect(newStr);
+    // res.json({
+    //   redirectFrom: req.query,
+    //   redirectTo: { param: newParam, newStr },
+    // });
+    res.redirect(newStr);
   });
 
   // TODO: move API to a new file of new folder server/api
   const apiRouter = express.Router();
 
-  apiRouter.route('/mint').post(async (req: Request, res: Response) => {
-    // res.json(req.body);
-    const [from, to, amount, txnId] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      `${req.body['mint_amount']}`,
-      ensureString(req.body['mint_txnId']),
-    ];
-    await mintResp({ from, to, amount, txnId }, res);
-  });
+  apiRouter
+    .route('/mint')
+    .get(async (req: Request, res: Response) => {
+      // const [from, to, amount, txnId] = [
+      //   ensureString(req.query['mint_from']),
+      //   ensureString(req.query['mint_to']),
+      //   `${req.query['mint_amount']}`,
+      //   ensureString(req.query['mint_txnId']),
+      // ];
+      // const mintApiParam = { from, to, amount, txnId };
+      console.log('========= /mint get ========== : '); // DEV_LOG_TO_REMOVE
+
+      const postParam = {
+        mint_from: req.query.mint_from,
+        mint_to: req.query.mint_to,
+        mint_amount: req.query.mint_amount,
+        mint_txnId: req.query.mint_txnId,
+      };
+      const requestOption: RequestOptions = {
+        hostname: req.hostname,
+        port: Number(ENV.PORT),
+        path: '/api/mint',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(JSON.stringify(postParam)),
+        },
+      };
+      console.log('========= /mint get ========== : making request  '); // DEV_LOG_TO_REMOVE
+      const apiReq = request(requestOption, (apiRes) => {
+        console.log('got api res'); // DEV_LOG_TO_REMOVE
+        let body = '';
+        apiRes.on('data', function (chunk) {
+          body += chunk; // will parse chunk as string
+        });
+        apiRes.on('end', () => {
+          return res.json(JSON.parse(body));
+        });
+      });
+      // console.log('========= /mint get ========== : writing request  '); // DEV_LOG_TO_REMOVE
+      apiReq.write(
+        JSON.stringify(postParam),
+        (error: Error | null | undefined) => {
+          if (error) {
+            console.log('got an error writing the request');
+            console.log(error);
+            return res.send(JSON.stringify(error));
+          }
+          // return res.send('mint success');
+        }
+      );
+      apiReq.on('error', (error: Error) => {
+        console.log('got an error');
+        console.log(error);
+        return res.write(JSON.stringify(error));
+      });
+
+      // mint dont
+    })
+    .post(async (req: Request, res: Response) => {
+      // res.json(req.body);
+      const [from, to, amount, txnId] = [
+        ensureString(req.body['mint_from']),
+        ensureString(req.body['mint_to']),
+        `${req.body['mint_amount']}`,
+        ensureString(req.body['mint_txnId']),
+      ];
+      await mintResp({ from, to, amount, txnId }, res);
+    });
 
   apiRouter.route('/burn').post(async (req: Request, res: Response) => {
     // res.json(req.body);
@@ -180,22 +240,23 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;
   let bridgeTxnObject: BridgeTxnObject;
-  logger.info(literals.START_MINTING(amount, from, to));
-  res.write(
-    `${literals.START_MINTING(amount, from, to)}\n` +
-      `${literals.MINT_NEAR_TXN_ID(txnId)}\n` +
-      `${literals.MINT_AWAITING}\n`
-  );
+  logger.info(literals.START_MINTING(amount, from, to) + `txnId: ${txnId}`);
+  // res.write(
+  //   `${literals.START_MINTING(amount, from, to)}\n` +
+  //     `${literals.MINT_NEAR_TXN_ID(txnId)}\n` +
+  //     `${literals.MINT_AWAITING}\n`
+  // );
   try {
     bridgeTxnObject = await mint(mintApiParam);
-    logger.info(literals.DONE_MINT);
-    res.end();
+    // logger.info(literals.DONE_MINT);
+    // TODO: use different literal template
   } catch (err) {
     res.status(400).send('Missing required query params');
     res.end();
     throw err;
   }
-  return bridgeTxnObject;
+
+  return res.json(stringifyBigintInObj(bridgeTxnObject));
 }
 
 // TODO: 2-func: ref mintResp and burnResp since they are in same structure.
@@ -221,5 +282,3 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   }
   return bridgeTxnObject;
 }
-
-// const apiCallParam: ApiCallParam;
