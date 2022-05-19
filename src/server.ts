@@ -2,6 +2,7 @@ export { startServer };
 
 import {
   BurnApiParam,
+  Stringer,
   parseBurnApiParam,
   parseMintApiParam,
 } from './utils/type';
@@ -24,6 +25,83 @@ async function homePageTest() {
 function startServer() {
   /* route */
   const app = express();
+  app.get('/', async (req: Request, res: Response) => {
+    if (
+      process.env.TS_NODE_DEV === undefined ||
+      process.env.TS_NODE_DEV === 'development'
+    ) {
+      await homePageTest();
+    }
+    res.sendFile('./frontend/index.html', { root: __dirname });
+  });
+  app.use('/frontend', express.static(__dirname + '/frontend'));
+
+  /* Express setup */
+  app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
+  app.use(express.json()); // parse application/json
+
+  app.use('/redirect', (req: Request, res: Response) => {
+    // TODO: improve next line
+    const oldUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+    // from https://stackoverflow.com/questions/66748591/hey-can-you-help-me-out-my-url-parse-is-deprecated
+
+    enum RedirectType {
+      MINT = 'MINT',
+      BURN = 'BURN',
+    }
+    res.json(req.query);
+    const type = req.query.type as RedirectType;
+    if (type === undefined) {
+      return res.status(400).send('Missing required query params "type"');
+    }
+    // TODO: improve this newPath logic. Just read it from the query params then verify.
+    let newPath: string;
+    let newParam: Record<string, Stringer>;
+    if (!(type in RedirectType)) {
+      return res.status(400).send('Wrong query params "type"');
+    } else {
+      switch (type) {
+        case RedirectType.MINT:
+          newPath = '/api/mint';
+          newParam = {
+            mint_from: literals.NOT_LOADED_FROM_ENV_STR,
+            mint_to: literals.NOT_LOADED_FROM_ENV_STR,
+            mint_amount: literals.NOT_LOADED_FROM_ENV_STR,
+            mint_txnId: ensureString(req.query.transactionHashes),
+          };
+          break;
+        case RedirectType.BURN:
+          newPath = '/api/burn';
+          newParam = {
+            burn_from: literals.NOT_LOADED_FROM_ENV_STR,
+            burn_to: literals.NOT_LOADED_FROM_ENV_STR,
+            burn_amount: literals.NOT_LOADED_FROM_ENV_STR,
+            burn_txnId: ensureString(req.query.transactionHashes),
+          };
+          break;
+        default:
+          // will never happen, only for typing
+          newPath = '/';
+          newParam = {};
+          break;
+      }
+    }
+
+    const newUrl = new URL(newPath, oldUrl);
+    for (const key in newParam) {
+      newUrl.searchParams.append(
+        key,
+        encodeURIComponent(newParam[key].toString())
+      );
+    }
+    newUrl.searchParams.set('txnId', 'a');
+    const newStr = newUrl.toString();
+    console.log('newStr : ', newStr); // DEV_LOG_TO_REMOVE
+
+    // res.redirect(newStr);
+  });
+
+  // TODO: move API to a new file of new folder server/api
   const apiRouter = express.Router();
 
   apiRouter.route('/mint').post(async (req: Request, res: Response) => {
@@ -47,7 +125,6 @@ function startServer() {
     ];
     await burnResp({ from, to, amount, txnId }, res);
   });
-
   apiRouter
     .route('/algorand/verify')
     .post(async (req: Request, res: Response) => {
@@ -87,21 +164,6 @@ function startServer() {
     );
     res.send(`Verification result: ${verifyResult}`);
   });
-
-  app.get('/', async (req: Request, res: Response) => {
-    if (
-      process.env.TS_NODE_DEV === undefined ||
-      process.env.TS_NODE_DEV === 'development'
-    ) {
-      await homePageTest();
-    }
-    res.sendFile('./frontend/index.html', { root: __dirname });
-  });
-  app.use('/frontend', express.static(__dirname + '/frontend'));
-  /* Express setup */
-  app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
-  app.use(express.json()); // parse application/json
-
   app.use('/api', apiRouter);
   app.listen(ENV.PORT, () => {
     logger.info(
