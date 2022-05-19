@@ -6,6 +6,7 @@ export {
   stringifyObjWithBigint,
   yoctoNearToAtom,
   atomToYoctoNear,
+  stringifyBigintInObj,
 };
 
 import { BridgeError, ERRORS } from './errors';
@@ -161,6 +162,8 @@ function atomToYoctoNear(atom: bigint): string {
 function stringifyObjWithBigint(obj?: object): string {
   if (!obj) {
     return '';
+    logger.warn('stringifyObjWithBigint: no obj');
+    // TODO: should raise error?
   }
   return JSON.stringify(stringifyBigintInObj(obj));
 }
@@ -175,7 +178,9 @@ type Obj = Record<string, unknown>;
 function stringifyBigintInObj(obj: object): object {
   const newObj: Obj = { ...obj };
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'bigint') {
+    if (value === undefined || value === null) {
+      console.log(`value of ${key} is undefined or null`); // DEV_LOG_TO_REMOVE
+    } else if (typeof value === 'bigint') {
       newObj[key] = value.toString();
     } else if (typeof value === 'object') {
       newObj[key] = stringifyBigintInObj(value);
