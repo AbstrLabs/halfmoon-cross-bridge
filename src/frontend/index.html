@@ -13,7 +13,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./frontend/index.css">
+    <link rel="stylesheet" href="./frontend/index.css" />
     <title>Algorand - NEAR Bridge</title>
   </head>
 
@@ -21,7 +21,8 @@
     <header>
       <h1>Algorand - NEAR Bridge</h1>
       <p>This is a demo of the Algorand Bridge for NEAR.</p>
-      <input type="checkbox" name="use-example-data" id="use-example-data-checkbox" checked> Use Example Data
+      <input type="checkbox" name="use-example-data" id="use-example-data-checkbox" checked />
+      Use Example Data
     </header>
 
     <div role="body">
@@ -32,13 +33,13 @@
         <div role="tab-switch">
           <ul class="tabs func-selection" role="tablist">
             <li class="func-selection">
-              <input type="radio" name="tabs" id="mint-tab-switch" class="func-selection">
+              <input type="radio" name="tabs" id="mint-tab-switch" class="func-selection" />
               <label for="mint-tab-switch" role="tab" aria-controls="mint" class="func-selection" tabindex="0">
                 mint
               </label>
             </li>
             <li class="func-selection">
-              <input type="radio" name="tabs" id="burn-tab-switch" checked class="func-selection">
+              <input type="radio" name="tabs" id="burn-tab-switch" checked class="func-selection" />
               <label for="burn-tab-switch" role="tab" aria-controls="burn" class="func-selection" tabindex="1">
                 burn
               </label>
@@ -49,13 +50,16 @@
         <div id="mint" role="tab-panel">
           <div role="left-column">
             <h3>NOTE:</h3>
-            <span>(TEMP,can check with wallet) Make sure your Algorand account has Opted In to the goNEAR asset</span>
+            <span>(TEMP,can check with wallet) Make sure your Algorand account has
+              Opted In to the goNEAR asset</span>
             <br />
 
             <div id="" class="wallet-wrap">
               <button id="near-connect-btn">Connect NEAR Wallet</button>
               <p id="near-address"></p>
-              <button id="near-signout-btn" style="display: none;">Sign Out</button>
+              <button id="near-signout-btn" style="display: none">
+                Sign Out
+              </button>
             </div>
             <br />
             <br />
@@ -92,7 +96,9 @@
         <div id="burn" role="tab-panel">
           <div>
             <div class="wallet-wrap">
-              <button id="algorand-connect-btn" onclick="connectToMyAlgo()">Connect My Algo Wallet</button>
+              <button id="algorand-connect-btn" onclick="connectToMyAlgo()">
+                Connect My Algo Wallet
+              </button>
               <p id="algo-address"></p>
               <!-- <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
                 first time)</button> -->
@@ -119,14 +125,13 @@
             </form>
             <!-- <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button> -->
             <!-- <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button> -->
-            <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">Confirm</button>
+            <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">
+              Confirm
+            </button>
           </div>
-
-
         </div>
       </div>
     </div>
-
   </body>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -148,27 +153,26 @@
 
     const renderTabSwitch = () => {
       if (mintTabSwitch.checked === true) {
-        mintTabContent.style.display = "grid";
+        mintTabContent.style.display = 'grid';
       } else {
-        mintTabContent.style.display = "none";
+        mintTabContent.style.display = 'none';
       }
       if (burnTabSwitch.checked === true) {
-        burnTabContent.style.display = "grid"
+        burnTabContent.style.display = 'grid';
       } else {
-        burnTabContent.style.display = "none"
+        burnTabContent.style.display = 'none';
       }
-    }
+    };
     mintTabSwitch.addEventListener('change', (event) => {
-      renderTabSwitch()
-    })
+      renderTabSwitch();
+    });
 
     burnTabSwitch.addEventListener('change', (event) => {
-      renderTabSwitch()
-    })
-
+      renderTabSwitch();
+    });
   </script>
   <script comment="run on start">
-    renderTabSwitch()
+    renderTabSwitch();
   </script>
 
 </html>
