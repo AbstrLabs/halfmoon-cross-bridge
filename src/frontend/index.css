@@ -158,14 +158,14 @@ ul {
   margin-bottom: 20px;
 }
 
-.two-columns {
+/* .two-columns {
   margin: 2% 25%;
   text-align: left;
   display: grid;
   grid-template: auto/50% 50%;
   gap: 20px;
   place-items: center;
-}
+} */
 
 label,
 input[type='text'],

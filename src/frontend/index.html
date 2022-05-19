@@ -5,6 +5,7 @@
 <!-- TODO: 3. before API call, user should make a transaction, and use the returned txnId -->
 <!-- TODO: 4. on button click: pass 4 params(to,from,amount,txnId) to API in server.ts -->
 
+<!-- TODO: input place holder, upto 10 digits, address -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,13 +32,13 @@
         <div role="tab-switch">
           <ul class="tabs func-selection" role="tablist">
             <li class="func-selection">
-              <input type="radio" name="tabs" id="mint-tab-switch" checked class="func-selection">
+              <input type="radio" name="tabs" id="mint-tab-switch" class="func-selection">
               <label for="mint-tab-switch" role="tab" aria-controls="mint" class="func-selection" tabindex="0">
                 mint
               </label>
             </li>
             <li class="func-selection">
-              <input type="radio" name="tabs" id="burn-tab-switch" class="func-selection">
+              <input type="radio" name="tabs" id="burn-tab-switch" checked class="func-selection">
               <label for="burn-tab-switch" role="tab" aria-controls="burn" class="func-selection" tabindex="1">
                 burn
               </label>
@@ -45,11 +46,12 @@
           </ul>
         </div>
 
-        <div id="mint" role="tab-panel" class="tab-panel">
+        <div id="mint" role="tab-panel">
           <div role="left-column">
             <h3>NOTE:</h3>
             <span>(TEMP,can check with wallet) Make sure your Algorand account has Opted In to the goNEAR asset</span>
             <br />
+
             <div id="" class="wallet-wrap">
               <button id="near-connect-btn">Connect NEAR Wallet</button>
               <p id="near-address"></p>
@@ -59,7 +61,7 @@
             <br />
             <form>
               <label>
-                Amount (in NEAR or goNEAR)
+                Amount (NEAR)
                 <br />
                 <input type="number" name="mint_amount" id="mint_amount" value="1.357" step="0.0000000001" required />
               </label>
@@ -77,15 +79,12 @@
                 <input type="text" name="mint_from" id="mint_to" value="abstrlabs-test.testnet" size="50" disabled />
               </label> -->
               <br />
-
-              <button id="near-request-transfer" class="clickBtn" onclick="">
-                Post form
-              </button>
             </form>
             Receiving XXX goNEAR on Algorand Account YYY
+            <br />
             <button id="near-request-transfer" class="clickBtn"
               onclick="requestSignNearTxn($('input#mint_amount').val())">
-              Make the Transfer(test)
+              Authorize Mint Transaction
             </button>
           </div>
         </div>
@@ -95,43 +94,35 @@
             <div class="wallet-wrap">
               <button id="algorand-connect-btn" onclick="connectToMyAlgo()">Connect My Algo Wallet</button>
               <p id="algo-address"></p>
-              <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
-                first time)</button>
+              <!-- <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
+                first time)</button> -->
             </div>
             <form>
               <label>
-                Amount
-                <input type="number" name="burn_amount" id="burn_amount" placeholder="10" step="0.0000000001"
-                  required />
-              </label>
-              <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button>
-
-              <label>Transaction ID (Algorand)
-                <input type="text" name="burn_txnId" id="burn_txnId"
-                  placeholder="Am1ZQx651WwYXZzBbtKV35YYPP6Tc5epvCfebv5XRn4K" size="50" required>
+                Amount (goNEAR)
+                <br />
+                <input type="number" name="burn_amount" id="burn_amount" value="10" step="0.0000000001" required />
               </label>
               <br />
-              <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button>
-            </form>
-            <h3>1. Transfer goNEAR token to Escrow account</h3>
-          </div>
-
-          <div>
-            <h3>2. Fill in the transaction ID</h3>
-
-          </div>
-
-          <div>
-            <h3>3. Confirm NEAR account to get NEAR from Escrow account</h3>
-            <form>
               <label>
                 To (NEAR public address)
-                <input type="text" name="burn_to" placeholder="abstrlabs-test.testnet" required />
+                <br />
+                <input type="text" name="burn_to" value="abstrlabs-test.testnet" required />
               </label>
+              <!-- <label>
+                Transaction ID (Algorand)
+                <br />
+                <input type="text" name="burn_txnId" id="burn_txnId"
+                  value="Am1ZQx651WwYXZzBbtKV35YYPP6Tc5epvCfebv5XRn4K" size="50" required>
+              </label> -->
               <br />
-              <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">Confirm</button>
             </form>
+            <!-- <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button> -->
+            <!-- <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button> -->
+            <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">Confirm</button>
           </div>
+
+
         </div>
       </div>
     </div>
