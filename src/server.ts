@@ -35,7 +35,8 @@ function startServer() {
     ) {
       await homePageTest();
     }
-    res.sendFile('./frontend/index.html', { root: __dirname });
+    res.redirect('/frontend');
+    // res.sendFile('./frontend/index.html', { root: __dirname });
   });
   app.use('/frontend', express.static(__dirname + '/frontend'));
 
