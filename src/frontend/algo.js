@@ -1,16 +1,24 @@
+const ALGO_UNIT = 10_000_000_000;
 const myAlgoWallet = new MyAlgoConnect();
-let algoAccountButton = $('algorand-connect-btn')[0];
-let algoAddressContext = $('algo-address')[0];
-let algoOptInButton = $('algorand-optin')[0];
-let algoTransferButton = $('algorand-transfer')[0];
-let algoTxInput = $('burn_txnId')[0];
 let algorandAddress;
+let algoAccountButton = $('#algorand-connect-btn')[0];
+let algoAddressContext = $('#algo-address')[0];
+let algoOptInButton = $('#algorand-optin')[0];
+let algoTransferButton = $('#algorand-transfer')[0];
+let algoTxInput = $('#burn_txnId')[0];
+let algoAmount = document.getElementById('burn_amount');
+let goNearAmount = $('#burn_amount_filled')[0];
+let algoFilledTx = $('#burn_txnId_filled')[0];
+let algoFilledAccount = $('#burn_from_filled')[0];
+let burnConfirmPage = $('#burn-confirm-page')[0];
+let burnReceiver = $('#burn_to')[0];
+let burnFilledReceiver = $('#burn_to_filled')[0];
 
 const connectToMyAlgo = async () => {
   try {
     const accounts = await myAlgoWallet.connect();
     algorandAddress = accounts[0].address;
-    algoAccountButton.textContent = algoAccountButton.textContent
+    algoAccountButton.textContent = 'My Algo Wallet Connected as (TODO: show wallet alias)';
     algoAddressContext.textContent = algorandAddress
     algoAccountButton.disabled = true;
     algoOptInButton.style.display = 'block';
@@ -21,12 +29,11 @@ const connectToMyAlgo = async () => {
 }
 
 const algodClient = new algosdk.Algodv2('', 'https://node.testnet.algoexplorerapi.io', '');
-const to = 'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE';
 
 /*Warning: Browser will block pop-up if user doesn't trigger myAlgoWallet.connect() with a button interation */
 
 /* Algorand wallet transfer function */
-async function signTransaction(from, to, amountAlgo) {
+async function signGoNearTransaction(from, to, amountAlgo) {
   try {
     const suggestedParams = await algodClient.getTransactionParams().do();
     const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({ suggestedParams, from, to, amount: amountAlgo, assetIndex: 83251085 });
@@ -38,26 +45,26 @@ async function signTransaction(from, to, amountAlgo) {
   }
 }
 
-let algoAmount = document.getElementById('burn_amount');
-const algo_unit = 10000000000;
-const goNEARTransfer = async (event) => {
-  event.preventDefault()
+
+const requestSignGoNearTxn = async (amountStr) => {
+
+  const from = algorandAddress; // change
+  const to = window.CONSTANT.ALGO_MASTER_ACCOUNT;
+  const amount = +amountStr * ALGO_UNIT;
   try {
-    const from = algorandAddress; // change
-    const amountAlgo = algoAmount.value * 10000000000;
-    const response = await signTransaction(from, to, amountAlgo);
-    console.log(response)
-    algoTxInput.value = response.txId
+    const response = await signGoNearTransaction(from, to, amount);
+    console.log('response : ', response); // DEV_LOG_TO_REMOVE
+    // TODO: Err handling: no goNEAR in acc.
+    return response.txId
   } catch (err) {
     console.error(err);
   }
 }
 
-const optInGoNear = async () => {
-  const from = algorandAddress;
-  const amountAlgo = 0;
-  const response = await signTransaction(from, from, amountAlgo);
+const optInGoNear = async (addr) => {
+  const response = await signGoNearTransaction(addr, addr, 0);
   console.log(response)
+  return response
 }
 
 /* check algo transaction */
@@ -73,9 +80,8 @@ const indexer = new algosdk.Indexer(
   indexerParam.port
 );
 
-let goNearAmount = document.getElementById('burn_amount_filled');
-let algoFilledTx = document.getElementById('burn_txnId_filled');
-let algoFilledAccount = document.getElementById('burn_from_filled');
+
+
 
 const checkAlgoTx = async (event) => {
   event.preventDefault()
@@ -87,15 +93,23 @@ const checkAlgoTx = async (event) => {
   }
 }
 
-/* confirm burn */
-let burnConfirmPage = document.getElementById('burn-confirm-page');
-let burnReceiver = document.getElementById('burn_to');
-let burnFilledReceiver = document.getElementById('burn_to_filled');
-const confirmBurn = (event) => {
-  event.preventDefault()
-  burnConfirmPage.style.display = 'block';
-  burnFilledReceiver.textContent = burnReceiver.value
-  document.getElementById('burn-button').disabled = false
+const authorizeBurnTransaction = async (amount) => {
+
+  const cbUrl = new URL('/redirect', window.location.href);
+  cbUrl.searchParams.set('path', '/api/burn');
+  cbUrl.searchParams.set('burn_amount', amount);
+  cbUrl.searchParams.set('burn_to', burnReceiver.value);
+  cbUrl.searchParams.set('burn_from', algorandAddress);
+  console.log('cbUrl : ', cbUrl.toString()); // DEV_LOG_TO_REMOVE
+
+  let txnId = await requestSignGoNearTxn(amount)
+  cbUrl.searchParams.set('burn_txnId', txnId);
+
+  const callbackUrl = cbUrl.toString();
+  window.location.assign(callbackUrl)
+  // burnConfirmPage.style.display = 'block';
+  // burnFilledReceiver.textContent = burnReceiver.value
+  // document.getElementById('burn-button').disabled = false
 }
 
 /* burn */

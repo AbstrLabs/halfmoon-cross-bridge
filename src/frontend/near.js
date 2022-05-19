@@ -84,19 +84,19 @@ async function createNearTxn({
   return tx;
 }
 
-async function requestSignNearTxn(amountStr) {
+async function requestSignNearTxn(amountStr, callbackUrl = undefined) {
+  let tx = await createNearTxn({ receiverId: 'abstrlabs.testnet', amountStr })
+  nearWallet.requestSignTransactions({ transactions: [tx], callbackUrl });
+}
+
+async function authorizeMintTransaction(amountStr) {
   const cbUrl = new URL('/redirect', window.location.href);
   cbUrl.searchParams.set('path', '/api/mint');
   cbUrl.searchParams.set('mint_amount', amountStr);
   cbUrl.searchParams.set('mint_to', mintReceiver.value);
   cbUrl.searchParams.set('mint_from', nearWallet.getAccountId().toString());
   const callbackUrl = cbUrl.toString();
-
-  console.log('callbackUrl : ', callbackUrl); // DEV_LOG_TO_REMOVE
-
-  let tx = await createNearTxn({ receiverId: 'abstrlabs.testnet', amountStr })
-
-  nearWallet.requestSignTransactions({ transactions: [tx], callbackUrl });
+  await requestSignNearTxn(amountStr, callbackUrl);
   return
 }
 

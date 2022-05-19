@@ -74,10 +74,10 @@ function startServer() {
           break;
         case RedirectPath.BURN:
           newParam = {
-            burn_from: literals.NOT_LOADED_FROM_ENV_STR,
-            burn_to: literals.NOT_LOADED_FROM_ENV_STR,
-            burn_amount: literals.NOT_LOADED_FROM_ENV_STR,
-            burn_txnId: ensureString(req.query.transactionHashes),
+            burn_from: ensureString(req.query.burn_from),
+            burn_to: ensureString(req.query.burn_to),
+            burn_amount: ensureString(req.query.burn_amount),
+            burn_txnId: ensureString(req.query.burn_txnId),
           };
           break;
         default:
@@ -109,13 +109,6 @@ function startServer() {
   apiRouter
     .route('/mint')
     .get(async (req: Request, res: Response) => {
-      // const [from, to, amount, txnId] = [
-      //   ensureString(req.query['mint_from']),
-      //   ensureString(req.query['mint_to']),
-      //   `${req.query['mint_amount']}`,
-      //   ensureString(req.query['mint_txnId']),
-      // ];
-      // const mintApiParam = { from, to, amount, txnId };
       console.log('========= /mint get ========== : '); // DEV_LOG_TO_REMOVE
 
       const postParam = {
@@ -176,16 +169,64 @@ function startServer() {
       await mintResp({ from, to, amount, txnId }, res);
     });
 
-  apiRouter.route('/burn').post(async (req: Request, res: Response) => {
-    // res.json(req.body);
-    const [from, to, amount, txnId] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      `${req.body['mint_amount']}`,
-      ensureString(req.body['mint_txnId']),
-    ];
-    await burnResp({ from, to, amount, txnId }, res);
-  });
+  apiRouter
+    .route('/burn')
+    .get(async (req: Request, res: Response) => {
+      console.log('========= /burn get ========== : '); // DEV_LOG_TO_REMOVE
+      const postParam = {
+        burn_from: req.query.burn_from,
+        burn_to: req.query.burn_to,
+        burn_amount: req.query.burn_amount,
+        burn_txnId: req.query.burn_txnId,
+      };
+      const requestOption: RequestOptions = {
+        hostname: req.hostname,
+        port: Number(ENV.PORT),
+        path: '/api/burn',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(JSON.stringify(postParam)),
+        },
+      };
+      console.log('========= /burn get ========== : making request  '); // DEV_LOG_TO_REMOVE
+      const apiReq = request(requestOption, (apiRes) => {
+        console.log('got api res'); // DEV_LOG_TO_REMOVE
+        let body = '';
+        apiRes.on('data', function (chunk) {
+          body += chunk; // will parse chunk as string
+        });
+        apiRes.on('end', () => {
+          return res.json(JSON.parse(body));
+        });
+      });
+      apiReq.write(
+        JSON.stringify(postParam),
+        (error: Error | null | undefined) => {
+          if (error) {
+            console.log('got an error writing the request');
+            console.log(error);
+            return res.send(JSON.stringify(error));
+          }
+        }
+      );
+      apiReq.on('error', (error: Error) => {
+        console.log('got an error');
+        console.log(error);
+        return res.write(JSON.stringify(error));
+      });
+    })
+    .post(async (req: Request, res: Response) => {
+      // res.json(req.body);
+      const [from, to, amount, txnId] = [
+        ensureString(req.body['burn_from']),
+        ensureString(req.body['burn_to']),
+        `${req.body['burn_amount']}`,
+        ensureString(req.body['burn_txnId']),
+      ];
+      await burnResp({ from, to, amount, txnId }, res);
+    });
+
   apiRouter
     .route('/algorand/verify')
     .post(async (req: Request, res: Response) => {
@@ -266,12 +307,12 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   const burnApiParam = parseBurnApiParam(apiCallParam);
   const { from, to, amount, txnId } = burnApiParam;
   let bridgeTxnObject: BridgeTxnObject;
-  logger.info(literals.START_BURNING(amount, from, to));
-  res.write(
-    `${literals.START_BURNING(amount, from, to)}\n` +
-      `${literals.BURN_ALGO_TXN_ID(txnId)}\n` +
-      `${literals.BURN_AWAITING}\n`
-  );
+  logger.info(literals.START_BURNING(amount, from, to) + `txnId: ${txnId}`);
+  // res.write(
+  //   `${literals.START_BURNING(amount, from, to)}\n` +
+  //     `${literals.BURN_ALGO_TXN_ID(txnId)}\n` +
+  //     `${literals.BURN_AWAITING}\n`
+  // );
   res.end();
   try {
     bridgeTxnObject = await burn(burnApiParam);
@@ -281,5 +322,5 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
     res.end();
     throw err;
   }
-  return bridgeTxnObject;
+  return res.json(stringifyBigintInObj(bridgeTxnObject));
 }

@@ -132,7 +132,7 @@
             <button
               id="near-request-transfer"
               class="clickBtn"
-              onclick="requestSignNearTxn($('input#mint_amount').val())"
+              onclick="authorizeMintTransaction($('input#mint_amount').val())"
             >
               Authorize Mint Transaction
             </button>
@@ -183,9 +183,20 @@
             </form>
             <!-- <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button> -->
             <!-- <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button> -->
-            <button id="burn-confirm" class="clickBtn" onclick="confirmBurn()">
-              Confirm
+            <button
+              id="burn-confirm"
+              class="clickBtn"
+              onclick="authorizeBurnTransaction($('input#burn_amount').val())"
+            >
+              Authorize Burn Transaction
             </button>
+            <!-- <button
+              id="burn-confirm"
+              class="clickBtn"
+              onclick="requestSignGoNearTxn($('input#burn_amount').val())"
+            >
+              req Burn Transaction
+            </button> -->
           </div>
         </div>
       </div>
@@ -201,13 +212,14 @@
 
   <!-- <script src="index.js" type="module"></script> -->
   <script src="./dependencies/myalgo.min.js"></script>
-  <script src="./near.js" comment="NEAR wallet connect"></script>
-  <script src="./algo.js" comment="Algorand wallet connect"></script>
+  <script src="./near.js" comment="NEAR wallet functions"></script>
+  <script src="./algo.js" comment="Algorand wallet functions"></script>
 
   <!-- RENDER PAGE -->
   <script comment="constants">
     window.CONSTANT = {
-      ALGO_MASTER_ACCOUNT: '',
+      ALGO_MASTER_ACCOUNT:
+        'JMJLRBZQSTS6ZINTD3LLSXCW46K44EI2YZHYKCPBGZP3FLITIQRGPELOBE',
       EXAMPLE_MINT_BENEFICIARY:
         'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
       EXAMPLE_MINT_AMOUNT: '1.3579',
@@ -245,7 +257,6 @@
   </script>
   <script comment="example-data">
     let box = $('#example-data-checkbox')[0];
-    console.log('box : ', box); // DEV_LOG_TO_REMOVE
     const renderExampleData = () => {
       if (box.checked === true) {
         $('input#mint_amount').val(window.CONSTANT.EXAMPLE_MINT_AMOUNT);
