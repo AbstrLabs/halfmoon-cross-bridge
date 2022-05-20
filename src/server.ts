@@ -17,6 +17,7 @@ import { ensureString } from './utils/helper';
 import { literals } from './utils/literals';
 import { logger } from './utils/logger';
 import { mint } from './bridge/mint';
+import { renderFile } from 'ejs';
 import { request } from 'http';
 import { stringifyBigintInObj } from './utils/formatter';
 import { verifyBlockchainTxn } from './blockchain/verify';
@@ -28,6 +29,18 @@ async function homePageTest() {
 function startServer() {
   /* route */
   const app = express();
+
+  app.engine('html', renderFile);
+  app.get('/test', (req: Request, res: Response) => {
+    console.log('__dirname : ', __dirname); // DEV_LOG_TO_REMOVE
+
+    res.render(__dirname + '/frontend/test.html', {
+      title: 'test',
+      variable: 'hello',
+      root: __dirname,
+    });
+  });
+
   app.get('/', async (req: Request, res: Response) => {
     if (
       process.env.TS_NODE_DEV === undefined ||
