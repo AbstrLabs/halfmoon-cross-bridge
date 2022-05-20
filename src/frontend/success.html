@@ -78,9 +78,7 @@
   </body>
   <script src="/frontend/html-nodes.js"></script>
   <script>
-    let bridgeTxn = JSON.parse('<%- bridgeTxn %>');
-    console.log('bridgeTxn : ', bridgeTxn); // DEV_LOG_TO_REMOVE
-
+    let bridgeTxn = JSON.parse('<%- bridgeTxnStr %>');
     document.querySelector('#dbId').textContent = bridgeTxn.dbId;
     document.querySelector('#fixedFeeAtom').textContent =
       bridgeTxn.fixedFeeAtom;

@@ -45,6 +45,9 @@ function startServer() {
 
   // TODO: exclude `frontend/processing.html`, `frontend/success.html`
   app.use('/frontend', express.static(__dirname + '/frontend'));
+  // app.use('/frontend/result', (req: Request, res: Response) => {
+  //   responseWithSuccess(res, req.query.bridgeTxn);
+  // });
 
   /* Express setup */
   app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
@@ -107,7 +110,7 @@ function startServer() {
     res.render(__dirname + '/frontend/processing.html', {
       toUrl: newUrlStr,
       params: JSON.stringify(newParam),
-      txnTypeStr: txnTypeStr,
+      txnTypeStr,
     });
     // res.redirect(newStr);
   });
@@ -340,6 +343,6 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
 
 function responseWithSuccess(res: Response, bridgeTxnStr: string) {
   res.render(__dirname + '/frontend/success.html', {
-    bridgeTxn: bridgeTxnStr,
+    bridgeTxnStr,
   });
 }
