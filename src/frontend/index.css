@@ -63,8 +63,7 @@ p {
 
 #near-connect-btn,
 #near-signout-btn,
-#algorand-connect-btn,
-#algorand-optin {
+#algorand-connect-btn {
   color: #18e3c0;
   font-size: 14px;
   font-weight: 300;
@@ -78,8 +77,7 @@ p {
 
 #near-connect-btn:disabled,
 #near-signout-btn:disabled,
-#algorand-connect-btn:disabled,
-#algorand-optin:disabled {
+#algorand-connect-btn:disabled {
   color: #1873e3;
   font-size: 14px;
   font-weight: 300;

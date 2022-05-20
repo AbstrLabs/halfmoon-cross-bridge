@@ -7,7 +7,6 @@ const myAlgoWallet = new MyAlgoConnect({
 let ALGORAND_ADDRESS;
 let algoAccountButton = $('#algorand-connect-btn')[0];
 let algoAddressContext = $('#algo-address')[0];
-let algoOptInButton = $('#algorand-optin')[0];
 let algoTransferButton = $('#algorand-transfer')[0];
 let algoTxInput = $('#burn_txnId')[0];
 let burnReceiver = $('#burn_to')[0];
@@ -67,7 +66,6 @@ const optInGoNear = async (addr) => {
 async function checkOptedIn(addr, option = { showAlert: false }) {
   if (addr === undefined) {
     window.alert('checking opted-in for empty addr')
-    $('#algorand-optin').style.display = 'default';
   }
   let accountInfo = await algodClient.accountInformation(addr).do();
   for (let assetInfo of accountInfo['assets']) {
