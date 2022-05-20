@@ -44,10 +44,10 @@ function startServer() {
   });
 
   // TODO: exclude `frontend/processing.html`, `frontend/success.html`
+  app.get('/frontend/result', (req: Request, res: Response) => {
+    responseWithSuccess(res, req.query.bridgeTxnStr as string);
+  });
   app.use('/frontend', express.static(__dirname + '/frontend'));
-  // app.use('/frontend/result', (req: Request, res: Response) => {
-  //   responseWithSuccess(res, req.query.bridgeTxn);
-  // });
 
   /* Express setup */
   app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
@@ -121,8 +121,6 @@ function startServer() {
   apiRouter
     .route('/mint')
     .get(async (req: Request, res: Response) => {
-      console.log('========= /mint get ========== : '); // DEV_LOG_TO_REMOVE
-
       const postParam = {
         mint_from: req.query.mint_from,
         mint_to: req.query.mint_to,
@@ -139,7 +137,6 @@ function startServer() {
           'Content-Length': Buffer.byteLength(JSON.stringify(postParam)),
         },
       };
-      console.log('========= /mint get ========== : making request  '); // DEV_LOG_TO_REMOVE
       const apiReq = request(requestOption, (apiRes) => {
         let body = '';
         apiRes.on('data', function (chunk) {
@@ -147,10 +144,13 @@ function startServer() {
         });
         apiRes.on('end', () => {
           const apiResBodyStr = body;
-          return responseWithSuccess(res, apiResBodyStr);
+          return res.redirect(
+            '/frontend/result/?bridgeTxnStr=' + apiResBodyStr
+          );
+
+          //  return responseWithSuccess(res, apiResBodyStr);
         });
       });
-      // console.log('========= /mint get ========== : writing request  '); // DEV_LOG_TO_REMOVE
       apiReq.write(
         JSON.stringify(postParam),
         (error: Error | null | undefined) => {
@@ -184,7 +184,6 @@ function startServer() {
   apiRouter
     .route('/burn')
     .get(async (req: Request, res: Response) => {
-      console.log('========= /burn get ========== : '); // DEV_LOG_TO_REMOVE
       const postParam = {
         burn_from: req.query.burn_from,
         burn_to: req.query.burn_to,
@@ -201,11 +200,8 @@ function startServer() {
           'Content-Length': Buffer.byteLength(JSON.stringify(postParam)),
         },
       };
-      console.log('postParam : ', postParam); // DEV_LOG_TO_REMOVE
 
-      console.log('========= /burn get ========== : making request  '); // DEV_LOG_TO_REMOVE
       const apiReq = request(requestOption, (apiRes) => {
-        console.log('got api res'); // DEV_LOG_TO_REMOVE
         let body = '';
         apiRes.on('data', function (chunk) {
           body += chunk; // will parse chunk as string
@@ -213,7 +209,10 @@ function startServer() {
 
         apiRes.on('end', () => {
           const apiResBodyStr = body;
-          return responseWithSuccess(res, apiResBodyStr);
+          return res.redirect(
+            '/frontend/success/?bridgeTxnStr=' + apiResBodyStr
+          );
+          // return responseWithSuccess(res, apiResBodyStr);
         });
       });
       apiReq.write(
