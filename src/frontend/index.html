@@ -19,7 +19,7 @@
   <body>
     <header>
       <h1>Algorand - NEAR Bridge</h1>
-      <p>This is a demo of the Algorand Bridge for NEAR.</p>
+      <p>Demo Page of the Algorand Bridge for NEAR</p>
       <label>
         <input
           type="checkbox"
@@ -78,13 +78,6 @@
 
         <div id="mint" role="tab-panel">
           <div role="left-column">
-            <div id="" class="wallet-wrap">
-              <button id="near-connect-btn">Connect NEAR Wallet</button>
-              <p id="near-address"></p>
-              <button id="near-signout-btn" style="display: none">
-                Sign Out
-              </button>
-            </div>
             <br />
             <br />
             <form>
@@ -120,7 +113,7 @@
               </label> -->
               <br />
             </form>
-            Receiving XXX goNEAR on Algorand Account YYY
+            Receiving XXX goNEAR
             <br />
             <!-- <button
               id="burn-confirm"
@@ -129,6 +122,27 @@
             >
               checkOptedIn
             </button> -->
+
+            <div id="" class="wallet-wrap">
+              <button id="near-connect-btn">Connect NEAR Wallet</button>
+              <p id="near-address"></p>
+              <button id="near-signout-btn" style="display: none">
+                Sign Out
+              </button>
+            </div>
+            <br />
+            <span>↓</span>
+            <br />
+            <br />
+
+            <button
+              id="algorand-optin"
+              onclick="optInGoNear()"
+              style="display: none"
+            >
+              Opt In goNEAR
+            </button>
+
             <button
               id="near-request-transfer"
               class="clickBtn"
@@ -141,14 +155,6 @@
 
         <div id="burn" role="tab-panel">
           <div>
-            <div class="wallet-wrap">
-              <button id="algorand-connect-btn" onclick="connectToMyAlgo()">
-                Connect My Algo Wallet
-              </button>
-              <p id="algo-address"></p>
-              <!-- <button id="algorand-optin" onclick="optInGoNear()">goNEAR Opt In(skip if finished
-                first time)</button> -->
-            </div>
             <form>
               <label>
                 Amount (goNEAR)
@@ -183,6 +189,18 @@
             </form>
             <!-- <button id="check-tx-algo" onclick="checkAlgoTx()" class="clickBtn" required>Hash Check</button> -->
             <!-- <button id="algorand-transfer" onclick="goNEARTransfer()" class="clickBtn" disabled>Transfer</button> -->
+            <div class="wallet-wrap">
+              <button id="algorand-connect-btn" onclick="connectToMyAlgo()">
+                Connect My Algo Wallet
+              </button>
+              <p id="algo-address"></p>
+            </div>
+
+            <br />
+            <span>↓</span>
+            <br />
+            <br />
+
             <button
               id="burn-confirm"
               class="clickBtn"

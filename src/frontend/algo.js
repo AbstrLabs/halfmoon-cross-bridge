@@ -1,6 +1,9 @@
 const ALGO_UNIT = 10_000_000_000;
 const GO_NEAR_ASA_ID = 83251085;
-const myAlgoWallet = new MyAlgoConnect();
+const myAlgoWallet = new MyAlgoConnect({
+  shouldSelectOneAccount: true,
+  openManager: true,
+});
 let ALGORAND_ADDRESS;
 let algoAccountButton = $('#algorand-connect-btn')[0];
 let algoAddressContext = $('#algo-address')[0];
@@ -30,6 +33,7 @@ const algodClient = new algosdk.Algodv2({ 'X-API-Key': 'WLJDqY55G5560kyCJVp647ER
 
 /* Algorand wallet transfer function */
 async function signGoNearTransaction(from, to, amountAlgo) {
+  await myAlgoWallet.connect()
   try {
     const suggestedParams = await algodClient.getTransactionParams().do();
     const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({ suggestedParams, from, to, amount: amountAlgo, assetIndex: GO_NEAR_ASA_ID });
@@ -43,13 +47,11 @@ async function signGoNearTransaction(from, to, amountAlgo) {
 
 
 const requestSignGoNearTxn = async (amountStr) => {
-
-  const from = ALGORAND_ADDRESS; // change
+  const from = ALGORAND_ADDRESS;
   const to = window.CONSTANT.ALGO_MASTER_ACCOUNT;
   const amount = +amountStr * ALGO_UNIT;
   try {
     const response = await signGoNearTransaction(from, to, amount);
-    console.log('response : ', response); // DEV_LOG_TO_REMOVE
     // TODO: Err handling: no goNEAR in acc.
     return response.txId
   } catch (err) {
@@ -59,13 +61,13 @@ const requestSignGoNearTxn = async (amountStr) => {
 
 const optInGoNear = async (addr) => {
   const response = await signGoNearTransaction(addr, addr, 0);
-  console.log(response)
-  return response
+  return response.txId
 }
 
 async function checkOptedIn(addr, option = { showAlert: false }) {
   if (addr === undefined) {
     window.alert('checking opted-in for empty addr')
+    $('#algorand-optin').style.display = 'default';
   }
   let accountInfo = await algodClient.accountInformation(addr).do();
   for (let assetInfo of accountInfo['assets']) {
