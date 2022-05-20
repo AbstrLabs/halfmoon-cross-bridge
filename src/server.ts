@@ -43,7 +43,7 @@ function startServer() {
     // res.sendFile('./frontend/index.html', { root: __dirname });
   });
 
-  // TODO: exclude `frontend/processing.html`
+  // TODO: exclude `frontend/processing.html`, `frontend/success.html`
   app.use('/frontend', express.static(__dirname + '/frontend'));
 
   /* Express setup */

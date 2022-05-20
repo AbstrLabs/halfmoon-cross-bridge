@@ -19,6 +19,9 @@
         padding: 5px;
         text-align: left;
       }
+      th {
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -30,7 +33,6 @@
           <th>type</th>
           <td id="txnTypeStr"></td>
         </tr>
-
         <tr>
           <th>from</th>
           <td id="from"></td>
@@ -40,12 +42,17 @@
           <td id="to"></td>
         </tr>
         <tr>
+          <th>amount</th>
+          <td id="amount"></td>
+        </tr>
+        <tr>
           <th>txnId</th>
           <td id="txnId"></td>
         </tr>
       </table>
     </div>
   </body>
+  <script src="./frontend/html-nodes.js"></script>
   <script>
     let toUrl = '<%- toUrl %>';
     let params = JSON.parse('<%- params %>');
@@ -54,31 +61,27 @@
     // alert(toUrl);
     document.querySelector('#txnTypeStr').textContent = txnTypeStr;
     if (txnTypeStr === 'Mint') {
-      const link = document.createElement('a');
-      link.title = params.mint_txnId;
-      link.href =
-        'https://explorer.testnet.near.org/transactions/' + params.mint_txnId;
-      // copilot gave me this 'https://explorer.nearprotocol.com/transaction/' + params.mint_txnId;
-      var linkText = document.createTextNode(link.title);
-      link.appendChild(linkText);
-
-      document.querySelector('#from').textContent = params.mint_from;
-      document.querySelector('#to').textContent = params.mint_to;
-      document.querySelector('#txnId').appendChild(link);
+      document
+        .querySelector('#from')
+        .appendChild(nearAccNode(params.mint_from));
+      document.querySelector('#to').appendChild(algoAccNode(params.mint_to));
+      document.querySelector('#amount').textContent = params.mint_amount;
+      document
+        .querySelector('#txnId')
+        .appendChild(nearTxnIdNode(params.mint_txnId));
 
       // document.querySelector(
       //   '#params'
       // ).textContent = `${txnTypeStr} \n from ${params.mint_from} \n to ${params.mint_to} \n amount ${params.mint_amount} \n txnId ${params.mint_txnId}`;
     } else if (txnTypeStr === 'Burn') {
-      const link = document.createElement('a');
-      link.title = params.burn_txnId;
-      link.href = 'https://testnet.algoexplorer.io/tx' + params.burn_txnId;
-      var linkText = document.createTextNode(link.title);
-      link.appendChild(linkText);
-
-      document.querySelector('#from').textContent = params.burn_from;
-      document.querySelector('#to').textContent = params.burn_to;
-      document.querySelector('#txnId').appendChild(link);
+      document
+        .querySelector('#from')
+        .appendChild(algoAccNode(params.burn_from));
+      document.querySelector('#to').appendChild(nearAccNode(params.burn_to));
+      document.querySelector('#amount').textContent = params.burn_amount;
+      document
+        .querySelector('#txnId')
+        .appendChild(algoTxnIdNode(params.burn_txnId));
 
       // document.querySelector(
       //   '#params'
@@ -87,6 +90,6 @@
       alert('Unknown transaction type');
     }
 
-    window.location.assign(toUrl);
+    // window.location.assign(toUrl);
   </script>
 </html>
