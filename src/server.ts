@@ -35,9 +35,7 @@ function startServer() {
     console.log('__dirname : ', __dirname); // DEV_LOG_TO_REMOVE
 
     res.render(__dirname + '/frontend/test.html', {
-      title: 'test',
-      variable: 'hello',
-      root: __dirname,
+      passedVariable: 'hello world',
     });
   });
 
