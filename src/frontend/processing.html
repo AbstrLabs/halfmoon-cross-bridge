@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Processing Transaction - Algorand-NEAR Bridge</title>
     <!-- <link rel="stylesheet" href="./index.css" /> -->
-    <link rel="stylesheet" href="./frontend/index.css" />
+    <link rel="stylesheet" href="/frontend/index.css" />
     <style>
       table,
       th,
@@ -26,8 +26,8 @@
   </head>
   <body>
     <div style="display: grid; place-items: center; height: 80%">
-      <h1>Processing...</h1>
-      <span id="params" style="white-space: pre; text-align: start"></span>
+      <h1>Processing Transaction...</h1>
+      <p>Please wait for redirection.</p>
       <table>
         <tr>
           <th>type</th>
@@ -52,7 +52,7 @@
       </table>
     </div>
   </body>
-  <script src="./frontend/html-nodes.js"></script>
+  <script src="/frontend/html-nodes.js"></script>
   <script>
     let toUrl = '<%- toUrl %>';
     let params = JSON.parse('<%- params %>');
@@ -90,6 +90,6 @@
       alert('Unknown transaction type');
     }
 
-    // window.location.assign(toUrl);
+    window.location.assign(toUrl);
   </script>
 </html>

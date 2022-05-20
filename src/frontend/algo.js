@@ -7,7 +7,6 @@ const myAlgoWallet = new MyAlgoConnect({
 let ALGORAND_ADDRESS;
 let algoAccountButton = $('#algorand-connect-btn')[0];
 let algoAddressContext = $('#algo-address')[0];
-let algoTransferButton = $('#algorand-transfer')[0];
 let algoTxInput = $('#burn_txnId')[0];
 let burnReceiver = $('#burn_to')[0];
 
@@ -18,7 +17,6 @@ const connectToMyAlgo = async () => {
     algoAccountButton.textContent = 'My Algo Wallet Connected as (TODO: show wallet alias)';
     algoAddressContext.textContent = ALGORAND_ADDRESS
     algoAccountButton.disabled = true;
-    algoOptInButton.style.display = 'block';
     algoTransferButton.disabled = false;
   } catch (err) {
     console.error(err);

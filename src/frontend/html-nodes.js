@@ -9,8 +9,8 @@ function algoAccNode(addr) {
 
 function algoTxnIdNode(txnId) {
   const link = document.createElement('a');
-  link.title = params.burn_txnId;
-  link.href = 'https://testnet.algoexplorer.io/tx' + params.burn_txnId;
+  link.title = txnId;
+  link.href = 'https://testnet.algoexplorer.io/tx/' + txnId;
   var linkText = document.createTextNode(link.title);
   link.appendChild(linkText);
   return link

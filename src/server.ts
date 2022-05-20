@@ -103,11 +103,6 @@ function startServer() {
       );
     }
     const newUrlStr = newUrl.toString();
-    // res.json({
-    //   redirectFrom: req.query,
-    //   redirectTo: { param: newParam, newStr },
-    // });
-    console.log('JSON.stringify(newParam) : ', JSON.stringify(newParam)); // DEV_LOG_TO_REMOVE
 
     res.render(__dirname + '/frontend/processing.html', {
       toUrl: newUrlStr,
@@ -143,13 +138,13 @@ function startServer() {
       };
       console.log('========= /mint get ========== : making request  '); // DEV_LOG_TO_REMOVE
       const apiReq = request(requestOption, (apiRes) => {
-        console.log('got api res'); // DEV_LOG_TO_REMOVE
         let body = '';
         apiRes.on('data', function (chunk) {
           body += chunk; // will parse chunk as string
         });
         apiRes.on('end', () => {
-          return res.json(JSON.parse(body));
+          const apiResBodyStr = body;
+          return responseWithSuccess(res, apiResBodyStr);
         });
       });
       // console.log('========= /mint get ========== : writing request  '); // DEV_LOG_TO_REMOVE
@@ -214,8 +209,8 @@ function startServer() {
         });
 
         apiRes.on('end', () => {
-          console.log('body : ', body); // DEV_LOG_TO_REMOVE
-          return res.json(JSON.parse(body));
+          const apiResBodyStr = body;
+          return responseWithSuccess(res, apiResBodyStr);
         });
       });
       apiReq.write(
@@ -341,4 +336,10 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
     throw err;
   }
   return res.json(stringifyBigintInObj(bridgeTxnObject));
+}
+
+function responseWithSuccess(res: Response, bridgeTxnStr: string) {
+  res.render(__dirname + '/frontend/success.html', {
+    bridgeTxn: bridgeTxnStr,
+  });
 }
