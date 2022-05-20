@@ -90,6 +90,10 @@ async function requestSignNearTxn(amountStr, callbackUrl = undefined) {
 }
 
 async function authorizeMintTransaction(amountStr) {
+  if (!(await checkOptedIn(mintReceiver.value))) {
+    window.alert('beneficiary account not opted in to goNEAR')
+    return
+  }
   const cbUrl = new URL('/redirect', window.location.href);
   cbUrl.searchParams.set('path', '/api/mint');
   cbUrl.searchParams.set('mint_amount', amountStr);

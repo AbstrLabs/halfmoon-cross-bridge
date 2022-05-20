@@ -78,13 +78,6 @@
 
         <div id="mint" role="tab-panel">
           <div role="left-column">
-            <h3>NOTE:</h3>
-            <span
-              >(TEMP,can check with wallet) Make sure your Algorand account has
-              Opted In to the goNEAR asset</span
-            >
-            <br />
-
             <div id="" class="wallet-wrap">
               <button id="near-connect-btn">Connect NEAR Wallet</button>
               <p id="near-address"></p>
@@ -129,6 +122,13 @@
             </form>
             Receiving XXX goNEAR on Algorand Account YYY
             <br />
+            <button
+              id="burn-confirm"
+              class="clickBtn"
+              onclick="checkOptedIn($('input#mint_to').val(),{showAlert: true})"
+            >
+              checkOptedIn
+            </button>
             <button
               id="near-request-transfer"
               class="clickBtn"
