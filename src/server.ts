@@ -31,13 +31,6 @@ function startServer() {
   const app = express();
 
   app.engine('html', renderFile);
-  app.get('/test', (req: Request, res: Response) => {
-    console.log('__dirname : ', __dirname); // DEV_LOG_TO_REMOVE
-
-    res.render(__dirname + '/frontend/test.html', {
-      passedVariable: 'hello world',
-    });
-  });
 
   app.get('/', async (req: Request, res: Response) => {
     if (
@@ -49,6 +42,8 @@ function startServer() {
     res.redirect('/frontend');
     // res.sendFile('./frontend/index.html', { root: __dirname });
   });
+
+  // TODO: exclude `frontend/processing.html`
   app.use('/frontend', express.static(__dirname + '/frontend'));
 
   /* Express setup */
@@ -69,9 +64,8 @@ function startServer() {
       return res.status(400).send('Missing required query params "type"');
     }
     let newParam: Record<string, Stringer>;
+    let txnTypeStr: string;
     if (!Object.values(RedirectPath).includes(newPath)) {
-      console.log('newPath : ', newPath); // DEV_LOG_TO_REMOVE
-
       return res.status(400).send('Wrong query params "path"');
     } else {
       switch (newPath) {
@@ -82,6 +76,7 @@ function startServer() {
             mint_amount: ensureString(req.query.mint_amount),
             mint_txnId: ensureString(req.query.transactionHashes),
           };
+          txnTypeStr = 'Mint';
           break;
         case RedirectPath.BURN:
           newParam = {
@@ -90,10 +85,12 @@ function startServer() {
             burn_amount: ensureString(req.query.burn_amount),
             burn_txnId: ensureString(req.query.burn_txnId),
           };
+          txnTypeStr = 'Burn';
           break;
         default:
           // will never happen, only for typing
           newParam = {};
+          txnTypeStr = '';
           break;
       }
     }
@@ -105,13 +102,19 @@ function startServer() {
         encodeURIComponent(newParam[key].toString())
       );
     }
-    const newStr = newUrl.toString();
-    console.log('newStr : ', newStr); // DEV_LOG_TO_REMOVE
+    const newUrlStr = newUrl.toString();
     // res.json({
     //   redirectFrom: req.query,
     //   redirectTo: { param: newParam, newStr },
     // });
-    res.redirect(newStr);
+    console.log('JSON.stringify(newParam) : ', JSON.stringify(newParam)); // DEV_LOG_TO_REMOVE
+
+    res.render(__dirname + '/frontend/processing.html', {
+      toUrl: newUrlStr,
+      params: JSON.stringify(newParam),
+      txnTypeStr: txnTypeStr,
+    });
+    // res.redirect(newStr);
   });
 
   // TODO: move API to a new file of new folder server/api

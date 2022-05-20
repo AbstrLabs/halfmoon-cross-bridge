@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Processing Transaction - Algorand-NEAR Bridge</title>
+    <!-- <link rel="stylesheet" href="./index.css" /> -->
+    <link rel="stylesheet" href="./frontend/index.css" />
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid white;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 5px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display: grid; place-items: center; height: 80%">
+      <h1>Processing...</h1>
+      <span id="params" style="white-space: pre; text-align: start"></span>
+      <table>
+        <tr>
+          <th>type</th>
+          <td id="txnTypeStr"></td>
+        </tr>
+
+        <tr>
+          <th>from</th>
+          <td id="from"></td>
+        </tr>
+        <tr>
+          <th>to</th>
+          <td id="to"></td>
+        </tr>
+        <tr>
+          <th>txnId</th>
+          <td id="txnId"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
+  <script>
+    let toUrl = '<%- toUrl %>';
+    let params = JSON.parse('<%- params %>');
+
+    let txnTypeStr = '<%= txnTypeStr %>';
+    // alert(toUrl);
+    document.querySelector('#txnTypeStr').textContent = txnTypeStr;
+    if (txnTypeStr === 'Mint') {
+      const link = document.createElement('a');
+      link.title = params.mint_txnId;
+      link.href =
+        'https://explorer.testnet.near.org/transactions/' + params.mint_txnId;
+      // copilot gave me this 'https://explorer.nearprotocol.com/transaction/' + params.mint_txnId;
+      var linkText = document.createTextNode(link.title);
+      link.appendChild(linkText);
+
+      document.querySelector('#from').textContent = params.mint_from;
+      document.querySelector('#to').textContent = params.mint_to;
+      document.querySelector('#txnId').appendChild(link);
+
+      // document.querySelector(
+      //   '#params'
+      // ).textContent = `${txnTypeStr} \n from ${params.mint_from} \n to ${params.mint_to} \n amount ${params.mint_amount} \n txnId ${params.mint_txnId}`;
+    } else if (txnTypeStr === 'Burn') {
+      const link = document.createElement('a');
+      link.title = params.burn_txnId;
+      link.href = 'https://testnet.algoexplorer.io/tx' + params.burn_txnId;
+      var linkText = document.createTextNode(link.title);
+      link.appendChild(linkText);
+
+      document.querySelector('#from').textContent = params.burn_from;
+      document.querySelector('#to').textContent = params.burn_to;
+      document.querySelector('#txnId').appendChild(link);
+
+      // document.querySelector(
+      //   '#params'
+      // ).textContent = `${txnTypeStr} from ${params.burn_from} to ${params.burn_to} amount ${params.burn_amount} txnId ${params.burn_txnId}`;
+    } else {
+      alert('Unknown transaction type');
+    }
+
+    window.location.assign(toUrl);
+  </script>
+</html>
