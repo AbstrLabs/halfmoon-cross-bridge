@@ -89,7 +89,7 @@ p {
 
 ul {
   list-style: none;
-  margin: 0 20%;
+  margin: 0 10%;
   padding: 0;
 }
 
@@ -181,4 +181,9 @@ input[type='number'] {
   border: 2px solid rgb(237, 255, 226);
   border-radius: 4px;
   transition: 180ms box-shadow ease-in-out;
+}
+
+a,
+a:visited {
+  color: #18e3c0;
 }
