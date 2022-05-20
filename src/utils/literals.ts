@@ -21,7 +21,7 @@ const MAKING_TXN = (
 const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Minting ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).`;
 const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
-  `Burning ${amount} ALGO from [${from}](ALGO) to [${to}](NEAR)`;
+  `Burning ${amount} goNEAR from [${from}](ALGO) to [${to}](NEAR)`;
 
 const MINT_NEAR_TXN_ID = (txnId: Stringer) =>
   `Minting with transaction ID [${txnId}](NEAR).`;

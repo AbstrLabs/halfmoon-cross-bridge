@@ -189,6 +189,8 @@ function startServer() {
           'Content-Length': Buffer.byteLength(JSON.stringify(postParam)),
         },
       };
+      console.log('postParam : ', postParam); // DEV_LOG_TO_REMOVE
+
       console.log('========= /burn get ========== : making request  '); // DEV_LOG_TO_REMOVE
       const apiReq = request(requestOption, (apiRes) => {
         console.log('got api res'); // DEV_LOG_TO_REMOVE
@@ -196,7 +198,9 @@ function startServer() {
         apiRes.on('data', function (chunk) {
           body += chunk; // will parse chunk as string
         });
+
         apiRes.on('end', () => {
+          console.log('body : ', body); // DEV_LOG_TO_REMOVE
           return res.json(JSON.parse(body));
         });
       });
@@ -313,7 +317,7 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   //     `${literals.BURN_ALGO_TXN_ID(txnId)}\n` +
   //     `${literals.BURN_AWAITING}\n`
   // );
-  res.end();
+  // res.end();
   try {
     bridgeTxnObject = await burn(burnApiParam);
     logger.info(literals.DONE_BURN);

@@ -257,6 +257,7 @@ if (ENV.NEAR_NETWORK === 'testnet') {
     explorerUrl: 'https://explorer.testnet.near.org',
     headers: {},
   };
+  // TODO: check if nearAPI also has .provider(s) (indexer)
   indexerParam = {
     url: 'https://archival-rpc.testnet.near.org',
   };

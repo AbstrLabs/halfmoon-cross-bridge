@@ -106,6 +106,12 @@ const authorizeBurnTransaction = async (amount) => {
   cbUrl.searchParams.set('burn_txnId', txnId);
 
   const callbackUrl = cbUrl.toString();
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 10000);
+  });
+
   window.location.assign(callbackUrl)
   // burnConfirmPage.style.display = 'block';
   // burnFilledReceiver.textContent = burnReceiver.value

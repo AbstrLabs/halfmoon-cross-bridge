@@ -703,6 +703,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the marginFeeAtom
+   *
+   * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
     if (this.marginFeeAtom !== undefined) {

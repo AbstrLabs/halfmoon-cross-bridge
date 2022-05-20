@@ -1,3 +1,4 @@
+// TODO: purge logger. too many info on Mint/burn
 export { BlockchainName, BridgeTxnStatus };
 
 enum BlockchainName {
