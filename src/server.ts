@@ -6,7 +6,7 @@ import {
   parseBurnApiParam,
   parseMintApiParam,
 } from './utils/type';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 
 import { BlockchainName } from '.';
 import { BridgeTxnObject } from './bridge';
@@ -44,6 +44,13 @@ function startServer() {
   });
 
   // TODO: exclude `frontend/processing.html`, `frontend/success.html`
+
+  app.use('/frontend', (req: Request, res: Response, next: NextFunction) => {
+    if (['processing.html', 'success.html'].includes(req.url)) {
+      return res.status(403).end('403 Forbidden');
+    }
+    next();
+  });
   app.get('/frontend/result', (req: Request, res: Response) => {
     responseWithSuccess(res, req.query.bridgeTxnStr as string);
   });
@@ -210,7 +217,7 @@ function startServer() {
         apiRes.on('end', () => {
           const apiResBodyStr = body;
           return res.redirect(
-            '/frontend/success/?bridgeTxnStr=' + apiResBodyStr
+            '/frontend/result/?bridgeTxnStr=' + apiResBodyStr
           );
           // return responseWithSuccess(res, apiResBodyStr);
         });
@@ -282,6 +289,9 @@ function startServer() {
     res.send(`Verification result: ${verifyResult}`);
   });
   app.use('/api', apiRouter);
+  app.use('/', (req: Request, res: Response) => {
+    return res.status(404).end('404 Not found');
+  });
   app.listen(ENV.PORT, () => {
     logger.info(
       `Application started on port ${ENV.PORT}! http://localhost:${ENV.PORT}/`
