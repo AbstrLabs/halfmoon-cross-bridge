@@ -129,7 +129,7 @@ class Database {
       bridgeTxn.toTxnId,
     ];
     const result = await this.query(query, params);
-    this._verifyResultUniqueness(result, { bridgeTxn });
+    this._verifyResultUniqueness(result, { bridgeTxn, at: 'createTxn' });
 
     const dbId = parseDbId(result[0].db_id);
     logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.getTxnType(), dbId));
@@ -206,7 +206,7 @@ class Database {
     ];
     const result = await this.query(query, params);
 
-    this._verifyResultUniqueness(result, { bridgeTxn });
+    this._verifyResultUniqueness(result, { bridgeTxn, at: 'updateTxn' });
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
     return parseDbId(result[0].db_id);
@@ -226,7 +226,7 @@ class Database {
     // should use BridgeTxn.fromDbItem to convert to BridgeTxn
 
     const result = await this.readTxn(dbId, txnType);
-    this._verifyResultUniqueness(result, { dbId });
+    this._verifyResultUniqueness(result, { dbId, at: 'readUniqueTxn' });
     const dbItem = parseDbItem(result[0]);
     return dbItem;
   }
@@ -314,6 +314,8 @@ class Database {
    * @param  {unknown[]} result - query result to be verified
    * @param  {object} extraErrInfo? - extra error info
    * @returns {boolean} - true if result is not empty
+   *
+   * @todo change the object type
    */
   private _verifyResultUniqueness(
     result: unknown[],

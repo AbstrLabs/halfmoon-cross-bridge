@@ -91,6 +91,7 @@ class NearBlockchain extends Blockchain {
         });
     });
   }
+
   /**
    * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
    *

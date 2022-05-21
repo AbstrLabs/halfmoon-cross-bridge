@@ -179,7 +179,7 @@ function stringifyBigintInObj(obj: object): object {
   const newObj: Obj = { ...obj };
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined || value === null) {
-      console.log(`value of ${key} is undefined or null`); // DEV_LOG_TO_REMOVE
+      newObj[key] = value;
     } else if (typeof value === 'bigint') {
       newObj[key] = value.toString();
     } else if (typeof value === 'object') {
