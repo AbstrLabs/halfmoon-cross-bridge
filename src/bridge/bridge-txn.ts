@@ -785,7 +785,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this.getTxnType()
     );
     if (dbEntryWithTxnId.length > 0) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+      // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
       throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
@@ -832,7 +832,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    return await this.#db.updateTxn(this);
+    try {
+      return await this.#db.updateTxn(this); // TODO: err handling in this async
+    } catch (e) {
+      logger.error('error at _updateTxn', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateTxn',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /**
@@ -862,7 +871,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     this.txnStatus = status;
-    return await this._updateTxn();
+    try {
+      return await this._updateTxn();
+    } catch (e) {
+      logger.error('error at _updateTxnStatus', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateTxnStatus',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /**
@@ -881,7 +899,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     this.toTxnId = toTxnId;
-    return await this._updateTxn();
+    try {
+      return await this._updateTxn();
+    } catch (e) {
+      logger.error('error at _updateToTxnId', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateToTxnId',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /* PRIVATE METHODS - HELPERS */

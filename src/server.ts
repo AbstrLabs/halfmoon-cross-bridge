@@ -32,6 +32,15 @@ function startServer() {
 
   app.engine('html', renderFile);
 
+  app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*'); // TODO: safety check '*'
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept'
+    );
+    next();
+  });
+
   app.get('/', async (req: Request, res: Response) => {
     if (
       process.env.TS_NODE_DEV === undefined ||
