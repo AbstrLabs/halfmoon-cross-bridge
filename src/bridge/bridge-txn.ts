@@ -186,7 +186,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
           resolve(true);
         })
         .catch((err) => {
-          reject(err);
+          logger.error(err);
+          reject(false);
         });
     });
   }
@@ -204,6 +205,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
+    if (!(await this.#isInitializedPromise)) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn.runWholeBridgeTxn',
+      });
+    }
     if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         at: 'BridgeTxn.runWholeBridgeTxn',
@@ -473,21 +479,32 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   private async _initialize(
     initializeOptions: InitializeOptions
   ): Promise<this> {
+    console.log('BridgeTxn._initialize()');
     try {
       this._selfValidate();
+      console.log('_selfValidate passed');
       this._inferBlockchainNames();
+      console.log('_inferBlockchainNames passed');
       this._hookBlockchain();
+      console.log('_hookBlockchain passed');
       this._getFixedFeeAtom();
+      console.log('_getFixedFeeAtom passed');
       this._calculateMarginFeeAtom();
+      console.log('_calculateMarginFeeAtom passed');
       this._calculateToAmountAtom();
+      console.log('_calculateToAmountAtom passed');
     } catch (err) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
       if (initializeOptions.notCreateInDb === false) {
         await this._createInDb();
       }
-      throw err;
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn._initialize',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+        err,
+      });
     }
-
+    console.log('try catch passed');
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
     if (initializeOptions.notCreateInDb === false) {
       await this._createInDb();
@@ -507,11 +524,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {BridgeTxn} the {@link BridgeTxn} itself
    */
   private _selfValidate(): this {
-    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM, {
-        at: 'BridgeTxn._selfValidate',
-      });
-    }
+    // if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
+    //   throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM, {
+    //     at: 'BridgeTxn._selfValidate',
+    //   });
+    // }
 
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this._getFixedFeeAtom();
@@ -743,6 +760,14 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
+    // create is inside _initialize() method, so we can't check if is initialized.
+    // if (!(await this.#isInitializedPromise)) {
+    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+    //     message: 'BridgeTxn is not initialized',
+    //     at: 'BridgeTxn._createInDb',
+    //   });
+    // }
+
     // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
     const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
@@ -758,15 +783,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    try {
-      this.dbId = await this.#db.createTxn(this);
-    } catch (err) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
-        at: 'BridgeTxn._createDbEntry',
-        error: err,
-        bridgeTxn: this,
-      });
-    }
+    // try {
+    this.dbId = await this.#db.createTxn(this);
+    // !!!now
+    // } catch (err) {
+    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
+    //     at: 'BridgeTxn._createInDb',
+    //     error: err,
+    //     bridgeTxn: this,
+    //   });
+    // }
     // if (!this.#db.isConnected) {
     //   throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
     //     at: 'BridgeTxn._updateTxnStatus',

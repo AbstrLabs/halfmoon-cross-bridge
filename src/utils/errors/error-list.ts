@@ -200,7 +200,7 @@ const externalErrors = {
   DB_QUERY_FAILED: {
     errId: 301,
     name: 'DB query failed',
-    message: 'Cannot query with database service',
+    message: 'Cannot query in database service',
   },
   MAKE_TXN_FAILED: {
     errId: 302,

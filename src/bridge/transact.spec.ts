@@ -1,9 +1,10 @@
 // TODO: mint-burn-test: move more same functions to test helper.
 
+import { NearTxnId, TxnType } from '../blockchain';
+
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { TxnType } from '../blockchain';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
 import { transact } from './transact';
@@ -11,7 +12,7 @@ import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
-describe('mint test', () => {
+describe.skip('mint test', () => {
   it(
     'mint 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
@@ -20,12 +21,22 @@ describe('mint test', () => {
       // config
       const amount = '1.2345678901';
       // simulate frontend: make NEAR txn
-      const mintResponse: FinalExecutionOutcome =
-        await transferOnNearTestnetFromExampleToMaster(amount);
+      let mintResponse: FinalExecutionOutcome | undefined = undefined;
+      let nearTxnId: NearTxnId | undefined = undefined;
+      try {
+        mintResponse = await transferOnNearTestnetFromExampleToMaster(amount);
+        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+        nearTxnId = mintResponse.transaction.hash as NearTxnId; // or mintResponse.transaction_outcome.id;
+      } catch (err) {
+        console.error('cannot mint NEAR', err);
+      }
       // manually checked the amount is correct.
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      const nearTxnId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
+      if (!nearTxnId) {
+        throw new Error('cannot mint NEAR');
+      }
       const apiCallParam: ApiCallParam = {
         txnType: TxnType.MINT,
         from: ENV.NEAR_EXAMPL_ADDR,
@@ -83,7 +94,10 @@ describe('burn test', () => {
       // should return AlgoTxnId,etc.
 
       // verification
+      console.log('bridgeTxn.toTxnId : ', bridgeTxn.toTxnId); // DEV_LOG_TO_REMOVE
+
       expect(bridgeTxn.toTxnId).toBeDefined();
+      return bridgeTxn;
     },
     TIMEOUT_30S * 3
   );

@@ -8,13 +8,7 @@ export { db };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
-import {
-  type DbId,
-  type DbItem,
-  parseDbItem,
-  parseDbId,
-  Stringer,
-} from '../utils/type';
+import { type DbId, type DbItem, parseDbItem, parseDbId } from '../utils/type';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -70,9 +64,20 @@ class Database {
    */
   async query(
     query: string,
-    params: (Stringer | unknown)[] = []
-  ): Promise<unknown[]> {
-    return await this.instance.query(query, params);
+    params: (unknown | undefined)[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any[]> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return await this.instance.query(query, params);
+    } catch (err: unknown) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_QUERY_FAILED, {
+        connected: this.isConnected,
+        err,
+        query,
+        params,
+      });
+    }
   }
 
   /**
@@ -107,7 +112,7 @@ class Database {
     const tableName = this._inferTableName(bridgeTxn.txnType);
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
-      // await this.connect();
+      await this.connect();
     }
     // const bridgeTxnObj = bridgeTxn.toObject();
     const query = `
@@ -134,6 +139,7 @@ class Database {
       bridgeTxn.toAmountAtom,
       bridgeTxn.toTxnId,
     ];
+    console.log('i run here : '); // DEV_LOG_TO_REMOVE
     const queryResult = await this.query(query, params);
     const result = this._verifyResultUniqueness(queryResult, {
       bridgeTxn: bridgeTxn,

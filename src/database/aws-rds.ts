@@ -66,17 +66,15 @@ class Postgres {
    * @returns  {Promise<any[]>} result of the query.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async query(
-    query: string,
-    params: unknown[] = []
-  ): Promise<(unknown | undefined)[]> {
+  async query(query: string, params: any[] = []): Promise<any[]> {
     if (!this.isConnected || !this.client) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED);
       // await this.connect();
     }
 
     const res = await this.client.query(query, params);
-    return res.rows as (unknown | undefined)[];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return res.rows;
   }
 
   /**
