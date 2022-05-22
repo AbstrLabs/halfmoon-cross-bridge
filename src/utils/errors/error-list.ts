@@ -242,6 +242,11 @@ const externalErrors = {
     name: 'Empty new transaction id',
     message: 'New transaction id is undefined',
   },
+  DB_UPDATE_TXN_FAILED: {
+    errId: 310,
+    name: 'DB update transaction failed',
+    message: 'Cannot update transaction in database',
+  },
 };
 
 const ERRORS = {

@@ -19,7 +19,7 @@ import { logger } from '../utils/logger';
  */
 async function burn(burnApiParam: BurnApiParam): Promise<BridgeTxnObject> {
   logger.info(
-    literals.START_MINTING(
+    literals.START_BURNING(
       burnApiParam.amount,
       burnApiParam.from,
       burnApiParam.to

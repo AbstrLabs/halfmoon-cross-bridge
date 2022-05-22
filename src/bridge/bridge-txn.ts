@@ -34,6 +34,7 @@ interface CriticalBridgeTxnObject {
   createdTime?: bigint;
 }
 
+// TODO: ref ren to ...Obj
 interface BridgeTxnObject extends CriticalBridgeTxnObject {
   dbId?: number;
   fixedFeeAtom: bigint;
@@ -48,6 +49,7 @@ interface BridgeTxnObject extends CriticalBridgeTxnObject {
   toBlockchain: BlockchainName;
   toTxnId?: string;
   txnStatus: BridgeTxnStatus;
+  txnType: TxnType;
 }
 
 /**
@@ -387,6 +389,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       toBlockchain: this.toBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
+      txnType: this.txnType!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
     };
     return Object.assign(bridgeTxnObject, this);
   }
@@ -703,6 +706,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the marginFeeAtom
+   *
+   * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
     if (this.marginFeeAtom !== undefined) {
@@ -783,7 +788,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this.getTxnType()
     );
     if (dbEntryWithTxnId.length > 0) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+      // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
       throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
@@ -830,7 +835,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    return await this.#db.updateTxn(this);
+    try {
+      return await this.#db.updateTxn(this); // TODO: err handling in this async
+    } catch (e) {
+      logger.error('error at _updateTxn', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateTxn',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /**
@@ -860,7 +874,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     this.txnStatus = status;
-    return await this._updateTxn();
+    try {
+      return await this._updateTxn();
+    } catch (e) {
+      logger.error('error at _updateTxnStatus', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateTxnStatus',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /**
@@ -879,7 +902,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     this.toTxnId = toTxnId;
-    return await this._updateTxn();
+    try {
+      return await this._updateTxn();
+    } catch (e) {
+      logger.error('error at _updateToTxnId', e);
+      throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
+        at: 'BridgeTxn._updateToTxnId',
+        error: e,
+        bridgeTxn: this,
+      });
+    }
   }
 
   /* PRIVATE METHODS - HELPERS */

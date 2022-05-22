@@ -14,6 +14,7 @@ function ensureString(value: unknown): string {
     throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
       expected: 'string',
       actual: typeof value,
+      value,
     });
   }
   return value as string;
