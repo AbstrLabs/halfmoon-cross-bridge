@@ -38,7 +38,7 @@ describe.skip('mint test', () => {
         throw new Error('cannot mint NEAR');
       }
       const apiCallParam: ApiCallParam = {
-        txnType: TxnType.MINT,
+        type: TxnType.MINT,
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
@@ -81,7 +81,7 @@ describe('burn test', () => {
       const algoTxnId = burnResponse;
 
       const apiCallParam: ApiCallParam = {
-        txnType: TxnType.BURN,
+        type: TxnType.BURN,
         from: ENV.ALGO_EXAMPL_ADDR,
         to: ENV.NEAR_EXAMPL_ADDR,
         amount,

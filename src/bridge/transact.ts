@@ -1,5 +1,5 @@
 /**
- * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting, and execute the transaction.
+ * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
  */
 export { transact };
 
@@ -12,7 +12,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
 /**
- * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting, and execute the transaction.
+ * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, and execute the transaction.
  *
  * @async
  * @param  {ApiCallParam} apiCallParam
@@ -24,14 +24,14 @@ async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
     START: (amount: Stringer, from: Stringer, to: Stringer) => string;
     DONE: string;
   };
-  if (apiCallParam.txnType === TxnType.MINT) {
+  if (apiCallParam.type === TxnType.MINT) {
     _literals = {
       START: literals.START_MINTING,
       DONE: literals.DONE_MINT,
     };
     // for extendability, we can add more txn types here.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  } else if (apiCallParam.txnType === TxnType.BURN) {
+  } else if (apiCallParam.type === TxnType.BURN) {
     _literals = {
       START: literals.START_BURNING,
       DONE: literals.DONE_BURN,

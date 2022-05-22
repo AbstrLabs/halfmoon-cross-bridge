@@ -39,7 +39,7 @@ algorandNear
       // });
       // ref: use Array.map if more attributes are added.
       apiCallParam = {
-        txnType: ensureString(body.type) as TxnType,
+        type: ensureString(body.type) as TxnType,
         from: ensureString(body.from),
         to: ensureString(body.to),
         amount: ensureString(body.amount),
@@ -48,10 +48,10 @@ algorandNear
       // `${req.body['amount']}`, testing amount.
 
       // not mutating apiCallParam, only zod-parse.
-      if (apiCallParam.txnType === TxnType.MINT) {
+      if (apiCallParam.type === TxnType.MINT) {
         apiCallParam = parseMintApiParam(apiCallParam);
       }
-      if (apiCallParam.txnType === TxnType.BURN) {
+      if (apiCallParam.type === TxnType.BURN) {
         apiCallParam = parseBurnApiParam(apiCallParam);
       }
     } catch (err) {
@@ -77,7 +77,7 @@ algorandNear
 //     ];
 //     const verifyResult = await verifyBlockchainTxn(
 //       {
-//         txnType: TxnType.BURN,
+//         type: TxnType.BURN,
 //         from,
 //         to,
 //         amount,
@@ -97,7 +97,7 @@ algorandNear
 //   ];
 //   const verifyResult = await verifyBlockchainTxn(
 //     {
-//       txnType: TxnType.MINT,
+//       type: TxnType.MINT,
 //       from,
 //       to,
 //       amount,
@@ -119,10 +119,10 @@ async function transactWithResp(
   // TODO: remove this part after deprecation.
   try {
     // not mutating apiCallParam, only zod-parse.
-    if (apiCallParam.txnType === TxnType.MINT) {
+    if (apiCallParam.type === TxnType.MINT) {
       apiCallParam = parseMintApiParam(apiCallParam);
     }
-    if (apiCallParam.txnType === TxnType.BURN) {
+    if (apiCallParam.type === TxnType.BURN) {
       apiCallParam = parseBurnApiParam(apiCallParam);
     }
   } catch (err) {
@@ -133,7 +133,7 @@ async function transactWithResp(
   // TODO: remove this part above after deprecation.
 
   const _literals =
-    apiCallParam.txnType === TxnType.MINT
+    apiCallParam.type === TxnType.MINT
       ? { START: literals.START_MINTING, DONE: literals.DONE_MINT }
       : { START: literals.START_BURNING, DONE: literals.DONE_BURN };
   logger.info(
