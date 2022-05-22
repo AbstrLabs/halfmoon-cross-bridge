@@ -26,6 +26,7 @@ function startServer() {
     next();
   });
 
+  /* API */
   app.get('/', async (req: Request, res: Response) => {
     if (
       process.env.TS_NODE_DEV === undefined ||

@@ -55,38 +55,43 @@ algorandNear.route('/burn').post(async (req: Request, res: Response) => {
   );
 });
 
-algorandNear.route('/').post(async (req: Request, res: Response) => {
-  let apiCallParam: ApiCallParam;
+algorandNear
+  .route('/')
+  .get((req: Request, res: Response) => {
+    res.send('please use "POST" method.');
+  })
+  .post(async (req: Request, res: Response) => {
+    let apiCallParam: ApiCallParam;
 
-  // PARSE API CALL PARAM
-  try {
-    // ref: use Array.map if more attributes are added.
-    apiCallParam = {
-      txnType: ensureString(req.body['type']) as TxnType,
-      from: ensureString(req.body['from']),
-      to: ensureString(req.body['to']),
-      amount: ensureString(req.body['amount']),
-      txnId: ensureString(req.body['txnId']),
-    };
-    // `${req.body['amount']}`, testing amount.
+    // PARSE API CALL PARAM
+    try {
+      // ref: use Array.map if more attributes are added.
+      apiCallParam = {
+        txnType: ensureString(req.body['type']) as TxnType,
+        from: ensureString(req.body['from']),
+        to: ensureString(req.body['to']),
+        amount: ensureString(req.body['amount']),
+        txnId: ensureString(req.body['txnId']),
+      };
+      // `${req.body['amount']}`, testing amount.
 
-    // not mutating apiCallParam, only zod-parse.
-    if (apiCallParam.txnType === TxnType.MINT) {
-      apiCallParam = parseMintApiParam(apiCallParam);
+      // not mutating apiCallParam, only zod-parse.
+      if (apiCallParam.txnType === TxnType.MINT) {
+        apiCallParam = parseMintApiParam(apiCallParam);
+      }
+      if (apiCallParam.txnType === TxnType.BURN) {
+        apiCallParam = parseBurnApiParam(apiCallParam);
+      }
+    } catch (err) {
+      res.status(400).send('Wrong param type: all params should be string');
+      res.end();
+      throw err;
     }
-    if (apiCallParam.txnType === TxnType.BURN) {
-      apiCallParam = parseBurnApiParam(apiCallParam);
-    }
-  } catch (err) {
-    res.status(400).send('Wrong param type: all params should be string');
-    res.end();
-    throw err;
-  }
 
-  // VERIFY API CALL PARAM
-  // verify within both ram and db.
-  await transactWithResp(apiCallParam, res);
-});
+    // VERIFY API CALL PARAM
+    // verify within both ram and db.
+    await transactWithResp(apiCallParam, res);
+  });
 
 // TODO: move verify to API.
 algorandNear
@@ -137,20 +142,24 @@ async function transactWithResp(
   { usingDeprecatedAPI } = { usingDeprecatedAPI: false }
 ) {
   /* CONFIG */
-  /* Parse error handling
-  try {} catch (err) {
+  let bridgeTxnObject: BridgeTxnObject;
+
+  // TODO: remove this part after deprecation.
+  try {
+    // not mutating apiCallParam, only zod-parse.
+    if (apiCallParam.txnType === TxnType.MINT) {
+      apiCallParam = parseMintApiParam(apiCallParam);
+    }
+    if (apiCallParam.txnType === TxnType.BURN) {
+      apiCallParam = parseBurnApiParam(apiCallParam);
+    }
+  } catch (err) {
     res.status(400).send('Wrong query params');
     res.end();
     throw err;
-  } */
-  let bridgeTxnObject: BridgeTxnObject;
-  // not mutating apiCallParam, only zod-parse.
-  if (apiCallParam.txnType === TxnType.MINT) {
-    apiCallParam = parseMintApiParam(apiCallParam);
   }
-  if (apiCallParam.txnType === TxnType.BURN) {
-    apiCallParam = parseBurnApiParam(apiCallParam);
-  }
+  // TODO: remove this part above after deprecation.
+
   const _literals =
     apiCallParam.txnType === TxnType.MINT
       ? { START: literals.START_MINTING, DONE: literals.DONE_MINT }
