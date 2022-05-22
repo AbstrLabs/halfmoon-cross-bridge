@@ -98,7 +98,7 @@ class Database {
 
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(bridgeTxn.txnType!);
+    const tableName = this._inferTableName(bridgeTxn.txnType);
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
       // await this.connect();

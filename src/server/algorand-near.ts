@@ -25,10 +25,10 @@ const algorandNear = express.Router();
 algorandNear.route('/mint').post(async (req: Request, res: Response) => {
   // res.json(req.body);
   const [from, to, amount, txnId] = [
-    ensureString(req.body['mint_from']),
-    ensureString(req.body['mint_to']),
-    `${req.body['mint_amount']}`,
-    ensureString(req.body['mint_txnId']),
+    ensureString(req.body.mint_from),
+    ensureString(req.body.mint_to),
+    `${req.body.mint_amount}`,
+    ensureString(req.body.mint_txnId),
   ];
   await transactWithResp(
     { txnType: TxnType.MINT, from, to, amount, txnId },
@@ -43,10 +43,10 @@ algorandNear.route('/mint').post(async (req: Request, res: Response) => {
 algorandNear.route('/burn').post(async (req: Request, res: Response) => {
   // res.json(req.body);
   const [from, to, amount, txnId] = [
-    ensureString(req.body['burn_from']),
-    ensureString(req.body['burn_to']),
-    `${req.body['burn_amount']}`,
-    ensureString(req.body['burn_txnId']),
+    ensureString(req.body.burn_from),
+    ensureString(req.body.burn_to),
+    `${req.body.burn_amount}`,
+    ensureString(req.body.burn_txnId),
   ];
   await transactWithResp(
     { txnType: TxnType.BURN, from, to, amount, txnId },
@@ -67,11 +67,11 @@ algorandNear
     try {
       // ref: use Array.map if more attributes are added.
       apiCallParam = {
-        txnType: ensureString(req.body['type']) as TxnType,
-        from: ensureString(req.body['from']),
-        to: ensureString(req.body['to']),
-        amount: ensureString(req.body['amount']),
-        txnId: ensureString(req.body['txnId']),
+        txnType: ensureString(req.body.type) as TxnType,
+        from: ensureString(req.body.from),
+        to: ensureString(req.body.to),
+        amount: ensureString(req.body.amount),
+        txnId: ensureString(req.body.txnId),
       };
       // `${req.body['amount']}`, testing amount.
 
@@ -98,10 +98,10 @@ algorandNear
   .route('/algorand/verify')
   .post(async (req: Request, res: Response) => {
     const [from, to, amount, txnId] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      `${req.body['mint_amount']}`,
-      ensureString(req.body['mint_txnId']),
+      ensureString(req.body.mint_from),
+      ensureString(req.body.mint_to),
+      `${req.body.mint_amount}`,
+      ensureString(req.body.mint_txnId),
     ];
     const verifyResult = await verifyBlockchainTxn(
       {
@@ -118,10 +118,10 @@ algorandNear
 
 algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
   const [from, to, amount, txnId] = [
-    ensureString(req.body['mint_from']),
-    ensureString(req.body['mint_to']),
-    `${req.body['mint_amount']}`,
-    ensureString(req.body['mint_txnId']),
+    ensureString(req.body.mint_from),
+    ensureString(req.body.mint_to),
+    `${req.body.mint_amount}`,
+    ensureString(req.body.mint_txnId),
   ];
   const verifyResult = await verifyBlockchainTxn(
     {

@@ -13,13 +13,13 @@ import { Pool, PoolClient } from 'pg';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 
-type PgConfig = {
+interface PgConfig {
   host: string;
   user: string;
   database: string;
   password: string;
   port: number;
-};
+}
 
 /**
  * Wrap up AWS-RDS service of postgreSQL into one singleton instance `postgres`.

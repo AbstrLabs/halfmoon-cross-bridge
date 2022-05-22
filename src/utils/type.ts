@@ -38,9 +38,9 @@ import { logger } from './logger';
 
 /* NON-ZOD TYPES */
 
-type Stringer = {
+interface Stringer {
   toString(): string;
-};
+}
 
 /* ZOD TYPES (WITH PARSER) */
 

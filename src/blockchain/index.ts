@@ -55,10 +55,10 @@ type AlgoTxnOutcome =
 type NearTxnOutcome = providers.FinalExecutionOutcome; // TODO: Type FinalExecutionOutcome.transaction.
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
-type ConfirmTxnConfig = {
+interface ConfirmTxnConfig {
   timeoutSec: number;
   intervalSec: number;
-};
+}
 
 enum TxnType {
   MINT = 'MINT',

@@ -28,23 +28,23 @@ import {
   parseBigInt,
 } from '../utils/type';
 
-type ClientParam = {
+interface ClientParam {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-};
+}
 
-type IndexerParam = {
+interface IndexerParam {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-};
+}
 
-type BridgeConfig = {
+interface BridgeConfig {
   centralizedAssetId: number;
   centralizedAddr: AlgoAddr;
   centralizedAccPassPhrase: string;
-};
+}
 
 /**
  * @classdesc Algorand blockchain wrapper, with centralized account. Implements {@link Blockchain}.

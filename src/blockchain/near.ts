@@ -29,24 +29,24 @@ import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 import { NearTxnParam } from '../utils/type';
 
-type ClientParam = {
+interface ClientParam {
   networkId: string;
   nodeUrl: string;
   walletUrl: string;
   helperUrl: string;
   explorerUrl: string;
   headers: Record<never, never>;
-};
+}
 
-type IndexerParam = {
+interface IndexerParam {
   url: string;
-};
+}
 
-type BridgeConfig = {
+interface BridgeConfig {
   centralizedAssetId: number;
   centralizedAddr: NearAddr;
   centralizedPrivateKey: string;
-};
+}
 
 /**
  * NEAR blockchain wrapper, with centralized account. Implements {@link Blockchain}.
