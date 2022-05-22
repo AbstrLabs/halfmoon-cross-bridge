@@ -3,7 +3,7 @@
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { mint } from './mint';
+import { mint } from './transact';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;

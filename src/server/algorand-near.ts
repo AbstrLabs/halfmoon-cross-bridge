@@ -11,7 +11,7 @@ import { burn } from '../bridge/burn';
 import { ensureString } from '../utils/helper';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
-import { mint } from '../bridge/mint';
+import { mint } from '../bridge/transact';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 
