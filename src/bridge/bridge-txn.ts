@@ -34,6 +34,7 @@ interface CriticalBridgeTxnObject {
   createdTime?: bigint;
 }
 
+// TODO: ref ren to ...Obj
 interface BridgeTxnObject extends CriticalBridgeTxnObject {
   dbId?: number;
   fixedFeeAtom: bigint;
@@ -48,6 +49,7 @@ interface BridgeTxnObject extends CriticalBridgeTxnObject {
   toBlockchain: BlockchainName;
   toTxnId?: string;
   txnStatus: BridgeTxnStatus;
+  txnType: TxnType;
 }
 
 /**
@@ -387,6 +389,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       toBlockchain: this.toBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
+      txnType: this.txnType!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
     };
     return Object.assign(bridgeTxnObject, this);
   }
