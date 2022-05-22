@@ -23,8 +23,6 @@ const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
 const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Burning ${amount} goNEAR from [${from}](ALGO) to [${to}](NEAR)`;
 
-const MINT_NEAR_TXN_ID = (txnId: Stringer) =>
-  `Minting with transaction ID [${txnId}](NEAR).`;
 const BURN_ALGO_TXN_ID = (txnId: Stringer) =>
   `Burning with transaction ID [${txnId}](ALGO).`;
 const DONE_MINT = 'mint success';
@@ -67,7 +65,6 @@ const literals = {
   FOURTEEN_ZEROS,
   MAKING_TXN,
   MINT_AWAITING,
-  MINT_NEAR_TXN_ID,
   NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
   NOT_LOADED_FROM_ENV_STR,
