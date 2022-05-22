@@ -31,7 +31,7 @@ interface CriticalBridgeTxnObject {
   toBlockchain?: BlockchainName;
   txnStatus?: BridgeTxnStatus;
   toTxnId?: string;
-  txnType?: TxnType;
+  txnType: TxnType;
   createdTime?: bigint;
 }
 
@@ -73,7 +73,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   toBlockchain?: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
-  txnType?: TxnType;
+  txnType: TxnType;
   #db = db;
   #fromBlockchain!: Blockchain;
   #toBlockchain!: Blockchain;
@@ -86,7 +86,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @static
    * @param  {ApiCallParam} apiCallParam - The API call parameter to initialize the {@link BridgeTxn} from.
-   * @param  {TxnType} txnType - The type of the transaction.
    * @param  {bigint} createdTime - optional, if not provided, will use system time
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
@@ -263,10 +262,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       }
     }
 
-    if (this.txnType === undefined) {
-      // for TS
-      this.txnType = this._inferTxnType();
-    }
     await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
   }
 
@@ -389,7 +384,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       toBlockchain: this.toBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
-      txnType: this.txnType!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      txnType: this.txnType,
     };
     return Object.assign(bridgeTxnObject, this);
   }
@@ -415,15 +410,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this.toAmountAtom = this._calculateToAmountAtom();
     }
     return this.toAmountAtom;
-  }
-
-  /**
-   * Get a defined txnType of the {@link BridgeTxn} for TS type checking.
-   *
-   * @returns {TxnType} the txnType of the {@link BridgeTxn}
-   */
-  public getTxnType(): TxnType {
-    return this.txnType ?? this._inferTxnType();
   }
 
   /**
@@ -481,7 +467,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   ): Promise<this> {
     try {
       this._selfValidate();
-      this._inferTxnType();
       this._inferBlockchainNames();
       this._hookBlockchain();
       this._getFixedFeeAtom();
@@ -575,43 +560,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   }
 
   /**
-   * Infer the txnType of the {@link BridgeTxn} from fromBlockchain and toBlockchain.
-   * This is one step of the initialization.
-   *
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is not valid
-   * @returns {TxnType} the txnType
-   */
-  private _inferTxnType(): TxnType {
-    if (this.txnType !== undefined) {
-      if (!(this.txnType in TxnType)) {
-        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-          txnType: this.txnType,
-        });
-      }
-      return this.txnType;
-    }
-    let txnType: TxnType;
-    if (
-      this.fromBlockchain === BlockchainName.NEAR &&
-      this.toBlockchain === BlockchainName.ALGO
-    ) {
-      txnType = TxnType.MINT;
-    } else if (
-      this.fromBlockchain === BlockchainName.ALGO &&
-      this.toBlockchain === BlockchainName.NEAR
-    ) {
-      txnType = TxnType.BURN;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        fromBlockchain: this.fromBlockchain,
-        toBlockchain: this.toBlockchain,
-      });
-    }
-    this.txnType = txnType;
-    return txnType;
-  }
-
-  /**
    * Hook the blockchains of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
@@ -683,9 +631,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       return this.fixedFeeAtom;
     }
     let fixedFee: bigint;
-    if (this.txnType === undefined) {
-      this._inferTxnType();
-    }
     if (this.txnType === TxnType.MINT) {
       fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
     } else if (this.txnType === TxnType.BURN) {
@@ -785,7 +730,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     // possible improvement: make sure transaction is finished recently, check a wider range in db
     const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
       this.fromTxnId,
-      this.getTxnType()
+      this.txnType
     );
     if (dbEntryWithTxnId.length > 0) {
       // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);

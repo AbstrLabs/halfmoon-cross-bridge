@@ -132,7 +132,7 @@ class Database {
     this._verifyResultUniqueness(result, { bridgeTxn, at: 'createTxn' });
 
     const dbId = parseDbId(result[0].db_id);
-    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.getTxnType(), dbId));
+    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
     return dbId;
   }
@@ -176,7 +176,7 @@ class Database {
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // next line: if null, will throw error.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(bridgeTxn.getTxnType());
+    const tableName = this._inferTableName(bridgeTxn.txnType);
     if (!this.isConnected) {
       await this.connect();
     }
