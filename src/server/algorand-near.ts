@@ -1,13 +1,8 @@
-import {
-  ApiCallParam,
-  parseBurnApiParam,
-  parseMintApiParam,
-} from '../utils/type';
+import { ApiCallParam, parseApiCallParam } from '../utils/type';
 import express, { Request, Response } from 'express';
 
 import { BridgeTxnObject } from '../bridge';
 import { TxnType } from '../blockchain';
-import { ensureString } from '../utils/helper';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
@@ -23,9 +18,8 @@ algorandNear
     res.send('please use "POST" method.');
   })
   .post(async (req: Request, res: Response) => {
-    let apiCallParam: ApiCallParam;
+    let apiCallParam: ApiCallParam | undefined = undefined;
 
-    // PARSE API CALL PARAM
     try {
       const body = req.body as {
         type: TxnType;
@@ -34,104 +28,34 @@ algorandNear
         amount: string;
         txnId: string;
       };
-      // Object.entries(req.body).map(([key, value]) => {
-      //   apiCallParam[key] = ensureString(value);
-      // });
-      // ref: use Array.map if more attributes are added.
-      apiCallParam = {
-        type: ensureString(body.type) as TxnType,
-        from: ensureString(body.from),
-        to: ensureString(body.to),
-        amount: ensureString(body.amount),
-        txnId: ensureString(body.txnId),
-      };
-      // `${req.body['amount']}`, testing amount.
-
-      // not mutating apiCallParam, only zod-parse.
-      if (apiCallParam.type === TxnType.MINT) {
-        apiCallParam = parseMintApiParam(apiCallParam);
-      }
-      if (apiCallParam.type === TxnType.BURN) {
-        apiCallParam = parseBurnApiParam(apiCallParam);
-      }
+      apiCallParam = parseApiCallParam(body);
     } catch (err) {
-      res.status(400).send('Wrong param type: all params should be string');
+      res.status(406).send('Wrong query params');
       res.end();
-      throw err;
+    }
+
+    if (apiCallParam === undefined) {
+      res.status(406).send('Missing required query params');
+      res.end();
+      return;
     }
 
     // VERIFY API CALL PARAM
-    // verify within both ram and db.
-    await transactWithResp(apiCallParam, res);
+    // TODO: verify within both ram and db.
+
+    // TRANSACT
+    try {
+      await transactWithResp(apiCallParam, res);
+    } catch (err) {
+      logger.error(err);
+      res.status(40).send('Internal server error');
+      res.end();
+    }
   });
 
-// TODO: move verify to API.
-// algorandNear
-//   .route('/algorand/verify')
-//   .post(async (req: Request, res: Response) => {
-//     const [from, to, amount, txnId] = [
-//       ensureString(req.body.mint_from),
-//       ensureString(req.body.mint_to),
-//       `${req.body.mint_amount}`,
-//       ensureString(req.body.mint_txnId),
-//     ];
-//     const verifyResult = await verifyBlockchainTxn(
-//       {
-//         type: TxnType.BURN,
-//         from,
-//         to,
-//         amount,
-//         txnId,
-//       },
-//       BlockchainName.ALGO
-//     );
-//     res.send(`Verification result: ${verifyResult}`);
-//   });
-
-// algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
-//   const [from, to, amount, txnId] = [
-//     ensureString(req.body.mint_from),
-//     ensureString(req.body.mint_to),
-//     `${req.body.mint_amount}`,
-//     ensureString(req.body.mint_txnId),
-//   ];
-//   const verifyResult = await verifyBlockchainTxn(
-//     {
-//       type: TxnType.MINT,
-//       from,
-//       to,
-//       amount,
-//       txnId,
-//     },
-//     BlockchainName.NEAR
-//   );
-//   res.send(`Verification result: ${verifyResult}`);
-// });
-
-async function transactWithResp(
-  apiCallParam: ApiCallParam,
-  res: Response,
-  { usingDeprecatedAPI } = { usingDeprecatedAPI: false }
-) {
+async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   /* CONFIG */
   let bridgeTxnObject: BridgeTxnObject;
-
-  // TODO: remove this part after deprecation.
-  try {
-    // not mutating apiCallParam, only zod-parse.
-    if (apiCallParam.type === TxnType.MINT) {
-      apiCallParam = parseMintApiParam(apiCallParam);
-    }
-    if (apiCallParam.type === TxnType.BURN) {
-      apiCallParam = parseBurnApiParam(apiCallParam);
-    }
-  } catch (err) {
-    res.status(400).send('Wrong query params');
-    res.end();
-    throw err;
-  }
-  // TODO: remove this part above after deprecation.
-
   const _literals =
     apiCallParam.type === TxnType.MINT
       ? { START: literals.START_MINTING, DONE: literals.DONE_MINT }
@@ -150,10 +74,9 @@ async function transactWithResp(
     res.end();
     throw err;
   }
-  if (usingDeprecatedAPI) {
-    res.send(
-      stringifyBigintInObj({ ...bridgeTxnObject, CAUTION: 'API_DEPRECATED' })
-    );
-  }
-  return res.json(stringifyBigintInObj({ bridgeTxnObject }));
+  const stringifiedBridgeTxnObject = stringifyBigintInObj(bridgeTxnObject);
+  logger.info(
+    'API call ended, returned:\n' + JSON.stringify(stringifiedBridgeTxnObject)
+  );
+  return res.json(stringifiedBridgeTxnObject);
 }

@@ -45,7 +45,6 @@ const TXN_CONFIRMED = (
 const ASA_CREATED = (assetName: Stringer, txnId: Stringer, assetId: Stringer) =>
   `New ASA ${assetName} created with ${txnId} having id ${assetId}.`;
 
-const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
@@ -63,7 +62,6 @@ const literals = {
   DONE_MINT,
   FOURTEEN_ZEROS,
   MAKING_TXN,
-  NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
   NOT_LOADED_FROM_ENV_STR,
   NOT_LOADED_FROM_ENV_NUM,
