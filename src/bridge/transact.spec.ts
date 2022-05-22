@@ -3,6 +3,7 @@
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
+import { TxnType } from '../blockchain';
 import { mint } from './transact';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
@@ -23,6 +24,7 @@ describe('mint test', () => {
       const nearTxnId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
       const apiCallParam: ApiCallParam = {
+        txnType: TxnType.MINT,
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,

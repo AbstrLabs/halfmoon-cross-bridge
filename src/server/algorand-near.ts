@@ -1,5 +1,6 @@
 import {
   BurnApiParam,
+  MintApiParam,
   parseBurnApiParam,
   parseMintApiParam,
 } from '../utils/type';
@@ -7,6 +8,7 @@ import express, { Request, Response } from 'express';
 
 import { BlockchainName } from '..';
 import { BridgeTxnObject } from '../bridge';
+import { TxnType } from '../blockchain';
 import { burn } from '../bridge/burn';
 import { ensureString } from '../utils/helper';
 import { literals } from '../utils/literals';
@@ -19,19 +21,16 @@ export { algorandNear };
 
 const algorandNear = express.Router();
 
-algorandNear
-  .route('/mint')
-
-  .post(async (req: Request, res: Response) => {
-    // res.json(req.body);
-    const [from, to, amount, txnId] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      `${req.body['mint_amount']}`,
-      ensureString(req.body['mint_txnId']),
-    ];
-    await mintResp({ from, to, amount, txnId }, res);
-  });
+algorandNear.route('/mint').post(async (req: Request, res: Response) => {
+  // res.json(req.body);
+  const [from, to, amount, txnId] = [
+    ensureString(req.body['mint_from']),
+    ensureString(req.body['mint_to']),
+    `${req.body['mint_amount']}`,
+    ensureString(req.body['mint_txnId']),
+  ];
+  await mintResp({ txnType: TxnType.MINT, from, to, amount, txnId }, res);
+});
 
 algorandNear.route('/burn').post(async (req: Request, res: Response) => {
   // res.json(req.body);
@@ -41,7 +40,7 @@ algorandNear.route('/burn').post(async (req: Request, res: Response) => {
     `${req.body['burn_amount']}`,
     ensureString(req.body['burn_txnId']),
   ];
-  await burnResp({ from, to, amount, txnId }, res);
+  await burnResp({ txnType: TxnType.BURN, from, to, amount, txnId }, res);
 });
 
 // TODO: move verify to API.
@@ -56,6 +55,7 @@ algorandNear
     ];
     const verifyResult = await verifyBlockchainTxn(
       {
+        txnType: TxnType.BURN,
         from,
         to,
         amount,
@@ -75,6 +75,7 @@ algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
   ];
   const verifyResult = await verifyBlockchainTxn(
     {
+      txnType: TxnType.MINT,
       from,
       to,
       amount,
@@ -86,7 +87,7 @@ algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
 });
 
 // TODO: 2-func: ref mintResp and burnResp since they are in same structure.
-async function mintResp(apiCallParam: BurnApiParam, res: Response) {
+async function mintResp(apiCallParam: MintApiParam, res: Response) {
   /* CONFIG */
   const mintApiParam = parseMintApiParam(apiCallParam);
   const { from, to, amount, txnId } = mintApiParam;

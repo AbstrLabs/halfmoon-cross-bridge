@@ -14,7 +14,7 @@ import { algoBlockchain } from './algorand';
 
 async function verifyBlockchainTxn(
   apiCallParam: ApiCallParam,
-  blockchainName: BlockchainName
+  blockchainName: BlockchainName // TODO: remove this param, infer it from apiCallParam.
 ) {
   let blockchain: Blockchain;
 

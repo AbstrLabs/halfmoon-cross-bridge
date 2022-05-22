@@ -32,6 +32,7 @@ export {
 
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
+import { TxnType } from '../blockchain';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
 
@@ -128,6 +129,7 @@ const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
 const zMintApiParam = z.object({
+  txnType: z.literal(TxnType.MINT),
   amount: zApiAmount,
   from: zNearAddr,
   to: zAlgoAddr,
@@ -137,6 +139,7 @@ function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zBurnApiParam = z.object({
+  txnType: z.literal(TxnType.BURN),
   amount: zApiAmount,
   from: zAlgoAddr,
   to: zNearAddr,

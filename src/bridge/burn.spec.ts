@@ -2,6 +2,7 @@
 
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
+import { TxnType } from '../blockchain';
 import { burn } from './burn';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
@@ -23,6 +24,7 @@ describe('burn test', () => {
       const algoTxnId = burnResponse;
 
       const apiCallParam: ApiCallParam = {
+        txnType: TxnType.BURN,
         from: ENV.ALGO_EXAMPL_ADDR,
         to: ENV.NEAR_EXAMPL_ADDR,
         amount,
