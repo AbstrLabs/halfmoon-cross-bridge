@@ -5,9 +5,9 @@ export { startServer };
 
 import express, { Request, Response } from 'express';
 
-import { ENV } from './utils/dotenv';
-import { algorandNear } from './server/algorand-near';
-import { logger } from './utils/logger';
+import { ENV } from '../utils/dotenv';
+import { algorandNear } from './algorand-near';
+import { logger } from '../utils/logger';
 
 async function homePageTest() {
   /* Used once code */

@@ -133,5 +133,6 @@
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils"
   },
+  "type": "module",
   "version": "1.0.0"
 }
