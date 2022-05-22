@@ -1,6 +1,4 @@
 // TODO: CORS '*'
-// TODO: ref: change endpoint to /algorand-near, and add params
-// TODO: move API to a new file of new folder server/api
 // TODO: feat: add a RAM pool
 
 export { startServer };
@@ -39,14 +37,14 @@ function startServer() {
       MESSAGE: 'Welcome to the Algorand-NEAR bridge API',
       FRONTEND: 'https://www.halfmooncross.com/',
       API_ENDPOINT: {
-        ['mint']: {
-          URL: '/algorand-near/mint',
-          PARAMS: {
-            mint_from: 'string',
-          },
+        URL: '/algorand-near',
+        PARAMS: {
+          from: 'string',
+          to: 'string',
+          amount: 'string',
+          txnId: 'string',
+          txnType: 'literal("MINT","BURN")',
         },
-        ['burn']: '/algorand-near/burn',
-        // TODO: ref : change endpoint to /algorand-near, and add params
       },
     });
   });
