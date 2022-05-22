@@ -91,13 +91,12 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    */
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
-    txnType: TxnType, // TODO: remove this, include in ApiCallParam
     createdTime?: bigint
   ): BridgeTxn {
     const { from, to, amount, txnId } = apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
-      txnType,
+      txnType: apiCallParam.txnType,
       fixedFeeAtom: undefined,
       fromAddr: from,
       fromAmountAtom: toGoNearAtom(amount),

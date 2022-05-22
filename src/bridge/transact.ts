@@ -6,7 +6,6 @@ export { transact };
 import { BridgeTxn, BridgeTxnObject } from '.';
 
 import { MintApiParam } from '../utils/type';
-import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
@@ -25,7 +24,10 @@ async function transact(mintApiParam: MintApiParam): Promise<BridgeTxnObject> {
       mintApiParam.to
     )
   );
-  const bridgeTxn = BridgeTxn.fromApiCallParam(mintApiParam, TxnType.MINT);
+  const bridgeTxn = BridgeTxn.fromApiCallParam(
+    mintApiParam,
+    BigInt(Date.now())
+  );
   const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
   logger.info(literals.DONE_MINT);
   return bridgeTxnObject;
