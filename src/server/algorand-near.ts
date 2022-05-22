@@ -9,7 +9,6 @@ import express, { Request, Response } from 'express';
 import { BlockchainName } from '..';
 import { BridgeTxnObject } from '../bridge';
 import { TxnType } from '../blockchain';
-import { burn } from '../bridge/burn';
 import { ensureString } from '../utils/helper';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -115,7 +114,7 @@ async function burnResp(apiCallParam: BurnApiParam, res: Response) {
   logger.info(literals.START_BURNING(amount, from, to) + `txnId: ${txnId}`);
   // res.end();
   try {
-    bridgeTxnObject = await burn(burnApiParam);
+    bridgeTxnObject = await transact(burnApiParam);
     logger.info(literals.DONE_BURN);
   } catch (err) {
     res.status(400).send('Missing required query params');

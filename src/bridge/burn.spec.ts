@@ -3,9 +3,9 @@
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { TxnType } from '../blockchain';
-import { burn } from './burn';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
+import { transact } from './transact';
 
 const TIMEOUT_30S = 30_000;
 
@@ -32,7 +32,7 @@ describe('burn test', () => {
       };
 
       // call API
-      const bridgeTxn = await burn(apiCallParam);
+      const bridgeTxn = await transact(apiCallParam);
 
       // should return AlgoTxnId,etc.
 
