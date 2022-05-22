@@ -19,6 +19,7 @@ import { logger } from '../utils/logger';
  * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
  */
 async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
+  /* SETUP */
   let _literals: {
     START: (amount: Stringer, from: Stringer, to: Stringer) => string;
     DONE: string;
@@ -42,12 +43,15 @@ async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
   logger.info(
     _literals.START(apiCallParam.amount, apiCallParam.from, apiCallParam.to)
   );
+
+  /* EXECUTE */
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
     BigInt(Date.now())
   );
   const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
-  // ERR handler .burn success
+
+  // TODO: ERR handler .burn success
   logger.info(_literals.DONE);
   return bridgeTxnObject;
 }

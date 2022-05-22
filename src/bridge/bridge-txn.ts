@@ -1,3 +1,4 @@
+// TODO: no need to infer TxnType anymore.
 export { type BridgeTxnObject, BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
