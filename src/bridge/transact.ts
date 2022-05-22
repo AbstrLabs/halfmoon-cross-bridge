@@ -29,6 +29,8 @@ async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
       START: literals.START_MINTING,
       DONE: literals.DONE_MINT,
     };
+    // for extendability, we can add more txn types here.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   } else if (apiCallParam.txnType === TxnType.BURN) {
     _literals = {
       START: literals.START_BURNING,

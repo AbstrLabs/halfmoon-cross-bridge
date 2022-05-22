@@ -5,7 +5,6 @@ import {
 } from '../utils/type';
 import express, { Request, Response } from 'express';
 
-import { BlockchainName } from '..';
 import { BridgeTxnObject } from '../bridge';
 import { TxnType } from '../blockchain';
 import { ensureString } from '../utils/helper';
@@ -13,47 +12,10 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { transact } from '../bridge/transact';
-import { verifyBlockchainTxn } from '../blockchain/verify';
 
 export { algorandNear };
 
 const algorandNear = express.Router();
-
-/**
- * @deprecated use new API endpoint.
- */
-algorandNear.route('/mint').post(async (req: Request, res: Response) => {
-  // res.json(req.body);
-  const [from, to, amount, txnId] = [
-    ensureString(req.body.mint_from),
-    ensureString(req.body.mint_to),
-    `${req.body.mint_amount}`,
-    ensureString(req.body.mint_txnId),
-  ];
-  await transactWithResp(
-    { txnType: TxnType.MINT, from, to, amount, txnId },
-    res,
-    { usingDeprecatedAPI: true }
-  );
-});
-
-/**
- * @deprecated use new API endpoint.
- */
-algorandNear.route('/burn').post(async (req: Request, res: Response) => {
-  // res.json(req.body);
-  const [from, to, amount, txnId] = [
-    ensureString(req.body.burn_from),
-    ensureString(req.body.burn_to),
-    `${req.body.burn_amount}`,
-    ensureString(req.body.burn_txnId),
-  ];
-  await transactWithResp(
-    { txnType: TxnType.BURN, from, to, amount, txnId },
-    res,
-    { usingDeprecatedAPI: true }
-  );
-});
 
 algorandNear
   .route('/')
@@ -65,13 +27,23 @@ algorandNear
 
     // PARSE API CALL PARAM
     try {
+      const body = req.body as {
+        type: TxnType;
+        from: string;
+        to: string;
+        amount: string;
+        txnId: string;
+      };
+      // Object.entries(req.body).map(([key, value]) => {
+      //   apiCallParam[key] = ensureString(value);
+      // });
       // ref: use Array.map if more attributes are added.
       apiCallParam = {
-        txnType: ensureString(req.body.type) as TxnType,
-        from: ensureString(req.body.from),
-        to: ensureString(req.body.to),
-        amount: ensureString(req.body.amount),
-        txnId: ensureString(req.body.txnId),
+        txnType: ensureString(body.type) as TxnType,
+        from: ensureString(body.from),
+        to: ensureString(body.to),
+        amount: ensureString(body.amount),
+        txnId: ensureString(body.txnId),
       };
       // `${req.body['amount']}`, testing amount.
 
@@ -94,47 +66,47 @@ algorandNear
   });
 
 // TODO: move verify to API.
-algorandNear
-  .route('/algorand/verify')
-  .post(async (req: Request, res: Response) => {
-    const [from, to, amount, txnId] = [
-      ensureString(req.body.mint_from),
-      ensureString(req.body.mint_to),
-      `${req.body.mint_amount}`,
-      ensureString(req.body.mint_txnId),
-    ];
-    const verifyResult = await verifyBlockchainTxn(
-      {
-        txnType: TxnType.BURN,
-        from,
-        to,
-        amount,
-        txnId,
-      },
-      BlockchainName.ALGO
-    );
-    res.send(`Verification result: ${verifyResult}`);
-  });
+// algorandNear
+//   .route('/algorand/verify')
+//   .post(async (req: Request, res: Response) => {
+//     const [from, to, amount, txnId] = [
+//       ensureString(req.body.mint_from),
+//       ensureString(req.body.mint_to),
+//       `${req.body.mint_amount}`,
+//       ensureString(req.body.mint_txnId),
+//     ];
+//     const verifyResult = await verifyBlockchainTxn(
+//       {
+//         txnType: TxnType.BURN,
+//         from,
+//         to,
+//         amount,
+//         txnId,
+//       },
+//       BlockchainName.ALGO
+//     );
+//     res.send(`Verification result: ${verifyResult}`);
+//   });
 
-algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
-  const [from, to, amount, txnId] = [
-    ensureString(req.body.mint_from),
-    ensureString(req.body.mint_to),
-    `${req.body.mint_amount}`,
-    ensureString(req.body.mint_txnId),
-  ];
-  const verifyResult = await verifyBlockchainTxn(
-    {
-      txnType: TxnType.MINT,
-      from,
-      to,
-      amount,
-      txnId,
-    },
-    BlockchainName.NEAR
-  );
-  res.send(`Verification result: ${verifyResult}`);
-});
+// algorandNear.route('/near/verify').post(async (req: Request, res: Response) => {
+//   const [from, to, amount, txnId] = [
+//     ensureString(req.body.mint_from),
+//     ensureString(req.body.mint_to),
+//     `${req.body.mint_amount}`,
+//     ensureString(req.body.mint_txnId),
+//   ];
+//   const verifyResult = await verifyBlockchainTxn(
+//     {
+//       txnType: TxnType.MINT,
+//       from,
+//       to,
+//       amount,
+//       txnId,
+//     },
+//     BlockchainName.NEAR
+//   );
+//   res.send(`Verification result: ${verifyResult}`);
+// });
 
 async function transactWithResp(
   apiCallParam: ApiCallParam,

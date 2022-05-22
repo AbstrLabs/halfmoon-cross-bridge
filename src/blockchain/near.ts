@@ -14,12 +14,7 @@ import {
   providers,
 } from 'near-api-js';
 
-import {
-  NearTxnOutcome,
-  type AlgoTxnId,
-  type NearAddr,
-  type NearTxnId,
-} from '.';
+import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from '.';
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
@@ -64,7 +59,7 @@ class NearBlockchain extends Blockchain {
     timeoutSec: ENV.NEAR_CONFIRM_TIMEOUT_SEC,
     intervalSec: ENV.NEAR_CONFIRM_INTERVAL_SEC,
   };
-  private _keyStore: keyStores.KeyStore;
+  #keyStore: keyStores.KeyStore;
   public readonly name = BlockchainName.NEAR;
 
   constructor(
@@ -74,22 +69,38 @@ class NearBlockchain extends Blockchain {
   ) {
     super();
     this.centralizedAddr = bridgeConfig.centralizedAddr;
-    this._keyStore = new keyStores.InMemoryKeyStore();
+    this.#keyStore = new keyStores.InMemoryKeyStore();
     this.indexer = new providers.JsonRpcProvider(indexerParam);
 
     // setup client
-    connect({ ...clientParam, keyStore: this._keyStore }).then((near) => {
-      this.client = near;
+    connect({ ...clientParam, keyStore: this.#keyStore })
+      .then((near) => {
+        this.client = near;
 
-      // setup centralizedAcc
-      const centralizedAccPrivKey = bridgeConfig.centralizedPrivateKey;
-      const keyPair = KeyPair.fromString(centralizedAccPrivKey);
-      this._keyStore
-        .setKey('testnet', this.centralizedAddr, keyPair)
-        .then(async () => {
-          this.centralizedAcc = await this.client.account(this.centralizedAddr);
+        // setup centralizedAcc
+        const centralizedAccPrivKey = bridgeConfig.centralizedPrivateKey;
+        const keyPair = KeyPair.fromString(centralizedAccPrivKey);
+        this.#keyStore
+          .setKey('testnet', this.centralizedAddr, keyPair)
+          .then(async () => {
+            this.centralizedAcc = await this.client.account(
+              this.centralizedAddr
+            );
+          })
+          .catch((err: unknown) => {
+            throw new BridgeError(ERRORS.EXTERNAL.NEAR_CLIENT_CONNECT_ERROR, {
+              err,
+              reason: 'cannot get master account from client',
+            });
+          });
+      })
+      .catch((err: unknown) => {
+        // logger.error(literals.NEAR_CLIENT_CONNECT_ERROR(err));
+        throw new BridgeError(ERRORS.EXTERNAL.NEAR_CLIENT_CONNECT_ERROR, {
+          err,
+          reason: 'cannot connect to near client',
         });
-    });
+      });
   }
 
   /**
@@ -142,10 +153,7 @@ class NearBlockchain extends Blockchain {
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
     logger.verbose(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
     if (txnOutcome.status instanceof Object) {
-      if (
-        txnOutcome.status.Failure !== undefined &&
-        txnOutcome.status.Failure !== null
-      ) {
+      if (txnOutcome.status.Failure !== undefined) {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
           txnOutcome,
           to: toAddr,
@@ -166,6 +174,8 @@ class NearBlockchain extends Blockchain {
     }
 
     const receivedAtom = yoctoNearToAtom(
+      // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
       txnOutcome.transaction.actions[0].Transfer.deposit
     );
 
@@ -179,18 +189,27 @@ class NearBlockchain extends Blockchain {
     }
 
     // check from address
+    // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
     if (txnOutcome.transaction.signer_id !== fromAddr) {
       throw new BridgeError(ERRORS.API.TXN_SENDER_MISMATCH, {
         blockchainName: this.name,
         receivedSender: fromAddr,
+        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
         blockchainSender: txnOutcome.transaction.signer_id,
       });
     } // TODO: later: maybe signer != sender?
+
     // check to address
+    // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
     if (txnOutcome.transaction.receiver_id !== toAddr) {
       throw new BridgeError(ERRORS.API.TXN_RECEIVER_MISMATCH, {
         blockchainName: this.name,
         receivedReceiver: toAddr,
+        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
         blockchainReceiver: txnOutcome.transaction.receiver_id,
       });
     }
@@ -231,19 +250,19 @@ class NearBlockchain extends Blockchain {
     return response.transaction_outcome.id;
   }
 
-  /**
-   * Unused slot for get recent transactions of an account.
-   *
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
-   * @param  {address} addr - not implemented yet
-   * @param  {number} limit
-   * @returns {Promise<NearTxnId[]>} - list of transaction ids
-   */
-  protected static async getRecentTransactions(
-    limit: number
-  ): Promise<NearTxnId[]> {
-    throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED, { TxnLimit: limit });
-  }
+  // /**
+  //  * Unused slot for get recent transactions of an account.
+  //  *
+  //  * @throws {BridgeError} - {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
+  //  * @param  {address} addr - not implemented yet
+  //  * @param  {number} limit
+  //  * @returns {Promise<NearTxnId[]>} - list of transaction ids
+  //  */
+  // protected static async getRecentTransactions(
+  //   limit: number
+  // ): Promise<NearTxnId[]> {
+  //   throw new BridgeError(ERRORS.INTERNAL.NOT_IMPLEMENTED, { TxnLimit: limit });
+  // }
 }
 
 let clientParam: ClientParam,

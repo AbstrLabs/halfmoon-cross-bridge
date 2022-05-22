@@ -23,6 +23,7 @@ describe('mint test', () => {
       const mintResponse: FinalExecutionOutcome =
         await transferOnNearTestnetFromExampleToMaster(amount);
       // manually checked the amount is correct.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
       const nearTxnId = mintResponse.transaction.hash; // or mintResponse.transaction_outcome.id;
 
       const apiCallParam: ApiCallParam = {
@@ -30,6 +31,7 @@ describe('mint test', () => {
         from: ENV.NEAR_EXAMPL_ADDR,
         to: ENV.ALGO_EXAMPL_ADDR,
         amount,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         txnId: nearTxnId,
       };
 

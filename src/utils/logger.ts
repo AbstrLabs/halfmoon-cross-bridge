@@ -22,7 +22,7 @@ const logger = createLogger({
         errors({ stack: true }),
         timestamp(),
         prettyPrint(),
-        printf(({ level, message, timestamp }) => {
+        printf(({ level, message, timestamp }: Record<string, string>) => {
           return `${timestamp} ${level.padEnd(7, ' ')}: ${message}`;
         })
       ),

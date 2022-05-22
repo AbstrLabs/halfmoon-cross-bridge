@@ -163,7 +163,7 @@ const internalErrors = {
   BRIDGE_TXN_NOT_INITIALIZED: {
     errId: 218,
     name: 'Bridge Transaction Not Initialized',
-    message: 'Bridge Transaction not initialized as expected',
+    message: 'Bridge Transaction used before initialized as expected',
   },
   OVERWRITE_ERROR_TXN_STATUS: {
     errId: 219,
@@ -246,6 +246,11 @@ const externalErrors = {
     errId: 310,
     name: 'DB update transaction failed',
     message: 'Cannot update transaction in database',
+  },
+  NEAR_CLIENT_CONNECT_ERROR: {
+    errId: 311,
+    name: 'Near Client Connect Error',
+    message: 'Cannot connect to near client',
   },
 };
 

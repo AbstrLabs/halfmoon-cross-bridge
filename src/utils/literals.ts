@@ -4,6 +4,10 @@
  *
  * named literals instead of literal to avoid conflict with zod package.
  */
+
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// Templates will call `toString()` method automatically.
+
 export { literals };
 
 import { Stringer } from './type';

@@ -52,7 +52,8 @@ type AlgoTxnOutcome =
       };
     }
   | AlgoAssetTransferTxnOutcome;
-type NearTxnOutcome = providers.FinalExecutionOutcome; // TODO: Type FinalExecutionOutcome.transaction.
+// TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
 interface ConfirmTxnConfig {

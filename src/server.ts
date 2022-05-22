@@ -27,12 +27,12 @@ function startServer() {
   });
 
   /* API */
-  app.get('/', async (req: Request, res: Response) => {
+  app.get('/', (req: Request, res: Response) => {
     if (
       process.env.TS_NODE_DEV === undefined ||
       process.env.TS_NODE_DEV === 'development'
     ) {
-      await homePageTest();
+      void homePageTest();
     }
     res.json({
       MESSAGE: 'Welcome to the Algorand-NEAR bridge API',

@@ -21,9 +21,13 @@ async function verifyBlockchainTxn(
   // TODO: wrap inferBlockchainName in a function in blockchain/index.ts
   if (blockchainName === BlockchainName.ALGO) {
     blockchain = algoBlockchain;
+    // for extendability, we can add more blockchain names here.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   } else if (blockchainName === BlockchainName.NEAR) {
     blockchain = nearBlockchain;
   } else {
+    // for extendability, we can add more blockchain names here.
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new Error(`Blockchain ${blockchainName} is not supported.`);
   }
   const txnParam: TxnParam = {

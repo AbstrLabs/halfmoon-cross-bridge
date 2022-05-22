@@ -23,6 +23,7 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
+  parseApiCallParam,
   parseBigInt,
   parseBurnApiParam,
   parseDbId,
@@ -59,7 +60,7 @@ function parseWithZod<T>(
   errorTemplate: ErrorTemplate
 ): T {
   try {
-    return zodParser.parse(zodShaped);
+    return zodParser.parse(zodShaped) as T;
   } catch (err) {
     logger.error(err);
     throw new BridgeError(errorTemplate, {
@@ -149,6 +150,9 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
+function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
+  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
+}
 
 // blockchain specific
 const zAlgoTxnParam = z.object({
