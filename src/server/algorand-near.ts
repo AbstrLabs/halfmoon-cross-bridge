@@ -13,8 +13,8 @@ import { burn } from '../bridge/burn';
 import { ensureString } from '../utils/helper';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
-import { mint } from '../bridge/transact';
 import { stringifyBigintInObj } from '../utils/formatter';
+import { transact } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 
 export { algorandNear };
@@ -94,7 +94,7 @@ async function mintResp(apiCallParam: MintApiParam, res: Response) {
   let bridgeTxnObject: BridgeTxnObject;
   logger.info(literals.START_MINTING(amount, from, to) + `txnId: ${txnId}`);
   try {
-    bridgeTxnObject = await mint(mintApiParam);
+    bridgeTxnObject = await transact(mintApiParam);
     logger.info(literals.DONE_MINT);
     // TODO: use different literal template
   } catch (err) {

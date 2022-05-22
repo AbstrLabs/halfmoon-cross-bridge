@@ -4,7 +4,7 @@ import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { TxnType } from '../blockchain';
-import { mint } from './transact';
+import { transact } from './transact';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
@@ -32,7 +32,7 @@ describe('mint test', () => {
       };
 
       // call API
-      const bridgeTxn = await mint(apiCallParam);
+      const bridgeTxn = await transact(apiCallParam);
       // should return AlgoTxnId,etc.
 
       // console.log('bridgeTxn : ', bridgeTxn);

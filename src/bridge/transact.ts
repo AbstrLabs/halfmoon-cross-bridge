@@ -1,7 +1,7 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting, and execute the transaction.
  */
-export { mint };
+export { transact };
 
 import { BridgeTxn, BridgeTxnObject } from '.';
 
@@ -17,7 +17,7 @@ import { logger } from '../utils/logger';
  * @param  {MintApiParam} mintApiParam
  * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
  */
-async function mint(mintApiParam: MintApiParam): Promise<BridgeTxnObject> {
+async function transact(mintApiParam: MintApiParam): Promise<BridgeTxnObject> {
   logger.info(
     literals.START_MINTING(
       mintApiParam.amount,
