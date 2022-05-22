@@ -1,36 +1,24 @@
 // TODO: CORS '*'
 // TODO: ref: change endpoint to /algorand-near, and add params
 // TODO: move API to a new file of new folder server/api
-// TODO: add a RAM pool
+// TODO: feat: add a RAM pool
 
 export { startServer };
 
-import {
-  BurnApiParam,
-  parseBurnApiParam,
-  parseMintApiParam,
-} from './utils/type';
 import express, { Request, Response } from 'express';
 
-import { BlockchainName } from '.';
-import { BridgeTxnObject } from './bridge';
 import { ENV } from './utils/dotenv';
-import { burn } from './bridge/burn';
-import { ensureString } from './utils/helper';
-import { literals } from './utils/literals';
+import { algorandNear } from './server/algorand-near';
 import { logger } from './utils/logger';
-import { mint } from './bridge/mint';
-import { stringifyBigintInObj } from './utils/formatter';
-import { verifyBlockchainTxn } from './blockchain/verify';
 
 async function homePageTest() {
   /* Used once code */
 }
 
 function startServer() {
-  /* route */
   const app = express();
 
+  /* CORS */
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*'); // TODO: safety check '*'
     res.header(
@@ -40,7 +28,6 @@ function startServer() {
     next();
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.get('/', async (req: Request, res: Response) => {
     if (
       process.env.TS_NODE_DEV === undefined ||
@@ -52,8 +39,13 @@ function startServer() {
       MESSAGE: 'Welcome to the Algorand-NEAR bridge API',
       FRONTEND: 'https://www.halfmooncross.com/',
       API_ENDPOINT: {
-        ['mint']: `/api/mint`,
-        ['burn']: `/api/burn`,
+        ['mint']: {
+          URL: '/algorand-near/mint',
+          PARAMS: {
+            mint_from: 'string',
+          },
+        },
+        ['burn']: '/algorand-near/burn',
         // TODO: ref : change endpoint to /algorand-near, and add params
       },
     });
@@ -64,77 +56,12 @@ function startServer() {
   app.use(express.json()); // parse application/json
 
   // TODO: move API to a new file of new folder server/api
-  const apiRouter = express.Router();
 
-  apiRouter
-    .route('/mint')
-
-    .post(async (req: Request, res: Response) => {
-      // res.json(req.body);
-      const [from, to, amount, txnId] = [
-        ensureString(req.body['mint_from']),
-        ensureString(req.body['mint_to']),
-        `${req.body['mint_amount']}`,
-        ensureString(req.body['mint_txnId']),
-      ];
-      await mintResp({ from, to, amount, txnId }, res);
-    });
-
-  apiRouter.route('/burn').post(async (req: Request, res: Response) => {
-    // res.json(req.body);
-    const [from, to, amount, txnId] = [
-      ensureString(req.body['burn_from']),
-      ensureString(req.body['burn_to']),
-      `${req.body['burn_amount']}`,
-      ensureString(req.body['burn_txnId']),
-    ];
-    await burnResp({ from, to, amount, txnId }, res);
-  });
-
-  // TODO: move verify to API.
-  apiRouter
-    .route('/algorand/verify')
-    .post(async (req: Request, res: Response) => {
-      const [from, to, amount, txnId] = [
-        ensureString(req.body['mint_from']),
-        ensureString(req.body['mint_to']),
-        `${req.body['mint_amount']}`,
-        ensureString(req.body['mint_txnId']),
-      ];
-      const verifyResult = await verifyBlockchainTxn(
-        {
-          from,
-          to,
-          amount,
-          txnId,
-        },
-        BlockchainName.ALGO
-      );
-      res.send(`Verification result: ${verifyResult}`);
-    });
-
-  apiRouter.route('/near/verify').post(async (req: Request, res: Response) => {
-    const [from, to, amount, txnId] = [
-      ensureString(req.body['mint_from']),
-      ensureString(req.body['mint_to']),
-      `${req.body['mint_amount']}`,
-      ensureString(req.body['mint_txnId']),
-    ];
-    const verifyResult = await verifyBlockchainTxn(
-      {
-        from,
-        to,
-        amount,
-        txnId,
-      },
-      BlockchainName.NEAR
-    );
-    res.send(`Verification result: ${verifyResult}`);
-  });
-  app.use('/api', apiRouter);
+  app.use('/algorand-near', algorandNear);
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
   });
+
   app.listen(ENV.PORT, () => {
     logger.info(
       `Application started on port ${ENV.PORT}! http://localhost:${ENV.PORT}/`
@@ -143,50 +70,3 @@ function startServer() {
 }
 
 /* server-side function wrap */
-
-// TODO: 2-func: ref mintResp and burnResp since they are in same structure.
-async function mintResp(apiCallParam: BurnApiParam, res: Response) {
-  /* CONFIG */
-  const mintApiParam = parseMintApiParam(apiCallParam);
-  const { from, to, amount, txnId } = mintApiParam;
-  let bridgeTxnObject: BridgeTxnObject;
-  logger.info(literals.START_MINTING(amount, from, to) + `txnId: ${txnId}`);
-  // res.write(
-  //     `${literals.MINT_AWAITING}\n`
-  // );
-  try {
-    bridgeTxnObject = await mint(mintApiParam);
-    // logger.info(literals.DONE_MINT);
-    // TODO: use different literal template
-  } catch (err) {
-    res.status(400).send('Missing required query params');
-    res.end();
-    throw err;
-  }
-
-  return res.json(stringifyBigintInObj(bridgeTxnObject));
-}
-
-// TODO: 2-func: ref mintResp and burnResp since they are in same structure.
-async function burnResp(apiCallParam: BurnApiParam, res: Response) {
-  /* CONFIG */
-  const burnApiParam = parseBurnApiParam(apiCallParam);
-  const { from, to, amount, txnId } = burnApiParam;
-  let bridgeTxnObject: BridgeTxnObject;
-  logger.info(literals.START_BURNING(amount, from, to) + `txnId: ${txnId}`);
-  // res.write(
-  //   `${literals.START_BURNING(amount, from, to)}\n` +
-  //     `${literals.BURN_ALGO_TXN_ID(txnId)}\n` +
-  //     `${literals.BURN_AWAITING}\n`
-  // );
-  // res.end();
-  try {
-    bridgeTxnObject = await burn(burnApiParam);
-    logger.info(literals.DONE_BURN);
-  } catch (err) {
-    res.status(400).send('Missing required query params');
-    res.end();
-    throw err;
-  }
-  return res.json(stringifyBigintInObj(bridgeTxnObject));
-}
