@@ -92,12 +92,9 @@ async function mintResp(apiCallParam: BurnApiParam, res: Response) {
   const { from, to, amount, txnId } = mintApiParam;
   let bridgeTxnObject: BridgeTxnObject;
   logger.info(literals.START_MINTING(amount, from, to) + `txnId: ${txnId}`);
-  // res.write(
-  //     `${literals.MINT_AWAITING}\n`
-  // );
   try {
     bridgeTxnObject = await mint(mintApiParam);
-    // logger.info(literals.DONE_MINT);
+    logger.info(literals.DONE_MINT);
     // TODO: use different literal template
   } catch (err) {
     res.status(400).send('Missing required query params');

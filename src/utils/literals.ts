@@ -23,12 +23,8 @@ const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
 const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Burning ${amount} goNEAR from [${from}](ALGO) to [${to}](NEAR)`;
 
-const BURN_ALGO_TXN_ID = (txnId: Stringer) =>
-  `Burning with transaction ID [${txnId}](ALGO).`;
 const DONE_MINT = 'mint success';
 const DONE_BURN = 'burn success';
-const MINT_AWAITING =
-  'Will redirect to "history" after mint transaction finished.';
 const BURN_AWAITING =
   'Will redirect to "history" after burn transaction finished.';
 
@@ -57,14 +53,12 @@ const SILLY_LOG = {};
 
 const literals = {
   ASA_CREATED,
-  BURN_ALGO_TXN_ID,
   BURN_AWAITING,
   DB_ENTRY_CREATED,
   DONE_BURN,
   DONE_MINT,
   FOURTEEN_ZEROS,
   MAKING_TXN,
-  MINT_AWAITING,
   NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
   NOT_LOADED_FROM_ENV_STR,
