@@ -96,17 +96,20 @@ type DbId = z.infer<typeof zDbId>;
 type Biginter = z.infer<typeof zBiginter>;
 
 // API -> server
+
+// from <https://forum.algorand.org/t/how-is-an-algorands-address-made/960> // no 0,1,8
+// TODO: algosdk.isValidAddress(addr)
 const zAlgoAddr = z
-  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
   // also in algosdk repo has some fixed value of 58.
   .string()
   .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
+
+// from <https://wallet.testnet.near.org/create>
 const zNearAddr = z
-  // from https://wallet.testnet.near.org/create
   // cannot start with `-` and `_`
   .string()
   .regex(
-    /^[0-9a-z][0-9a-z\-_]{1,64}.(testnet|mainnet)$/,
+    /^[0-9a-z][0-9a-z\-_]{2,64}.(testnet|mainnet)$/,
     'malformed near address'
   );
 const zAddr = z.union([zAlgoAddr, zNearAddr]);

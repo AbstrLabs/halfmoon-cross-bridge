@@ -30,13 +30,9 @@ algorandNear
       };
       apiCallParam = parseApiCallParam(body);
     } catch (err) {
-      res.status(406).send('Wrong query params');
+      res.status(406).send('Wrong POST body');
       res.end();
-    }
-
-    if (apiCallParam === undefined) {
-      res.status(406).send('Missing required query params');
-      res.end();
+      logger.info('API server still running...');
       return;
     }
 
@@ -48,8 +44,10 @@ algorandNear
       await transactWithResp(apiCallParam, res);
     } catch (err) {
       logger.error(err);
-      res.status(40).send('Internal server error');
+      res.status(40).send('Internal server error.');
       res.end();
+      logger.info('API server still running...');
+      return;
     }
   });
 
