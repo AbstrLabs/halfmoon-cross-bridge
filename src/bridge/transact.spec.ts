@@ -12,7 +12,7 @@ import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
-describe.skip('mint test', () => {
+describe('mint test', () => {
   it(
     'mint 1.2345678901 NEAR from NEAR to ALGO',
     async () => {
