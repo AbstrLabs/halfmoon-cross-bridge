@@ -705,9 +705,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    const marginFee: bigint = // suppose no bigint overflow
-      (this.fromAmountAtom * BigInt(marginPercentage)) / BigInt(10000) +
-      BigInt(1); // +1 for rounding up
+    const marginFee: bigint = // TODO: supposing no bigint overflow
+      this.fromAmountAtom -
+      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginPercentage))) /
+        BigInt(10000); // X-(X*(1-%)) instead of X*% for rounding.
+    // algorithm discussed with algomint team.
 
     this.marginFeeAtom = marginFee;
     return marginFee;
