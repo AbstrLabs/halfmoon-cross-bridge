@@ -1,12 +1,14 @@
 import { ApiCallParam, parseApiCallParam } from '../utils/type';
+import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
+import { BlockchainName } from '..';
 import { BridgeTxnObject } from '../bridge';
-import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { transact } from '../bridge/transact';
+import { verifyBlockchainTxn } from '../blockchain/verify';
 
 export { algorandNear };
 
@@ -37,6 +39,41 @@ algorandNear
     }
 
     // VERIFY API CALL PARAM
+    const verifyBlockchainMap = {
+      [TxnType.MINT]: BlockchainName.NEAR,
+      [TxnType.BURN]: BlockchainName.ALGO,
+    };
+
+    let verifyResult: ConfirmOutcome;
+    try {
+      verifyResult = await verifyBlockchainTxn(
+        apiCallParam,
+        verifyBlockchainMap[apiCallParam.type]
+      );
+    } catch (err) {
+      res.status(400).send('Invalid transaction');
+      res.end();
+      logger.info('API server still running...');
+      return;
+    }
+    switch (verifyResult) {
+      case ConfirmOutcome.SUCCESS:
+        logger.info('Verify success');
+        break;
+      case ConfirmOutcome.WRONG_INFO:
+        res.status(406).send('Invalid transaction');
+        res.end();
+        logger.info('API server still running...');
+        return;
+      case ConfirmOutcome.TIMEOUT:
+        res.status(500).send('Verify transaction time out');
+        res.end();
+        logger.info('API server still running...');
+        return;
+      default:
+        res.status(500).send('Server error code ANB-001');
+        return;
+    }
     // TODO: verify within both ram and db.
 
     // TRANSACT

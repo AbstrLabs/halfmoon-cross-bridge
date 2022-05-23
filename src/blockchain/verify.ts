@@ -8,14 +8,14 @@ import { ApiCallParam, TxnParam } from '../utils/type';
 
 import { BlockchainName } from '..';
 import { toGoNearAtom } from '../utils/formatter';
-import { type Blockchain } from '.';
+import { ConfirmOutcome, type Blockchain } from '.';
 import { nearBlockchain } from './near';
 import { algoBlockchain } from './algorand';
 
 async function verifyBlockchainTxn(
   apiCallParam: ApiCallParam,
   blockchainName: BlockchainName // TODO: remove this param, infer it from apiCallParam.
-) {
+): Promise<ConfirmOutcome> {
   let blockchain: Blockchain;
 
   // TODO: wrap inferBlockchainName in a function in blockchain/index.ts
