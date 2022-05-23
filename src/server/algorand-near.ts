@@ -81,7 +81,7 @@ algorandNear
       await transactWithResp(apiCallParam, res);
     } catch (err) {
       logger.error(err);
-      res.status(40).send('Internal server error.');
+      res.status(500).send('Internal server error.');
       res.end();
       logger.info('API server still running...');
       return;
@@ -105,9 +105,10 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
     logger.info(_literals.DONE);
     // TODO: use different literal template than transact
   } catch (err) {
-    res.status(400).send('Missing required query params');
+    logger.error(err);
+    res.status(406).send('Missing required query params');
     res.end();
-    throw err;
+    return;
   }
   const stringifiedBridgeTxnObject = stringifyBigintInObj(bridgeTxnObject);
   logger.info(

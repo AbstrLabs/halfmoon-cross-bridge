@@ -107,6 +107,7 @@ abstract class Blockchain {
           }
         } catch (err) {
           // TODO: use BridgeError
+          // TODO: this system cannot handle the three cases. need rework.
           console.log('err : ', err); // DEV_LOG_TO_REMOVE
           clearTimeout(timeout);
           clearInterval(interval);
