@@ -8,6 +8,7 @@
  * - https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/errors/errors-list.ts
  */
 
+import { logger } from '../logger';
 import { stringifyObjWithBigint } from '../formatter';
 
 export { ErrorTemplate, ErrorGroup, BridgeError };
@@ -39,7 +40,7 @@ class BridgeError extends Error {
       `(ERR_CODE: ${ERROR_PREFIX}${String(errorTemplate.errId)}): \n` +
       `${errorTemplate.message}: ${stringifyObjWithBigint(extraArg)}`;
     super(errMsg);
-
+    logger.error(errMsg);
     this.name = errorTemplate.name;
     this.errId = errorTemplate.errId;
     this.message = errMsg;
