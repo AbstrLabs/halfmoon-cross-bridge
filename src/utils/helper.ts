@@ -17,7 +17,7 @@ function ensureString(value: unknown): string {
       value,
     });
   }
-  return value as string;
+  return value ;
 }
 
 /**

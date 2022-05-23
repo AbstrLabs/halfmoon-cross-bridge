@@ -128,11 +128,11 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
 
   // to goNear
   const nearPlain = utils.format.formatNearAmount(yoctoNearStr);
-  if (nearPlain === null) {
-    throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
-      yNear: yoctoNearStr,
-    });
-  }
+  // if (nearPlain === undefined) {
+  //   throw new BridgeError(ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT, {
+  //     yNear: yoctoNearStr,
+  //   });
+  // }
   return toGoNearAtom(nearPlain);
 }
 
@@ -183,6 +183,7 @@ function stringifyBigintInObj(obj: object): object {
     } else if (typeof value === 'bigint') {
       newObj[key] = value.toString();
     } else if (typeof value === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       newObj[key] = stringifyBigintInObj(value);
     } else {
       newObj[key] = value;
@@ -190,42 +191,3 @@ function stringifyBigintInObj(obj: object): object {
   }
   return newObj;
 }
-
-/* two older versions of stringifyObjWithBigint
-
-function stringifyObjWithBigint(obj?: object): string {
-  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
-  if (!obj) {
-    return '';
-  }
-  return JSON.stringify(
-    obj,
-    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
-  );
-}
-
-
-function stringifyObjWithBigint(obj?: object): string {
-  // modified from https://github.com/GoogleChromeLabs/jsbi/issues/30
-  if (obj === undefined) {
-    return 'undefined';
-  }
-  if (obj === null) {
-    return 'null';
-  }
-  return JSON.stringify(
-    obj,
-    // (key, value) => value.toString() // not working, [object Object] is returned
-    (key, value) => {
-      switch (true) {
-        case typeof value === 'bigint':
-          return value.toString();
-        case value instanceof BridgeTxn:
-          return value.toString();
-        default:
-          value;
-      }
-    } // return everything else unchanged
-  );
-}
- */

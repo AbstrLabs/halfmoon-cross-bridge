@@ -4,13 +4,14 @@ export { exampleBridgeTxn };
 import { BlockchainName, BridgeTxnStatus } from '../..';
 
 import { BridgeTxn } from '../../bridge';
+import { TxnType } from '../../blockchain';
 
 const FAKE_TXN_ID = 'some_fake_txn_id';
 
 // TODO(test): use realistic data.
 const exampleBridgeTxn: BridgeTxn = new BridgeTxn(
   {
-    // this is a mint txn
+    txnType: TxnType.MINT,
     fromAmountAtom: BigInt(10000000000), // big int jest err read on top.
     fixedFeeAtom: BigInt(123456),
     marginFeeAtom: BigInt(567890),

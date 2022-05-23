@@ -19,7 +19,7 @@ interface ErrorTemplate {
   name: string;
   errId: number;
 }
-type ErrorGroup = { [errorName: string]: ErrorTemplate };
+type ErrorGroup = Record<string, ErrorTemplate>;
 
 //
 // type ErrorCategory = {

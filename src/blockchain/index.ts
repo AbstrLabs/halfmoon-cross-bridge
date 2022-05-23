@@ -52,13 +52,14 @@ type AlgoTxnOutcome =
       };
     }
   | AlgoAssetTransferTxnOutcome;
-type NearTxnOutcome = providers.FinalExecutionOutcome; // TODO: Type FinalExecutionOutcome.transaction.
+// TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
-type ConfirmTxnConfig = {
+interface ConfirmTxnConfig {
   timeoutSec: number;
   intervalSec: number;
-};
+}
 
 enum TxnType {
   MINT = 'MINT',

@@ -33,6 +33,7 @@ describe('AWS-RDS capability test', () => {
     // postgres.disconnect();
 
     expect(res.length).toBe(0);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res2.at(-1).test_date).toBe(date.toString());
   });
   it.skip('update in test_table', async () => {
@@ -52,6 +53,7 @@ describe('AWS-RDS capability test', () => {
 
     expect(res.length).toBe(0);
     // Without sorting, first element in res2 has id 2.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(res2[0].test_date).toBe(date.toString());
   });
   it.skip('delete last entry in test_table', async () => {

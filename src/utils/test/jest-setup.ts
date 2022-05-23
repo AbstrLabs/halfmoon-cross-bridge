@@ -1,6 +1,8 @@
-module.exports = async function (
-  globalConfig: any, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  projectConfig: any // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+import type { Config } from '@jest/types';
+
+module.exports = function (
+  globalConfig: Config.GlobalConfig
+  // projectConfig: Config.ProjectConfig,
 ) {
   console.log(globalConfig.testPathPattern);
   // console.log(projectConfig);

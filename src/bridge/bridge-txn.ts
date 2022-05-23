@@ -1,3 +1,4 @@
+// TODO: no need to infer TxnType anymore.
 export { type BridgeTxnObject, BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
@@ -30,7 +31,7 @@ interface CriticalBridgeTxnObject {
   toBlockchain?: BlockchainName;
   txnStatus?: BridgeTxnStatus;
   toTxnId?: string;
-  txnType?: TxnType;
+  txnType: TxnType;
   createdTime?: bigint;
 }
 
@@ -72,7 +73,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   toBlockchain?: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
-  txnType?: TxnType;
+  txnType: TxnType;
   #db = db;
   #fromBlockchain!: Blockchain;
   #toBlockchain!: Blockchain;
@@ -85,19 +86,17 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @static
    * @param  {ApiCallParam} apiCallParam - The API call parameter to initialize the {@link BridgeTxn} from.
-   * @param  {TxnType} txnType - The type of the transaction.
    * @param  {bigint} createdTime - optional, if not provided, will use system time
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
-    txnType: TxnType,
     createdTime?: bigint
   ): BridgeTxn {
     const { from, to, amount, txnId } = apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
-      txnType,
+      txnType: apiCallParam.type,
       fixedFeeAtom: undefined,
       fromAddr: from,
       fromAmountAtom: toGoNearAtom(amount),
@@ -181,10 +180,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     this.dbId = dbId;
 
     // TODO: maybe a `static async asyncConstruct(){}` is better?
-    this.#isInitializedPromise = new Promise((resolve) => {
-      this._initialize(initializeOptions).then(() => {
-        resolve(true);
-      });
+    this.#isInitializedPromise = new Promise((resolve, reject) => {
+      this._initialize(initializeOptions)
+        .then(() => {
+          resolve(true);
+        })
+        .catch((err) => {
+          logger.error(err);
+          reject(false);
+        });
     });
   }
 
@@ -196,10 +200,23 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This should be the only way used outside the {@link BridgeTxn} class.
    *
    * @async
+   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
+    if (!(await this.#isInitializedPromise)) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn.runWholeBridgeTxn',
+      });
+    }
+    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
+        at: 'BridgeTxn.runWholeBridgeTxn',
+        reason: 'fromBlockchain or toBlockchain is undefined',
+      });
+    }
+
     logger.info(
       literals.MAKING_TXN(
         `${this.fromBlockchain}->${this.toBlockchain}`,
@@ -232,7 +249,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    */
   async confirmIncomingTxn(): Promise<void> {
     await this.#isInitializedPromise;
-    if (!this.#isInitializedPromise) {
+    if (!(await this.#isInitializedPromise)) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
@@ -263,10 +280,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       }
     }
 
-    if (this.txnType === undefined) {
-      // for TS
-      this.txnType = this._inferTxnType();
-    }
     await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
   }
 
@@ -292,11 +305,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         atomAmount: this.toAmountAtom,
         txnId: literals.UNUSED,
       });
-      if (outgoingTxnId === undefined) {
-        throw new BridgeError(ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID, {
-          at: 'BridgeTxn.makeOutgoingTxn',
-        });
-      }
+      // if (outgoingTxnId === undefined) {
+      //   throw new BridgeError(ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID, {
+      //     at: 'BridgeTxn.makeOutgoingTxn',
+      //   });
+      // }
       await this._updateToTxnId(outgoingTxnId);
     } catch (err) {
       await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
@@ -374,22 +387,34 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {BridgeTxnObject} the object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObject {
-    this._initialize({ notCreateInDb: true }); // this makes all fields non-null
+    if (
+      this.fromBlockchain === undefined ||
+      this.toBlockchain === undefined ||
+      this.toAmountAtom === undefined ||
+      this.fixedFeeAtom === undefined ||
+      this.marginFeeAtom === undefined
+    ) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
+        at: 'BridgeTxn.toObject',
+        reason: 'undefined field(s)',
+      });
+    }
+    // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
     const bridgeTxnObject: BridgeTxnObject = {
       dbId: this.dbId,
-      fixedFeeAtom: this.fixedFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      marginFeeAtom: this.marginFeeAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      fixedFeeAtom: this.fixedFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      marginFeeAtom: this.marginFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
-      fromBlockchain: this.fromBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      fromBlockchain: this.fromBlockchain,
       fromTxnId: this.fromTxnId,
       toAddr: this.toAddr,
-      toAmountAtom: this.toAmountAtom!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      toBlockchain: this.toBlockchain!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      toAmountAtom: this.toAmountAtom,
+      toBlockchain: this.toBlockchain, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
-      txnType: this.txnType!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      txnType: this.txnType,
     };
     return Object.assign(bridgeTxnObject, this);
   }
@@ -418,15 +443,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   }
 
   /**
-   * Get a defined txnType of the {@link BridgeTxn} for TS type checking.
-   *
-   * @returns {TxnType} the txnType of the {@link BridgeTxn}
-   */
-  public getTxnType(): TxnType {
-    return this.txnType ?? this._inferTxnType();
-  }
-
-  /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
@@ -434,29 +450,13 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {number} the dbId of the {@link BridgeTxn}
    */
   public getDbId(): number {
-    // TODO: this is not used in production. But it's incorrect because it
-    // ++ should always throw error. However, we can have a #isInitialized
-    // ++ and make it true when _isInitializedPromise is settled. In this
-    // ++ way it should work
-
-    let isInitialized = false;
-    this.#isInitializedPromise.then(() => {
-      isInitialized = true;
-      if (this.dbId === undefined) {
-        throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-          at: 'BridgeTxn.getDbId',
-        });
-      }
-    });
-    if (isInitialized) {
-      // the parte before ensures non-null
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this.dbId!;
-    } else {
+    if (this.dbId === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         extraMsg: 'try to get dbId before BridgeTxn is initialized',
         at: 'BridgeTxn.getDbId',
       });
+    } else {
+      return this.dbId;
     }
   }
 
@@ -479,22 +479,32 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   private async _initialize(
     initializeOptions: InitializeOptions
   ): Promise<this> {
+    console.log('BridgeTxn._initialize()');
     try {
       this._selfValidate();
-      this._inferTxnType();
+      console.log('_selfValidate passed');
       this._inferBlockchainNames();
+      console.log('_inferBlockchainNames passed');
       this._hookBlockchain();
+      console.log('_hookBlockchain passed');
       this._getFixedFeeAtom();
+      console.log('_getFixedFeeAtom passed');
       this._calculateMarginFeeAtom();
+      console.log('_calculateMarginFeeAtom passed');
       this._calculateToAmountAtom();
+      console.log('_calculateToAmountAtom passed');
     } catch (err) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
       if (initializeOptions.notCreateInDb === false) {
         await this._createInDb();
       }
-      throw err;
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn._initialize',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+        err,
+      });
     }
-
+    console.log('try catch passed');
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
     if (initializeOptions.notCreateInDb === false) {
       await this._createInDb();
@@ -514,12 +524,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {BridgeTxn} the {@link BridgeTxn} itself
    */
   private _selfValidate(): this {
-    if (
-      (this.fromBlockchain === undefined || this.toBlockchain === undefined) &&
-      this.txnType === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM);
-    }
+    // if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
+    //   throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM, {
+    //     at: 'BridgeTxn._selfValidate',
+    //   });
+    // }
 
     if (this.fixedFeeAtom === undefined) {
       this.fixedFeeAtom = this._getFixedFeeAtom();
@@ -561,6 +570,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     if (this.txnType === TxnType.MINT) {
       fromBlockchain = BlockchainName.NEAR;
       toBlockchain = BlockchainName.ALGO;
+      // for extendability, we can add more txn types here.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (this.txnType === TxnType.BURN) {
       fromBlockchain = BlockchainName.ALGO;
       toBlockchain = BlockchainName.NEAR;
@@ -572,43 +583,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     this.fromBlockchain = fromBlockchain;
     this.toBlockchain = toBlockchain;
     return { fromBlockchain, toBlockchain };
-  }
-
-  /**
-   * Infer the txnType of the {@link BridgeTxn} from fromBlockchain and toBlockchain.
-   * This is one step of the initialization.
-   *
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is not valid
-   * @returns {TxnType} the txnType
-   */
-  private _inferTxnType(): TxnType {
-    if (this.txnType !== undefined) {
-      if (!(this.txnType in TxnType)) {
-        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-          txnType: this.txnType,
-        });
-      }
-      return this.txnType;
-    }
-    let txnType: TxnType;
-    if (
-      this.fromBlockchain === BlockchainName.NEAR &&
-      this.toBlockchain === BlockchainName.ALGO
-    ) {
-      txnType = TxnType.MINT;
-    } else if (
-      this.fromBlockchain === BlockchainName.ALGO &&
-      this.toBlockchain === BlockchainName.NEAR
-    ) {
-      txnType = TxnType.BURN;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        fromBlockchain: this.fromBlockchain,
-        toBlockchain: this.toBlockchain,
-      });
-    }
-    this.txnType = txnType;
-    return txnType;
   }
 
   /**
@@ -683,12 +657,13 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       return this.fixedFeeAtom;
     }
     let fixedFee: bigint;
-    if (this.txnType === undefined) {
-      this._inferTxnType();
-    }
     if (this.txnType === TxnType.MINT) {
       fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
-    } else if (this.txnType === TxnType.BURN) {
+    } else if (
+      // for extendability, we can add more txn types here.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.txnType === TxnType.BURN
+    ) {
       fixedFee = toGoNearAtom(ENV.MINT_FIX_FEE);
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
@@ -718,7 +693,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
 
     if (this.txnType === TxnType.MINT) {
       marginPercentage = ENV.MINT_MARGIN_FEE_BIPS;
-    } else if (this.txnType === TxnType.BURN) {
+    } else if (
+      // for extendability, we can add more txn types here.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.txnType === TxnType.BURN
+    ) {
       marginPercentage = ENV.BURN_MARGIN_FEE_BIPS;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
@@ -781,11 +760,19 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
+    // create is inside _initialize() method, so we can't check if is initialized.
+    // if (!(await this.#isInitializedPromise)) {
+    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+    //     message: 'BridgeTxn is not initialized',
+    //     at: 'BridgeTxn._createInDb',
+    //   });
+    // }
+
     // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
     const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
       this.fromTxnId,
-      this.getTxnType()
+      this.txnType
     );
     if (dbEntryWithTxnId.length > 0) {
       // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
@@ -796,20 +783,21 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    try {
-      this.dbId = await this.#db.createTxn(this);
-    } catch (err) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
-        at: 'BridgeTxn._createDbEntry',
-        error: err,
-        bridgeTxn: this,
-      });
-    }
-    if (!this.#db.isConnected) {
-      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
-        at: 'BridgeTxn._updateTxnStatus',
-      });
-    }
+    // try {
+    this.dbId = await this.#db.createTxn(this);
+    // !!!now
+    // } catch (err) {
+    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
+    //     at: 'BridgeTxn._createInDb',
+    //     error: err,
+    //     bridgeTxn: this,
+    //   });
+    // }
+    // if (!this.#db.isConnected) {
+    //   throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+    //     at: 'BridgeTxn._updateTxnStatus',
+    //   });
+    // }
     return this.dbId;
   }
 
@@ -825,11 +813,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns Promise
    */
   private async _updateTxn(): Promise<DbId> {
-    if (this.txnStatus === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn._updateTxnStatus',
-      });
-    }
+    // if (this.txnStatus === undefined) {
+    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+    //     at: 'BridgeTxn._updateTxnStatus',
+    //   });
+    // }
     if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._updateTxnStatus',
@@ -853,10 +841,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @async
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
-   * @param  {BridgeTxnStatus} status
+   * @param  {BridgeTxnStatus} newStatus
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
-  private async _updateTxnStatus(status: BridgeTxnStatus): Promise<DbId> {
+  private async _updateTxnStatus(newStatus: BridgeTxnStatus): Promise<DbId> {
+    // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
     // will raise err if current txnStatus is error.
     if (
       [
@@ -873,7 +862,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         bridgeTxn: this,
       });
     }
-    this.txnStatus = status;
+    this.txnStatus = newStatus;
     try {
       return await this._updateTxn();
     } catch (e) {

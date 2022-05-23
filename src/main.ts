@@ -1,5 +1,8 @@
 import { db } from './database/db';
-import { startServer } from './server';
+import { logger } from './utils/logger';
+import { startServer } from './server/start-server';
 
-db.connect();
+db.connect().catch((err) => {
+  logger.error(err);
+});
 startServer();

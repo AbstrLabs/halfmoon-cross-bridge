@@ -44,9 +44,9 @@
     "@types/jest": "^27.4.1",
     "@types/json-bigint": "^1.0.1",
     "@types/pg": "^8.6.5",
-    "@typescript-eslint/eslint-plugin": "^5.22.0",
-    "@typescript-eslint/parser": "^5.22.0",
-    "eslint": "^8.14.0",
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
+    "eslint": "^8.16.0",
     "husky": "^7.0.0",
     "jest": "^27.5.1",
     "json-bigint": "^1.0.0",
@@ -65,9 +65,16 @@
     },
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended"
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "plugin:@typescript-eslint/strict"
     ],
     "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": [
+        "./tsconfig.json"
+      ]
+    },
     "plugins": [
       "@typescript-eslint"
     ],
@@ -111,22 +118,21 @@
     "algo": "yarn test:algo",
     "bridge": "yarn test:bridge",
     "build": "tsc",
-    "burn": "yarn test:burn",
+    "tx": "yarn test:transact",
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "lint": "eslint . --ext .ts",
-    "mint": "yarn test:mint",
     "near": "yarn test:near",
     "postinstall": "husky install",
     "prepare": "husky install",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/bridge",
-    "test:burn": "jest --testPathPattern=src/bridge/burn",
+    "test:transact": "jest --testPathPattern=src/bridge/transact",
     "test:db": "jest --testPathPattern=src/database",
-    "test:mint": "jest --testPathPattern=src/bridge/mint",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:util": "jest --testPathPattern=src/utils"
   },
+  "type": "module",
   "version": "1.0.0"
 }

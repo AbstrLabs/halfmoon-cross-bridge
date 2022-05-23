@@ -28,23 +28,23 @@ import {
   parseBigInt,
 } from '../utils/type';
 
-type ClientParam = {
+interface ClientParam {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-};
+}
 
-type IndexerParam = {
+interface IndexerParam {
   token: { 'X-API-Key': string };
   port: string;
   server: string;
-};
+}
 
-type BridgeConfig = {
+interface BridgeConfig {
   centralizedAssetId: number;
   centralizedAddr: AlgoAddr;
   centralizedAccPassPhrase: string;
-};
+}
 
 /**
  * @classdesc Algorand blockchain wrapper, with centralized account. Implements {@link Blockchain}.
@@ -296,27 +296,33 @@ class AlgorandBlockchain extends Blockchain {
     const txnId = txn.txID().toString();
     const rawSignedTxn = txn.signTxn(senderAccount.sk);
 
-    const rcpt = await this.client
+    // copied from algorand docs
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const rcpt: { txId: string } = await this.client
       .sendRawTransaction(rawSignedTxn)
       .do()
-      .catch((err) => {
+      .catch((err: unknown) => {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
           blockchainName: this.name,
           err,
         });
       });
     // Wait for confirmation
-    const confirmedTxn = await algosdk.waitForConfirmation(
+    interface ConfirmedTxn extends Record<string, unknown> {
+      'confirmed-round': string;
+    }
+    const confirmedTxn: ConfirmedTxn = (await algosdk.waitForConfirmation(
       this.client,
       txnId,
       4
-    );
+    )) as ConfirmedTxn;
 
     if (rcpt.txId !== txnId) {
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
         blockchainName: this.name,
         rawTxnId: txnId,
         blockchainTxnId: rcpt.txId,
+        reason: 'wrong txn id',
       });
     }
 
@@ -343,7 +349,7 @@ class AlgorandBlockchain extends Blockchain {
    * @returns {Promise<void>} promise of void
    */
   protected async _createGoNearWithAdmin(): Promise<void> {
-    this._createAsaWithAccount(noParamGoNearConfig, this.centralizedAcc);
+    await this._createAsaWithAccount(noParamGoNearConfig, this.centralizedAcc);
   }
 
   /**
@@ -352,7 +358,7 @@ class AlgorandBlockchain extends Blockchain {
    * @async
    * @returns {Promise<AlgoAcc>} promise of {@link AlgoAcc} account created
    */
-  protected async _genAcc(): Promise<AlgoAcc> {
+  protected _genAcc(): AlgoAcc {
     // tested, used only once
     const algoAcc: AlgoAcc = algosdk.generateAccount();
     logger.warn('Account Address = ' + algoAcc.addr);
@@ -366,6 +372,7 @@ class AlgorandBlockchain extends Blockchain {
 
   /**
    * Create a new asset on algorand with the given account.
+   * Used once and from algorand docs. Not caring typing in this function.
    *
    * @async
    * @param  {NoParamAsaConfig} noParamAsaConfig
@@ -387,12 +394,16 @@ class AlgorandBlockchain extends Blockchain {
     );
 
     const rawSignedTxn = createdTxn.signTxn(creatorAccount.sk);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const tx = await this.client.sendRawTransaction(rawSignedTxn).do();
+    // eslint-disable-next-line
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     noParamAsaConfig.assetId = ptx['asset-index'];
     logger.info(
       literals.ASA_CREATED(
         noParamAsaConfig.assetName,
+        // eslint-disable-next-line
         tx.txId,
         noParamAsaConfig.assetId! // eslint-disable-line @typescript-eslint/no-non-null-assertion
       )
@@ -450,13 +461,6 @@ const algoBlockchain = new AlgorandBlockchain(
  * @todo move to test helper
  */
 class TestAlgo extends AlgorandBlockchain {
-  constructor(
-    clientParam: ClientParam,
-    indexerParam: IndexerParam,
-    bridgeConfig: BridgeConfig
-  ) {
-    super(clientParam, indexerParam, bridgeConfig);
-  }
   async simulateFrontendTxn(
     algoTxnParam: AlgoTxnParam,
     senderPassPhrase: string

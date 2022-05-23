@@ -23,6 +23,7 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
+  parseApiCallParam,
   parseBigInt,
   parseBurnApiParam,
   parseDbId,
@@ -32,14 +33,15 @@ export {
 
 import { z } from 'zod';
 import { BridgeTxnStatus } from '..';
+import { TxnType } from '../blockchain';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
 
 /* NON-ZOD TYPES */
 
-type Stringer = {
+interface Stringer {
   toString(): string;
-};
+}
 
 /* ZOD TYPES (WITH PARSER) */
 
@@ -58,7 +60,7 @@ function parseWithZod<T>(
   errorTemplate: ErrorTemplate
 ): T {
   try {
-    return zodParser.parse(zodShaped);
+    return zodParser.parse(zodShaped) as T;
   } catch (err) {
     logger.error(err);
     throw new BridgeError(errorTemplate, {
@@ -94,17 +96,20 @@ type DbId = z.infer<typeof zDbId>;
 type Biginter = z.infer<typeof zBiginter>;
 
 // API -> server
+
+// from <https://forum.algorand.org/t/how-is-an-algorands-address-made/960> // no 0,1,8
+// TODO: algosdk.isValidAddress(addr)
 const zAlgoAddr = z
-  // from https://forum.algorand.org/t/how-is-an-algorands-address-made/960 // no 0,1,8
   // also in algosdk repo has some fixed value of 58.
   .string()
   .regex(/^[2-79A-Z]{58}$/, 'malformed algorand address');
+
+// from <https://wallet.testnet.near.org/create>
 const zNearAddr = z
-  // from https://wallet.testnet.near.org/create
   // cannot start with `-` and `_`
   .string()
   .regex(
-    /^[0-9a-z][0-9a-z\-_]{1,64}.(testnet|mainnet)$/,
+    /^[0-9a-z][0-9a-z\-_]{2,64}.(testnet|mainnet)$/,
     'malformed near address'
   );
 const zAddr = z.union([zAlgoAddr, zNearAddr]);
@@ -128,6 +133,7 @@ const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
 const zMintApiParam = z.object({
+  type: z.literal(TxnType.MINT),
   amount: zApiAmount,
   from: zNearAddr,
   to: zAlgoAddr,
@@ -137,6 +143,7 @@ function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zBurnApiParam = z.object({
+  type: z.literal(TxnType.BURN),
   amount: zApiAmount,
   from: zAlgoAddr,
   to: zNearAddr,
@@ -146,6 +153,9 @@ function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
   return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
 }
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
+function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
+  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
+}
 
 // blockchain specific
 const zAlgoTxnParam = z.object({

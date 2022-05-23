@@ -4,6 +4,10 @@
  *
  * named literals instead of literal to avoid conflict with zod package.
  */
+
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// Templates will call `toString()` method automatically.
+
 export { literals };
 
 import { Stringer } from './type';
@@ -23,12 +27,8 @@ const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
 const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Burning ${amount} goNEAR from [${from}](ALGO) to [${to}](NEAR)`;
 
-const BURN_ALGO_TXN_ID = (txnId: Stringer) =>
-  `Burning with transaction ID [${txnId}](ALGO).`;
 const DONE_MINT = 'mint success';
 const DONE_BURN = 'burn success';
-const MINT_AWAITING =
-  'Will redirect to "history" after mint transaction finished.';
 const BURN_AWAITING =
   'Will redirect to "history" after burn transaction finished.';
 
@@ -45,7 +45,6 @@ const TXN_CONFIRMED = (
 const ASA_CREATED = (assetName: Stringer, txnId: Stringer, assetId: Stringer) =>
   `New ASA ${assetName} created with ${txnId} having id ${assetId}.`;
 
-const NEAR_TXN_RESULT = (result: Stringer) => `near txn result: ${result}`;
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
@@ -57,15 +56,12 @@ const SILLY_LOG = {};
 
 const literals = {
   ASA_CREATED,
-  BURN_ALGO_TXN_ID,
   BURN_AWAITING,
   DB_ENTRY_CREATED,
   DONE_BURN,
   DONE_MINT,
   FOURTEEN_ZEROS,
   MAKING_TXN,
-  MINT_AWAITING,
-  NEAR_TXN_RESULT,
   NEAR_VERIFY_OUTCOME,
   NOT_LOADED_FROM_ENV_STR,
   NOT_LOADED_FROM_ENV_NUM,

@@ -13,13 +13,13 @@ import { Pool, PoolClient } from 'pg';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 
-type PgConfig = {
+interface PgConfig {
   host: string;
   user: string;
   database: string;
   password: string;
   port: number;
-};
+}
 
 /**
  * Wrap up AWS-RDS service of postgreSQL into one singleton instance `postgres`.
@@ -49,9 +49,9 @@ class Postgres {
       return;
     }
     this.client = await this.pool.connect();
-    if (!this.client) {
-      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
-    }
+    // if (!this.client) {
+    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
+    // }
     this.isConnected = true;
     logger.info('database connected');
   }
@@ -66,13 +66,14 @@ class Postgres {
    * @returns  {Promise<any[]>} result of the query.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async query(query: string, params: unknown[] = []): Promise<any[]> {
+  async query(query: string, params: any[] = []): Promise<any[]> {
     if (!this.isConnected || !this.client) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED);
       // await this.connect();
     }
 
     const res = await this.client.query(query, params);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return res.rows;
   }
 
@@ -114,9 +115,9 @@ class Postgres {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async _connectionTest(): Promise<any> {
     await this.connect();
-    const res = await this.query('SELECT $1::text as message', [
+    const res = (await this.query('SELECT $1::text as message', [
       'Hello world!',
-    ]);
+    ])) as { message: string }[];
     this.disconnect();
     return res[0].message;
   }

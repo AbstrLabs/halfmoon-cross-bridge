@@ -62,9 +62,22 @@ class Database {
    * @param {any[]} params
    * @returns {Promise<any[]>} query result
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async query(query: string, params: any[] = []): Promise<any[]> {
-    return await this.instance.query(query, params);
+  async query(
+    query: string,
+    params: (unknown | undefined)[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any[]> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return await this.instance.query(query, params);
+    } catch (err: unknown) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_QUERY_FAILED, {
+        connected: this.isConnected,
+        err,
+        query,
+        params,
+      });
+    }
   }
 
   /**
@@ -96,14 +109,12 @@ class Database {
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
 
-    // next line: if null, will throw error.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(bridgeTxn.txnType!);
+    const tableName = this._inferTableName(bridgeTxn.txnType);
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
-      // await this.connect();
+      await this.connect();
     }
-
+    // const bridgeTxnObj = bridgeTxn.toObject();
     const query = `
       INSERT INTO ${tableName} 
       (
@@ -116,7 +127,7 @@ class Database {
       ) 
       RETURNING db_id;
     `;
-    const params = [
+    const params: (string | bigint | undefined)[] = [
       bridgeTxn.txnStatus,
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
@@ -128,11 +139,15 @@ class Database {
       bridgeTxn.toAmountAtom,
       bridgeTxn.toTxnId,
     ];
-    const result = await this.query(query, params);
-    this._verifyResultUniqueness(result, { bridgeTxn, at: 'createTxn' });
+    console.log('i run here : '); // DEV_LOG_TO_REMOVE
+    const queryResult = await this.query(query, params);
+    const result = this._verifyResultUniqueness(queryResult, {
+      bridgeTxn: bridgeTxn,
+      at: 'db.createTxn',
+    }) as { db_id: DbId };
 
-    const dbId = parseDbId(result[0].db_id);
-    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.getTxnType(), dbId));
+    const dbId = parseDbId(result.db_id);
+    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
     return dbId;
   }
@@ -145,9 +160,8 @@ class Database {
    * @param   {TxnType} txnType - transaction type, will search in the corresponding table
    * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
    */
-  public async readTxn(dbId: DbId, txnType: TxnType): Promise<DbItem[]> {
-    // next line: if null, will throw error.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  public async readTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
+    // this should always be unique with a dbId
     const tableName = this._inferTableName(txnType);
 
     if (!this.isConnected) {
@@ -158,8 +172,11 @@ class Database {
       SELECT * FROM ${tableName} WHERE db_id = $1;
     `;
     const params = [dbId];
-    const result = await this.query(query, params);
-    return result;
+    const queryResult = await this.query(query, params);
+    const result = this._verifyResultUniqueness(queryResult, {
+      at: 'db.readTxn',
+    }) as DbItem;
+    return parseDbItem(result);
   }
 
   /**
@@ -174,9 +191,16 @@ class Database {
    * @returns {Promise<DbId>} promise of the updated dbId
    */
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
-    // next line: if null, will throw error.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(bridgeTxn.getTxnType());
+    // ensure bridgeTxn is created
+    if (bridgeTxn.dbId === undefined) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
+        at: 'updateTxn',
+        why: 'dbId is undefined',
+        bridgeTxn: bridgeTxn,
+      });
+    }
+
+    const tableName = this._inferTableName(bridgeTxn.txnType);
     if (!this.isConnected) {
       await this.connect();
     }
@@ -204,12 +228,15 @@ class Database {
       bridgeTxn.toTxnId,
       bridgeTxn.dbId,
     ];
-    const result = await this.query(query, params);
+    const queryResult = await this.query(query, params);
 
-    this._verifyResultUniqueness(result, { bridgeTxn, at: 'updateTxn' });
+    const result = this._verifyResultUniqueness(queryResult, {
+      bridgeTxn,
+      at: 'db.updateTxn',
+    }) as { db_id: DbId };
 
     logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
-    return parseDbId(result[0].db_id);
+    return parseDbId(result.db_id);
   }
 
   /**
@@ -219,16 +246,14 @@ class Database {
    * @param  {DbId} dbId - database primary key
    * @param  {TxnType} txnType - transaction type, will search in the corresponding table
    * @returns {Promise<DbItem>} promise of the unique {@link DbItem} of the query result
+   *
+   * @deprecated use {@link readTxn} instead, it's already unique.
    */
   public async readUniqueTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
     // currently only used in test. not fixing.
     // should return an BridgeTxn
     // should use BridgeTxn.fromDbItem to convert to BridgeTxn
-
-    const result = await this.readTxn(dbId, txnType);
-    this._verifyResultUniqueness(result, { dbId, at: 'readUniqueTxn' });
-    const dbItem = parseDbItem(result[0]);
-    return dbItem;
+    return await this.readTxn(dbId, txnType);
   }
   /**
    * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
@@ -255,7 +280,7 @@ class Database {
     `;
     const params = [fromTxnId];
     const result = await this.query(query, params);
-    return result;
+    return result as DbItem[];
   }
 
   /* PRIVATE METHODS */
@@ -273,11 +298,13 @@ class Database {
   private async deleteTxn(dbId: DbId, txnType: TxnType): Promise<void> {
     // never used.
 
-    // const query = `
-    //   DELETE FROM ${this.mintTableName} WHERE id = $1;
-    // `;
-    // const params = [dbId];
-    // const result = await this.query(query, params);
+    const query = `
+      DELETE FROM ${this.mintTableName} WHERE id = $1;
+    `;
+    const params = [dbId];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const result = await this.query(query, params);
+    // return result
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',
       dbId,
@@ -296,6 +323,8 @@ class Database {
     let tableName: TableName;
     if (txnType === TxnType.MINT) {
       tableName = this.mintTableName;
+      // for extendability, we can add more txn types here.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (txnType === TxnType.BURN) {
       tableName = this.burnTableName;
     } else {
@@ -317,17 +346,14 @@ class Database {
    *
    * @todo change the object type
    */
-  private _verifyResultUniqueness(
-    result: unknown[],
-    extraErrInfo?: object
-  ): boolean {
+  private _verifyResultUniqueness<T>(result: T[], extraErrInfo?: object): T {
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, extraErrInfo);
     }
     if (result.length > 1) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE, extraErrInfo);
     }
-    return true;
+    return result[0];
   }
 }
 
