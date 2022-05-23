@@ -7,6 +7,8 @@
 
 import { createLogger, format, transports } from 'winston';
 
+import { ENV } from './dotenv';
+
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
 export { logger };
@@ -29,7 +31,7 @@ const logger = createLogger({
     }),
     // new transports.File({ filename: 'combined.log' }),
   ],
-  level: 'info',
+  level: ENV.LOGGER_LEVEL,
   format: combine(
     errors({ stack: true }), // <-- use errors format
     timestamp(),
