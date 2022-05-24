@@ -6,7 +6,7 @@
  * 1. I dont know where this was shown, maybe in console.log(ENV)?
  */
 
-export { ENV };
+export { ENV, loadDotEnv };
 
 import { BridgeError, ERRORS } from './errors';
 
@@ -45,7 +45,7 @@ const default_ENV = {
   ALGO_CONFIRM_TIMEOUT_SEC: 60,
   ALGO_CONFIRM_INTERVAL_SEC: 5,
   TEST_NET_GO_NEAR_ASSET_ID: 83251085,
-  LOGGER_LEVEL: 'silly',
+  LOGGER_LEVEL: 'info',
   GO_NEAR_DECIMALS: 10,
   NEAR_TOTAL: 1_000_000_000,
   DB_ORIGIN: 'NEDB',
@@ -82,6 +82,10 @@ const secret_ENV = {
 const parsed_ENV = parseDotEnv();
 
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
+
+const loadDotEnv = () => {
+  return ENV;
+};
 
 // validate in dotenv that ENV.ALGO_NETWORK is same as ENV.NEAR_NETWORK
 if (ENV.ALGO_NETWORK !== ENV.NEAR_NETWORK) {

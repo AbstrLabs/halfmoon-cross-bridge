@@ -7,8 +7,6 @@
 
 import { createLogger, format, transports } from 'winston';
 
-import { ENV } from './dotenv';
-
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
 export { logger };
@@ -31,10 +29,16 @@ const logger = createLogger({
     }),
     // new transports.File({ filename: 'combined.log' }),
   ],
-  level: ENV.LOGGER_LEVEL,
+  level: 'info',
   format: combine(
     errors({ stack: true }), // <-- use errors format
     timestamp(),
     prettyPrint()
   ),
 });
+
+// Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
+// TODO: fix this or know why. the `logger` is not imported in `dotenv.ts`
+// loadDotEnv();
+// logger.level = ENV.LOGGER_LEVEL;
+// logger.info(`log level: ${ENV.LOGGER_LEVEL}`);
