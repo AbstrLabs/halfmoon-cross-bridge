@@ -6,6 +6,7 @@ export { startServer };
 import express, { Request, Response } from 'express';
 
 import { ENV } from '../utils/dotenv';
+import { WELCOME_JSON } from '.';
 import { algorandNear } from './algorand-near';
 import { logger } from '../utils/logger';
 
@@ -34,21 +35,7 @@ function startServer() {
     ) {
       void homePageTest();
     }
-    res.json({
-      MESSAGE: 'Welcome to the Algorand-NEAR bridge API',
-      FRONTEND: 'https://.halfmooncross.com/',
-      VERSION: '0.1.0',
-      API_ENDPOINT: {
-        URL: '/algorand-near',
-        PARAMS: {
-          type: 'literal("MINT","BURN")',
-          from: 'string',
-          to: 'string',
-          amount: 'string',
-          txnId: 'string',
-        },
-      },
-    });
+    res.json(WELCOME_JSON);
   });
 
   /* Express setup */

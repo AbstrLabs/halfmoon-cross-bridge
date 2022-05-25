@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express';
 
 import { BlockchainName } from '..';
 import { BridgeTxnObject } from '../bridge';
+import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
@@ -17,7 +18,7 @@ const algorandNear = express.Router();
 algorandNear
   .route('/')
   .get((req: Request, res: Response) => {
-    res.send('please use "POST" method.');
+    res.json(WELCOME_JSON);
   })
   .post(async (req: Request, res: Response) => {
     let apiCallParam: ApiCallParam | undefined = undefined;
