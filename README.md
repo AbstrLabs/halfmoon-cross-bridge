@@ -2,6 +2,14 @@
 
 Backend of the unidirectional bridge of Algorand <- NEAR with asset `goNEAR`.
 
+## Usage
+
+0. Have a `.env` file (it's git-ignored).
+1. Run `git clone` on this repo and `cd` into the repo root (with ssh `git clone git@github.com:AbstrLabs/Algorand-NEAR-bridge.git && cd Algorand-NEAR-bridge`). Don't forget to put your `.env` file in the root of the repo.
+2. Run `yarn install` to install the dependencies.
+3. Run `yarn test` first to confirm that the "mint" and "burn" functions are working correctly.
+4. Run `yarn dev` to start the server. `PORT` is set to `4190` by default, you can change it in the `.env` file.
+
 ## Implementation
 
 1. All amount and fee values are in unit of `10^-{GO_NEAR_DECIMALS}` goNEAR/NEAR, where `env.GO_NEAR_DECIMALS` is the number of decimal places in the goNEAR token (using 10).
