@@ -36,15 +36,16 @@ function startServer() {
     }
     res.json({
       MESSAGE: 'Welcome to the Algorand-NEAR bridge API',
-      FRONTEND: 'https://www.halfmooncross.com/',
+      FRONTEND: 'https://.halfmooncross.com/',
+      VERSION: '0.1.0',
       API_ENDPOINT: {
         URL: '/algorand-near',
         PARAMS: {
+          type: 'literal("MINT","BURN")',
           from: 'string',
           to: 'string',
           amount: 'string',
           txnId: 'string',
-          txnType: 'literal("MINT","BURN")',
         },
       },
     });
