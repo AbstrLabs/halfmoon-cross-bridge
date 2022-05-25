@@ -36,3 +36,9 @@ const logger = createLogger({
     prettyPrint()
   ),
 });
+
+// Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
+// TODO: fix this or know why. the `logger` is not imported in `dotenv.ts`
+// loadDotEnv();
+// logger.level = ENV.LOGGER_LEVEL;
+// logger.info(`log level: ${ENV.LOGGER_LEVEL}`);

@@ -1,7 +1,7 @@
-import { ENV } from '../dotenv';
 import { db } from '../../database/db';
+import { loadDotEnv } from '../dotenv';
 
-ENV;
+loadDotEnv(); // better than calling `ENV`.
 const SECOND = 1000;
 jest.setTimeout(10 * SECOND); // in milliseconds
 
