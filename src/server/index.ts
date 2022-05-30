@@ -1,9 +1,11 @@
 export { WELCOME_JSON };
 
+// import PackageJson from "../../package.json";
 const WELCOME_JSON = {
   MESSAGE: 'Welcome to the Algorand-NEAR bridge API',
   FRONTEND: 'http://halfmooncross.com/',
-  API_VERSION: '0.1.0',
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-var-requires
+  API_VERSION: require('../../package.json').version,
   API_SERVER: 'http://api.halfmooncross.com/',
   API_ENDPOINT: [
     {
