@@ -89,11 +89,15 @@ abstract class Blockchain {
       const timeout = setTimeout(() => {
         resolve(ConfirmOutcome.TIMEOUT);
       }, this.confirmTxnConfig.timeoutSec * 1000);
-
+      let txnOutcome: TxnOutcome | undefined;
       const interval = setImmediateInterval(async () => {
-        const txnOutcome = await this.getTxnStatus(txnParam);
         let isCorrect;
-
+        try {
+          txnOutcome = await this.getTxnStatus(txnParam);
+        } catch (err) {
+          logger.error('Blockchain: confirmTransaction()', err);
+          return; // run next interval
+        }
         try {
           isCorrect = this.verifyCorrectness(txnOutcome, txnParam);
           if (isCorrect) {
