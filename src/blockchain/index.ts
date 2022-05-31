@@ -86,10 +86,13 @@ abstract class Blockchain {
   async confirmTxn(txnParam: TxnParam): Promise<ConfirmOutcome> {
     logger.silly('Blockchain: confirmTransaction()', txnParam);
     const outcome = new Promise<ConfirmOutcome>((resolve) => {
+      // let interval:NodeJS.Timer;
+      let txnOutcome: TxnOutcome | undefined;
       const timeout = setTimeout(() => {
+        // hoist interval or move this to the end
+        clearInterval(interval);
         resolve(ConfirmOutcome.TIMEOUT);
       }, this.confirmTxnConfig.timeoutSec * 1000);
-      let txnOutcome: TxnOutcome | undefined;
       const interval = setImmediateInterval(async () => {
         let isCorrect;
         try {
