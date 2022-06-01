@@ -479,20 +479,13 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   private async _initialize(
     initializeOptions: InitializeOptions
   ): Promise<this> {
-    console.log('BridgeTxn._initialize()');
     try {
       this._selfValidate();
-      console.log('_selfValidate passed');
       this._inferBlockchainNames();
-      console.log('_inferBlockchainNames passed');
       this._hookBlockchain();
-      console.log('_hookBlockchain passed');
       this._getFixedFeeAtom();
-      console.log('_getFixedFeeAtom passed');
       this._calculateMarginFeeAtom();
-      console.log('_calculateMarginFeeAtom passed');
       this._calculateToAmountAtom();
-      console.log('_calculateToAmountAtom passed');
     } catch (err) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
       if (initializeOptions.notCreateInDb === false) {
@@ -504,7 +497,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         err,
       });
     }
-    console.log('try catch passed');
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
     if (initializeOptions.notCreateInDb === false) {
       await this._createInDb();

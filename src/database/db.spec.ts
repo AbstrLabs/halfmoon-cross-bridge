@@ -17,12 +17,6 @@ describe('DATABASE test', () => {
       // should test with bridgeTxn
       exampleBridgeTxn.dbId = exampleBridgeTxn.getDbId();
       const res = await db.readUniqueTxn(exampleBridgeTxn.dbId, TxnType.MINT);
-      console.log('typeof res : ', typeof res); // DEV_LOG_TO_REMOVE
-      console.log(
-        'typeof res.from_amount_atom : ',
-        typeof res.from_amount_atom
-      ); // DEV_LOG_TO_REMOVE
-      console.log('res : ', res); // DEV_LOG_TO_REMOVE
       expect(typeof res).toBe('object');
 
       expect(BridgeTxn.fromDbItem(res, TxnType.MINT)).toEqual(exampleBridgeTxn);

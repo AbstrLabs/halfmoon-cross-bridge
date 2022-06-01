@@ -50,7 +50,6 @@ describe('mint test', () => {
       const bridgeTxn = await transact(apiCallParam);
       // should return AlgoTxnId,etc.
 
-      // console.log('bridgeTxn : ', bridgeTxn);
       // verification
       expect(bridgeTxn.toTxnId).toBeDefined();
     },
