@@ -542,6 +542,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Infer the blockchain names of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
+   * @deprecated this should be done on receiving the request, not here.
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn} is invalid
    * @returns {{fromBlockchain: BlockchainName; toBlockchain: BlockchainName;}} the blockchain names
@@ -550,6 +551,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     fromBlockchain: BlockchainName;
     toBlockchain: BlockchainName;
   } {
+    // TODO: deprecate this
     if (this.fromBlockchain !== undefined && this.toBlockchain !== undefined) {
       return {
         fromBlockchain: this.fromBlockchain,
