@@ -243,7 +243,6 @@ class NearBlockchain extends Blockchain {
       nearTxnParam.toAddr, // receiver account
       atomToYoctoNear(nearTxnParam.atomAmount) // amount in yoctoNEAR
     );
-    // console.log('response : ', response); // DEV_LOG_TO_REMOVE
 
     return response.transaction_outcome.id;
   }

@@ -139,7 +139,6 @@ class Database {
       bridgeTxn.toAmountAtom,
       bridgeTxn.toTxnId,
     ];
-    console.log('i run here : '); // DEV_LOG_TO_REMOVE
     const queryResult = await this.query(query, params);
     const result = this._verifyResultUniqueness(queryResult, {
       bridgeTxn: bridgeTxn,
