@@ -1,7 +1,7 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
  */
-export { transact };
+export { create, execute };
 
 import { ApiCallParam, Stringer } from '../utils/type';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -12,14 +12,15 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 
 /**
- * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, and execute the transaction.
+ * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
  *
  * @async
  * @param  {ApiCallParam} apiCallParam
  * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
  */
-async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
-  /* SETUP */
+// eslint-disable-next-line @typescript-eslint/require-await
+async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
+  /* LOGGING */
   let _literals: {
     START: (amount: Stringer, from: Stringer, to: Stringer) => string;
     DONE: string;
@@ -46,14 +47,17 @@ async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
     _literals.START(apiCallParam.amount, apiCallParam.from, apiCallParam.to)
   );
 
-  /* EXECUTE */
+  /* CREATE */
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
     BigInt(Date.now())
   );
-  const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
-
-  // TODO: ERR handler .burn success
   logger.info(_literals.DONE);
+  return bridgeTxn;
+}
+
+async function execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObject> {
+  const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
+  // TODO: ERR handler .burn success
   return bridgeTxnObject;
 }

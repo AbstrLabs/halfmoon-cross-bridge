@@ -7,7 +7,7 @@ import { ENV } from '../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
-import { transact } from './transact';
+import { create } from './transact';
 import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
@@ -47,11 +47,12 @@ describe('mint test', () => {
       };
 
       // call API
-      const bridgeTxn = await transact(apiCallParam);
+      const bridgeTxn = await create(apiCallParam);
+      const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
       // should return AlgoTxnId,etc.
 
       // verification
-      expect(bridgeTxn.toTxnId).toBeDefined();
+      expect(bridgeTxnObject.toTxnId).toBeDefined();
     },
     TIMEOUT_30S * 3
   );
@@ -88,15 +89,13 @@ describe('burn test', () => {
       };
 
       // call API
-      const bridgeTxn = await transact(apiCallParam);
+      const bridgeTxn = await create(apiCallParam);
+      const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
 
       // should return AlgoTxnId,etc.
 
       // verification
-      console.log('bridgeTxn.toTxnId : ', bridgeTxn.toTxnId); // DEV_LOG_TO_REMOVE
-
-      expect(bridgeTxn.toTxnId).toBeDefined();
-      return bridgeTxn;
+      expect(bridgeTxnObject.toTxnId).toBeDefined();
     },
     TIMEOUT_30S * 3
   );

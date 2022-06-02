@@ -8,7 +8,7 @@ import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
-import { transact } from '../bridge/transact';
+import { create, execute } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 
 export { algorandNear };
@@ -37,7 +37,8 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   );
 
   try {
-    bridgeTxnObject = await transact(apiCallParam);
+    const bridgeTxn = await create(apiCallParam);
+    bridgeTxnObject = await execute(bridgeTxn);
     logger.info(_literals.DONE);
     // TODO: use different literal template than transact
   } catch (err) {
