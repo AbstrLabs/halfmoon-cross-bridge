@@ -1,5 +1,5 @@
 // TODO: no need to infer TxnType anymore.
-export { type BridgeTxnObject, BridgeTxn };
+export { type BridgeTxnObj, BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
@@ -18,7 +18,7 @@ interface InitializeOptions {
   notCreateInDb?: boolean;
 }
 
-interface CriticalBridgeTxnObject {
+interface CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
@@ -35,8 +35,7 @@ interface CriticalBridgeTxnObject {
   createdTime?: bigint;
 }
 
-// TODO: ref ren to ...Obj
-interface BridgeTxnObject extends CriticalBridgeTxnObject {
+interface BridgeTxnObj extends CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
@@ -56,10 +55,10 @@ interface BridgeTxnObject extends CriticalBridgeTxnObject {
 /**
  * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
- * @param  {CriticalBridgeTxnObject} bridgeTxnObject
+ * @param  {CriticalBridgeTxnObj} bridgeTxnObject
  * @param  {InitializeOptions} initializeOptions
  */
-class BridgeTxn implements CriticalBridgeTxnObject {
+class BridgeTxn implements CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
@@ -159,7 +158,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       txnType,
       toTxnId,
       dbId,
-    }: CriticalBridgeTxnObject,
+    }: CriticalBridgeTxnObj,
     initializeOptions: InitializeOptions = {
       notCreateInDb: false,
     }
@@ -233,15 +232,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   // process according to sequence diagram
 
   /**
-   * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObject}.
+   * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObj}.
    * This should be the only way used outside the {@link BridgeTxn} class.
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
+   * @returns {Promise<BridgeTxnObj>} - the {@link BridgeTxnObj} representing the {@link BridgeTxn}
    */
-  async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
+  async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
     if (!(await this.#isCreatedInDbPromise)) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.runWholeBridgeTxn',
@@ -420,9 +419,9 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   /**
    * Transform the {@link BridgeTxn} to an object with all info, wrapping up all important fields.
    *
-   * @returns {BridgeTxnObject} the object representation of the {@link BridgeTxn}
+   * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
    */
-  public toObject(): BridgeTxnObject {
+  public toObject(): BridgeTxnObj {
     if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         at: 'BridgeTxn.toObject',
@@ -430,7 +429,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
-    const bridgeTxnObject: BridgeTxnObject = {
+    const bridgeTxnObject: BridgeTxnObj = {
       dbId: this.dbId,
       fixedFeeAtom: this.fixedFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       marginFeeAtom: this.marginFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
