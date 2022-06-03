@@ -61,11 +61,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchainName?: BlockchainName;
+  fromBlockchainName: BlockchainName;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: bigint;
-  toBlockchainName?: BlockchainName;
+  toBlockchainName: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
   txnType: TxnType;
@@ -144,31 +144,34 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     createdTime,
     fromAddr,
     fromAmountAtom,
-    fromBlockchainName: fromBlockchain,
+    fromBlockchainName,
     fromTxnId,
     toAddr,
     toAmountAtom,
-    toBlockchainName: toBlockchain,
+    toBlockchainName,
     txnStatus,
     txnType,
     toTxnId,
     dbId,
   }: CriticalBridgeTxnObj) {
-    // TODO: remove from creation queue
-
     this.#isCreatedInDb = false;
 
-    this.fromAmountAtom = fromAmountAtom;
     this.txnType = txnType;
+    // TODO: shouldn't infer here
+    ({
+      fromBlockchainName: this.fromBlockchainName,
+      toBlockchainName: this.toBlockchainName,
+    } = this._inferBlockchainNames());
+    this.fromBlockchainName = fromBlockchainName ?? this.fromBlockchainName;
+    this.toBlockchainName = toBlockchainName ?? this.toBlockchainName;
+
+    this.fromTxnId = fromTxnId;
+    this.fromAmountAtom = fromAmountAtom;
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
-    this.fromBlockchainName = fromBlockchain;
-    this.fromTxnId = fromTxnId;
     this.toAddr = toAddr;
-    this.toBlockchainName = toBlockchain;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
-    this._inferBlockchainNames();
     this._hookBlockchain();
 
     try {
@@ -207,16 +210,6 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     // TODO: should not create in db automatically
     if (!this.#isCreatedInDb) {
       await this.createInDb();
-    }
-
-    if (
-      this.fromBlockchainName === undefined ||
-      this.toBlockchainName === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
-        at: 'BridgeTxn.runWholeBridgeTxn',
-        reason: 'fromBlockchain or toBlockchain is undefined',
-      });
     }
 
     logger.info(
@@ -383,20 +376,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObj {
-    if (
-      this.fromBlockchainName === undefined ||
-      this.toBlockchainName === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
-        at: 'BridgeTxn.toObject',
-        reason: 'undefined field(s)',
-      });
-    }
     // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
     const bridgeTxnObject: BridgeTxnObj = {
       dbId: this.dbId,
-      fixedFeeAtom: this.fixedFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      marginFeeAtom: this.marginFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      fixedFeeAtom: this.fixedFeeAtom,
+      marginFeeAtom: this.marginFeeAtom,
       createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
@@ -404,7 +388,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       fromTxnId: this.fromTxnId,
       toAddr: this.toAddr,
       toAmountAtom: this.toAmountAtom,
-      toBlockchainName: this.toBlockchainName, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      toBlockchainName: this.toBlockchainName,
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
       txnType: this.txnType,
@@ -484,19 +468,10 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {{fromBlockchain: BlockchainName; toBlockchain: BlockchainName;}} the blockchain names
    */
   private _inferBlockchainNames(): {
-    fromBlockchain: BlockchainName;
-    toBlockchain: BlockchainName;
+    fromBlockchainName: BlockchainName;
+    toBlockchainName: BlockchainName;
   } {
     // TODO: deprecate this
-    if (
-      this.fromBlockchainName !== undefined &&
-      this.toBlockchainName !== undefined
-    ) {
-      return {
-        fromBlockchain: this.fromBlockchainName,
-        toBlockchain: this.toBlockchainName,
-      };
-    }
 
     let fromBlockchain: BlockchainName;
     let toBlockchain: BlockchainName;
@@ -515,7 +490,10 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     }
     this.fromBlockchainName = fromBlockchain;
     this.toBlockchainName = toBlockchain;
-    return { fromBlockchain, toBlockchain };
+    return {
+      fromBlockchainName: fromBlockchain,
+      toBlockchainName: toBlockchain,
+    };
   }
 
   /**
@@ -527,16 +505,6 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns void
    */
   private _hookBlockchain(): void {
-    if (
-      this.fromBlockchainName === undefined ||
-      this.toBlockchainName === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        fromBlockchain: this.fromBlockchainName,
-        toBlockchain: this.toBlockchainName,
-        at: 'BridgeTxn._hookBlockchain',
-      });
-    }
     this._hookFromBlockchain();
     this._hookToBlockchain();
   }
@@ -551,6 +519,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   private _hookFromBlockchain(): void {
     if (this.fromBlockchainName === BlockchainName.NEAR) {
       this.#fromBlockchain = nearBlockchain;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (this.fromBlockchainName === BlockchainName.ALGO) {
       this.#fromBlockchain = algoBlockchain;
     } else {
@@ -571,6 +540,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   private _hookToBlockchain(): void {
     if (this.toBlockchainName === BlockchainName.NEAR) {
       this.#toBlockchain = nearBlockchain;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (this.toBlockchainName === BlockchainName.ALGO) {
       this.#toBlockchain = algoBlockchain;
     } else {

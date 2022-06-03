@@ -7,7 +7,7 @@ export { type CreationQueue, creationQueue };
 
 // TODO: parse with zod, txnId type should meet fromBlockchain
 interface TxnRequest {
-  fromBlockchain: BlockchainName;
+  fromBlockchainName: BlockchainName;
   txnId: TxnId;
 }
 class CreationQueue {
@@ -21,27 +21,27 @@ class CreationQueue {
 
   public add(txnRequest: TxnRequest) {
     if (this._has(txnRequest)) {
-      return false;
+      throw new Error('Txn already in creation queue');
     }
     this._push(txnRequest);
     return true;
   }
 
   public _has(txnRequest: TxnRequest) {
-    if (txnRequest.fromBlockchain === BlockchainName.ALGO) {
+    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
       return this.algorandQueue.includes(txnRequest.txnId);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnRequest.fromBlockchain === BlockchainName.NEAR) {
+    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
       return this.nearQueue.includes(txnRequest.txnId);
     } else {
       throw new Error('Invalid blockchain name');
     }
   }
   private _push(txnRequest: TxnRequest) {
-    if (txnRequest.fromBlockchain === BlockchainName.ALGO) {
+    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
       this.algorandQueue.push(txnRequest.txnId);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnRequest.fromBlockchain === BlockchainName.NEAR) {
+    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
       this.nearQueue.push(txnRequest.txnId);
     } else
       () => {
