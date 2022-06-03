@@ -61,15 +61,15 @@ interface BridgeTxnObject extends CriticalBridgeTxnObject {
  */
 class BridgeTxn implements CriticalBridgeTxnObject {
   dbId?: number;
-  fixedFeeAtom?: bigint;
-  marginFeeAtom?: bigint;
+  fixedFeeAtom: bigint;
+  marginFeeAtom: bigint;
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
   fromBlockchain?: BlockchainName;
   fromTxnId: string;
   toAddr: string;
-  toAmountAtom?: bigint;
+  toAmountAtom: bigint;
   toBlockchain?: BlockchainName;
   txnStatus: BridgeTxnStatus;
   toTxnId?: string;
@@ -164,22 +164,52 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       notCreateInDb: false,
     }
   ) {
-    this.fixedFeeAtom = fixedFeeAtom;
-    this.marginFeeAtom = marginFeeAtom;
-    this.createdTime = createdTime ?? BigInt(+Date.now());
+    this.fromAmountAtom = fromAmountAtom;
+    this.txnType = txnType;
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
     this.fromBlockchain = fromBlockchain;
     this.fromTxnId = fromTxnId;
     this.toAddr = toAddr;
-    this.toAmountAtom = toAmountAtom;
     this.toBlockchain = toBlockchain;
-    this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
-    this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
-    this._initialize();
+    try {
+      this._inferBlockchainNames();
+      this._hookBlockchain();
+      this._readFixedFeeAtom();
+      this._calculateMarginFeeAtom();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      throw new BridgeError(ERRORS.API.INVALID_API_PARAM, {
+        at: 'BridgeTxn._initialize',
+        // TODO: not disable all
+        // eslint-disable-next-line
+        details: e.toString(),
+      });
+    }
+    try {
+      // Below will be overwritten if instantiated with value.
+      this.fixedFeeAtom = fixedFeeAtom ?? this._readFixedFeeAtom();
+      this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
+      this.createdTime = createdTime ?? BigInt(+Date.now());
+
+      this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
+
+      this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
+
+      this._selfValidate();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn._initialize',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+        err: err.toString(),
+      });
+    }
+    this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
 
     // TODO: maybe a `static async asyncConstruct(){}` is better?
     this.#isCreatedInDbPromise = new Promise((resolve, reject) => {
@@ -196,6 +226,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         resolve(false);
       }
     });
+    return this;
   }
 
   /* MAKE BRIDGE TRANSACTION */
@@ -302,7 +333,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     this._checkStatus(BridgeTxnStatus.DONE_INCOMING, 'makeOutgoingTxn');
 
     let outgoingTxnId: TxnId;
-    this.toAmountAtom = this.getToAmountAtom();
     try {
       await this._updateTxnStatus(BridgeTxnStatus.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
@@ -341,7 +371,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        atomAmount: this.toAmountAtom!,
+        atomAmount: this.toAmountAtom,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         txnId: this.toTxnId!,
       });
@@ -373,16 +403,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.toAmountAtom!.toString() === other.toAmountAtom!.toString() &&
+      this.toAmountAtom.toString() === other.toAmountAtom.toString() &&
       this.toBlockchain === other.toBlockchain &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
       this.txnType === other.txnType &&
       this.dbId === other.dbId &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.fixedFeeAtom!.toString() === other.fixedFeeAtom!.toString() &&
+      this.fixedFeeAtom.toString() === other.fixedFeeAtom.toString() &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
+      this.marginFeeAtom.toString() === other.marginFeeAtom.toString() &&
       this.createdTime.toString() === other.createdTime.toString()
     );
   }
@@ -393,13 +423,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {BridgeTxnObject} the object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObject {
-    if (
-      this.fromBlockchain === undefined ||
-      this.toBlockchain === undefined ||
-      this.toAmountAtom === undefined ||
-      this.fixedFeeAtom === undefined ||
-      this.marginFeeAtom === undefined
-    ) {
+    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         at: 'BridgeTxn.toObject',
         reason: 'undefined field(s)',
@@ -438,18 +462,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   /* GETTERS */
 
   /**
-   * Get a defined toAmountAtom of the {@link BridgeTxn} for TS type checking.
-   *
-   * @returns {bigint} the toAmountAtom of the {@link BridgeTxn}
-   */
-  public getToAmountAtom(): bigint {
-    if (this.toAmountAtom === undefined) {
-      this.toAmountAtom = this._calculateToAmountAtom();
-    }
-    return this.toAmountAtom;
-  }
-
-  /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
@@ -470,40 +482,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   /**  PRIVATE METHODS - CLASS INIT  **/
 
   /**
-   * Initiate the BridgeTxn.
-   * Most fields are readonly, and are defined after initiate().
-   * 3 Exceptions: `dbId`, `toTxnId` are allowed to be assigned once.
-   * Field `txnStatus` is allowed to be assigned by the {@link enum BridgeTxnStatus}.
-   *
-   * @async
-   * @private
-   * @param {InitializeOptions} initializeOptions - [optional] the options for initiating the {@link BridgeTxn}
-   * @returns {Promise<BridgeTxn>} the initiated {@link BridgeTxn}
-   *
-   * @todo try to fix the readonly
-   * @todo link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
-   */
-  private _initialize(): this {
-    try {
-      this._selfValidate();
-      this._inferBlockchainNames();
-      this._hookBlockchain();
-      this._getFixedFeeAtom();
-      this._calculateMarginFeeAtom();
-      this._calculateToAmountAtom();
-    } catch (err) {
-      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn._initialize',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-        err,
-      });
-    }
-    this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
-    return this;
-  }
-
-  /**
    * Synchronously validate the {@link BridgeTxn} itself.
    * Check the fromAmountAtom is greater than fixedFeeAtom.
    * Not check if it's already in the database, because it's async. This check happens in {@link createInDb}.
@@ -520,10 +498,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     //     at: 'BridgeTxn._selfValidate',
     //   });
     // }
-
-    if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this._getFixedFeeAtom();
-    }
 
     if (this.fromAmountAtom < this.fixedFeeAtom) {
       throw new BridgeError(ERRORS.INTERNAL.INVALID_AMOUNT, {
@@ -645,10 +619,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the fixedFeeAtom
    */
-  private _getFixedFeeAtom(): bigint {
-    if (this.fixedFeeAtom !== undefined) {
-      return this.fixedFeeAtom;
-    }
+  private _readFixedFeeAtom(): bigint {
     let fixedFee: bigint;
     if (this.txnType === TxnType.MINT) {
       fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
@@ -678,20 +649,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
-    if (this.marginFeeAtom !== undefined) {
-      return this.marginFeeAtom;
-    }
-
-    let marginPercentage: number;
-
+    let marginBips: number;
     if (this.txnType === TxnType.MINT) {
-      marginPercentage = ENV.MINT_MARGIN_FEE_BIPS;
+      marginBips = ENV.MINT_MARGIN_FEE_BIPS;
     } else if (
       // for extendability, we can add more txn types here.
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       this.txnType === TxnType.BURN
     ) {
-      marginPercentage = ENV.BURN_MARGIN_FEE_BIPS;
+      marginBips = ENV.BURN_MARGIN_FEE_BIPS;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
@@ -700,7 +666,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
 
     const marginFee: bigint = // TODO: supposing no bigint overflow
       this.fromAmountAtom -
-      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginPercentage))) /
+      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginBips))) /
         BigInt(10000); // X-(X*(1-%)) instead of X*% for rounding.
     // algorithm discussed with algomint team.
 
@@ -716,17 +682,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {bigint} the totalFeeAtom
    */
   private _calculateToAmountAtom(): bigint {
-    if (this.toAmountAtom !== undefined) {
-      return this.toAmountAtom;
-    }
-
-    if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this._getFixedFeeAtom();
-    }
-    if (this.marginFeeAtom === undefined) {
-      this.marginFeeAtom = this._calculateMarginFeeAtom();
-    }
-
     const toAmount: bigint =
       this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
 

@@ -12,7 +12,7 @@ const FAKE_TXN_ID = 'some_fake_txn_id';
 const exampleBridgeTxn: BridgeTxn = new BridgeTxn(
   {
     txnType: TxnType.MINT,
-    fromAmountAtom: BigInt(10000000000), // big int jest err read on top.
+    fromAmountAtom: BigInt(10000000000), // big int jest err read on top. // should be 0?
     fixedFeeAtom: BigInt(123456),
     marginFeeAtom: BigInt(567890),
     toAmountAtom: BigInt(10000000000),

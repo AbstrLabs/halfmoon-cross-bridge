@@ -98,7 +98,7 @@ abstract class Blockchain {
         try {
           txnOutcome = await this.getTxnStatus(txnParam);
         } catch (err) {
-          logger.error('Blockchain: confirmTransaction()', err);
+          logger.error('Blockchain: confirmTransaction()', { err, txnParam });
           return; // run next interval
         }
         try {
