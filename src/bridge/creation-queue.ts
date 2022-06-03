@@ -27,7 +27,28 @@ class CreationQueue {
     return true;
   }
 
-  public _has(txnRequest: TxnRequest) {
+  public remove(txnRequest: TxnRequest) {
+    if (!this._has(txnRequest)) {
+      throw new Error('Txn not in creation queue');
+    }
+
+    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
+      this.algorandQueue = this.algorandQueue.filter(
+        (txnId) => txnId !== txnRequest.txnId
+      );
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
+      this.nearQueue = this.nearQueue.filter(
+        (txnId) => txnId !== txnRequest.txnId
+      );
+    } else {
+      throw new Error('Invalid blockchain name');
+    }
+
+    return true;
+  }
+
+  private _has(txnRequest: TxnRequest) {
     if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
       return this.algorandQueue.includes(txnRequest.txnId);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
