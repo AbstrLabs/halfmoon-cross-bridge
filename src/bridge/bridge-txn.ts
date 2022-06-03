@@ -173,32 +173,16 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     this.toBlockchainName = toBlockchain;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
+    this._inferBlockchainNames();
+    this._hookBlockchain();
 
-    try {
-      this._inferBlockchainNames();
-      this._hookBlockchain();
-      this._readFixedFeeAtom();
-      this._calculateMarginFeeAtom();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      throw new BridgeError(ERRORS.API.INVALID_API_PARAM, {
-        at: 'BridgeTxn._initialize',
-        // TODO: not disable all
-        // eslint-disable-next-line
-        details: e.toString(),
-      });
-    }
     try {
       // Below will be overwritten if instantiated with value.
       this.fixedFeeAtom = fixedFeeAtom ?? this._readFixedFeeAtom();
       this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
-
       this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
-
       this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
-
-      this._selfValidate();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
@@ -208,6 +192,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         err: err.toString(),
       });
     }
+    this._selfValidate();
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
 
     // TODO: maybe a `static async asyncConstruct(){}` is better?
