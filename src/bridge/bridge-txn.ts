@@ -14,10 +14,6 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 
-interface InitializeOptions {
-  notCreateInDb?: boolean;
-}
-
 interface CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom?: bigint;
@@ -76,7 +72,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   #db = db;
   #fromBlockchain!: Blockchain;
   #toBlockchain!: Blockchain;
-  #isCreatedInDbPromise: Promise<boolean>;
+  #isCreatedInDb: boolean;
 
   /* CONSTRUCTORS  */
 
@@ -142,27 +138,26 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     return bridgeTxn;
   }
 
-  constructor(
-    {
-      fixedFeeAtom,
-      marginFeeAtom,
-      createdTime,
-      fromAddr,
-      fromAmountAtom,
-      fromBlockchainName: fromBlockchain,
-      fromTxnId,
-      toAddr,
-      toAmountAtom,
-      toBlockchainName: toBlockchain,
-      txnStatus,
-      txnType,
-      toTxnId,
-      dbId,
-    }: CriticalBridgeTxnObj,
-    initializeOptions: InitializeOptions = {
-      notCreateInDb: false,
-    }
-  ) {
+  constructor({
+    fixedFeeAtom,
+    marginFeeAtom,
+    createdTime,
+    fromAddr,
+    fromAmountAtom,
+    fromBlockchainName: fromBlockchain,
+    fromTxnId,
+    toAddr,
+    toAmountAtom,
+    toBlockchainName: toBlockchain,
+    txnStatus,
+    txnType,
+    toTxnId,
+    dbId,
+  }: CriticalBridgeTxnObj) {
+    // TODO: remove from creation queue
+
+    this.#isCreatedInDb = false;
+
     this.fromAmountAtom = fromAmountAtom;
     this.txnType = txnType;
     this.fromAddr = fromAddr;
@@ -194,23 +189,6 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     }
     this._selfValidate();
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
-
-    // TODO: maybe a `static async asyncConstruct(){}` is better?
-    this.#isCreatedInDbPromise = new Promise((resolve, reject) => {
-      if (!initializeOptions.notCreateInDb) {
-        this.createInDb()
-          .then(() => {
-            resolve(true);
-          })
-          .catch((err) => {
-            logger.error(err);
-            reject(false);
-          });
-      } else {
-        resolve(false);
-      }
-    });
-    return this;
   }
 
   /* MAKE BRIDGE TRANSACTION */
@@ -226,11 +204,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {Promise<BridgeTxnObj>} - the {@link BridgeTxnObj} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
-    if (!(await this.#isCreatedInDbPromise)) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn.runWholeBridgeTxn',
-      });
+    // TODO: should not create in db automatically
+    if (!this.#isCreatedInDb) {
+      await this.createInDb();
     }
+
     if (
       this.fromBlockchainName === undefined ||
       this.toBlockchainName === undefined
@@ -249,12 +227,6 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         this.toAddr
       )
     );
-    const isInitialized = await this.#isCreatedInDbPromise;
-    if (!isInitialized) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        bridgeTxn: this,
-      });
-    }
 
     await this.confirmIncomingTxn();
     await this.makeOutgoingTxn();
@@ -272,10 +244,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
-    await this.#isCreatedInDbPromise;
-    if (!(await this.#isCreatedInDbPromise)) {
+    if (!this.#isCreatedInDb) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
+        reason:
+          'BridgeTxn should be created in DB before confirming incoming txn',
         bridgeTxn: this,
       });
     }
@@ -701,18 +674,10 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   public async createInDb(): Promise<DbId> {
     if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
-        at: 'BridgeTxn._createInDb',
+        at: 'BridgeTxn.createInDb',
         db: this.#db,
       });
     }
-
-    // create is inside _initialize() method, so we can't check if is initialized.
-    // if (!(await this.#isInitializedPromise)) {
-    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-    //     message: 'BridgeTxn is not initialized',
-    //     at: 'BridgeTxn._createInDb',
-    //   });
-    // }
 
     // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
@@ -729,21 +694,26 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       });
     }
 
-    // try {
-    this.dbId = await this.#db.createTxn(this);
-    // !!!now
-    // } catch (err) {
-    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
-    //     at: 'BridgeTxn._createInDb',
-    //     error: err,
-    //     bridgeTxn: this,
-    //   });
-    // }
-    // if (!this.#db.isConnected) {
-    //   throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
-    //     at: 'BridgeTxn._updateTxnStatus',
-    //   });
-    // }
+    try {
+      this.dbId = await this.#db.createTxn(this);
+    } catch (err) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
+        at: 'BridgeTxn._createInDb',
+        error: err,
+        bridgeTxn: this,
+      });
+    }
+
+    // for jest testing
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!this.#db.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: 'BridgeTxn._updateTxnStatus',
+      });
+    }
+    // TODO: remove from creation queue
+    this.#isCreatedInDb = true;
+
     return this.dbId;
   }
 
