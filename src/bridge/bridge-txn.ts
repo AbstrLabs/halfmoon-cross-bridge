@@ -77,7 +77,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   #db = db;
   #fromBlockchain!: Blockchain;
   #toBlockchain!: Blockchain;
-  #isInitializedPromise: Promise<boolean>;
+  #isCreatedInDbPromise: Promise<boolean>;
 
   /* CONSTRUCTORS  */
 
@@ -179,16 +179,22 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
+    this._initialize();
+
     // TODO: maybe a `static async asyncConstruct(){}` is better?
-    this.#isInitializedPromise = new Promise((resolve, reject) => {
-      this._initialize(initializeOptions)
-        .then(() => {
-          resolve(true);
-        })
-        .catch((err) => {
-          logger.error(err);
-          reject(false);
-        });
+    this.#isCreatedInDbPromise = new Promise((resolve, reject) => {
+      if (!initializeOptions.notCreateInDb) {
+        this.createInDb()
+          .then(() => {
+            resolve(true);
+          })
+          .catch((err) => {
+            logger.error(err);
+            reject(false);
+          });
+      } else {
+        resolve(false);
+      }
     });
   }
 
@@ -205,7 +211,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
-    if (!(await this.#isInitializedPromise)) {
+    if (!(await this.#isCreatedInDbPromise)) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.runWholeBridgeTxn',
       });
@@ -225,7 +231,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         this.toAddr
       )
     );
-    const isInitialized = await this.#isInitializedPromise;
+    const isInitialized = await this.#isCreatedInDbPromise;
     if (!isInitialized) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         bridgeTxn: this,
@@ -248,8 +254,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
-    await this.#isInitializedPromise;
-    if (!(await this.#isInitializedPromise)) {
+    await this.#isCreatedInDbPromise;
+    if (!(await this.#isCreatedInDbPromise)) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
@@ -416,7 +422,8 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       txnStatus: this.txnStatus,
       txnType: this.txnType,
     };
-    return Object.assign(bridgeTxnObject, this);
+    return bridgeTxnObject;
+    // return Object.assign(bridgeTxnObject, this);
   }
 
   /**
@@ -476,9 +483,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @todo try to fix the readonly
    * @todo link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
    */
-  private async _initialize(
-    initializeOptions: InitializeOptions
-  ): Promise<this> {
+  private _initialize(): this {
     try {
       this._selfValidate();
       this._inferBlockchainNames();
@@ -488,9 +493,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       this._calculateToAmountAtom();
     } catch (err) {
       this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
-      if (initializeOptions.notCreateInDb === false) {
-        await this._createInDb();
-      }
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn._initialize',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
@@ -498,16 +500,13 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
     this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
-    if (initializeOptions.notCreateInDb === false) {
-      await this._createInDb();
-    }
     return this;
   }
 
   /**
    * Synchronously validate the {@link BridgeTxn} itself.
    * Check the fromAmountAtom is greater than fixedFeeAtom.
-   * Not check if it's already in the database, because it's async. This check happens in {@link _createInDb}.
+   * Not check if it's already in the database, because it's async. This check happens in {@link createInDb}.
    * This is one step of the initialization.
    *
    * @private
@@ -742,13 +741,13 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This is the last step of the initialization.
    *
    * @async
-   * @private
+   * @public
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
    * @throws {BridgeError} - {@link ERRORS.API.REUSED_INCOMING_TXN} if the incoming txn is already used
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED} if the database create txn failed
    * @returns {Promise<DbId>} the id of the created {@link BridgeTxn}
    */
-  private async _createInDb(): Promise<DbId> {
+  public async createInDb(): Promise<DbId> {
     if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._createInDb',
