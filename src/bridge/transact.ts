@@ -10,6 +10,7 @@ import { BridgeTxn, BridgeTxnObj } from '.';
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
+import { txnHandler } from './txn-handler';
 
 /**
  * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
@@ -57,7 +58,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
 }
 
 async function execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
-  const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
+  const bridgeTxnObject = await txnHandler._execute(bridgeTxn);
   // TODO: ERR handler .burn success
   return bridgeTxnObject;
 }
