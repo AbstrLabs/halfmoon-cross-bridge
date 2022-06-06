@@ -3,14 +3,13 @@
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { logger } from '../utils/logger';
-import { creationQueue, type CreationQueue } from './creation-queue';
 
 export { type TxnHandler, txnHandler };
 
 class TxnHandler {
-  queue: CreationQueue;
+  queue: BridgeTxn[];
   constructor() {
-    this.queue = creationQueue;
+    this.queue = [];
   }
   /* private */ async _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
     logger.warn('calling a methods that should be private');
@@ -32,7 +31,7 @@ class TxnHandler {
   get length(): number {
     return this.queue.length;
   }
-  get tasksNum(): number {
+  get taskNum(): number {
     return this.length;
   }
   get queueLength(): number {
