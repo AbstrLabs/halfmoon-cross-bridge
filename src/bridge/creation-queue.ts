@@ -48,6 +48,10 @@ class CreationQueue {
     return true;
   }
 
+  public get length() {
+    return this.algorandQueue.length + this.nearQueue.length;
+  }
+
   private _has(txnRequest: TxnRequest) {
     if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
       return this.algorandQueue.includes(txnRequest.txnId);

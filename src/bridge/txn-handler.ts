@@ -10,10 +10,9 @@ class TxnHandler {
   /* private */ async _execute(bridgeTxn: BridgeTxn) {
     await bridgeTxn.runWholeBridgeTxn();
   }
-  /* async  */ loadQueueUnfinishedFromDb() {
+  /* async  */ loadUnfinishedTasksFromDb() {
     throw new Error('Function not implemented.');
   }
-
   /* async  */ addTask() {
     throw new Error('Function not implemented.');
   }
@@ -23,9 +22,14 @@ class TxnHandler {
   /* async  */ removeTask() {
     throw new Error('Function not implemented.');
   }
-  get length() {
-    throw new Error('Function not implemented.');
-    // return this.queue.length;
-    // TODO CreationQueue.length = sum of all queues
+
+  get length(): number {
+    return this.queue.length;
+  }
+  get tasksNum(): number {
+    return this.length;
+  }
+  get queueLength(): number {
+    return this.length;
   }
 }
