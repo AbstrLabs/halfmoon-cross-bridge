@@ -1,4 +1,4 @@
-import { BridgeTxn } from './bridge-txn';
+import { BridgeTxn, BridgeTxnObj } from '.';
 import { creationQueue, type CreationQueue } from './creation-queue';
 
 export { TxnHandler };
@@ -7,8 +7,8 @@ class TxnHandler {
   constructor() {
     this.queue = creationQueue;
   }
-  /* private */ async _execute(bridgeTxn: BridgeTxn) {
-    await bridgeTxn.runWholeBridgeTxn();
+  /* private */ async _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
+    return await bridgeTxn.runWholeBridgeTxn();
   }
   /* async  */ loadUnfinishedTasksFromDb() {
     throw new Error('Function not implemented.');

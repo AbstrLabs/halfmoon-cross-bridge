@@ -5,7 +5,7 @@ export { create, execute };
 
 import { ApiCallParam, Stringer } from '../utils/type';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { BridgeTxn, BridgeTxnObject } from '.';
+import { BridgeTxn, BridgeTxnObj } from '.';
 
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
@@ -16,7 +16,7 @@ import { logger } from '../utils/logger';
  *
  * @async
  * @param  {ApiCallParam} apiCallParam
- * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
+ * @returns {Promise<BridgeTxnObj>} A BridgeTxnObject representing the burn bridge transaction.
  */
 // eslint-disable-next-line @typescript-eslint/require-await
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
@@ -56,7 +56,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   return bridgeTxn;
 }
 
-async function execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObject> {
+async function execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
   const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
   // TODO: ERR handler .burn success
   return bridgeTxnObject;

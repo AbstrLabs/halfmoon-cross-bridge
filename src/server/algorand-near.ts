@@ -3,7 +3,7 @@ import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
 import { BlockchainName } from '..';
-import { BridgeTxnObject } from '../bridge';
+import { BridgeTxnObj } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -26,7 +26,7 @@ algorandNear
 
 async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   /* CONFIG */
-  let bridgeTxnObject: BridgeTxnObject;
+  let bridgeTxnObject: BridgeTxnObj;
   const _literals =
     apiCallParam.type === TxnType.MINT
       ? { START: literals.START_MINTING, DONE: literals.DONE_MINT }
