@@ -176,6 +176,8 @@ const zBiginter =
   // can convert to bigint without loss of precision
   z.union([
     z.string().regex(/^[1-9][0-9]{0,18}$/),
+    // TODO: actually should remove "0" because minting/ burning 0 makes no sense
+    z.literal('0'),
     z.number().int(),
     z.bigint(),
   ]);
