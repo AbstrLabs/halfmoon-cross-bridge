@@ -122,6 +122,7 @@
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "lint": "eslint . --ext .ts",
+    "handler": "yarn test:handler",
     "near": "yarn test:near",
     "postinstall": "husky install",
     "prepare": "husky install",
@@ -131,7 +132,8 @@
     "test:transact": "jest --testPathPattern=src/bridge/transact",
     "test:db": "jest --testPathPattern=src/database",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:util": "jest --testPathPattern=src/utils"
+    "test:util": "jest --testPathPattern=src/utils",
+    "test:handler": "jest --testPathPattern=src/bridge/txn-handler"
   },
   "type": "module",
   "version": "0.1.1"

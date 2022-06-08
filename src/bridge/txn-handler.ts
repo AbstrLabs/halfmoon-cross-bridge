@@ -29,7 +29,7 @@ class TxnHandler {
       this.queue.push(BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN));
     }
     // TODO! check repeated tasks, test, filter finished / error tasks.
-    console.dir(this.queue);
+    // TODO+ need a func for both arr.
   }
 
   // public run() {
