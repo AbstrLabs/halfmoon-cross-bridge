@@ -27,7 +27,7 @@ interface CriticalBridgeTxnObj {
   toAmountAtom?: bigint;
   toBlockchainName?: BlockchainName;
   txnStatus?: BridgeTxnStatus;
-  toTxnId?: string;
+  toTxnId?: string | null;
   txnType: TxnType;
   createdTime?: bigint;
 }
@@ -44,7 +44,7 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   toAddr: string;
   toAmountAtom: bigint;
   toBlockchainName: BlockchainName;
-  toTxnId?: string;
+  toTxnId?: string | null;
   txnStatus: BridgeTxnStatus;
   txnType: TxnType;
 }
@@ -68,7 +68,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   toAmountAtom: bigint;
   toBlockchainName: BlockchainName;
   txnStatus: BridgeTxnStatus;
-  toTxnId?: string;
+  toTxnId?: string | null;
   txnType: TxnType;
   #db = db;
   #fromBlockchain!: Blockchain;

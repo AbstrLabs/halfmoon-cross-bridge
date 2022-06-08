@@ -233,7 +233,7 @@ const zDbItem = z.object({
   created_time: zBiginter,
   to_addr: zAddr,
   to_amount_atom: zBiginter,
-  to_txn_id: zTxnId,
+  to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
   txn_status: zBridgeTxnStatus,
 });
 function parseDbItem(dbItem: DbItem): DbItem {
