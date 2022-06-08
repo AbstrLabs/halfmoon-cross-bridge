@@ -38,4 +38,10 @@ describe('DATABASE test', () => {
       );
     });
   });
+  it('should read all burn txn in db', async () => {
+    const res = await db.readAllTxn(TxnType.BURN);
+    expect(typeof res).toBe('object');
+    expect(Array.isArray(res)).toBe(true);
+    expect(res.length).toBeGreaterThan(0);
+  });
 });

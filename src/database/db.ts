@@ -4,7 +4,7 @@
  * @exports db
  */
 
-export { db };
+export { db, type Database };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
@@ -178,6 +178,20 @@ class Database {
     return parseDbItem(result);
   }
 
+  public async readAllTxn(txnType: TxnType): Promise<DbItem[]> {
+    const tableName = this._inferTableName(txnType);
+
+    // TODO: these 3 lines below needs refactor to a new decorator
+    if (!this.isConnected) {
+      await this.connect();
+    }
+
+    const query = `
+      SELECT * FROM ${tableName};
+    `;
+    const dbItems = await this.query(query);
+    return dbItems.map((dbItem) => parseDbItem(dbItem as DbItem));
+  }
   /**
    * Update a {@link BridgeTxn} in the database. Only `txnStatus` and `toTxnId` can be updated.
    *
