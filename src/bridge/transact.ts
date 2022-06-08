@@ -11,6 +11,8 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
+import { creationQueue } from './creation-queue';
+import { BlockchainName } from '..';
 
 /**
  * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
@@ -53,6 +55,16 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
     apiCallParam,
     BigInt(Date.now())
   );
+
+  // TODO: this is a quick fix for test, need update TODO-ID:CQA
+  creationQueue.add({
+    txnId: apiCallParam.txnId,
+    fromBlockchainName:
+      apiCallParam.type == TxnType.MINT
+        ? BlockchainName.ALGO
+        : BlockchainName.NEAR,
+  });
+
   logger.info(_literals.DONE);
   return bridgeTxn;
 }

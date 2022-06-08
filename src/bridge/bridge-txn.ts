@@ -167,10 +167,14 @@ class BridgeTxn implements CriticalBridgeTxnObj {
     this.toBlockchainName = toBlockchainName ?? this.toBlockchainName;
 
     this.fromTxnId = fromTxnId;
-    creationQueue.add({
-      fromBlockchainName: this.fromBlockchainName,
-      txnId: this.fromTxnId,
-    });
+    // TODO: should not add all on creation. Creation queue is only used in API part.
+    // TODO+ these lines below should be moved to API part on creating.
+    // TODO+ Or add a "fromApiCallParam" function.
+    // TODO-ID:CQA;
+    // creationQueue.add({
+    //   fromBlockchainName: this.fromBlockchainName,
+    //   txnId: this.fromTxnId,
+    // });
 
     this.fromAmountAtom = fromAmountAtom;
     this.fromAddr = fromAddr;
