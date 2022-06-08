@@ -21,7 +21,11 @@ class CreationQueue {
 
   public add(txnRequest: TxnRequest) {
     if (this._has(txnRequest)) {
-      throw new Error('Txn already in creation queue');
+      throw new Error(
+        'Txn already in creation queue ' +
+          txnRequest.txnId +
+          txnRequest.fromBlockchainName
+      );
     }
     this._push(txnRequest);
     return true;
