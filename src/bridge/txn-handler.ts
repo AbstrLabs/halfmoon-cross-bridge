@@ -2,6 +2,8 @@
  * A worker to handle transactions with a queue.
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
+import { TxnType } from '../blockchain';
+import { type Database } from '../database/db';
 import { logger } from '../utils/logger';
 
 export { type TxnHandler, txnHandler };
@@ -17,10 +19,24 @@ class TxnHandler {
     return await bridgeTxn.runWholeBridgeTxn();
     // TODO: support BridgeTxn with more txnStatus
   }
-  /* async  */ loadUnfinishedTasksFromDb() {
-    throw new Error('Function not implemented.');
+  async loadUnfinishedTasksFromDb(db: Database) {
+    const mintDbItems = await db.readAllTxn(TxnType.MINT);
+    const burnDbItems = await db.readAllTxn(TxnType.BURN);
+    for (const mintDbItem of mintDbItems) {
+      this.queue.push(BridgeTxn.fromDbItem(mintDbItem, TxnType.MINT));
+    }
+    for (const burnDbItem of burnDbItems) {
+      this.queue.push(BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN));
+    }
+    // TODO! check repeated tasks, test, filter finished / error tasks.
+    console.dir(this.queue);
   }
-  /* async  */ addTask(bridgeTxn: BridgeTxn) {
+
+  // public run() {
+  //   this.handleTask();
+  // }
+
+  addTask(bridgeTxn: BridgeTxn) {
     if (this._hasTask(bridgeTxn)) {
       throw new Error('task already exists in TxnHandler queue');
     }
