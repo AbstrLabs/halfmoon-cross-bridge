@@ -13,7 +13,6 @@ import { toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
-import { creationQueue } from './creation-queue';
 
 interface CriticalBridgeTxnObj {
   dbId?: number;
@@ -691,10 +690,6 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    creationQueue.remove({
-      fromBlockchainName: this.fromBlockchainName,
-      txnId: this.fromTxnId,
-    });
     this.#isCreatedInDb = true;
 
     return this.dbId;

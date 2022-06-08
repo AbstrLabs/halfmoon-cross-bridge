@@ -51,11 +51,6 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   );
 
   /* CREATE */
-  const bridgeTxn = BridgeTxn.fromApiCallParam(
-    apiCallParam,
-    BigInt(Date.now())
-  );
-
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
   creationQueue.add({
     txnId: apiCallParam.txnId,
@@ -64,8 +59,22 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
         ? BlockchainName.ALGO
         : BlockchainName.NEAR,
   });
+  const bridgeTxn = BridgeTxn.fromApiCallParam(
+    apiCallParam,
+    BigInt(Date.now())
+  );
+
+  // TODO: this is a quick fix for test, need update TODO-ID:CQA
+  creationQueue.remove({
+    fromBlockchainName:
+      apiCallParam.type == TxnType.MINT
+        ? BlockchainName.ALGO
+        : BlockchainName.NEAR,
+    txnId: apiCallParam.txnId,
+  });
 
   logger.info(_literals.DONE);
+
   return bridgeTxn;
 }
 
