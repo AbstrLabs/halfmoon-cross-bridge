@@ -127,7 +127,7 @@ class Database {
       ) 
       RETURNING db_id;
     `;
-    const params: (string | bigint | undefined)[] = [
+    const params: (string | bigint | undefined | null)[] = [
       bridgeTxn.txnStatus,
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
@@ -239,22 +239,6 @@ class Database {
   }
 
   /**
-   * Read a unique {@link BridgeTxn} from the database with its database primary key.
-   *
-   * @async
-   * @param  {DbId} dbId - database primary key
-   * @param  {TxnType} txnType - transaction type, will search in the corresponding table
-   * @returns {Promise<DbItem>} promise of the unique {@link DbItem} of the query result
-   *
-   * @deprecated use {@link readTxn} instead, it's already unique.
-   */
-  public async readUniqueTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
-    // currently only used in test. not fixing.
-    // should return an BridgeTxn
-    // should use BridgeTxn.fromDbItem to convert to BridgeTxn
-    return await this.readTxn(dbId, txnType);
-  }
-  /**
    * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
    *
    * @async
@@ -310,6 +294,7 @@ class Database {
       txnType,
     });
   }
+
   /**
    * infer the table name from a transaction type.
    *

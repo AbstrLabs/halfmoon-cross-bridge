@@ -16,7 +16,7 @@ describe('DATABASE test', () => {
       // skip: serialize bigint
       // should test with bridgeTxn
       exampleBridgeTxn.dbId = exampleBridgeTxn.getDbId();
-      const res = await db.readUniqueTxn(exampleBridgeTxn.dbId, TxnType.MINT);
+      const res = await db.readTxn(exampleBridgeTxn.dbId, TxnType.MINT);
       expect(typeof res).toBe('object');
 
       expect(BridgeTxn.fromDbItem(res, TxnType.MINT)).toEqual(exampleBridgeTxn);
@@ -30,7 +30,7 @@ describe('DATABASE test', () => {
       // read the updated transaction
       // should test with bridgeTxn
       exampleBridgeTxn.dbId = exampleBridgeTxn.getDbId();
-      const res2 = await db.readUniqueTxn(exampleBridgeTxn.dbId, TxnType.MINT);
+      const res2 = await db.readTxn(exampleBridgeTxn.dbId, TxnType.MINT);
       expect(typeof res2).toBe('object');
       // verify updated transaction is correct
       expect(BridgeTxn.fromDbItem(res2, TxnType.MINT)).toEqual(
