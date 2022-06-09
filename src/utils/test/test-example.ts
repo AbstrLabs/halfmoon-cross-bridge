@@ -1,7 +1,7 @@
 // Used across many tests
 export { exampleBridgeTxn };
 
-import { BlockchainName, BridgeTxnStatus } from '../..';
+import { BlockchainName, BridgeTxnStatusEnum } from '../..';
 
 import { BridgeTxn } from '../../bridge';
 import { TxnType } from '../../blockchain';
@@ -23,5 +23,5 @@ const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
   toAddr: '0x1234567890123456789012345678901234567890',
   toBlockchainName: BlockchainName.ALGO,
   toTxnId: FAKE_TXN_ID,
-  txnStatus: BridgeTxnStatus.DONE_OUTGOING,
+  txnStatus: BridgeTxnStatusEnum.DONE_OUTGOING,
 });

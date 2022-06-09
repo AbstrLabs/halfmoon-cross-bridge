@@ -1,12 +1,12 @@
 // TODO: purge logger. too many info on Mint/burn
-export { BlockchainName, BridgeTxnStatus };
+export { BlockchainName, BridgeTxnStatusEnum };
 
 enum BlockchainName {
   NEAR = 'NEAR',
   ALGO = 'ALGO',
 }
 
-enum BridgeTxnStatus {
+enum BridgeTxnStatusEnum {
   // By order
   ERR_SEVER_INTERNAL = 'ERR_SEVER_INTERNAL', //     General server internal error
   ERR_AWS_RDS_DB = 'ERR_AWS_RDS_DB', //             General AWS DB External error

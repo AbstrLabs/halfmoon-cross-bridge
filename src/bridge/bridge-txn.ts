@@ -3,7 +3,7 @@ export { type BridgeTxnObj, BridgeTxn };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
-import { BlockchainName, BridgeTxnStatus } from '..';
+import { BlockchainName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { ENV } from '../utils/dotenv';
@@ -25,7 +25,7 @@ interface CriticalBridgeTxnObj {
   toAddr: string;
   toAmountAtom?: bigint;
   toBlockchainName?: BlockchainName;
-  txnStatus?: BridgeTxnStatus;
+  txnStatus?: BridgeTxnStatusEnum;
   toTxnId?: string | null;
   txnType: TxnType;
   createdTime?: bigint;
@@ -44,7 +44,7 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   toAmountAtom: bigint;
   toBlockchainName: BlockchainName;
   toTxnId?: string | null;
-  txnStatus: BridgeTxnStatus;
+  txnStatus: BridgeTxnStatusEnum;
   txnType: TxnType;
 }
 
@@ -66,7 +66,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
   toAddr: string;
   toAmountAtom: bigint;
   toBlockchainName: BlockchainName;
-  txnStatus: BridgeTxnStatus;
+  txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
   txnType: TxnType;
   #db = db;
@@ -103,7 +103,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       toAmountAtom: undefined,
       toBlockchainName: undefined,
       toTxnId: undefined,
-      txnStatus: BridgeTxnStatus.DOING_INITIALIZE,
+      txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
     });
     return bridgeTxn;
   }
@@ -189,10 +189,10 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
       this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
-      this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
+      this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DOING_INITIALIZE;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
+      this.txnStatus = BridgeTxnStatusEnum.ERR_INITIALIZE;
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn._initialize',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
@@ -200,7 +200,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       });
     }
     this._selfValidate();
-    this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
+    this.txnStatus = BridgeTxnStatusEnum.DONE_INITIALIZE;
   }
 
   /* MAKE BRIDGE TRANSACTION */
@@ -254,9 +254,12 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         bridgeTxn: this,
       });
     }
-    this._checkStatus(BridgeTxnStatus.DONE_INITIALIZE, 'confirmIncomingTxn');
+    this._checkStatus(
+      BridgeTxnStatusEnum.DONE_INITIALIZE,
+      'confirmIncomingTxn'
+    );
 
-    await this._updateTxnStatus(BridgeTxnStatus.DOING_INCOMING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_INCOMING);
 
     let confirmOutcome;
     try {
@@ -271,15 +274,15 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         case ConfirmOutcome.SUCCESS:
           break;
         case ConfirmOutcome.WRONG_INFO:
-          await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+          await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_VERIFY_INCOMING);
           break;
         case ConfirmOutcome.TIMEOUT:
-          await this._updateTxnStatus(BridgeTxnStatus.ERR_TIMEOUT_INCOMING);
+          await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING);
           break;
       }
     }
 
-    await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DONE_INCOMING);
   }
 
   /**
@@ -292,11 +295,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {Promise<void>} promise of void
    */
   async makeOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DONE_INCOMING, 'makeOutgoingTxn');
+    this._checkStatus(BridgeTxnStatusEnum.DONE_INCOMING, 'makeOutgoingTxn');
 
     let outgoingTxnId: TxnId;
     try {
-      await this._updateTxnStatus(BridgeTxnStatus.DOING_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
@@ -310,7 +313,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
       // }
       await this._updateToTxnId(outgoingTxnId);
     } catch (err) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
         err,
@@ -327,7 +330,7 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @returns {Promise<void>} promise of void
    */
   async verifyOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DOING_OUTGOING, 'verifyOutgoingTxn');
+    this._checkStatus(BridgeTxnStatusEnum.DOING_OUTGOING, 'verifyOutgoingTxn');
     try {
       await this.#toBlockchain.confirmTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
@@ -338,13 +341,13 @@ class BridgeTxn implements CriticalBridgeTxnObj {
         txnId: this.toTxnId!,
       });
     } catch (e) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_CONFIRM_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
         err: e,
       });
     }
-    await this._updateTxnStatus(BridgeTxnStatus.DONE_OUTGOING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DONE_OUTGOING);
   }
 
   /* MISCELLANEOUS */
@@ -735,21 +738,23 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    * @async
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
-   * @param  {BridgeTxnStatus} newStatus
+   * @param  {BridgeTxnStatusEnum} newStatus
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
-  private async _updateTxnStatus(newStatus: BridgeTxnStatus): Promise<DbId> {
+  private async _updateTxnStatus(
+    newStatus: BridgeTxnStatusEnum
+  ): Promise<DbId> {
     // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
     // will raise err if current txnStatus is error.
     if (
       [
-        BridgeTxnStatus.ERR_AWS_RDS_DB,
-        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
-        BridgeTxnStatus.ERR_INITIALIZE,
-        BridgeTxnStatus.ERR_MAKE_OUTGOING,
-        BridgeTxnStatus.ERR_SEVER_INTERNAL,
-        BridgeTxnStatus.ERR_TIMEOUT_INCOMING,
-        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
+        BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
+        BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
+        BridgeTxnStatusEnum.ERR_INITIALIZE,
+        BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
+        BridgeTxnStatusEnum.ERR_SEVER_INTERNAL,
+        BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING,
+        BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
       ].includes(this.txnStatus)
     ) {
       throw new BridgeError(ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS, {
@@ -804,11 +809,11 @@ class BridgeTxn implements CriticalBridgeTxnObj {
    *
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
-   * @param  {BridgeTxnStatus} expected
+   * @param  {BridgeTxnStatusEnum} expected
    * @param  {string} at
    * @returns void
    */
-  private _checkStatus(expected: BridgeTxnStatus, at: string): void {
+  private _checkStatus(expected: BridgeTxnStatusEnum, at: string): void {
     if (!(this.txnStatus === expected)) {
       throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
         at: `BridgeTxn.${at}`,

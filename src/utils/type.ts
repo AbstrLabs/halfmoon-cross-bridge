@@ -32,7 +32,7 @@ export {
 };
 
 import { z } from 'zod';
-import { BridgeTxnStatus } from '..';
+import { BridgeTxnStatusEnum } from '..';
 import { TxnType } from '../blockchain';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
@@ -224,7 +224,7 @@ const zDbId = z.number().int().positive();
 function parseDbId(dbId: DbId): DbId {
   return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }
-const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
+const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
 const zDbItem = z.object({
   db_id: zDbId,
   fixed_fee_atom: zBiginter,

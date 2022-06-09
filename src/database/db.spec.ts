@@ -1,5 +1,5 @@
 import { BridgeTxn } from '../bridge';
-import { BridgeTxnStatus } from '..';
+import { BridgeTxnStatusEnum } from '..';
 // import { ENV } from '../utils/dotenv'; // not sure if we can initialize DB without ENV
 import { TxnType } from '../blockchain';
 import { db } from './db';
@@ -22,7 +22,7 @@ describe('DATABASE test', () => {
       expect(BridgeTxn.fromDbItem(res, TxnType.MINT)).toEqual(exampleBridgeTxn);
     });
     it('update a transaction', async () => {
-      exampleBridgeTxn.txnStatus = BridgeTxnStatus.DONE_OUTGOING;
+      exampleBridgeTxn.txnStatus = BridgeTxnStatusEnum.DONE_OUTGOING;
       exampleBridgeTxn.toTxnId = 'some_fake_txn_id';
       const res1 = await db.updateTxn(exampleBridgeTxn);
       expect(typeof res1).toBe('number');
