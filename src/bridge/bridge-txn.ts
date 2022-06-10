@@ -246,7 +246,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @emit change the txnStatus from {@link BridgeTxnStatus.DONE_INITIALIZE} to {@link BridgeTxnStatus.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
@@ -295,7 +295,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @async
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
-   * @emit change the txnStatus from {@link BridgeTxnStatus.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatus.DOING_OUTGOING} or the corresponding errors.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatusEnum.DOING_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async makeOutgoingTxn(): Promise<void> {
@@ -330,7 +330,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
-   * @emit change the txnStatus from {@link BridgeTxnStatus.DOING_OUTGOING} to {@link BridgeTxnStatus.DONE_OUTGOING} or the corresponding errors.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DOING_OUTGOING} to {@link BridgeTxnStatusEnum.DONE_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async verifyOutgoingTxn(): Promise<void> {
@@ -672,7 +672,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       this.txnType
     );
     if (dbEntryWithTxnId.length > 0) {
-      // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+      // await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_VERIFY_INCOMING);
       throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,

@@ -1,6 +1,6 @@
 DROP TYPE txn_status_enum;
 
--- source of truth: src/index.ts: enum BridgeTxnStatus
+-- source of truth: src/index.ts: enum BridgeTxnStatusEnum
 CREATE TYPE txn_status_enum AS ENUM (
   'ERR_SEVER_INTERNAL',
   'ERR_AWS_RDS_DB',

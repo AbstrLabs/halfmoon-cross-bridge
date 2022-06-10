@@ -5,6 +5,7 @@ describe('utils tool test, should skip', () => {
     it('log "something"', () => {
       logger.info('something');
       console.log('something'); // this is better to show call stack
+      // TODO: override logger.info with console.log
     });
   });
 });
