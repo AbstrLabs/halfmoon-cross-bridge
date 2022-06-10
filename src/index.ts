@@ -1,7 +1,17 @@
-import { BridgeTxnActionName } from './bridge/bridge-txn';
-
 // TODO: purge logger. too many info on Mint/burn
-export { BlockchainName, BridgeTxnStatusEnum, BridgeTxnStatusTree };
+export {
+  BlockchainName,
+  BridgeTxnStatusEnum,
+  BridgeTxnStatusTree,
+  BridgeTxnActionName,
+};
+
+enum BridgeTxnActionName {
+  // create in DB
+  confirmIncomingTxn = 'confirmIncomingTxn',
+  makeOutgoingTxn = 'makeOutgoingTxn',
+  verifyOutgoingTxn = 'verifyOutgoingTxn',
+}
 
 enum BlockchainName {
   NEAR = 'NEAR',

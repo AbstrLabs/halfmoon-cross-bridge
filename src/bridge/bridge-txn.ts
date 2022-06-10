@@ -3,7 +3,7 @@ export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
-import { BlockchainName, BridgeTxnStatusEnum } from '..';
+import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { ENV } from '../utils/dotenv';
@@ -46,13 +46,6 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
   txnType: TxnType;
-}
-
-enum BridgeTxnActionName {
-  // create in DB
-  confirmIncomingTxn = 'confirmIncomingTxn',
-  makeOutgoingTxn = 'makeOutgoingTxn',
-  verifyOutgoingTxn = 'verifyOutgoingTxn',
 }
 
 type BridgeTxnAction = {
