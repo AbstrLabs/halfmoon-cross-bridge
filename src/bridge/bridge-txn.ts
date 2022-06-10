@@ -1,5 +1,5 @@
-// TODO: no need to infer TxnType anymore.
-export { type BridgeTxnObj, BridgeTxn };
+// TODO: no need to infer TxnType here anymore.
+export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
@@ -48,13 +48,24 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   txnType: TxnType;
 }
 
+enum BridgeTxnActionName {
+  // create in DB
+  confirmIncomingTxn = 'confirmIncomingTxn',
+  makeOutgoingTxn = 'makeOutgoingTxn',
+  verifyOutgoingTxn = 'verifyOutgoingTxn',
+}
+
+type BridgeTxnAction = {
+  [methodName in BridgeTxnActionName]: () => Promise<void>;
+};
+
 /**
  * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
  * @param  {CriticalBridgeTxnObj} bridgeTxnObject
  * @param  {InitializeOptions} initializeOptions
  */
-class BridgeTxn implements CriticalBridgeTxnObj {
+class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
