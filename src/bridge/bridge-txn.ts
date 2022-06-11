@@ -442,6 +442,16 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     }
   }
 
+  /**
+   * UID {TxnType}.{DbId}.{txnId}
+   */
+  get uid(): string {
+    if (this.dbId === undefined) {
+      this.dbId = this.getDbId();
+    }
+    return `${this.txnType}.${this.dbId}.${this.fromTxnId}`;
+  }
+
   /**  PRIVATE METHODS - CLASS INIT  **/
 
   /**
