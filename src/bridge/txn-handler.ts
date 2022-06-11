@@ -2,8 +2,10 @@
  * A worker to handle transactions with a queue.
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
+import { BridgeTxnStatusTree } from '..';
 import { TxnType } from '../blockchain';
 import { type Database } from '../database/db';
+import { emailServer } from '../server/email';
 import { logger } from '../utils/logger';
 
 export { type TxnHandler, txnHandler };
@@ -13,6 +15,10 @@ class TxnHandler {
   constructor() {
     this.queue = [];
   }
+
+  /**
+   * @deprecated use handleTasks() instead.
+   */
   /* private */ async _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
     logger.warn('calling a methods that should be private');
     // only handles fresh-new task
@@ -59,7 +65,17 @@ class TxnHandler {
 
   async handleTasks() {
     for (const bridgeTxn of this.queue) {
-      await this._execute(bridgeTxn);
+      const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
+      if (actionName === 'MANUAL') {
+        emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
+        this.removeTask(bridgeTxn);
+        return;
+      }
+      if (actionName === null) {
+        throw new Error(`actionName is null for ${bridgeTxn.uid}`);
+      }
+      await bridgeTxn[actionName]();
+      // await this._execute(bridgeTxn);
     }
   }
 
@@ -76,8 +92,10 @@ class TxnHandler {
   /* private async */ handleTask() {
     throw new Error('Function not implemented.');
   }
-  /* private async */ removeTask() {
-    throw new Error('Function not implemented.');
+  /* private async */ removeTask(bridgeTxn: BridgeTxn) {
+    throw new Error(
+      `Function not implemented. ${bridgeTxn.uid} is not removed`
+    );
   }
 
   private _hasTask(bridgeTxn: BridgeTxn): boolean {
