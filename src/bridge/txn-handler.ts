@@ -32,6 +32,37 @@ class TxnHandler {
     // TODO+ need a func for both arr.
   }
 
+  /**
+   * Fetch newly added tasks from the database.
+   * loadUnfinishedTasksFromDb can merge into this
+   *
+   * @param  {Database} db
+   *
+   * @returns {Promise<void>}
+   */
+  async updateTasksFromDb(db: Database): Promise<void> {
+    const mintDbItems = await db.readAllTxn(TxnType.MINT);
+    const burnDbItems = await db.readAllTxn(TxnType.BURN);
+    for (const mintDbItem of mintDbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(mintDbItem, TxnType.MINT);
+      if (!this._hasTask(bridgeTxn)) {
+        this.queue.push(bridgeTxn);
+      }
+    }
+    for (const burnDbItem of burnDbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN);
+      if (!this._hasTask(bridgeTxn)) {
+        this.queue.push(bridgeTxn);
+      }
+    }
+  }
+
+  async handleTasks() {
+    for (const bridgeTxn of this.queue) {
+      await this._execute(bridgeTxn);
+    }
+  }
+
   // public run() {
   //   this.handleTask();
   // }
