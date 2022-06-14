@@ -65,23 +65,18 @@ class TxnHandler {
 
   async handleTasks() {
     for (const bridgeTxn of this.queue) {
-      const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
-      if (actionName === 'MANUAL') {
-        emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
-        this.removeTask(bridgeTxn);
-        return;
-      }
-      if (actionName === null) {
-        throw new Error(`actionName is null for ${bridgeTxn.uid}`);
-      }
-      await bridgeTxn[actionName]();
-      // await this._execute(bridgeTxn);
+      await this.handleTask(bridgeTxn);
     }
   }
 
-  // public run() {
-  //   this.handleTask();
-  // }
+  public async run(db: Database) {
+    await this.loadUnfinishedTasksFromDb(db);
+    await this.handleTasks();
+    setInterval(() => {
+      throw new Error(`Function not implemented.`);
+      // this.updateTasksFromDb(db);
+    }, 50_000);
+  }
 
   addTask(bridgeTxn: BridgeTxn) {
     if (this._hasTask(bridgeTxn)) {
@@ -89,8 +84,19 @@ class TxnHandler {
     }
     this.queue.push(bridgeTxn);
   }
-  /* private async */ handleTask() {
-    throw new Error('Function not implemented.');
+  private async handleTask(bridgeTxn: BridgeTxn) {
+    const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
+    if (actionName === 'MANUAL') {
+      emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
+      this.removeTask(bridgeTxn);
+      return;
+    }
+    if (actionName === null) {
+      throw new Error(
+        `actionName is null for ${bridgeTxn.uid} no action's needed.`
+      );
+    }
+    await bridgeTxn[actionName]();
   }
   /* private async */ removeTask(bridgeTxn: BridgeTxn) {
     throw new Error(
