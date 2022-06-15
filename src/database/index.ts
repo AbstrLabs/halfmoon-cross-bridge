@@ -1,6 +1,10 @@
 export { TableName };
 
 enum TableName {
-  MINT_TABLE_NAME = `mint_request`,
-  BURN_TABLE_NAME = `burn_request`,
+  MINT_ACTIVE = `mint_request`,
+  BURN_ACTIVE = `burn_request`,
+  MINT_FINISHED = `mint_archive`,
+  BURN_FINISHED = `burn_archive`,
+  MINT_MANUAL = `mint_manual`,
+  BURN_MANUAL = `burn_manual`,
 }

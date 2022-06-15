@@ -356,6 +356,6 @@ class Database {
 }
 
 const db = new Database(postgres, {
-  mintTableName: TableName.MINT_TABLE_NAME,
-  burnTableName: TableName.BURN_TABLE_NAME,
+  mintTableName: TableName.MINT_ACTIVE,
+  burnTableName: TableName.BURN_ACTIVE,
 });

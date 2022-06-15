@@ -34,8 +34,8 @@ class TxnHandler {
     for (const burnDbItem of burnDbItems) {
       this.queue.push(BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN));
     }
-    // TODO! check repeated tasks, test, filter finished / error tasks.
-    // TODO+ need a func for both arr.
+    // no longer needed: check repeated tasks, test, filter finished / error tasks.
+    // TODO: need a func for both arr.
   }
 
   /**
