@@ -113,6 +113,10 @@ I assume you can find which file to add after reading this list.
 
 ## TODO
 
+### Terminology
+
+- "Mint" and "burn" are not precise enough. Need a better name.
+
 ### send an alert email when
 
 - db cannot connect.

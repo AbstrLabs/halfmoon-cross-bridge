@@ -15,6 +15,8 @@ import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
 import { TableName } from '.';
 
+const REQUEST_TABLE = 'anb_request';
+
 /**
  * A database class to handle all database requests. Should be used as a singleton.
  *
@@ -109,7 +111,7 @@ class Database {
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
 
-    const tableName = this._inferTableName(bridgeTxn.txnType);
+    const tableName = REQUEST_TABLE;
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
       await this.connect();
@@ -118,16 +120,17 @@ class Database {
     const query = `
       INSERT INTO ${tableName} 
       (
-        txn_status, created_time, fixed_fee_atom, from_addr, from_amount_atom,
+        txn_type, txn_status, created_time, fixed_fee_atom, from_addr, from_amount_atom,
         from_txn_id, margin_fee_atom, to_addr, to_amount_atom, to_txn_id
       ) 
       VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8, $9, $10
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10, $11
       ) 
       RETURNING db_id;
     `;
     const params: (string | bigint | undefined | null)[] = [
+      bridgeTxn.txnType,
       bridgeTxn.txnStatus,
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
@@ -156,12 +159,11 @@ class Database {
    *
    * @async
    * @param   {DbId} dbId - database primary key
-   * @param   {TxnType} txnType - transaction type, will search in the corresponding table
    * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
    */
-  public async readTxn(dbId: DbId, txnType: TxnType): Promise<DbItem> {
+  public async readTxn(dbId: DbId): Promise<DbItem> {
     // this should always be unique with a dbId
-    const tableName = this._inferTableName(txnType);
+    const tableName = REQUEST_TABLE;
 
     if (!this.isConnected) {
       await this.connect();
@@ -178,8 +180,8 @@ class Database {
     return parseDbItem(result);
   }
 
-  public async readAllTxn(txnType: TxnType): Promise<DbItem[]> {
-    const tableName = this._inferTableName(txnType);
+  public async readAllTxn(): Promise<DbItem[]> {
+    const tableName = REQUEST_TABLE;
 
     // TODO: these 3 lines below needs refactor to a new decorator
     if (!this.isConnected) {
@@ -213,22 +215,31 @@ class Database {
       });
     }
 
-    const tableName = this._inferTableName(bridgeTxn.txnType);
+    const tableName = REQUEST_TABLE;
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
       UPDATE ${tableName} SET
-        txn_status=$1, to_txn_id = $10
+        txn_status=$2, to_txn_id = $11
           WHERE (
-            db_id=$11 AND created_time=$2 AND fixed_fee_atom=$3 AND
-            from_addr=$4 AND from_amount_atom=$5 AND from_txn_id=$6 AND
-            margin_fee_atom=$7 AND to_addr=$8 AND to_amount_atom=$9
+            db_id=$1 
+            -- AND txn_status=$2 
+            AND created_time=$3 
+            AND fixed_fee_atom=$4 
+            AND from_addr=$5 
+            AND from_amount_atom=$6 
+            AND from_txn_id=$7 
+            AND margin_fee_atom=$8 
+            AND to_addr=$9 
+            AND to_amount_atom=$10 
+            -- AND to_txn_id=$11
           )
       RETURNING db_id;
     `;
     const params = [
+      bridgeTxn.dbId,
       bridgeTxn.txnStatus,
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
@@ -239,7 +250,6 @@ class Database {
       bridgeTxn.toAddr,
       bridgeTxn.toAmountAtom,
       bridgeTxn.toTxnId,
-      bridgeTxn.dbId,
     ];
     const queryResult = await this.query(query, params);
 
@@ -257,16 +267,10 @@ class Database {
    *
    * @async
    * @param  {string} fromTxnId
-   * @param  {TxnType} txnType
    * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
-  public async readTxnFromTxnId(
-    fromTxnId: string,
-    txnType: TxnType
-  ): Promise<DbItem[]> {
-    // next line: if txnType is null, _inferTableName will throw error.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const tableName = this._inferTableName(txnType);
+  public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
+    const tableName = REQUEST_TABLE;
 
     if (!this.isConnected) {
       await this.connect();
@@ -312,6 +316,7 @@ class Database {
   /**
    * infer the table name from a transaction type.
    *
+   * @deprecated - we use anb_request table for both mint and burn.
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if {@link txnType} is not valid
    * @param  {TxnType} txnType

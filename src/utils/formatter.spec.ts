@@ -56,7 +56,7 @@ describe('param validation and formatting', () => {
     const JsonStringifySpy = jest.spyOn(JSON, 'stringify');
     JsonStringifySpy.mockImplementation(jest.fn(JsonBig.stringify));
 
-    expect(BridgeTxn.fromDbItem(exampleDbItem, TxnType.MINT)).toEqual(
+    expect(BridgeTxn.fromDbItem(exampleDbItem)).toEqual(
       exampleBridgeTxn
     ); // need --workers=1 flag
   });

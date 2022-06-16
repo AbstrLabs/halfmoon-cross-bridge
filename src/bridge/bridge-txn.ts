@@ -120,12 +120,11 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @param  {TxnType} dbName
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
-  static fromDbItem(dbItem: DbItem, dbName: TxnType): BridgeTxn {
+  static fromDbItem(dbItem: DbItem): BridgeTxn {
     const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: _dbItem.db_id,
-      txnType: dbName,
-
+      txnType: _dbItem.txn_type,
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
       fromAmountAtom: BigInt(_dbItem.from_amount_atom),
@@ -677,10 +676,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
     // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
-    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
-      this.fromTxnId,
-      this.txnType
-    );
+    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(this.fromTxnId);
     if (dbEntryWithTxnId.length > 0) {
       // await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_VERIFY_INCOMING);
       throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {

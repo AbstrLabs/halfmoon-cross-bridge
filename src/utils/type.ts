@@ -225,7 +225,11 @@ function parseDbId(dbId: DbId): DbId {
   return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
+const zBridgeTxnType = z.nativeEnum(TxnType);
+
+// TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
+  txn_type: zBridgeTxnType,
   db_id: zDbId,
   fixed_fee_atom: zBiginter,
   from_addr: zAddr,

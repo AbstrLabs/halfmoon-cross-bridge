@@ -3,7 +3,6 @@
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusTree } from '..';
-import { TxnType } from '../blockchain';
 import { type Database } from '../database/db';
 import { emailServer } from '../server/email';
 import { logger } from '../utils/logger';
@@ -26,13 +25,12 @@ class TxnHandler {
     // TODO: support BridgeTxn with more txnStatus
   }
   async loadUnfinishedTasksFromDb(db: Database) {
-    const mintDbItems = await db.readAllTxn(TxnType.MINT);
-    const burnDbItems = await db.readAllTxn(TxnType.BURN);
-    for (const mintDbItem of mintDbItems) {
-      this.queue.push(BridgeTxn.fromDbItem(mintDbItem, TxnType.MINT));
-    }
-    for (const burnDbItem of burnDbItems) {
-      this.queue.push(BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN));
+    const dbItems = await db.readAllTxn();
+    for (const dbItem of dbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(dbItem);
+      if (!this._hasTask(bridgeTxn)) {
+        this.queue.push(bridgeTxn);
+      }
     }
     // no longer needed: check repeated tasks, test, filter finished / error tasks.
     // TODO: need a func for both arr.
@@ -47,16 +45,9 @@ class TxnHandler {
    * @returns {Promise<void>}
    */
   async updateTasksFromDb(db: Database): Promise<void> {
-    const mintDbItems = await db.readAllTxn(TxnType.MINT);
-    const burnDbItems = await db.readAllTxn(TxnType.BURN);
-    for (const mintDbItem of mintDbItems) {
-      const bridgeTxn = BridgeTxn.fromDbItem(mintDbItem, TxnType.MINT);
-      if (!this._hasTask(bridgeTxn)) {
-        this.queue.push(bridgeTxn);
-      }
-    }
-    for (const burnDbItem of burnDbItems) {
-      const bridgeTxn = BridgeTxn.fromDbItem(burnDbItem, TxnType.BURN);
+    const dbItems = await db.readAllTxn();
+    for (const dbItem of dbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(dbItem);
       if (!this._hasTask(bridgeTxn)) {
         this.queue.push(bridgeTxn);
       }
