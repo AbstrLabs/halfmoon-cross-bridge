@@ -9,7 +9,7 @@ import { BridgeError, ERRORS } from '../utils/errors';
 import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
-import { toGoNearAtom } from '../utils/formatter';
+import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
@@ -418,7 +418,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {string} the JSON string representation of the {@link BridgeTxn}
    */
   public toString(): string {
-    return JSON.stringify(this.toObject());
+    return JSON.stringify(stringifyBigintInObj(this.toObject()));
   }
 
   /* GETTERS */

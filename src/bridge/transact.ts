@@ -1,7 +1,7 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
  */
-export { create, execute };
+export { create, _execute };
 
 import { ApiCallParam, Stringer } from '../utils/type';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -64,6 +64,9 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
     BigInt(Date.now())
   );
 
+  // next version: await bridgeTxn.createInDb();
+  // txnHandler.queue.push(bridgeTxn);
+
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
   creationQueue.remove({
     fromBlockchainName:
@@ -73,12 +76,17 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
     txnId: apiCallParam.txnId,
   });
 
-  logger.info(_literals.DONE);
+  logger.info(
+    `created ${apiCallParam.type} bridge txn: ${bridgeTxn.toString()}`
+  );
 
   return bridgeTxn;
 }
 
-async function execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
+/**
+ * @deprecated - use new API model, the txnHandler will execute the transaction.
+ */
+async function _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
   const bridgeTxnObject = await txnHandler._execute(bridgeTxn);
   // TODO: ERR handler .burn success
   return bridgeTxnObject;
