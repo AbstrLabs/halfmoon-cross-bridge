@@ -139,6 +139,5 @@
     "test:util": "jest --testPathPattern=src/utils",
     "tx": "yarn test:transact"
   },
-  "type": "module",
   "version": "0.1.1"
 }
