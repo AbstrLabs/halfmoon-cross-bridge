@@ -2,4 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 
-yarn test # Not doing all test, only unit tests
+yarn jest
