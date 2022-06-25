@@ -90,11 +90,15 @@
       "ts-jest": {
         "tsconfig": {
           "module": "ESNext",
-          "target": "ES2017"
+          "target": "ESNext"
         },
-        "useESM": true
+        "useESM": false
       }
     },
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/src/integration-test/"
+    ],
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
       "./src/utils/test/global-beforeAll.ts"
@@ -123,22 +127,21 @@
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "handler": "yarn test:handler",
-    "int": "yarn test:integration",
+    "int": "yarn integration-test",
+    "integration-test": "playwright test ./src/integration-test/",
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",
     "postinstall": "husky install",
     "prepare": "husky install",
-    "test": "jest --testPathIgnorePatterns=integration-test",
+    "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/bridge",
     "test:db": "jest --testPathPattern=src/database",
     "test:handler": "jest --testPathPattern=src/bridge/txn-handler",
-    "test:integration": "playwright test ./src/integration-test/",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:transact": "jest --testPathPattern=src/bridge/transact",
     "test:util": "jest --testPathPattern=src/utils",
     "tx": "yarn test:transact"
   },
-  "type": "module",
   "version": "0.1.1"
 }
