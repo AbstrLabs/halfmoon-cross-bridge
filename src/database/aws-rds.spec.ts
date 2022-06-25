@@ -22,7 +22,8 @@ describe('AWS-RDS capability test', () => {
     expect(res2.length).toBe(0);
   });
   // it('CRUD in test_table', async () => {
-  it('read and write to test_table', async () => {
+  it.skip('read and write to test_table', async () => {
+    // cannot use test_table
     const tableName = 'test_table';
     const date = +new Date();
     const query = `INSERT INTO ${tableName} (test_date) VALUES ($1);`;
