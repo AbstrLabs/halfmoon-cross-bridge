@@ -90,9 +90,9 @@
       "ts-jest": {
         "tsconfig": {
           "module": "ESNext",
-          "target": "ES2017"
+          "target": "ESNext"
         },
-        "useESM": true
+        "useESM": false
       }
     },
     "preset": "ts-jest",
