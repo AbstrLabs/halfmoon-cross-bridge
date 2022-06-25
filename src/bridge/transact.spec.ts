@@ -54,7 +54,7 @@ describe('mint test', () => {
       // verification
       expect(bridgeTxnObject.toTxnId).toBeDefined();
     },
-    TIMEOUT_30S * 3
+    TIMEOUT_30S
   );
   /* TODO: More tests:
    * - wrong amount,
@@ -97,7 +97,7 @@ describe('burn test', () => {
       // verification
       expect(bridgeTxnObject.toTxnId).toBeDefined();
     },
-    TIMEOUT_30S * 3
+    TIMEOUT_30S
   );
   /* TODO: More tests:
    * - wrong amount,
