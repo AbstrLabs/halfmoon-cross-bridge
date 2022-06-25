@@ -60,6 +60,14 @@ I assume you can find which file to add after reading this list.
 
 ## Tests
 
+| Unit Test  | Integration Test |
+| ---------- | ---------------- |
+| `.spec.ts` | `test.ts`        |
+
+### Unit test
+
+1. Test all functions. (All = 100% coverage.)
+
 ### Integration Tests
 
 1. Create an ASA asset goNEAR on Algorand.
@@ -106,10 +114,6 @@ I assume you can find which file to add after reading this list.
 7. security: neither the user nor the service provider suffers a major loss in the event of a malicious attack.
 
    1. I don't know how to do this <!-- TODO -->
-
-### Unit test
-
-1. Test all functions. (All = 100% coverage.)
 
 ## TODO
 
