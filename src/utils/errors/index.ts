@@ -45,4 +45,8 @@ class BridgeError extends Error {
     this.errId = errorTemplate.errId;
     this.message = errMsg;
   }
+
+  toString() {
+    return this.message;
+  }
 }

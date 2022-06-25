@@ -32,7 +32,7 @@ export {
 };
 
 import { z } from 'zod';
-import { BridgeTxnStatus } from '..';
+import { BridgeTxnStatusEnum } from '..';
 import { TxnType } from '../blockchain';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
@@ -176,6 +176,8 @@ const zBiginter =
   // can convert to bigint without loss of precision
   z.union([
     z.string().regex(/^[1-9][0-9]{0,18}$/),
+    // TODO: actually should remove "0" because minting/ burning 0 makes no sense
+    z.literal('0'),
     z.number().int(),
     z.bigint(),
   ]);
@@ -222,8 +224,12 @@ const zDbId = z.number().int().positive();
 function parseDbId(dbId: DbId): DbId {
   return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }
-const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatus);
+const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
+const zBridgeTxnType = z.nativeEnum(TxnType);
+
+// TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
+  txn_type: zBridgeTxnType,
   db_id: zDbId,
   fixed_fee_atom: zBiginter,
   from_addr: zAddr,
@@ -233,7 +239,7 @@ const zDbItem = z.object({
   created_time: zBiginter,
   to_addr: zAddr,
   to_amount_atom: zBiginter,
-  to_txn_id: zTxnId,
+  to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
   txn_status: zBridgeTxnStatus,
 });
 function parseDbItem(dbItem: DbItem): DbItem {

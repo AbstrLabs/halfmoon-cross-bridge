@@ -1,7 +1,9 @@
 DROP TYPE txn_status_enum;
+DROP TYPE txn_type_enum;
 
--- source of truth: src/index.ts: enum BridgeTxnStatus
+-- source of truth: src/index.ts: enum BridgeTxnStatusEnum
 CREATE TYPE txn_status_enum AS ENUM (
+  -- 'NOT_CREATED', this should not show up in the database
   'ERR_SEVER_INTERNAL',
   'ERR_AWS_RDS_DB',
   'DOING_INITIALIZE',
@@ -17,4 +19,9 @@ CREATE TYPE txn_status_enum AS ENUM (
   'ERR_CONFIRM_OUTGOING',
   'DONE_OUTGOING',
   'USER_CONFIRMED'
-  );
+);
+
+CREATE TYPE txn_type_enum AS ENUM (
+  'MINT',
+  'BURN'
+);

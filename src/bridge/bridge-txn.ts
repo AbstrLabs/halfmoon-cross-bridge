@@ -1,83 +1,82 @@
-// TODO: no need to infer TxnType anymore.
-export { type BridgeTxnObject, BridgeTxn };
+// TODO: no need to infer TxnType here anymore.
+export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
 
 import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
-import { BlockchainName, BridgeTxnStatus } from '..';
+import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
-import { toGoNearAtom } from '../utils/formatter';
+import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 
-interface InitializeOptions {
-  notCreateInDb?: boolean;
-}
-
-interface CriticalBridgeTxnObject {
+interface CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchain?: BlockchainName;
+  fromBlockchainName?: BlockchainName;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom?: bigint;
-  toBlockchain?: BlockchainName;
-  txnStatus?: BridgeTxnStatus;
-  toTxnId?: string;
+  toBlockchainName?: BlockchainName;
+  txnStatus?: BridgeTxnStatusEnum;
+  toTxnId?: string | null;
   txnType: TxnType;
   createdTime?: bigint;
 }
 
-// TODO: ref ren to ...Obj
-interface BridgeTxnObject extends CriticalBridgeTxnObject {
+interface BridgeTxnObj extends CriticalBridgeTxnObj {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchain: BlockchainName;
+  fromBlockchainName: BlockchainName;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: bigint;
-  toBlockchain: BlockchainName;
-  toTxnId?: string;
-  txnStatus: BridgeTxnStatus;
+  toBlockchainName: BlockchainName;
+  toTxnId?: string | null;
+  txnStatus: BridgeTxnStatusEnum;
   txnType: TxnType;
 }
+
+type BridgeTxnAction = {
+  [methodName in BridgeTxnActionName]: () => Promise<void>;
+};
 
 /**
  * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
- * @param  {CriticalBridgeTxnObject} bridgeTxnObject
+ * @param  {CriticalBridgeTxnObj} bridgeTxnObject
  * @param  {InitializeOptions} initializeOptions
  */
-class BridgeTxn implements CriticalBridgeTxnObject {
+class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
   dbId?: number;
-  fixedFeeAtom?: bigint;
-  marginFeeAtom?: bigint;
+  fixedFeeAtom: bigint;
+  marginFeeAtom: bigint;
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchain?: BlockchainName;
+  fromBlockchainName: BlockchainName;
   fromTxnId: string;
   toAddr: string;
-  toAmountAtom?: bigint;
-  toBlockchain?: BlockchainName;
-  txnStatus: BridgeTxnStatus;
-  toTxnId?: string;
+  toAmountAtom: bigint;
+  toBlockchainName: BlockchainName;
+  txnStatus: BridgeTxnStatusEnum;
+  toTxnId?: string | null;
   txnType: TxnType;
   #db = db;
   #fromBlockchain!: Blockchain;
   #toBlockchain!: Blockchain;
-  #isInitializedPromise: Promise<boolean>;
+  #isCreatedInDb: boolean;
 
   /* CONSTRUCTORS  */
 
@@ -100,15 +99,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       fixedFeeAtom: undefined,
       fromAddr: from,
       fromAmountAtom: toGoNearAtom(amount),
-      fromBlockchain: undefined,
+      fromBlockchainName: undefined,
       fromTxnId: txnId,
       marginFeeAtom: undefined,
       createdTime,
       toAddr: to,
       toAmountAtom: undefined,
-      toBlockchain: undefined,
+      toBlockchainName: undefined,
       toTxnId: undefined,
-      txnStatus: BridgeTxnStatus.DOING_INITIALIZE,
+      txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
     });
     return bridgeTxn;
   }
@@ -121,116 +120,118 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @param  {TxnType} dbName
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
-  static fromDbItem(dbItem: DbItem, dbName: TxnType): BridgeTxn {
+  static fromDbItem(dbItem: DbItem): BridgeTxn {
     const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: _dbItem.db_id,
-      txnType: dbName,
-
+      txnType: _dbItem.txn_type,
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
       fromAmountAtom: BigInt(_dbItem.from_amount_atom),
-      fromBlockchain: undefined,
+      fromBlockchainName: undefined,
       fromTxnId: _dbItem.from_txn_id,
       marginFeeAtom: BigInt(_dbItem.margin_fee_atom),
       createdTime: BigInt(_dbItem.created_time),
       toAddr: _dbItem.to_addr,
       toAmountAtom: BigInt(_dbItem.to_amount_atom),
-      toBlockchain: undefined,
+      toBlockchainName: undefined,
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
     });
     return bridgeTxn;
   }
 
-  constructor(
-    {
-      fixedFeeAtom,
-      marginFeeAtom,
-      createdTime,
-      fromAddr,
-      fromAmountAtom,
-      fromBlockchain,
-      fromTxnId,
-      toAddr,
-      toAmountAtom,
-      toBlockchain,
-      txnStatus,
-      txnType,
-      toTxnId,
-      dbId,
-    }: CriticalBridgeTxnObject,
-    initializeOptions: InitializeOptions = {
-      notCreateInDb: false,
-    }
-  ) {
-    this.fixedFeeAtom = fixedFeeAtom;
-    this.marginFeeAtom = marginFeeAtom;
-    this.createdTime = createdTime ?? BigInt(+Date.now());
+  constructor({
+    fixedFeeAtom,
+    marginFeeAtom,
+    createdTime,
+    fromAddr,
+    fromAmountAtom,
+    fromBlockchainName,
+    fromTxnId,
+    toAddr,
+    toAmountAtom,
+    toBlockchainName,
+    txnStatus,
+    txnType,
+    toTxnId,
+    dbId,
+  }: CriticalBridgeTxnObj) {
+    this.#isCreatedInDb = false;
+
+    this.txnType = txnType;
+    // TODO: shouldn't infer here
+    ({
+      fromBlockchainName: this.fromBlockchainName,
+      toBlockchainName: this.toBlockchainName,
+    } = this._inferBlockchainNames());
+    this.fromBlockchainName = fromBlockchainName ?? this.fromBlockchainName;
+    this.toBlockchainName = toBlockchainName ?? this.toBlockchainName;
+
+    this.fromTxnId = fromTxnId;
+    // TODO: should not add all on creation. Creation queue is only used in API part.
+    // TODO+ these lines below should be moved to API part on creating.
+    // TODO+ Or add a "fromApiCallParam" function.
+    // TODO-ID:CQA;
+    // creationQueue.add({
+    //   fromBlockchainName: this.fromBlockchainName,
+    //   txnId: this.fromTxnId,
+    // });
+
+    this.fromAmountAtom = fromAmountAtom;
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
-    this.fromBlockchain = fromBlockchain;
-    this.fromTxnId = fromTxnId;
     this.toAddr = toAddr;
-    this.toAmountAtom = toAmountAtom;
-    this.toBlockchain = toBlockchain;
-    this.txnStatus = txnStatus ?? BridgeTxnStatus.DOING_INITIALIZE;
-    this.txnType = txnType;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
+    this._hookBlockchain();
 
-    // TODO: maybe a `static async asyncConstruct(){}` is better?
-    this.#isInitializedPromise = new Promise((resolve, reject) => {
-      this._initialize(initializeOptions)
-        .then(() => {
-          resolve(true);
-        })
-        .catch((err) => {
-          logger.error(err);
-          reject(false);
-        });
-    });
+    try {
+      // Below will be overwritten if instantiated with value.
+      this.fixedFeeAtom = fixedFeeAtom ?? this._readFixedFeeAtom();
+      this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
+      this.createdTime = createdTime ?? BigInt(+Date.now());
+      this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
+      this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DOING_INITIALIZE;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      this.txnStatus = BridgeTxnStatusEnum.ERR_INITIALIZE;
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: 'BridgeTxn._initialize',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+        err: err.toString(),
+      });
+    }
+    this._selfValidate();
+    this.txnStatus = BridgeTxnStatusEnum.DONE_INITIALIZE;
   }
 
   /* MAKE BRIDGE TRANSACTION */
   // process according to sequence diagram
 
   /**
-   * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObject}.
+   * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObj}.
    * This should be the only way used outside the {@link BridgeTxn} class.
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @returns {Promise<BridgeTxnObject>} - the {@link BridgeTxnObject} representing the {@link BridgeTxn}
+   * @returns {Promise<BridgeTxnObj>} - the {@link BridgeTxnObj} representing the {@link BridgeTxn}
    */
-  async runWholeBridgeTxn(): Promise<BridgeTxnObject> {
-    if (!(await this.#isInitializedPromise)) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn.runWholeBridgeTxn',
-      });
-    }
-    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
-        at: 'BridgeTxn.runWholeBridgeTxn',
-        reason: 'fromBlockchain or toBlockchain is undefined',
-      });
+  async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
+    // TODO: should not create in db automatically
+    if (!this.#isCreatedInDb) {
+      await this.createInDb();
     }
 
     logger.info(
       literals.MAKING_TXN(
-        `${this.fromBlockchain}->${this.toBlockchain}`,
+        `${this.fromBlockchainName}->${this.toBlockchainName}`,
         this.fromAmountAtom,
         this.fromAddr,
         this.toAddr
       )
     );
-    const isInitialized = await this.#isInitializedPromise;
-    if (!isInitialized) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        bridgeTxn: this,
-      });
-    }
 
     await this.confirmIncomingTxn();
     await this.makeOutgoingTxn();
@@ -244,20 +245,24 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @emit change the txnStatus from {@link BridgeTxnStatus.DONE_INITIALIZE} to {@link BridgeTxnStatus.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
-    await this.#isInitializedPromise;
-    if (!(await this.#isInitializedPromise)) {
+    if (!this.#isCreatedInDb) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
+        reason:
+          'BridgeTxn should be created in DB before confirming incoming txn',
         bridgeTxn: this,
       });
     }
-    this._checkStatus(BridgeTxnStatus.DONE_INITIALIZE, 'confirmIncomingTxn');
+    this._checkStatus(
+      BridgeTxnStatusEnum.DONE_INITIALIZE,
+      'confirmIncomingTxn'
+    );
 
-    await this._updateTxnStatus(BridgeTxnStatus.DOING_INCOMING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_INCOMING);
 
     let confirmOutcome;
     try {
@@ -272,15 +277,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         case ConfirmOutcome.SUCCESS:
           break;
         case ConfirmOutcome.WRONG_INFO:
-          await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+          await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_VERIFY_INCOMING);
           break;
         case ConfirmOutcome.TIMEOUT:
-          await this._updateTxnStatus(BridgeTxnStatus.ERR_TIMEOUT_INCOMING);
+          await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING);
           break;
       }
     }
 
-    await this._updateTxnStatus(BridgeTxnStatus.DONE_INCOMING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DONE_INCOMING);
   }
 
   /**
@@ -288,17 +293,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchain} fails to make the outgoing transaction.
-   * @emit change the txnStatus from {@link BridgeTxnStatus.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatus.DOING_OUTGOING} or the corresponding errors.
+   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatusEnum.DOING_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async makeOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DONE_INCOMING, 'makeOutgoingTxn');
+    this._checkStatus(BridgeTxnStatusEnum.DONE_INCOMING, 'makeOutgoingTxn');
 
     let outgoingTxnId: TxnId;
-    this.toAmountAtom = this.getToAmountAtom();
     try {
-      await this._updateTxnStatus(BridgeTxnStatus.DOING_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
@@ -312,7 +316,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       // }
       await this._updateToTxnId(outgoingTxnId);
     } catch (err) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_MAKE_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
         err,
@@ -325,28 +329,28 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
-   * @emit change the txnStatus from {@link BridgeTxnStatus.DOING_OUTGOING} to {@link BridgeTxnStatus.DONE_OUTGOING} or the corresponding errors.
+   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DOING_OUTGOING} to {@link BridgeTxnStatusEnum.DONE_OUTGOING} or the corresponding errors.
    * @returns {Promise<void>} promise of void
    */
   async verifyOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatus.DOING_OUTGOING, 'verifyOutgoingTxn');
+    this._checkStatus(BridgeTxnStatusEnum.DOING_OUTGOING, 'verifyOutgoingTxn');
     try {
       await this.#toBlockchain.confirmTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        atomAmount: this.toAmountAtom!,
+        atomAmount: this.toAmountAtom,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         txnId: this.toTxnId!,
       });
     } catch (e) {
-      await this._updateTxnStatus(BridgeTxnStatus.ERR_CONFIRM_OUTGOING);
+      await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
         err: e,
       });
     }
-    await this._updateTxnStatus(BridgeTxnStatus.DONE_OUTGOING);
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DONE_OUTGOING);
   }
 
   /* MISCELLANEOUS */
@@ -363,20 +367,20 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     return (
       this.fromAddr === other.fromAddr &&
       this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
-      this.fromBlockchain === other.fromBlockchain &&
+      this.fromBlockchainName === other.fromBlockchainName &&
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.toAmountAtom!.toString() === other.toAmountAtom!.toString() &&
-      this.toBlockchain === other.toBlockchain &&
+      this.toAmountAtom.toString() === other.toAmountAtom.toString() &&
+      this.toBlockchainName === other.toBlockchainName &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
       this.txnType === other.txnType &&
       this.dbId === other.dbId &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.fixedFeeAtom!.toString() === other.fixedFeeAtom!.toString() &&
+      this.fixedFeeAtom.toString() === other.fixedFeeAtom.toString() &&
       //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.marginFeeAtom!.toString() === other.marginFeeAtom!.toString() &&
+      this.marginFeeAtom.toString() === other.marginFeeAtom.toString() &&
       this.createdTime.toString() === other.createdTime.toString()
     );
   }
@@ -384,39 +388,28 @@ class BridgeTxn implements CriticalBridgeTxnObject {
   /**
    * Transform the {@link BridgeTxn} to an object with all info, wrapping up all important fields.
    *
-   * @returns {BridgeTxnObject} the object representation of the {@link BridgeTxn}
+   * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
    */
-  public toObject(): BridgeTxnObject {
-    if (
-      this.fromBlockchain === undefined ||
-      this.toBlockchain === undefined ||
-      this.toAmountAtom === undefined ||
-      this.fixedFeeAtom === undefined ||
-      this.marginFeeAtom === undefined
-    ) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
-        at: 'BridgeTxn.toObject',
-        reason: 'undefined field(s)',
-      });
-    }
+  public toObject(): BridgeTxnObj {
     // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
-    const bridgeTxnObject: BridgeTxnObject = {
+    const bridgeTxnObject: BridgeTxnObj = {
       dbId: this.dbId,
-      fixedFeeAtom: this.fixedFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      marginFeeAtom: this.marginFeeAtom, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      fixedFeeAtom: this.fixedFeeAtom,
+      marginFeeAtom: this.marginFeeAtom,
       createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
-      fromBlockchain: this.fromBlockchain,
+      fromBlockchainName: this.fromBlockchainName,
       fromTxnId: this.fromTxnId,
       toAddr: this.toAddr,
       toAmountAtom: this.toAmountAtom,
-      toBlockchain: this.toBlockchain, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      toBlockchainName: this.toBlockchainName,
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
       txnType: this.txnType,
     };
-    return Object.assign(bridgeTxnObject, this);
+    return bridgeTxnObject;
+    // return Object.assign(bridgeTxnObject, this);
   }
 
   /**
@@ -425,22 +418,10 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {string} the JSON string representation of the {@link BridgeTxn}
    */
   public toString(): string {
-    return JSON.stringify(this.toObject());
+    return JSON.stringify(stringifyBigintInObj(this.toObject()));
   }
 
   /* GETTERS */
-
-  /**
-   * Get a defined toAmountAtom of the {@link BridgeTxn} for TS type checking.
-   *
-   * @returns {bigint} the toAmountAtom of the {@link BridgeTxn}
-   */
-  public getToAmountAtom(): bigint {
-    if (this.toAmountAtom === undefined) {
-      this.toAmountAtom = this._calculateToAmountAtom();
-    }
-    return this.toAmountAtom;
-  }
 
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
@@ -460,54 +441,22 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     }
   }
 
-  /**  PRIVATE METHODS - CLASS INIT  **/
-
   /**
-   * Initiate the BridgeTxn.
-   * Most fields are readonly, and are defined after initiate().
-   * 3 Exceptions: `dbId`, `toTxnId` are allowed to be assigned once.
-   * Field `txnStatus` is allowed to be assigned by the {@link enum BridgeTxnStatus}.
-   *
-   * @async
-   * @private
-   * @param {InitializeOptions} initializeOptions - [optional] the options for initiating the {@link BridgeTxn}
-   * @returns {Promise<BridgeTxn>} the initiated {@link BridgeTxn}
-   *
-   * @todo try to fix the readonly
-   * @todo link the enum BridgeTxnStatus from ${REPO_ROOT}/index.ts
+   * UID {DbId}.{TxnId}
    */
-  private async _initialize(
-    initializeOptions: InitializeOptions
-  ): Promise<this> {
-    try {
-      this._selfValidate();
-      this._inferBlockchainNames();
-      this._hookBlockchain();
-      this._getFixedFeeAtom();
-      this._calculateMarginFeeAtom();
-      this._calculateToAmountAtom();
-    } catch (err) {
-      this.txnStatus = BridgeTxnStatus.ERR_INITIALIZE;
-      if (initializeOptions.notCreateInDb === false) {
-        await this._createInDb();
-      }
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn._initialize',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-        err,
-      });
+  get uid(): string {
+    if (this.dbId === undefined) {
+      this.dbId = this.getDbId();
     }
-    this.txnStatus = BridgeTxnStatus.DONE_INITIALIZE;
-    if (initializeOptions.notCreateInDb === false) {
-      await this._createInDb();
-    }
-    return this;
+    return `${this.dbId}.${this.fromTxnId}`;
   }
+
+  /**  PRIVATE METHODS - CLASS INIT  **/
 
   /**
    * Synchronously validate the {@link BridgeTxn} itself.
    * Check the fromAmountAtom is greater than fixedFeeAtom.
-   * Not check if it's already in the database, because it's async. This check happens in {@link _createInDb}.
+   * Not check if it's already in the database, because it's async. This check happens in {@link createInDb}.
    * This is one step of the initialization.
    *
    * @private
@@ -521,10 +470,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
     //     at: 'BridgeTxn._selfValidate',
     //   });
     // }
-
-    if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this._getFixedFeeAtom();
-    }
 
     if (this.fromAmountAtom < this.fixedFeeAtom) {
       throw new BridgeError(ERRORS.INTERNAL.INVALID_AMOUNT, {
@@ -542,20 +487,16 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * Infer the blockchain names of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
+   * @deprecated this should be done on receiving the request, not here.
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn} is invalid
    * @returns {{fromBlockchain: BlockchainName; toBlockchain: BlockchainName;}} the blockchain names
    */
   private _inferBlockchainNames(): {
-    fromBlockchain: BlockchainName;
-    toBlockchain: BlockchainName;
+    fromBlockchainName: BlockchainName;
+    toBlockchainName: BlockchainName;
   } {
-    if (this.fromBlockchain !== undefined && this.toBlockchain !== undefined) {
-      return {
-        fromBlockchain: this.fromBlockchain,
-        toBlockchain: this.toBlockchain,
-      };
-    }
+    // TODO: deprecate this
 
     let fromBlockchain: BlockchainName;
     let toBlockchain: BlockchainName;
@@ -572,9 +513,12 @@ class BridgeTxn implements CriticalBridgeTxnObject {
         txnType: this.txnType,
       });
     }
-    this.fromBlockchain = fromBlockchain;
-    this.toBlockchain = toBlockchain;
-    return { fromBlockchain, toBlockchain };
+    this.fromBlockchainName = fromBlockchain;
+    this.toBlockchainName = toBlockchain;
+    return {
+      fromBlockchainName: fromBlockchain,
+      toBlockchainName: toBlockchain,
+    };
   }
 
   /**
@@ -586,13 +530,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns void
    */
   private _hookBlockchain(): void {
-    if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        fromBlockchain: this.fromBlockchain,
-        toBlockchain: this.toBlockchain,
-        at: 'BridgeTxn._hookBlockchain',
-      });
-    }
     this._hookFromBlockchain();
     this._hookToBlockchain();
   }
@@ -605,13 +542,14 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns void
    */
   private _hookFromBlockchain(): void {
-    if (this.fromBlockchain === BlockchainName.NEAR) {
+    if (this.fromBlockchainName === BlockchainName.NEAR) {
       this.#fromBlockchain = nearBlockchain;
-    } else if (this.fromBlockchain === BlockchainName.ALGO) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (this.fromBlockchainName === BlockchainName.ALGO) {
       this.#fromBlockchain = algoBlockchain;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        fromBlockchain: this.fromBlockchain,
+        fromBlockchain: this.fromBlockchainName,
         at: 'BridgeTxn._hookBlockchain',
       });
     }
@@ -625,13 +563,14 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns void
    */
   private _hookToBlockchain(): void {
-    if (this.toBlockchain === BlockchainName.NEAR) {
+    if (this.toBlockchainName === BlockchainName.NEAR) {
       this.#toBlockchain = nearBlockchain;
-    } else if (this.toBlockchain === BlockchainName.ALGO) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (this.toBlockchainName === BlockchainName.ALGO) {
       this.#toBlockchain = algoBlockchain;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        toBlockchain: this.toBlockchain,
+        toBlockchain: this.toBlockchainName,
         at: 'BridgeTxn._hookBlockchain',
       });
     }
@@ -644,10 +583,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns {bigint} the fixedFeeAtom
    */
-  private _getFixedFeeAtom(): bigint {
-    if (this.fixedFeeAtom !== undefined) {
-      return this.fixedFeeAtom;
-    }
+  private _readFixedFeeAtom(): bigint {
     let fixedFee: bigint;
     if (this.txnType === TxnType.MINT) {
       fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
@@ -677,20 +613,15 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
-    if (this.marginFeeAtom !== undefined) {
-      return this.marginFeeAtom;
-    }
-
-    let marginPercentage: number;
-
+    let marginBips: number;
     if (this.txnType === TxnType.MINT) {
-      marginPercentage = ENV.MINT_MARGIN_FEE_BIPS;
+      marginBips = ENV.MINT_MARGIN_FEE_BIPS;
     } else if (
       // for extendability, we can add more txn types here.
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       this.txnType === TxnType.BURN
     ) {
-      marginPercentage = ENV.BURN_MARGIN_FEE_BIPS;
+      marginBips = ENV.BURN_MARGIN_FEE_BIPS;
     } else {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
         txnType: this.txnType,
@@ -699,7 +630,7 @@ class BridgeTxn implements CriticalBridgeTxnObject {
 
     const marginFee: bigint = // TODO: supposing no bigint overflow
       this.fromAmountAtom -
-      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginPercentage))) /
+      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginBips))) /
         BigInt(10000); // X-(X*(1-%)) instead of X*% for rounding.
     // algorithm discussed with algomint team.
 
@@ -715,17 +646,6 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @returns {bigint} the totalFeeAtom
    */
   private _calculateToAmountAtom(): bigint {
-    if (this.toAmountAtom !== undefined) {
-      return this.toAmountAtom;
-    }
-
-    if (this.fixedFeeAtom === undefined) {
-      this.fixedFeeAtom = this._getFixedFeeAtom();
-    }
-    if (this.marginFeeAtom === undefined) {
-      this.marginFeeAtom = this._calculateMarginFeeAtom();
-    }
-
     const toAmount: bigint =
       this.fromAmountAtom - this.fixedFeeAtom - this.marginFeeAtom;
 
@@ -740,36 +660,25 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * This is the last step of the initialization.
    *
    * @async
-   * @private
+   * @public
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
    * @throws {BridgeError} - {@link ERRORS.API.REUSED_INCOMING_TXN} if the incoming txn is already used
    * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED} if the database create txn failed
    * @returns {Promise<DbId>} the id of the created {@link BridgeTxn}
    */
-  private async _createInDb(): Promise<DbId> {
+  public async createInDb(): Promise<DbId> {
     if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
-        at: 'BridgeTxn._createInDb',
+        at: 'BridgeTxn.createInDb',
         db: this.#db,
       });
     }
 
-    // create is inside _initialize() method, so we can't check if is initialized.
-    // if (!(await this.#isInitializedPromise)) {
-    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-    //     message: 'BridgeTxn is not initialized',
-    //     at: 'BridgeTxn._createInDb',
-    //   });
-    // }
-
     // make sure fromTxnId is never used before
     // possible improvement: make sure transaction is finished recently, check a wider range in db
-    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(
-      this.fromTxnId,
-      this.txnType
-    );
+    const dbEntryWithTxnId = await this.#db.readTxnFromTxnId(this.fromTxnId);
     if (dbEntryWithTxnId.length > 0) {
-      // await this._updateTxnStatus(BridgeTxnStatus.ERR_VERIFY_INCOMING);
+      // await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_VERIFY_INCOMING);
       throw new BridgeError(ERRORS.API.REUSED_INCOMING_TXN, {
         at: 'BridgeTxn.confirmIncomingTxn',
         bridgeTxn: this,
@@ -777,21 +686,25 @@ class BridgeTxn implements CriticalBridgeTxnObject {
       });
     }
 
-    // try {
-    this.dbId = await this.#db.createTxn(this);
-    // !!!now
-    // } catch (err) {
-    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
-    //     at: 'BridgeTxn._createInDb',
-    //     error: err,
-    //     bridgeTxn: this,
-    //   });
-    // }
-    // if (!this.#db.isConnected) {
-    //   throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
-    //     at: 'BridgeTxn._updateTxnStatus',
-    //   });
-    // }
+    try {
+      this.dbId = await this.#db.createTxn(this);
+    } catch (err) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED, {
+        at: 'BridgeTxn._createInDb',
+        error: err,
+        bridgeTxn: this,
+      });
+    }
+
+    // for jest testing
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!this.#db.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: 'BridgeTxn._updateTxnStatus',
+      });
+    }
+    this.#isCreatedInDb = true;
+
     return this.dbId;
   }
 
@@ -835,21 +748,23 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    * @async
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
-   * @param  {BridgeTxnStatus} newStatus
+   * @param  {BridgeTxnStatusEnum} newStatus
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
-  private async _updateTxnStatus(newStatus: BridgeTxnStatus): Promise<DbId> {
+  private async _updateTxnStatus(
+    newStatus: BridgeTxnStatusEnum
+  ): Promise<DbId> {
     // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
     // will raise err if current txnStatus is error.
     if (
       [
-        BridgeTxnStatus.ERR_AWS_RDS_DB,
-        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
-        BridgeTxnStatus.ERR_INITIALIZE,
-        BridgeTxnStatus.ERR_MAKE_OUTGOING,
-        BridgeTxnStatus.ERR_SEVER_INTERNAL,
-        BridgeTxnStatus.ERR_TIMEOUT_INCOMING,
-        BridgeTxnStatus.ERR_CONFIRM_OUTGOING,
+        BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
+        BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
+        BridgeTxnStatusEnum.ERR_INITIALIZE,
+        BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
+        BridgeTxnStatusEnum.ERR_SEVER_INTERNAL,
+        BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING,
+        BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
       ].includes(this.txnStatus)
     ) {
       throw new BridgeError(ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS, {
@@ -904,11 +819,11 @@ class BridgeTxn implements CriticalBridgeTxnObject {
    *
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
-   * @param  {BridgeTxnStatus} expected
+   * @param  {BridgeTxnStatusEnum} expected
    * @param  {string} at
    * @returns void
    */
-  private _checkStatus(expected: BridgeTxnStatus, at: string): void {
+  private _checkStatus(expected: BridgeTxnStatusEnum, at: string): void {
     if (!(this.txnStatus === expected)) {
       throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
         at: `BridgeTxn.${at}`,

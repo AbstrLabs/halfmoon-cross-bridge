@@ -1,25 +1,29 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
  */
-export { transact };
+export { create, _execute };
 
 import { ApiCallParam, Stringer } from '../utils/type';
 import { BridgeError, ERRORS } from '../utils/errors';
-import { BridgeTxn, BridgeTxnObject } from '.';
+import { BridgeTxn, BridgeTxnObj } from '.';
 
 import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
+import { txnHandler } from './txn-handler';
+import { creationQueue } from './creation-queue';
+import { BlockchainName } from '..';
 
 /**
- * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, and execute the transaction.
+ * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
  *
  * @async
  * @param  {ApiCallParam} apiCallParam
- * @returns {Promise<BridgeTxnObject>} A BridgeTxnObject representing the burn bridge transaction.
+ * @returns {Promise<BridgeTxnObj>} A BridgeTxnObject representing the burn bridge transaction.
  */
-async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
-  /* SETUP */
+// eslint-disable-next-line @typescript-eslint/require-await
+async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
+  /* LOGGING */
   let _literals: {
     START: (amount: Stringer, from: Stringer, to: Stringer) => string;
     DONE: string;
@@ -46,14 +50,44 @@ async function transact(apiCallParam: ApiCallParam): Promise<BridgeTxnObject> {
     _literals.START(apiCallParam.amount, apiCallParam.from, apiCallParam.to)
   );
 
-  /* EXECUTE */
+  /* CREATE */
+  // TODO: this is a quick fix for test, need update TODO-ID:CQA
+  creationQueue.add({
+    txnId: apiCallParam.txnId,
+    fromBlockchainName:
+      apiCallParam.type == TxnType.MINT
+        ? BlockchainName.ALGO
+        : BlockchainName.NEAR,
+  });
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
     BigInt(Date.now())
   );
-  const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
 
+  // next version: await bridgeTxn.createInDb();
+  // txnHandler.queue.push(bridgeTxn);
+
+  // TODO: this is a quick fix for test, need update TODO-ID:CQA
+  creationQueue.remove({
+    fromBlockchainName:
+      apiCallParam.type == TxnType.MINT
+        ? BlockchainName.ALGO
+        : BlockchainName.NEAR,
+    txnId: apiCallParam.txnId,
+  });
+
+  logger.info(
+    `created ${apiCallParam.type} bridge txn: ${bridgeTxn.toString()}`
+  );
+
+  return bridgeTxn;
+}
+
+/**
+ * @deprecated - use new API model, the txnHandler will execute the transaction.
+ */
+async function _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
+  const bridgeTxnObject = await txnHandler._execute(bridgeTxn);
   // TODO: ERR handler .burn success
-  logger.info(_literals.DONE);
   return bridgeTxnObject;
 }
