@@ -7,7 +7,7 @@ import { toGoNearAtom } from '../utils/formatter';
 const exampleFrom = ENV.NEAR_EXAMPL_ADDR;
 const exampleTo = ENV.NEAR_MASTER_ADDR;
 const exampleAmount = toGoNearAtom('1');
-const exampleTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7';
+const exampleTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7'; // TODO: use temp string
 describe('nearBlockchain', () => {
   it.skip('should be defined', () => {
     expect(nearBlockchain).toBeDefined();
