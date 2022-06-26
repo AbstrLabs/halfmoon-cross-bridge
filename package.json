@@ -96,9 +96,6 @@
         "useESM": false
       }
     },
-    "ignorePatterns": [
-      "<rootDir>/playwright.config.ts"
-    ],
     "modulePathIgnorePatterns": [
       "<rootDir>/dist/",
       "<rootDir>/src/integration-test/"
