@@ -17,8 +17,6 @@ test('near explorer connection', async ({ page }) => {
   const receiver = page.locator(
     '.col-md-4 .c-CardCellText-eLcwWo .c-AccountLinkWrapper-dbzzBd'
   );
-  console.dir(signer);
-  console.dir(receiver);
   await expect(signer).toHaveText('abstrlabs-test.testnet');
   await expect(receiver).toHaveText('abstrlabs.testnet');
 });

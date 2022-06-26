@@ -5,5 +5,4 @@ test('host API server', async ({ request }) => {
   expect(res.ok()).toBeTruthy();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   expect((await res.json()).API_VERSION == '0.1.1').toBe(true);
-  // await expect(title).toHaveText('Playwright');
 });
