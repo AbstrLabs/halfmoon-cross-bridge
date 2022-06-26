@@ -6,6 +6,13 @@ const config: PlaywrightTestConfig = {
   retries: process.env.CI ? 2 : 0,
   use: {
     trace: 'on-first-retry',
+    baseURL: 'http://localhost:4190/',
+  },
+  webServer: {
+    command: 'yarn dev',
+    url: 'http://localhost:4190',
+    timeout: 20 * 1000,
+    reuseExistingServer: !process.env.CI,
   },
   projects: [
     {

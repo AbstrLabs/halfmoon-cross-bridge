@@ -74,7 +74,8 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
       "project": [
-        "./tsconfig.json"
+        "./tsconfig.json",
+        "./tsconfig.eslint.json"
       ]
     },
     "plugins": [
@@ -95,6 +96,9 @@
         "useESM": false
       }
     },
+    "ignorePatterns": [
+      "<rootDir>/playwright.config.ts"
+    ],
     "modulePathIgnorePatterns": [
       "<rootDir>/dist/",
       "<rootDir>/src/integration-test/"

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "types": ["@types/node"],
+    "strictNullChecks": true
+  },
+  "extends": "./tsconfig.json",
+  "exclude": [""],
+  "include": ["playwright.config.ts"]
+}

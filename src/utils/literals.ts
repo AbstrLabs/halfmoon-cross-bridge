@@ -8,10 +8,13 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 // Templates will call `toString()` method automatically.
 
-export { literals };
+export { literals, exampleNearTxnId };
 
 import { Stringer } from './type';
 
+const exampleNearTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7'; // TODO: use temp string
+
+/* LITERAL TEMPLATES */
 const NOT_LOADED_FROM_ENV_STR = 'NOT_LOADED_FROM_ENV';
 const NOT_LOADED_FROM_ENV_NUM = 1234567890;
 
