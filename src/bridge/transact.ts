@@ -3,12 +3,10 @@
  */
 export { create, _execute };
 
-import { ApiCallParam, Stringer } from '../utils/type';
-import { BridgeError, ERRORS } from '../utils/errors';
+import { ApiCallParam } from '../utils/type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 
 import { TxnType } from '../blockchain';
-import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
 import { creationQueue } from './creation-queue';
@@ -23,33 +21,6 @@ import { BlockchainName } from '..';
  */
 // eslint-disable-next-line @typescript-eslint/require-await
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
-  /* LOGGING */
-  let _literals: {
-    START: (amount: Stringer, from: Stringer, to: Stringer) => string;
-    DONE: string;
-  };
-  if (apiCallParam.type === TxnType.MINT) {
-    _literals = {
-      START: literals.START_MINTING,
-      DONE: literals.DONE_MINT,
-    };
-    // for extendability, we can add more txn types here.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  } else if (apiCallParam.type === TxnType.BURN) {
-    _literals = {
-      START: literals.START_BURNING,
-      DONE: literals.DONE_BURN,
-    };
-  } else {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-      at: 'transact',
-      apiCallParam,
-    });
-  }
-  logger.info(
-    _literals.START(apiCallParam.amount, apiCallParam.from, apiCallParam.to)
-  );
-
   /* CREATE */
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
   creationQueue.add({
@@ -59,13 +30,14 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
         ? BlockchainName.ALGO
         : BlockchainName.NEAR,
   });
+
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
     BigInt(Date.now())
   );
 
-  // next version: await bridgeTxn.createInDb();
-  // txnHandler.queue.push(bridgeTxn);
+  await bridgeTxn.createInDb();
+  txnHandler.queue.push(bridgeTxn);
 
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
   creationQueue.remove({
@@ -76,9 +48,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
     txnId: apiCallParam.txnId,
   });
 
-  logger.info(
-    `created ${apiCallParam.type} bridge txn: ${bridgeTxn.toString()}`
-  );
+  logger.info(`created bridge txn: ${bridgeTxn.uid.toString()}`);
 
   return bridgeTxn;
 }
