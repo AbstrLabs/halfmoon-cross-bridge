@@ -6,7 +6,7 @@ test('internet connection', async ({ page }) => {
   const title = page.locator('.navbar__inner .navbar__title');
   await expect(title).toHaveText('Playwright');
 });
-test('near explorer connection', async ({ page }) => {
+/* test('near explorer connection', async ({ page }) => {
   const exampleNearTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7'; // TODO: use temp string
 
   const url = `https://explorer.testnet.near.org/transactions/${exampleNearTxnId}`;
@@ -19,5 +19,5 @@ test('near explorer connection', async ({ page }) => {
   );
   await expect(signer).toHaveText('abstrlabs-test.testnet');
   await expect(receiver).toHaveText('abstrlabs.testnet');
-});
+}); */
 // });
