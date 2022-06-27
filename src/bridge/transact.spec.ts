@@ -66,7 +66,7 @@ describe('mint test', () => {
 
 // TODO: mint-burn-test: move more same functions to test helper.
 
-describe('burn test', () => {
+describe.skip('burn test', () => {
   it(
     'burn 1.2345678901 goNEAR from ALGO to NEAR',
     async () => {
