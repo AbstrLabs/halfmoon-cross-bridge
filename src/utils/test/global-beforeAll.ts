@@ -14,7 +14,6 @@ jest.setTimeout(10 * SECOND); // in milliseconds
 //   console.error(infoObj);
 //   return logger;
 // });
-// jest.fn();
 
 beforeAll(async () => {
   try {
