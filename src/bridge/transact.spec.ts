@@ -12,17 +12,18 @@ import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
-describe('mint test', () => {
+describe.skip('mint test', () => {
+  // skipped for state pattern
   it(
     'mint 1.2345678901 NEAR from NEAR to ALGO',
+    // suppose Opted-in to goNEAR.
     async () => {
-      // suppose Opted-in to goNEAR.
-
       // config
       const amount = '1.2345678901';
+
       // simulate frontend: make NEAR txn
-      let mintResponse: FinalExecutionOutcome | undefined = undefined;
-      let nearTxnId: NearTxnId | undefined = undefined;
+      let mintResponse!: FinalExecutionOutcome;
+      let nearTxnId!: NearTxnId;
       try {
         mintResponse = await transferOnNearTestnetFromExampleToMaster(amount);
         // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
@@ -32,11 +33,6 @@ describe('mint test', () => {
         console.error('cannot mint NEAR', err);
       }
       // manually checked the amount is correct.
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-
-      if (!nearTxnId) {
-        throw new Error('cannot mint NEAR');
-      }
       const apiCallParam: ApiCallParam = {
         type: TxnType.MINT,
         from: ENV.NEAR_EXAMPL_ADDR,
