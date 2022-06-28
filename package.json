@@ -98,7 +98,7 @@
     },
     "modulePathIgnorePatterns": [
       "<rootDir>/dist/",
-      "<rootDir>/src/integration-test/"
+      "disabled/<rootDir>/src/integration-test/"
     ],
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
