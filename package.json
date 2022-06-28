@@ -95,8 +95,7 @@
       }
     },
     "modulePathIgnorePatterns": [
-      "<rootDir>/dist/",
-      "disabled/<rootDir>/src/integration-test/"
+      "<rootDir>/dist/"
     ],
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
@@ -126,8 +125,6 @@
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "handler": "yarn test:handler",
-    "int": "yarn integration-test",
-    "integration-test": "jest ./src/integration-test/",
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",
     "postinstall": "husky install",

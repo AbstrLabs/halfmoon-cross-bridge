@@ -3,4 +3,3 @@
 
 
 yarn test # unit tests
-yarn integration-test # integration tests
