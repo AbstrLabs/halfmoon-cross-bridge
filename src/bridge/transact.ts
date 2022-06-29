@@ -9,7 +9,7 @@ import { BridgeTxn, BridgeTxnObj } from '.';
 
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
-import { bridgeWorker } from './bridge-worker';
+import { apiWorker } from './api-worker';
 
 /**
  * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
@@ -22,7 +22,7 @@ import { bridgeWorker } from './bridge-worker';
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   /* CREATE */
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  bridgeWorker.add(apiCallParam);
+  apiWorker.plan(apiCallParam);
 
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
@@ -33,7 +33,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   txnHandler.queue.push(bridgeTxn);
 
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  bridgeWorker.remove(apiCallParam);
+  apiWorker.remove(apiCallParam);
 
   logger.info(`created bridge txn with uid: ${bridgeTxn.uid.toString()}`);
 
