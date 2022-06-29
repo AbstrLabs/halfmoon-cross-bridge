@@ -1,5 +1,5 @@
 import { IncomingMessage, request, RequestOptions } from 'node:http';
-import { WELCOME_JSON } from '../server';
+import { WELCOME_JSON } from '../../server';
 
 it('hosted API server returns welcome JSON on GET', async () => {
   //

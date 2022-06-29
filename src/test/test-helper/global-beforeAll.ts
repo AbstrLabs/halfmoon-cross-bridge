@@ -1,6 +1,6 @@
 import { db } from '../../database/db';
-import { loadDotEnv } from '../dotenv';
-import { logger } from '../logger';
+import { loadDotEnv } from '../../utils/dotenv';
+import { logger } from '../../utils/logger';
 
 loadDotEnv(); // better than calling `ENV`.
 const SECOND = 1000;

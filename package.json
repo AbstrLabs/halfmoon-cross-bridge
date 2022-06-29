@@ -83,8 +83,8 @@
   },
   "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",
   "jest": {
-    "globalSetup": "./src/utils/test/jest-setup.ts",
-    "globalTeardown": "./src/utils/test/jest-teardown.ts",
+    "globalSetup": "./src/test/test-helper/jest-setup.ts",
+    "globalTeardown": "./src/test/test-helper/jest-teardown.ts",
     "globals": {
       "ts-jest": {
         "tsconfig": {
@@ -99,7 +99,7 @@
     ],
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
-      "./src/utils/test/global-beforeAll.ts"
+      "./src/test/test-helper/global-beforeAll.ts"
     ],
     "testEnvironment": "node"
   },
@@ -125,6 +125,7 @@
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "handler": "yarn test:handler",
+    "int": "yarn test:integration",
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",
     "postinstall": "husky install",
@@ -134,6 +135,7 @@
     "test:bridge": "jest --testPathPattern=src/bridge",
     "test:db": "jest --testPathPattern=src/database",
     "test:handler": "jest --testPathPattern=src/bridge/txn-handler",
+    "test:integration": "jest --testPathPattern=src/test/integration-test",
     "test:near": "jest --testPathPattern=src/blockchain/near",
     "test:transact": "jest --testPathPattern=src/bridge/transact",
     "test:util": "jest --testPathPattern=src/utils",

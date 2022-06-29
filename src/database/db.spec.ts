@@ -2,7 +2,7 @@ import { BridgeTxn } from '../bridge';
 import { BridgeTxnStatusEnum } from '..';
 // import { ENV } from '../utils/dotenv'; // not sure if we can initialize DB without ENV
 import { db } from './db';
-import { exampleBridgeTxn } from '../utils/test/test-example';
+import { exampleBridgeTxn } from '../test/test-helper/test-example';
 
 describe('DATABASE test', () => {
   describe.skip('CRUD test with Bridge Txn', () => {

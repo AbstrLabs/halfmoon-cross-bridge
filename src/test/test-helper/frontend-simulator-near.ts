@@ -8,10 +8,10 @@ export { simulatedFrontendNearToGoNear };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { MintApiParam } from '../utils/type';
-import { NearTxnId, TxnType } from '../blockchain';
+import { MintApiParam } from '../../utils/type';
+import { NearTxnId, TxnType } from '../../blockchain';
 
 /**
  * Simulate frontend: make NEAR -> goNEAR mint txn, returning an API call param.
