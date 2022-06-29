@@ -7,7 +7,7 @@ export { _create, _execute };
 import { ApiCallParam } from '../utils/type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 
-import { txnHandler } from './txn-handler';
+import { txnHandler } from './bridge-worker';
 import { apiWorker } from './api-worker';
 
 /**
