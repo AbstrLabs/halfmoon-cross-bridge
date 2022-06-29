@@ -9,6 +9,8 @@ async function main() {
   setupLocalEnv();
   showWelcome();
   await setupRemoteEnv();
+
+  /* START SERVER */
   startServer();
 }
 

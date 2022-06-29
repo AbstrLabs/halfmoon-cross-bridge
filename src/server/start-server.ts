@@ -44,7 +44,8 @@ function startServer() {
 
   // TODO: move API to a new file of new folder server/api
 
-  app.use('/algorand-near', algorandNear);
+  // is it better to write "/algorand-near" here or in "algorand-near.ts"?
+  app.use('/', algorandNear);
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
   });

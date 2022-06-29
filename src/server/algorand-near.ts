@@ -1,3 +1,8 @@
+/**
+ * Route for /algorand-near with POST and GET method.
+ */
+export { algorandNear };
+
 import { ApiCallParam, parseApiCallParam, TxnUid } from '../utils/type';
 import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
@@ -12,12 +17,10 @@ import { _create } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from '../bridge/api-worker';
 
-export { algorandNear };
-
 const algorandNear = express.Router();
 
 algorandNear
-  .route('/')
+  .route('/algorand-near')
   .get((req: Request, res: Response) => {
     res.json(WELCOME_JSON);
   })
