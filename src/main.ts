@@ -18,6 +18,7 @@ function setupLocalEnv() {
 function showWelcome() {
   logger.level = ENV.LOGGER_LEVEL;
   logger.info(`log level: ${ENV.LOGGER_LEVEL}`);
+  // TODO: show some settings like network (testnet/mainnet), accounts, database, etc.
 }
 async function setupRemoteEnv() {
   // TODO: check statuses of all blockchains
