@@ -9,7 +9,7 @@ import { BridgeTxn, BridgeTxnObj } from '.';
 import { TxnType } from '../blockchain';
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
-import { bridgeWorker } from './creation-queue';
+import { bridgeWorker } from './bridge-worker';
 import { BlockchainName } from '..';
 
 /**
