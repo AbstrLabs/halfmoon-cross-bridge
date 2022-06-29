@@ -131,6 +131,8 @@
     "near": "yarn test:near",
     "postinstall": "husky install",
     "prepare": "husky install",
+    "pretest": "yarn pretest:integration",
+    "pretest:integration": "echo 'should run `yarn dev` before running integration test'",
     "test": "jest",
     "test:algo": "jest --testPathPattern=src/blockchain/algorand",
     "test:bridge": "jest --testPathPattern=src/bridge",
