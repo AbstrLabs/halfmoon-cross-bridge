@@ -23,6 +23,19 @@ class BridgeWorker {
     this.database = database;
   }
 
+  public async run() {
+    await this.loadUnfinishedTasksFromDb();
+    // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      await this.updateTasksFromDb();
+      await pause(UPDATE_INTERVAL_MS);
+      while (this.length > 0) {
+        await this.handleNewTask();
+        await pause(EXECUTE_INTERVAL_MS);
+      }
+    }
+  }
+
   /**
    * @deprecated use handleTasks() instead.
    */
@@ -68,20 +81,11 @@ class BridgeWorker {
     await this.handleTask(newTask);
   }
 
-  public async run() {
-    await this.loadUnfinishedTasksFromDb();
-    // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      await this.updateTasksFromDb();
-      await pause(UPDATE_INTERVAL_MS);
-      while (this.length > 0) {
-        await this.handleNewTask();
-        await pause(EXECUTE_INTERVAL_MS);
-      }
-    }
-  }
-
-  addTask(bridgeTxn: BridgeTxn) {
+  public async addTask(bridgeTxn: BridgeTxn) {
+    // TODO: check if task already exists in DB
+    await new Promise<void>((resolve) => {
+      resolve();
+    });
     this._push(bridgeTxn);
   }
 
