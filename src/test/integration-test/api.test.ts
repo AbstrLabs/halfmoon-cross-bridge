@@ -6,6 +6,13 @@ import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator
 
 it('hosted API server returns welcome JSON on GET', async () => {
   const res = await axios.get('http://localhost:4190/');
+
+  const IGNORED = 'IGNORED';
+  interface shaped {
+    ADDITIONAL_INFO: { TIMESTAMP: string };
+  }
+  (res.data as shaped).ADDITIONAL_INFO.TIMESTAMP = IGNORED;
+  (WELCOME_JSON as shaped).ADDITIONAL_INFO.TIMESTAMP = IGNORED;
   expect(res.data).toStrictEqual(WELCOME_JSON);
   expect(res.status).toBe(200);
   expect(res.statusText).toBe('OK');
