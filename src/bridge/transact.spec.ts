@@ -1,14 +1,13 @@
 // TODO: mint-burn-test: move more same functions to test helper.
 
-import { NearTxnId, TxnType } from '../blockchain';
+import { TxnType } from '../blockchain';
 
 import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
-import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
 import { create } from './transact';
-import { transferOnNearTestnetFromExampleToMaster } from './test-helper';
+import { simulatedFrontendNearToGoNear } from './test-helper';
 
 const TIMEOUT_30S = 30_000;
 
@@ -21,26 +20,10 @@ describe.skip('mint test', () => {
       // config
       const amount = '1.2345678901';
 
-      // simulate frontend: make NEAR txn
-      let mintResponse!: FinalExecutionOutcome;
-      let nearTxnId!: NearTxnId;
-      try {
-        mintResponse = await transferOnNearTestnetFromExampleToMaster(amount);
-        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
-        nearTxnId = mintResponse.transaction.hash as NearTxnId; // or mintResponse.transaction_outcome.id;
-      } catch (err) {
-        console.error('cannot mint NEAR', err);
-      }
-      // manually checked the amount is correct.
-      const apiCallParam: ApiCallParam = {
-        type: TxnType.MINT,
-        from: ENV.NEAR_EXAMPL_ADDR,
-        to: ENV.ALGO_EXAMPL_ADDR,
-        amount,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        txnId: nearTxnId,
-      };
+      // simulate frontend
+      const apiCallParam: ApiCallParam = await simulatedFrontendNearToGoNear(
+        amount
+      );
 
       // call API
       const bridgeTxn = await create(apiCallParam);
