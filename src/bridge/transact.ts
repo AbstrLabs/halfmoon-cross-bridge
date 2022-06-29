@@ -1,16 +1,15 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
+ * @deprecated - deprecating, use bridge-worker
  */
 export { create, _execute };
 
 import { ApiCallParam } from '../utils/type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 
-import { TxnType } from '../blockchain';
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
 import { bridgeWorker } from './bridge-worker';
-import { BlockchainName } from '..';
 
 /**
  * Create a {@link BridgeTxn} instance from {@link ApiCallParam} for minting and burning, but not execute the transaction.
@@ -23,13 +22,7 @@ import { BlockchainName } from '..';
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   /* CREATE */
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  bridgeWorker.add({
-    txnId: apiCallParam.txnId,
-    fromBlockchainName:
-      apiCallParam.type == TxnType.MINT
-        ? BlockchainName.ALGO
-        : BlockchainName.NEAR,
-  });
+  bridgeWorker.add(apiCallParam);
 
   const bridgeTxn = BridgeTxn.fromApiCallParam(
     apiCallParam,
@@ -40,13 +33,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   txnHandler.queue.push(bridgeTxn);
 
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  bridgeWorker.remove({
-    fromBlockchainName:
-      apiCallParam.type == TxnType.MINT
-        ? BlockchainName.ALGO
-        : BlockchainName.NEAR,
-    txnId: apiCallParam.txnId,
-  });
+  bridgeWorker.remove(apiCallParam);
 
   logger.info(`created bridge txn with uid: ${bridgeTxn.uid.toString()}`);
 
