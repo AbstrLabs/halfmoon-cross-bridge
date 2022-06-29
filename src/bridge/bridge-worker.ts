@@ -1,14 +1,14 @@
 /**
  * A worker to handle transactions with a queue.
  */
+export { type BridgeWorker, bridgeWorker };
+
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
-
-export { type BridgeWorker, bridgeWorker };
 
 // TODO: add this to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;

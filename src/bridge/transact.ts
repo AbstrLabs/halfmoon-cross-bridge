@@ -2,12 +2,11 @@
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
  * @deprecated - deprecating, use api-worker and bridge-worker.
  */
-export { _create, _execute };
+export { _create };
 
 import { ApiCallParam } from '../utils/type';
-import { BridgeTxn, BridgeTxnObj } from '.';
+import { BridgeTxn } from '.';
 
-import { bridgeWorker } from './bridge-worker';
 import { apiWorker } from './api-worker';
 
 /**
@@ -22,13 +21,4 @@ import { apiWorker } from './api-worker';
 async function _create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   /* CREATE */
   return await apiWorker.create(apiCallParam);
-}
-
-/**
- * @deprecated - use new API model, the txnHandler will execute the transaction.
- */
-async function _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
-  const bridgeTxnObject = await bridgeWorker._execute(bridgeTxn);
-  // TODO: ERR handler .burn success
-  return bridgeTxnObject;
 }
