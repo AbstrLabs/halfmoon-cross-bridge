@@ -3,7 +3,7 @@ import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
 import { BlockchainName } from '..';
-import { BridgeTxnObj } from '../bridge';
+import { BridgeTxn, BridgeTxnObj } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
@@ -31,16 +31,16 @@ async function handleAlgorandNearApiCall(req: Request, res: Response) {
   const verifyResult = await verifyBlockchainTxnWithResp(apiCallParam, res);
   if (verifyResult === null) return;
 
-  // TRANSACT
-  try {
-    await transactWithResp(apiCallParam, res);
-  } catch (err) {
-    logger.error(err);
-    res.status(500).send('Internal server error.');
-    res.end();
-    logger.info('API server still running...');
-    return;
-  }
+  const bridgeTxn = await createBridgeTxnWithResp(apiCallParam, res);
+  if (bridgeTxn === null) return;
+
+  logger.info('Handled API call: ' + JSON.stringify(apiCallParam));
+
+  res.status(200).json({
+    BridgeTxnStatus: bridgeTxn.txnStatus,
+    uid: bridgeTxn.uid,
+  });
+  return bridgeTxn.uid;
 }
 
 function verifyApiCallParamWithResp(
@@ -107,6 +107,28 @@ async function verifyBlockchainTxnWithResp(
   }
 }
 
+async function createBridgeTxnWithResp(
+  apiCallParam: ApiCallParam,
+  res: Response
+): Promise<BridgeTxn | null> {
+  try {
+    const bridgeTxn: BridgeTxn = await create(apiCallParam);
+    return bridgeTxn;
+  } catch (err) {
+    logger.error('unknown error, maybe db?');
+    logger.error(err);
+    res.status(500).send('Internal server error.');
+    return null;
+  }
+}
+
+/**
+ * @deprecated
+ * @param apiCallParam
+ * @param res
+ * @returns
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   /* CONFIG */
   let bridgeTxnObject: BridgeTxnObj;
