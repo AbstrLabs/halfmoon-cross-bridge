@@ -1,8 +1,9 @@
 import { BridgeTxnObj } from '../bridge';
 import { logger } from '../utils/logger';
+import { TxnUid } from '../utils/type';
 
 type EmailAddr = string; // TODO: type this with zod regex
-type UID = string; // TODO: type this with zod regex, also apply to BridgeTxn.uid getter
+
 interface Email {
   title: string;
   body: string;
@@ -21,7 +22,7 @@ class EmailServer {
       `Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
     );
   }
-  sendErrEmail(uid: UID, bridgeTxnObj: BridgeTxnObj): void {
+  sendErrEmail(uid: TxnUid, bridgeTxnObj: BridgeTxnObj): void {
     const email: Email = genAnbErrEmailWithTemplate(uid, bridgeTxnObj);
     this.sendEmail(email);
   }
@@ -30,7 +31,7 @@ class EmailServer {
 export const emailServer = new EmailServer();
 
 function genAnbErrEmailWithTemplate(
-  uid: UID,
+  uid: TxnUid,
   bridgeTxnObj: BridgeTxnObj
 ): Email {
   return {

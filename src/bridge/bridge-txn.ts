@@ -445,6 +445,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
   /**
    * UID {DbId}.{TxnId}
+   * @todo: UID: parse with zod, txnUid type should be uid format
    */
   get uid(): string {
     if (this.dbId === undefined) {

@@ -23,6 +23,7 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
+  type TxnUid,
   parseApiCallParam,
   parseBigInt,
   parseBurnApiParam,
@@ -94,6 +95,8 @@ type AlgoAssetTransferTxnOutcome = z.infer<typeof zAlgoAssetTransferTxnOutcome>;
 type DbItem = z.infer<typeof zDbItem>;
 type DbId = z.infer<typeof zDbId>;
 type Biginter = z.infer<typeof zBiginter>;
+
+type TxnUid = string; // TODO: UID: parse with zod, txnUid type should be uid format
 
 // API -> server
 

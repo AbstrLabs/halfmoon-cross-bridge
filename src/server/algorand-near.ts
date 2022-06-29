@@ -1,4 +1,4 @@
-import { ApiCallParam, parseApiCallParam } from '../utils/type';
+import { ApiCallParam, parseApiCallParam, TxnUid } from '../utils/type';
 import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
@@ -27,7 +27,7 @@ algorandNear
 // TODO: refactor move to types with better typing
 export interface PostReturn {
   BridgeTxnStatus: BridgeTxnStatusEnum;
-  uid: string;
+  uid: TxnUid; // TODO: UID: parse with zod, txnUid type should be uid format
 }
 async function handleAlgorandNearApiCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);

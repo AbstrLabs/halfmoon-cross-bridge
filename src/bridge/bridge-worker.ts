@@ -1,31 +1,30 @@
 // TODO: add test
-// TODO: merge two queues
-// TODO+ There can be more queues, but it's not needed to separate them after the new DB model.
 
 import { BlockchainName } from '..';
-import { TxnId } from '../utils/type';
+import { TxnId, TxnUid } from '../utils/type';
 
 export { type BridgeWorker, bridgeWorker };
 
-// TODO: parse with zod, txnId type should meet fromBlockchain
+// TODO: UID: parse with zod, txnUid type should be uid format
 interface TxnRequest {
-  fromBlockchainName: BlockchainName;
   txnId: TxnId;
+  fromBlockchainName: BlockchainName;
 }
-class BridgeWorker {
-  transactionQueue: TxnId[];
 
-  constructor() {
+class BridgeWorker {
+  creationQueue: TxnRequest[]; // not in DB.
+  transactionQueue: TxnUid[]; // sync with DB.
+  threadNumber: number;
+
+  constructor(threadNumber = 1) {
+    this.threadNumber = threadNumber;
+    this.creationQueue = [];
     this.transactionQueue = [];
   }
 
   public add(txnRequest: TxnRequest) {
     if (this._has(txnRequest)) {
-      throw new Error(
-        'Txn already in creation queue ' +
-          txnRequest.txnId +
-          txnRequest.fromBlockchainName
-      );
+      throw new Error('Txn already in creation queue ' + txnRequest.txnId);
     }
     this._push(txnRequest);
     return true;
