@@ -7,7 +7,7 @@ export { _create, _execute };
 import { ApiCallParam } from '../utils/type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 
-import { txnHandler } from './bridge-worker';
+import { bridgeWorker } from './bridge-worker';
 import { apiWorker } from './api-worker';
 
 /**
@@ -28,7 +28,7 @@ async function _create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
  * @deprecated - use new API model, the txnHandler will execute the transaction.
  */
 async function _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
-  const bridgeTxnObject = await txnHandler._execute(bridgeTxn);
+  const bridgeTxnObject = await bridgeWorker._execute(bridgeTxn);
   // TODO: ERR handler .burn success
   return bridgeTxnObject;
 }

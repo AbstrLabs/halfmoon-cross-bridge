@@ -7,9 +7,9 @@ import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
 import { logger } from '../utils/logger';
 
-export { type TxnHandler, txnHandler };
+export { type BridgeWorker, bridgeWorker };
 
-class TxnHandler {
+class BridgeWorker {
   queue: BridgeTxn[];
   database: Database;
 
@@ -126,4 +126,4 @@ class TxnHandler {
   }
 }
 
-const txnHandler = new TxnHandler(db);
+const bridgeWorker = new BridgeWorker(db);
