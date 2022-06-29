@@ -1,7 +1,5 @@
 /**
- * Test helper used across tests.
- *
- * @todo: move to utils/test
+ * Test helper to simulate frontend mint call.
  */
 
 export { simulatedFrontendNearToGoNear };

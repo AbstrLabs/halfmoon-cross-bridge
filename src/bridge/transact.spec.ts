@@ -7,7 +7,7 @@ import { ENV } from '../utils/dotenv';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
 import { create } from './transact';
-import { simulatedFrontendNearToGoNear } from '../test/test-helper/frontend-simulator-near';
+import { simulatedFrontendNearToGoNear } from '../test/test-helper/frontend-simulator-mint';
 
 const TIMEOUT_30S = 30_000;
 
