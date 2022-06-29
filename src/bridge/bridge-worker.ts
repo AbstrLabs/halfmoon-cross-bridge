@@ -2,12 +2,17 @@
  * A worker to handle transactions with a queue.
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
-import { BridgeTxnStatusTree } from '..';
+import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
+import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
 
 export { type BridgeWorker, bridgeWorker };
+
+// TODO: add this to setting (maybe .env)
+const EXECUTE_INTERVAL_MS = 1_000;
+const UPDATE_INTERVAL_MS = 5_000;
 
 class BridgeWorker {
   queue: BridgeTxn[];
@@ -42,8 +47,6 @@ class BridgeWorker {
    * Fetch newly added tasks from the database.
    * loadUnfinishedTasksFromDb can merge into this
    *
-   * @param  {Database} db
-   *
    * @returns {Promise<void>}
    */
   async updateTasksFromDb(): Promise<void> {
@@ -57,19 +60,25 @@ class BridgeWorker {
     // then update current to txn
   }
 
-  async handleTasks() {
-    for (const bridgeTxn of this.queue) {
-      await this.handleTask(bridgeTxn);
+  async handleNewTask() {
+    const newTask = this._pop();
+    if (newTask === undefined) {
+      return;
     }
+    await this.handleTask(newTask);
   }
 
   public async run() {
     await this.loadUnfinishedTasksFromDb();
-    await this.handleTasks();
-    setInterval(() => {
-      throw new Error(`Function not implemented.`);
-      // this.updateTasksFromDb(db);
-    }, 1_000);
+    // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      await this.updateTasksFromDb();
+      await pause(UPDATE_INTERVAL_MS);
+      while (this.length > 0) {
+        await this.handleNewTask();
+        await pause(EXECUTE_INTERVAL_MS);
+      }
+    }
   }
 
   addTask(bridgeTxn: BridgeTxn) {
@@ -101,6 +110,13 @@ class BridgeWorker {
   }
 
   private async handleTask(bridgeTxn: BridgeTxn) {
+    if (
+      bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
+      bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
+    ) {
+      await this.finishTask(bridgeTxn);
+      return;
+    }
     const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
     if (actionName === 'MANUAL') {
       emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
@@ -115,6 +131,14 @@ class BridgeWorker {
     await bridgeTxn[actionName]();
   }
 
+  private async finishTask(bridgeTxn: BridgeTxn) {
+    // TODO: move this task to "finished" table
+    await new Promise<void>((resolve) => {
+      resolve();
+    });
+    this.removeTask(bridgeTxn);
+  }
+
   /* private async */ removeTask(bridgeTxn: BridgeTxn) {
     throw new Error(
       `Function not implemented. ${bridgeTxn.uid} is not removed`
@@ -123,6 +147,10 @@ class BridgeWorker {
 
   private _hasTask(bridgeTxn: BridgeTxn): boolean {
     return this.queue.includes(bridgeTxn); // TODO: should compare UID here.
+  }
+
+  private _pop(): BridgeTxn | undefined {
+    return this.queue.pop();
   }
 }
 
