@@ -1,6 +1,6 @@
 /**
  * @exports mint - Create a {@link BridgeTxn} instance from {@link BurnApiParam} for minting and burning, and execute the transaction.
- * @deprecated - deprecating, use bridge-worker
+ * @deprecated - deprecating, use api-worker and bridge-worker.
  */
 export { _create, _execute };
 
