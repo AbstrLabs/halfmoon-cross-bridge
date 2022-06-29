@@ -8,8 +8,9 @@ import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
-import { create, _execute } from '../bridge/transact';
+import { _create, _execute } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
+import { apiWorker } from '../bridge/api-worker';
 
 export { algorandNear };
 
@@ -118,7 +119,7 @@ async function createBridgeTxnWithResp(
   res: Response
 ): Promise<BridgeTxn | null> {
   try {
-    const bridgeTxn: BridgeTxn = await create(apiCallParam);
+    const bridgeTxn: BridgeTxn = await apiWorker.create(apiCallParam);
     return bridgeTxn;
   } catch (err) {
     logger.error('unknown error, maybe db?');
@@ -148,7 +149,7 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   );
 
   try {
-    const bridgeTxn = await create(apiCallParam);
+    const bridgeTxn = await _create(apiCallParam);
     bridgeTxnObject = await _execute(bridgeTxn);
     logger.info(_literals.DONE);
     // TODO: use different literal template than transact

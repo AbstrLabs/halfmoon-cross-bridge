@@ -6,7 +6,7 @@ import { ApiCallParam } from '../utils/type';
 import { ENV } from '../utils/dotenv';
 import { testAlgo } from '../blockchain/algorand';
 import { toGoNearAtom } from '../utils/formatter';
-import { create } from './transact';
+import { _create } from './transact';
 import { simulatedFrontendNearToGoNear } from '../test/test-helper/frontend-simulator-mint';
 
 const TIMEOUT_30S = 30_000;
@@ -26,7 +26,7 @@ describe.skip('mint test', () => {
       );
 
       // call API
-      const bridgeTxn = await create(apiCallParam);
+      const bridgeTxn = await _create(apiCallParam);
       const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
       // should return AlgoTxnId,etc.
 
@@ -68,7 +68,7 @@ describe.skip('burn test', () => {
       };
 
       // call API
-      const bridgeTxn = await create(apiCallParam);
+      const bridgeTxn = await _create(apiCallParam);
       const bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
 
       // should return AlgoTxnId,etc.
