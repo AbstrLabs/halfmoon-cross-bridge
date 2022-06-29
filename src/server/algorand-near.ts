@@ -2,7 +2,7 @@ import { ApiCallParam, parseApiCallParam } from '../utils/type';
 import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
-import { BlockchainName } from '..';
+import { BlockchainName, BridgeTxnStatusEnum } from '..';
 import { BridgeTxn, BridgeTxnObj } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
@@ -24,6 +24,11 @@ algorandNear
     await handleAlgorandNearApiCall(req, res);
   });
 
+// TODO: refactor move to types with better typing
+export interface PostReturn {
+  BridgeTxnStatus: BridgeTxnStatusEnum;
+  uid: string;
+}
 async function handleAlgorandNearApiCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
   if (apiCallParam === null) return;
@@ -36,10 +41,11 @@ async function handleAlgorandNearApiCall(req: Request, res: Response) {
 
   logger.info('Handled API call: ' + JSON.stringify(apiCallParam));
 
-  res.status(200).json({
+  const postReturn: PostReturn = {
     BridgeTxnStatus: bridgeTxn.txnStatus,
     uid: bridgeTxn.uid,
-  });
+  };
+  res.status(200).json(postReturn);
   return bridgeTxn.uid;
 }
 

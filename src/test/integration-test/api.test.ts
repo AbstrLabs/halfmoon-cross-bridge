@@ -1,5 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { WELCOME_JSON } from '../../server';
+import { PostReturn } from '../../server/algorand-near';
+import { MintApiParam } from '../../utils/type';
+import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 
 it('hosted API server returns welcome JSON on GET', async () => {
   const res = await axios.get('http://localhost:4190/');
@@ -8,7 +11,58 @@ it('hosted API server returns welcome JSON on GET', async () => {
   expect(res.statusText).toBe('OK');
 });
 
-// it('/algorand-near creates transaction in database on POST', async () => {
+it('/algorand-near creates transaction in database on POST', async () => {
+  // config
+  const amount = '1.2345678901';
+
+  // // simulate frontend: make NEAR txn
+  // const burnResponse = await testAlgo.sendFromExampleToMaster(
+  //   toGoNearAtom(amount)
+  // );
+  // console.log(burnResponse);
+
+  // simulate frontend: mint txn
+  const mintApiParam: MintApiParam = await simulatedFrontendNearToGoNear(
+    amount
+  );
+
+  const res = await axios
+    .post('http://localhost:4190/algorand-near', {
+      ...mintApiParam,
+    })
+    .catch((err: AxiosError) => {
+      if (axios.isAxiosError(err)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const res: AxiosResponse = err.response!;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const { data, status, headers } = res;
+        console.error(
+          `{data: ${
+            data as string
+          }, status: ${status}, headers: ${JSON.stringify(headers)}}`
+        );
+      }
+      throw err;
+    });
+
+  expect(res.status).toBe(200);
+  expect(res.statusText).toBe('OK');
+  const data = res.data as PostReturn;
+  console.log(data); // TODO: to be like uid form (need new zod type )
+  expect(/^[0-9]{2}.*/.test(data.uid)).toBe(true); // starts with 2 digits
+});
+
+// test('API endpoint should reject double mint', async ({ request }) => {
+//   const res = await request.post('./algorand-near', { data: {} });
+//   expect(res.ok()).toBeTruthy();
+//   console.dir(await res.json());
+// });
+
+// test('API endpoint should reject old transactions', async ({ request }) => {
+//   const res = await request.post('./algorand-near', { data: {} });
+//   expect(res.ok()).toBeTruthy();
+//   console.dir(await res.json());
+// });
 
 // });
 
