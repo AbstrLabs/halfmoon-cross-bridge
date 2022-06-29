@@ -3,7 +3,7 @@
 // TODO+ There can be more queues, but it's not needed to separate them after the new DB model.
 
 import { BlockchainName } from '..';
-import { AlgoTxnId, NearTxnId, TxnId } from '../utils/type';
+import { TxnId } from '../utils/type';
 
 export { type CreationQueue, creationQueue };
 
@@ -13,12 +13,10 @@ interface TxnRequest {
   txnId: TxnId;
 }
 class CreationQueue {
-  algorandQueue: AlgoTxnId[];
-  nearQueue: NearTxnId[];
+  transactionQueue: TxnId[];
 
   constructor() {
-    this.algorandQueue = [];
-    this.nearQueue = [];
+    this.transactionQueue = [];
   }
 
   public add(txnRequest: TxnRequest) {
@@ -38,46 +36,23 @@ class CreationQueue {
       throw new Error('Txn not in creation queue');
     }
 
-    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
-      this.algorandQueue = this.algorandQueue.filter(
-        (txnId) => txnId !== txnRequest.txnId
-      );
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
-      this.nearQueue = this.nearQueue.filter(
-        (txnId) => txnId !== txnRequest.txnId
-      );
-    } else {
-      throw new Error('Invalid blockchain name');
-    }
-
+    this.transactionQueue = this.transactionQueue.filter(
+      (txnId) => txnId !== txnRequest.txnId
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return true;
   }
 
   public get length() {
-    return this.algorandQueue.length + this.nearQueue.length;
+    return this.transactionQueue.length;
   }
 
   private _has(txnRequest: TxnRequest) {
-    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
-      return this.algorandQueue.includes(txnRequest.txnId);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
-      return this.nearQueue.includes(txnRequest.txnId);
-    } else {
-      throw new Error('Invalid blockchain name');
-    }
+    return this.transactionQueue.includes(txnRequest.txnId);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }
   private _push(txnRequest: TxnRequest) {
-    if (txnRequest.fromBlockchainName === BlockchainName.ALGO) {
-      this.algorandQueue.push(txnRequest.txnId);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnRequest.fromBlockchainName === BlockchainName.NEAR) {
-      this.nearQueue.push(txnRequest.txnId);
-    } else
-      () => {
-        throw new Error('Invalid blockchain name');
-      };
+    this.transactionQueue.push(txnRequest.txnId);
   }
 }
 
