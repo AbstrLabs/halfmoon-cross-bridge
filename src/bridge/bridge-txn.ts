@@ -213,6 +213,8 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObj}.
    * This should be the only way used outside the {@link BridgeTxn} class.
    *
+   * @deprecated - use new state pattern instead
+   *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
