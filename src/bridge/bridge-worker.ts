@@ -114,13 +114,13 @@ class BridgeWorker {
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
     ) {
-      await this.finishTask(bridgeTxn);
+      await this._finishTask(bridgeTxn);
       return;
     }
     const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
     if (actionName === 'MANUAL') {
       emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
-      this.removeTask(bridgeTxn);
+      this._removeTask(bridgeTxn);
       return;
     }
     if (actionName === null) {
@@ -131,18 +131,16 @@ class BridgeWorker {
     await bridgeTxn[actionName]();
   }
 
-  private async finishTask(bridgeTxn: BridgeTxn) {
+  private async _finishTask(bridgeTxn: BridgeTxn) {
     // TODO: move this task to "finished" table
     await new Promise<void>((resolve) => {
       resolve();
     });
-    this.removeTask(bridgeTxn);
+    this._removeTask(bridgeTxn);
   }
 
-  /* private async */ removeTask(bridgeTxn: BridgeTxn) {
-    throw new Error(
-      `Function not implemented. ${bridgeTxn.uid} is not removed`
-    );
+  private _removeTask(bridgeTxn: BridgeTxn) {
+    this.queue = this.queue.filter((txn) => txn !== bridgeTxn);
   }
 
   private _hasTask(bridgeTxn: BridgeTxn): boolean {
