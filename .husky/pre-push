@@ -1,5 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-
-yarn test # unit tests
+# first, check server is running
+yarn jest --runTestsByPath='./src/test/integration-test/api.test.ts' --testNamePattern='hosted API server returns welcome JSON on GET'
+# unit tests and integration tests
+yarn test --bail
