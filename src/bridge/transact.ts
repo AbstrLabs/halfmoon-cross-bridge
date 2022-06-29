@@ -48,7 +48,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
     txnId: apiCallParam.txnId,
   });
 
-  logger.info(`created bridge txn: ${bridgeTxn.uid.toString()}`);
+  logger.info(`created bridge txn with uid: ${bridgeTxn.uid.toString()}`);
 
   return bridgeTxn;
 }

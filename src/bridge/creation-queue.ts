@@ -1,4 +1,6 @@
 // TODO: add test
+// TODO: merge two queues
+// TODO+ There can be more queues, but it's not needed to separate them after the new DB model.
 
 import { BlockchainName } from '..';
 import { AlgoTxnId, NearTxnId, TxnId } from '../utils/type';
