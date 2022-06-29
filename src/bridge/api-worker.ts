@@ -4,7 +4,9 @@
 export { type ApiWorker, apiWorker };
 
 import { TxnType } from '../blockchain';
-import { TxnId } from '../utils/type';
+import { ApiCallParam, TxnId } from '../utils/type';
+import { BridgeTxn } from '.';
+import { logger } from '../utils/logger';
 
 // TODO: parse with zod
 interface CriticalApiCallParam {
@@ -19,19 +21,39 @@ class ApiWorker {
     this.queue = [];
   }
 
-  public plan(criticalApiCallParam: CriticalApiCallParam) {
+  public async create(apiCallParam: ApiCallParam) {
     // TODO: zod parse
     // TODO: only use fields in critical api call param
+    const criticalApiCallParam: CriticalApiCallParam = apiCallParam;
+
     if (this._includes(criticalApiCallParam)) {
       throw new Error(
         'Txn already in creation queue ' + criticalApiCallParam.txnId
       );
     }
     this._push(criticalApiCallParam);
-    return true;
+
+    const bridgeTxn = BridgeTxn.fromApiCallParam(
+      apiCallParam,
+      BigInt(Date.now())
+    );
+
+    // TODO: compare then create
+    await bridgeTxn.createInDb();
+
+    // TODO: should we add more coupling to save execution time?
+    // bridgeWorker._push(bridgeTxn);
+
+    apiWorker._remove(criticalApiCallParam);
+
+    logger.verbose(
+      `[ApiWorker]: bridge txn created with uid: ${bridgeTxn.uid.toString()}`
+    );
+
+    return bridgeTxn;
   }
 
-  public remove(criticalApiCallParam: CriticalApiCallParam) {
+  private _remove(criticalApiCallParam: CriticalApiCallParam) {
     if (!this._includes(criticalApiCallParam)) {
       throw new Error('Txn not in creation queue');
     }
@@ -40,7 +62,6 @@ class ApiWorker {
       (ExistedCallParam) =>
         ExistedCallParam.txnId !== criticalApiCallParam.txnId
     );
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return true;
   }
   /* GETTERS & SETTERs */

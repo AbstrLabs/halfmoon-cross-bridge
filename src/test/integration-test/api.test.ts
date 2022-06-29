@@ -15,17 +15,12 @@ it('/algorand-near creates transaction in database on POST', async () => {
   // config
   const amount = '1.2345678901';
 
-  // // simulate frontend: make NEAR txn
-  // const burnResponse = await testAlgo.sendFromExampleToMaster(
-  //   toGoNearAtom(amount)
-  // );
-  // console.log(burnResponse);
-
-  // simulate frontend: mint txn
+  // simulate frontend:  make NEAR mint txn
   const mintApiParam: MintApiParam = await simulatedFrontendNearToGoNear(
     amount
   );
 
+  // same API call as frontend
   const res = await axios
     .post('http://localhost:4190/algorand-near', {
       ...mintApiParam,

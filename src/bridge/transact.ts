@@ -7,7 +7,6 @@ export { create, _execute };
 import { ApiCallParam } from '../utils/type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 
-import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
 import { apiWorker } from './api-worker';
 
@@ -16,28 +15,12 @@ import { apiWorker } from './api-worker';
  *
  * @async
  * @param  {ApiCallParam} apiCallParam
- * @returns {Promise<BridgeTxnObj>} A BridgeTxnObject representing the burn bridge transaction.
+ * @returns {Promise<BridgeTxn>} A BridgeTxnObject representing the burn bridge transaction.
  */
 // eslint-disable-next-line @typescript-eslint/require-await
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   /* CREATE */
-  // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  apiWorker.plan(apiCallParam);
-
-  const bridgeTxn = BridgeTxn.fromApiCallParam(
-    apiCallParam,
-    BigInt(Date.now())
-  );
-
-  await bridgeTxn.createInDb();
-  txnHandler.queue.push(bridgeTxn);
-
-  // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  apiWorker.remove(apiCallParam);
-
-  logger.info(`created bridge txn with uid: ${bridgeTxn.uid.toString()}`);
-
-  return bridgeTxn;
+  return await apiWorker.create(apiCallParam);
 }
 
 /**
