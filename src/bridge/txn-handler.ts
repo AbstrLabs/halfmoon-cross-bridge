@@ -3,7 +3,7 @@
  */
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusTree } from '..';
-import { type Database } from '../database/db';
+import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
 import { logger } from '../utils/logger';
 
@@ -11,8 +11,11 @@ export { type TxnHandler, txnHandler };
 
 class TxnHandler {
   queue: BridgeTxn[];
-  constructor() {
+  database: Database;
+
+  constructor(database = db) {
     this.queue = [];
+    this.database = database;
   }
 
   /**
@@ -24,16 +27,15 @@ class TxnHandler {
     return await bridgeTxn.runWholeBridgeTxn();
     // TODO: support BridgeTxn with more txnStatus
   }
-  async loadUnfinishedTasksFromDb(db: Database) {
-    const dbItems = await db.readAllTxn();
-    for (const dbItem of dbItems) {
-      const bridgeTxn = BridgeTxn.fromDbItem(dbItem);
-      if (!this._hasTask(bridgeTxn)) {
-        this.queue.push(bridgeTxn);
-      }
-    }
-    // no longer needed: check repeated tasks, test, filter finished / error tasks.
-    // TODO: need a func for both arr.
+
+  async loadUnfinishedTasksFromDb() {
+    // TODO: prune DB.
+    const allDbItems = await this.database.readAllTxn();
+    const allBridgeTxns = allDbItems.map((item) => BridgeTxn.fromDbItem(item));
+    const unfinishedBridgeTxns = allBridgeTxns.filter(
+      (txn) => BridgeTxnStatusTree[txn.txnStatus].actionName !== null
+    );
+    unfinishedBridgeTxns.map((txn) => this._push(txn));
   }
 
   /**
@@ -44,14 +46,15 @@ class TxnHandler {
    *
    * @returns {Promise<void>}
    */
-  async updateTasksFromDb(db: Database): Promise<void> {
-    const dbItems = await db.readAllTxn();
-    for (const dbItem of dbItems) {
-      const bridgeTxn = BridgeTxn.fromDbItem(dbItem);
-      if (!this._hasTask(bridgeTxn)) {
-        this.queue.push(bridgeTxn);
-      }
-    }
+  async updateTasksFromDb(): Promise<void> {
+    // get all unfinished txn
+    // for txn, run updateTask
+  }
+
+  async updateTask(/* bridgeTxn: BridgeTxn */) {
+    // get current with bridgeTxn.uid
+    // if txn.txnStatus > current, (need partial order on txnStatus)
+    // then update current to txn
   }
 
   async handleTasks() {
@@ -60,21 +63,43 @@ class TxnHandler {
     }
   }
 
-  public async run(db: Database) {
-    await this.loadUnfinishedTasksFromDb(db);
+  public async run() {
+    await this.loadUnfinishedTasksFromDb();
     await this.handleTasks();
     setInterval(() => {
       throw new Error(`Function not implemented.`);
       // this.updateTasksFromDb(db);
-    }, 50_000);
+    }, 1_000);
   }
 
   addTask(bridgeTxn: BridgeTxn) {
+    this._push(bridgeTxn);
+  }
+
+  /* GETTERS & SETTERS */
+  get length(): number {
+    return this.queue.length;
+  }
+  get taskNum(): number {
+    return this.length;
+  }
+  get queueLength(): number {
+    return this.length;
+  }
+
+  toString() {
+    return JSON.stringify(this.queue);
+  }
+
+  /* PRIVATE METHODS */
+
+  private _push(bridgeTxn: BridgeTxn) {
     if (this._hasTask(bridgeTxn)) {
       throw new Error('task already exists in TxnHandler queue');
     }
     this.queue.push(bridgeTxn);
   }
+
   private async handleTask(bridgeTxn: BridgeTxn) {
     const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
     if (actionName === 'MANUAL') {
@@ -89,6 +114,7 @@ class TxnHandler {
     }
     await bridgeTxn[actionName]();
   }
+
   /* private async */ removeTask(bridgeTxn: BridgeTxn) {
     throw new Error(
       `Function not implemented. ${bridgeTxn.uid} is not removed`
@@ -98,16 +124,6 @@ class TxnHandler {
   private _hasTask(bridgeTxn: BridgeTxn): boolean {
     return this.queue.includes(bridgeTxn); // TODO: should compare UID here.
   }
-
-  get length(): number {
-    return this.queue.length;
-  }
-  get taskNum(): number {
-    return this.length;
-  }
-  get queueLength(): number {
-    return this.length;
-  }
 }
 
-const txnHandler = new TxnHandler();
+const txnHandler = new TxnHandler(db);
