@@ -38,6 +38,10 @@ enum BridgeTxnStatusEnum {
   USER_CONFIRMED = 'USER_CONFIRMED', //             User confirmed
 }
 
+/**
+ * When actionName is null, there's no action to take,
+ * hence can be treated as finished. (TODO: DOING_INITIALIZE etc)
+ */
 class BridgeTxnStatus {
   status: BridgeTxnStatusEnum;
   isError: boolean;
