@@ -5,14 +5,14 @@
 import { BlockchainName } from '..';
 import { TxnId } from '../utils/type';
 
-export { type CreationQueue, creationQueue };
+export { type BridgeWorker, bridgeWorker };
 
 // TODO: parse with zod, txnId type should meet fromBlockchain
 interface TxnRequest {
   fromBlockchainName: BlockchainName;
   txnId: TxnId;
 }
-class CreationQueue {
+class BridgeWorker {
   transactionQueue: TxnId[];
 
   constructor() {
@@ -56,4 +56,4 @@ class CreationQueue {
   }
 }
 
-const creationQueue = new CreationQueue();
+const bridgeWorker = new BridgeWorker();

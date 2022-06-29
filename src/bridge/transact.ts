@@ -9,7 +9,7 @@ import { BridgeTxn, BridgeTxnObj } from '.';
 import { TxnType } from '../blockchain';
 import { logger } from '../utils/logger';
 import { txnHandler } from './txn-handler';
-import { creationQueue } from './creation-queue';
+import { bridgeWorker } from './creation-queue';
 import { BlockchainName } from '..';
 
 /**
@@ -23,7 +23,7 @@ import { BlockchainName } from '..';
 async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   /* CREATE */
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  creationQueue.add({
+  bridgeWorker.add({
     txnId: apiCallParam.txnId,
     fromBlockchainName:
       apiCallParam.type == TxnType.MINT
@@ -40,7 +40,7 @@ async function create(apiCallParam: ApiCallParam): Promise<BridgeTxn> {
   txnHandler.queue.push(bridgeTxn);
 
   // TODO: this is a quick fix for test, need update TODO-ID:CQA
-  creationQueue.remove({
+  bridgeWorker.remove({
     fromBlockchainName:
       apiCallParam.type == TxnType.MINT
         ? BlockchainName.ALGO
