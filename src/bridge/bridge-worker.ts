@@ -47,13 +47,15 @@ class BridgeWorker {
   }
 
   async loadUnfinishedTasksFromDb() {
-    // TODO: prune DB.
+    // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
-    const allBridgeTxns = allDbItems.map((item) => BridgeTxn.fromDbItem(item));
-    const unfinishedBridgeTxns = allBridgeTxns.filter(
-      (txn) => BridgeTxnStatusTree[txn.txnStatus].actionName !== null
-    );
-    unfinishedBridgeTxns.map((txn) => this._push(txn));
+    for (const item of allDbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(item);
+      if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
+        continue;
+      }
+      this._push(bridgeTxn);
+    }
   }
 
   /**
