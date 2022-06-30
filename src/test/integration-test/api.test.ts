@@ -61,7 +61,6 @@ describe('/algorand-near API (GET)', () => {
       'http://localhost:4190/algorand-near?uid=' + EXAMPLE_UID_FROM_DB
     );
 
-    console.log(res.data);
     expect(res.data).toStrictEqual(EXAMPLE_RESULT_FROM_DB);
     expect(res.status).toBe(200);
     expect(res.statusText).toBe('OK');

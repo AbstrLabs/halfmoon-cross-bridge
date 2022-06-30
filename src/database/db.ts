@@ -13,7 +13,6 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
-import { TableName } from '.';
 
 const REQUEST_TABLE = 'anb_request';
 
@@ -25,16 +24,11 @@ const REQUEST_TABLE = 'anb_request';
  */
 class Database {
   private instance;
-  private mintTableName;
-  private burnTableName;
+  private requestTableName;
 
-  constructor(
-    instance: Postgres,
-    tableNames: { mintTableName: TableName; burnTableName: TableName }
-  ) {
+  constructor(instance: Postgres) {
     this.instance = instance;
-    this.mintTableName = tableNames.mintTableName;
-    this.burnTableName = tableNames.burnTableName;
+    this.requestTableName = REQUEST_TABLE;
   }
 
   /**
@@ -300,7 +294,7 @@ class Database {
     // never used.
 
     const query = `
-      DELETE FROM ${this.mintTableName} WHERE id = $1;
+      DELETE FROM ${this.requestTableName} WHERE id = $1;
     `;
     const params = [dbId];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -311,31 +305,6 @@ class Database {
       dbId,
       txnType,
     });
-  }
-
-  /**
-   * infer the table name from a transaction type.
-   *
-   * @deprecated - we use anb_request table for both mint and burn.
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if {@link txnType} is not valid
-   * @param  {TxnType} txnType
-   * @returns {TableName} table name
-   */
-  private _inferTableName(txnType: TxnType): TableName {
-    let tableName: TableName;
-    if (txnType === TxnType.MINT) {
-      tableName = this.mintTableName;
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (txnType === TxnType.BURN) {
-      tableName = this.burnTableName;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType,
-      });
-    }
-    return tableName;
   }
 
   /**
@@ -360,7 +329,4 @@ class Database {
   }
 }
 
-const db = new Database(postgres, {
-  mintTableName: TableName.MINT_ACTIVE,
-  burnTableName: TableName.BURN_ACTIVE,
-});
+const db = new Database(postgres);
