@@ -26,14 +26,12 @@ algorandNear
   .get((req: Request, res: Response) => {
     // return WELCOME_JSON if no uid is provided.
 
-    // `req.params` has wrong type: `req.params.uid` can be undefined.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (req.params.uid === undefined) {
-      console.log('req.params.uid:', req.params.uid);
+    if (req.query.uid === undefined) {
+      console.log('req.query.uid:', req.query.uid);
       res.json(WELCOME_JSON);
       return;
     }
-    const uid: TxnUid = req.params.uid;
+    const uid: TxnUid = req.query.uid as string;
 
     // validate uid
     try {
