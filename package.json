@@ -140,9 +140,7 @@
     "test:handler": "jest --testPathPattern=src/bridge/txn-handler",
     "test:integration": "jest --testPathPattern=src/test/integration-test",
     "test:near": "jest --testPathPattern=src/blockchain/near",
-    "test:transact": "jest --testPathPattern=src/bridge/transact",
-    "test:util": "jest --testPathPattern=src/utils",
-    "tx": "yarn test:transact"
+    "test:util": "jest --testPathPattern=src/utils"
   },
   "version": "0.1.1"
 }
