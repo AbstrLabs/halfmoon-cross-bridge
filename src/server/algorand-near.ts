@@ -14,7 +14,6 @@ import { WELCOME_JSON } from '.';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
-import { _create } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from '../bridge/api-worker';
 import { db } from '../database/db';
@@ -202,7 +201,7 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
   );
 
   try {
-    const bridgeTxn = await _create(apiCallParam);
+    const bridgeTxn = await apiWorker.create(apiCallParam);
     // bridgeTxnObject = await _execute(bridgeTxn); // executed in main.ts bridgeWorker.run()
     bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
     logger.info(_literals.DONE);
