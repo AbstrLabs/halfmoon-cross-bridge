@@ -23,51 +23,11 @@ const algorandNear = express.Router();
 
 algorandNear
   .route('/algorand-near')
-  .get((req: Request, res: Response) => {
-    // return WELCOME_JSON if no uid is provided.
-
-    if (req.query.uid === undefined) {
-      logger.info('[API]: handled GET /algorand-near without UID');
-      res.json(WELCOME_JSON);
-      return;
-    }
-    const uid: TxnUid = req.query.uid as string;
-
-    // validate uid
-    try {
-      parseTxnUid(uid);
-    } catch (err) {
-      logger.info('[API]: handled GET /algorand-near with malformed UID');
-      res.status(406).send('Wrong get param format');
-      return;
-    }
-
-    const [dbId, txnId] = uid
-      .split('.')
-      .map((val, ind) => (ind === 0 ? parseInt(val) : val)) as [DbId, TxnId];
-
-    // TODO: maybe shouldn't use db here for too much coupling.
-    db.readTxn(dbId)
-      .then((dbItem: DbItem) => {
-        if (dbItem.from_txn_id !== txnId) {
-          logger.warn('[API]: handled GET /algorand-near with invalid UID');
-          return res.status(406).send('Wrong get param format');
-        }
-        // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
-        const safeObj = stringifyBigintInObj(
-          BridgeTxn.fromDbItem(dbItem).toObject()
-        );
-        logger.warn('[API]: handled GET /algorand-near with valid UID');
-
-        return res.json(safeObj);
-      })
-      .catch((err) => {
-        logger.error(err);
-        return res.status(500).send('Internal server error.');
-      });
+  .get(async (req: Request, res: Response) => {
+    await handleGetCall(req, res);
   })
   .post(async (req: Request, res: Response) => {
-    await handleAlgorandNearApiCall(req, res);
+    await handlePostCall(req, res);
   });
 
 // TODO: refactor move to types with better typing
@@ -75,7 +35,50 @@ export interface PostReturn {
   BridgeTxnStatus: BridgeTxnStatusEnum;
   uid: TxnUid;
 }
-async function handleAlgorandNearApiCall(req: Request, res: Response) {
+
+async function handleGetCall(req: Request, res: Response) {
+  if (req.query.uid === undefined) {
+    logger.info('[API]: handled GET /algorand-near without UID');
+    res.json(WELCOME_JSON);
+    return;
+  }
+  const uid: TxnUid = req.query.uid as string;
+
+  // validate uid
+  try {
+    parseTxnUid(uid);
+  } catch (err) {
+    logger.info('[API]: handled GET /algorand-near with malformed UID');
+    res.status(406).send('Wrong get param format');
+    return;
+  }
+
+  const [dbId, txnId] = uid
+    .split('.')
+    .map((val, ind) => (ind === 0 ? parseInt(val) : val)) as [DbId, TxnId];
+
+  // TODO: maybe shouldn't use db here for too much coupling.
+  try {
+    const dbItem: DbItem = await db.readTxn(dbId);
+
+    if (dbItem.from_txn_id !== txnId) {
+      logger.warn('[API]: handled GET /algorand-near with invalid UID');
+      return res.status(406).send('Wrong get param format');
+    }
+    // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
+    const safeObj = stringifyBigintInObj(
+      BridgeTxn.fromDbItem(dbItem).toObject()
+    );
+    logger.warn('[API]: handled GET /algorand-near with valid UID');
+
+    return res.json(safeObj);
+  } catch (err) {
+    logger.error(err);
+    return res.status(500).send('Internal server error.');
+  }
+}
+
+async function handlePostCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
   if (apiCallParam === null) return;
 
@@ -94,7 +97,6 @@ async function handleAlgorandNearApiCall(req: Request, res: Response) {
   res.status(200).json(postReturn);
   return bridgeTxn.uid;
 }
-
 function verifyApiCallParamWithResp(
   req: Request,
   res: Response
@@ -114,7 +116,6 @@ function verifyApiCallParamWithResp(
     return null;
   }
 }
-
 /**
  *
  * @todo - verify within both ram and db.
@@ -158,7 +159,6 @@ async function verifyBlockchainTxnWithResp(
       return null;
   }
 }
-
 async function createBridgeTxnWithResp(
   apiCallParam: ApiCallParam,
   res: Response
