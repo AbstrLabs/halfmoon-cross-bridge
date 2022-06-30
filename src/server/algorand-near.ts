@@ -27,7 +27,7 @@ algorandNear
     // return WELCOME_JSON if no uid is provided.
 
     if (req.query.uid === undefined) {
-      console.log('req.query.uid:', req.query.uid);
+      logger.info('[API]: handled GET /algorand-near without UID');
       res.json(WELCOME_JSON);
       return;
     }
@@ -37,6 +37,7 @@ algorandNear
     try {
       parseTxnUid(uid);
     } catch (err) {
+      logger.info('[API]: handled GET /algorand-near with malformed UID');
       res.status(406).send('Wrong get param format');
       return;
     }
@@ -49,14 +50,14 @@ algorandNear
     db.readTxn(dbId)
       .then((dbItem: DbItem) => {
         if (dbItem.from_txn_id !== txnId) {
-          logger.warn('GET call UID mismatch');
-
+          logger.warn('[API]: handled GET /algorand-near with invalid UID');
           return res.status(406).send('Wrong get param format');
         }
         // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
         const safeObj = stringifyBigintInObj(
           BridgeTxn.fromDbItem(dbItem).toObject()
         );
+        logger.warn('[API]: handled GET /algorand-near with valid UID');
 
         return res.json(safeObj);
       })
