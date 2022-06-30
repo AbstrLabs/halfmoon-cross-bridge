@@ -23,7 +23,13 @@ const logger = createLogger({
         timestamp(),
         prettyPrint(),
         printf(({ level, message, timestamp }: Record<string, string>) => {
-          return `${timestamp} ${level.padEnd(7, ' ')}: ${message}`;
+          return `${
+            timestamp.slice(11, -5)
+            // first 11 chars `2022-06-30T`, last 5 chars `.777Z`
+          }Z ${
+            level.slice(0, 9).concat(level.slice(-5)).padEnd(15)
+            // 'X[32m', 'verbo' + 'X[39m'
+          }: ${message}`;
         })
       ),
     }),
