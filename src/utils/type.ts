@@ -92,12 +92,12 @@ type NearTxnParam = z.infer<typeof zNearTxnParam>;
 type TxnParam = z.infer<typeof zTxnParam>;
 type AlgoAssetTransferTxnOutcome = z.infer<typeof zAlgoAssetTransferTxnOutcome>;
 // Class BridgeTxn
-// Used by BridgeTxn Class - database
+type TxnUid = z.infer<typeof zTxnUid>;
+// Database
 type DbItem = z.infer<typeof zDbItem>;
 type DbId = z.infer<typeof zDbId>;
 type Biginter = z.infer<typeof zBiginter>;
 
-type TxnUid = string; // TODO: UID: parse with zod, txnUid type should be uid format
 /* COMMONLY USED */
 
 const zBiginter =
@@ -214,6 +214,20 @@ const zAlgoAssetTransferTxnOutcome = z.object({
 
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
 const zBridgeTxnType = z.nativeEnum(TxnType);
+const zTxnUid = z.string().refine((str: string) => {
+  const splitted = str.split('.');
+  if (splitted.length !== 2) {
+    return false;
+  }
+  const [dbId, txnId] = splitted;
+  try {
+    parseDbId(+dbId);
+    parseTxnId(txnId);
+  } catch (e) {
+    return false;
+  }
+  return true;
+});
 
 /* DATABASE */
 
