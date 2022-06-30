@@ -21,14 +21,7 @@ import { db } from '../database/db';
 
 const algorandNear = express.Router();
 
-algorandNear
-  .route('/algorand-near')
-  .get(async (req: Request, res: Response) => {
-    await handleGetCall(req, res);
-  })
-  .post(async (req: Request, res: Response) => {
-    await handlePostCall(req, res);
-  });
+algorandNear.route('/algorand-near').get(handleGetCall).post(handlePostCall);
 
 // TODO: refactor move to types with better typing
 export interface PostReturn {
@@ -36,6 +29,14 @@ export interface PostReturn {
   uid: TxnUid;
 }
 
+/**
+ * Handle GET call on /algorand-near
+ * return WELCOME_JSON if no uid is provided.
+ *
+ * @param  {Request} req
+ * @param  {Response} res
+ * @returns
+ */
 async function handleGetCall(req: Request, res: Response) {
   if (req.query.uid === undefined) {
     logger.info('[API]: handled GET /algorand-near without UID');
@@ -78,6 +79,13 @@ async function handleGetCall(req: Request, res: Response) {
   }
 }
 
+/**
+ * Handle POST call on /algorand-near
+ * return WELCOME_JSON if no uid is provided.
+ *
+ * @param  {Request} req
+ * @param  {Response} res
+ */
 async function handlePostCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
   if (apiCallParam === null) return;
