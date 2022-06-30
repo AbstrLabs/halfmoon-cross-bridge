@@ -18,6 +18,50 @@ it('hosted API root server returns welcome JSON on GET', async () => {
   expect(res.statusText).toBe('OK');
 });
 
+it('/algorand-near returns welcome JSON on no-param GET', async () => {
+  const res = await axios.get('http://localhost:4190/algorand-near');
+
+  const IGNORED = 'IGNORED';
+  interface shaped {
+    ADDITIONAL_INFO: { SERVER_UP_TIMESTAMP: string };
+  }
+  (res.data as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  (WELCOME_JSON as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  expect(res.data).toStrictEqual(WELCOME_JSON);
+  expect(res.status).toBe(200);
+  expect(res.statusText).toBe('OK');
+});
+
+it('/algorand-near returns welcome JSON on valid-param-ed GET', async () => {
+  // TODO: finish this test
+  const res = await axios.get('http://localhost:4190/algorand-near');
+
+  const IGNORED = 'IGNORED';
+  interface shaped {
+    ADDITIONAL_INFO: { SERVER_UP_TIMESTAMP: string };
+  }
+  (res.data as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  (WELCOME_JSON as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  expect(res.data).toStrictEqual(WELCOME_JSON);
+  expect(res.status).toBe(200);
+  expect(res.statusText).toBe('OK');
+});
+
+it('/algorand-near returns 406 invalid-param-ed GET', async () => {
+  // TODO: finish this test
+  const res = await axios.get('http://localhost:4190/algorand-near');
+
+  const IGNORED = 'IGNORED';
+  interface shaped {
+    ADDITIONAL_INFO: { SERVER_UP_TIMESTAMP: string };
+  }
+  (res.data as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  (WELCOME_JSON as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  expect(res.data).toStrictEqual(WELCOME_JSON);
+  expect(res.status).toBe(200);
+  expect(res.statusText).toBe('OK');
+});
+
 it('/algorand-near creates transaction in database on POST', async () => {
   // config
   const amount = '1.2345678901';

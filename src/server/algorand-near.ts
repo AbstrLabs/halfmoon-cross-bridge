@@ -3,7 +3,8 @@
  */
 export { algorandNear };
 
-import { ApiCallParam, parseApiCallParam, TxnUid } from '../utils/type';
+import type { ApiCallParam, DbId, DbItem, TxnId, TxnUid } from '../utils/type';
+import { parseApiCallParam, parseTxnUid } from '../utils/type';
 import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
@@ -16,13 +17,55 @@ import { stringifyBigintInObj } from '../utils/formatter';
 import { _create } from '../bridge/transact';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from '../bridge/api-worker';
+import { db } from '../database/db';
 
 const algorandNear = express.Router();
 
 algorandNear
   .route('/algorand-near')
   .get((req: Request, res: Response) => {
-    res.json(WELCOME_JSON);
+    // return WELCOME_JSON if no uid is provided.
+
+    // `req.params` has wrong type: `req.params.uid` can be undefined.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (req.params.uid === undefined) {
+      console.log('req.params.uid:', req.params.uid);
+      res.json(WELCOME_JSON);
+      return;
+    }
+    const uid: TxnUid = req.params.uid;
+
+    // validate uid
+    try {
+      parseTxnUid(uid);
+    } catch (err) {
+      res.status(406).send('Wrong get param format');
+      return;
+    }
+
+    const [dbId, txnId] = uid
+      .split('.')
+      .map((val, ind) => (ind === 0 ? parseInt(val) : val)) as [DbId, TxnId];
+
+    // TODO: maybe shouldn't use db here for too much coupling.
+    db.readTxn(dbId)
+      .then((dbItem: DbItem) => {
+        if (dbItem.from_txn_id !== txnId) {
+          logger.warn('GET call UID mismatch');
+
+          return res.status(406).send('Wrong get param format');
+        }
+        // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
+        const safeObj = stringifyBigintInObj(
+          BridgeTxn.fromDbItem(dbItem).toObject()
+        );
+
+        return res.json(safeObj);
+      })
+      .catch((err) => {
+        logger.error(err);
+        return res.status(500).send('Internal server error.');
+      });
   })
   .post(async (req: Request, res: Response) => {
     await handleAlgorandNearApiCall(req, res);
@@ -31,7 +74,7 @@ algorandNear
 // TODO: refactor move to types with better typing
 export interface PostReturn {
   BridgeTxnStatus: BridgeTxnStatusEnum;
-  uid: TxnUid; // TODO: UID: parse with zod, txnUid type should be uid format
+  uid: TxnUid;
 }
 async function handleAlgorandNearApiCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
@@ -47,7 +90,7 @@ async function handleAlgorandNearApiCall(req: Request, res: Response) {
 
   const postReturn: PostReturn = {
     BridgeTxnStatus: bridgeTxn.txnStatus,
-    uid: bridgeTxn.uid,
+    uid: parseTxnUid(bridgeTxn.uid),
   };
   res.status(200).json(postReturn);
   return bridgeTxn.uid;
@@ -163,6 +206,7 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
     res.end();
     return;
   }
+  // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
   const stringifiedBridgeTxnObject = stringifyBigintInObj(bridgeTxnObject);
   logger.info(
     'API call ended, returned:\n' + JSON.stringify(stringifiedBridgeTxnObject)
