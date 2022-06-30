@@ -172,6 +172,7 @@ type Obj = Record<string, unknown>;
 /**
  * Stringify all bigint in an object recursively.
  *
+ * @todo - type this function (obj: Record<key, bigint|Types>) => Record<key, string|Types>
  * @param  {object} obj
  * @returns object
  */

@@ -55,6 +55,23 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   txnType: TxnType;
 }
 
+interface BridgeTxnSafeObject {
+  dbId: number | string;
+  fixedFeeAtom: string;
+  marginFeeAtom: string;
+  createdTime: string;
+  fromAddr: string;
+  fromAmountAtom: string;
+  fromBlockchainName: BlockchainName;
+  fromTxnId: string;
+  toAddr: string;
+  toAmountAtom: string;
+  toBlockchainName: BlockchainName;
+  toTxnId?: string | null;
+  txnStatus: BridgeTxnStatusEnum;
+  txnType: TxnType;
+}
+
 type BridgeTxnAction = {
   [methodName in BridgeTxnActionName]: () => Promise<void>;
 };
@@ -144,6 +161,29 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       toBlockchainName: undefined,
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
+    });
+    return bridgeTxn;
+  }
+
+  static fromObject(safeObj: BridgeTxnSafeObject) {
+    const bridgeTxn: BridgeTxn = new BridgeTxn({
+      dbId:
+        typeof safeObj.dbId === 'number'
+          ? safeObj.dbId
+          : parseInt(safeObj.dbId),
+      txnType: safeObj.txnType,
+      fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
+      fromAddr: safeObj.fromAddr,
+      fromAmountAtom: BigInt(safeObj.fromAmountAtom),
+      fromBlockchainName: safeObj.fromBlockchainName,
+      fromTxnId: safeObj.fromTxnId,
+      marginFeeAtom: BigInt(safeObj.marginFeeAtom),
+      createdTime: BigInt(safeObj.createdTime),
+      toAddr: safeObj.toAddr,
+      toAmountAtom: BigInt(safeObj.toAmountAtom),
+      toBlockchainName: safeObj.toBlockchainName,
+      toTxnId: safeObj.toTxnId,
+      txnStatus: safeObj.txnStatus,
     });
     return bridgeTxn;
   }
@@ -385,6 +425,10 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     );
   }
 
+  public toSafeObject(): BridgeTxnSafeObject {
+    return stringifyBigintInObj(this.toObject()) as BridgeTxnSafeObject;
+  }
+
   /**
    * Transform the {@link BridgeTxn} to an object with all info, wrapping up all important fields.
    *
@@ -418,7 +462,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {string} the JSON string representation of the {@link BridgeTxn}
    */
   public toString(): string {
-    return JSON.stringify(stringifyBigintInObj(this.toObject()));
+    return JSON.stringify(this.toSafeObject());
   }
 
   /* GETTERS */
