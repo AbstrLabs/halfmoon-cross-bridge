@@ -1,7 +1,12 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { BridgeTxn } from '../../bridge';
 import { WELCOME_JSON } from '../../server';
 import { PostReturn } from '../../server/algorand-near';
 import { MintApiParam, parseTxnUid } from '../../utils/type';
+import {
+  EXAMPLE_MALFORMED_UID_FROM_DB,
+  EXAMPLE_TXN_FROM_DB,
+} from '../test-helper/test-examples';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 
 describe('root API (GET)', () => {
@@ -36,40 +41,18 @@ describe('/algorand-near API (GET)', () => {
   });
 
   it('/algorand-near returns welcome JSON on VALID-param-ed GET', async () => {
-    // TODO: [TEST-CONST]
-    const EXAMPLE_UID_FROM_DB =
-      '57.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
-    // TODO: [TEST-CONST]
-    const EXAMPLE_RESULT_FROM_DB = {
-      createdTime: '1656171676417',
-      dbId: 57,
-      fixedFeeAtom: '10000000000',
-      fromAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
-      fromAmountAtom: '12345678901',
-      fromBlockchainName: 'ALGO',
-      fromTxnId: '2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA',
-      marginFeeAtom: '24691358',
-      toAddr: 'abstrlabs-test.testnet',
-      toAmountAtom: '2320987543',
-      toBlockchainName: 'NEAR',
-      toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
-      txnStatus: 'DONE_INITIALIZE',
-      txnType: 'BURN',
-    };
-
     const res = await axios.get(
-      'http://localhost:4190/algorand-near?uid=' + EXAMPLE_UID_FROM_DB
+      'http://localhost:4190/algorand-near?uid=' +
+        BridgeTxn.fromObject(EXAMPLE_TXN_FROM_DB).uid
     );
 
-    expect(res.data).toStrictEqual(EXAMPLE_RESULT_FROM_DB);
+    expect(res.data).toStrictEqual(EXAMPLE_TXN_FROM_DB);
     expect(res.status).toBe(200);
     expect(res.statusText).toBe('OK');
   });
 
   it('/algorand-near returns 406 invalid-param-ed GET', async () => {
     // TODO: [TEST-CONST]
-    const EXAMPLE_MALFORMED_UID_FROM_DB =
-      '58.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
 
     await expect(
       axios.get(
