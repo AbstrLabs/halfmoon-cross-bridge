@@ -80,7 +80,9 @@ describe('/algorand-near API (GET)', () => {
       new AxiosError('Request failed with status code 406')
     );
   });
+});
 
+describe('/algorand-near API (POST)', () => {
   it('/algorand-near creates transaction in database on POST', async () => {
     // config
     const amount = '1.2345678901';
@@ -118,9 +120,6 @@ describe('/algorand-near API (GET)', () => {
       parseTxnUid(data.uid);
     }).not.toThrow(); // starts with 2 digits
   });
-});
-
-describe('/algorand-near API (POST)', () => {
   // test('API endpoint should reject double mint', async ({ request }) => {
   //   const res = await request.post('./algorand-near', { data: {} });
   //   expect(res.ok()).toBeTruthy();
