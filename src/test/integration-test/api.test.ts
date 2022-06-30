@@ -9,10 +9,10 @@ it('hosted API server returns welcome JSON on GET', async () => {
 
   const IGNORED = 'IGNORED';
   interface shaped {
-    ADDITIONAL_INFO: { TIMESTAMP: string };
+    ADDITIONAL_INFO: { SERVER_UP_TIMESTAMP: string };
   }
-  (res.data as shaped).ADDITIONAL_INFO.TIMESTAMP = IGNORED;
-  (WELCOME_JSON as shaped).ADDITIONAL_INFO.TIMESTAMP = IGNORED;
+  (res.data as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
+  (WELCOME_JSON as shaped).ADDITIONAL_INFO.SERVER_UP_TIMESTAMP = IGNORED;
   expect(res.data).toStrictEqual(WELCOME_JSON);
   expect(res.status).toBe(200);
   expect(res.statusText).toBe('OK');

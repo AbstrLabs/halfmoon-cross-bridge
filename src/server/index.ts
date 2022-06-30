@@ -29,6 +29,6 @@ const WELCOME_JSON = {
     },
   ],
   ADDITIONAL_INFO: {
-    TIMESTAMP: new Date().toISOString(),
+    SERVER_UP_TIMESTAMP: new Date().toISOString(),
   },
 };
