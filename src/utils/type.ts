@@ -31,6 +31,7 @@ export {
   parseDbItem,
   parseMintApiParam,
   parseTxnId,
+  parseTxnUid,
 };
 
 import { z } from 'zod';
@@ -274,4 +275,7 @@ function parseDbId(dbId: DbId): DbId {
 }
 function parseTxnId(txnId: TxnId): TxnId {
   return parseWithZod(txnId, zTxnId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
+function parseTxnUid(txnUid: TxnUid): TxnUid {
+  return parseWithZod(txnUid, zTxnUid, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }

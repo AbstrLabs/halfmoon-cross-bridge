@@ -1,7 +1,14 @@
 // TODO: no need to infer TxnType here anymore.
 export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
 
-import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
+import {
+  ApiCallParam,
+  DbId,
+  DbItem,
+  TxnId,
+  parseDbItem,
+  parseTxnUid,
+} from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -436,13 +443,12 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
   /**
    * UID {DbId}.{TxnId}
-   * @todo: UID: parse with zod, txnUid type should be uid format
    */
   get uid(): string {
     if (this.dbId === undefined) {
       this.dbId = this.getDbId();
     }
-    return `${this.dbId}.${this.fromTxnId}`;
+    return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
 
   /**  PRIVATE METHODS - CLASS INIT  **/
