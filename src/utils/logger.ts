@@ -28,11 +28,11 @@ const logger = createLogger({
         prettyPrint(),
         printf(({ level, message, timestamp }: Record<string, string>) => {
           return `${
-            timestamp.slice(11, -5)
-            // first 11 chars `2022-06-30T`, last 5 chars `.777Z`
-          }Z ${
-            level.slice(0, 9).concat(level.slice(-5)).padEnd(15)
-            // 'X[32m', 'verbo' + 'X[39m'
+            timestamp.slice(14, -5)
+            // first 14 chars `2022-06-30T23:`, last 5 chars `.777Z`
+          }${
+            level.slice(0, 9).concat(level.slice(-5)).padEnd(14)
+            // 'X[32m', 'verb' + 'X[39m', only 4 chars, shortest =4.
           }: ${message}`;
         })
       ),
