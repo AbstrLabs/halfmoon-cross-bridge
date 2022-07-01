@@ -289,6 +289,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
+    logger.verbose('[BTX]: running confirmIncomingTxn.');
     if (!this.#isCreatedInDb) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',

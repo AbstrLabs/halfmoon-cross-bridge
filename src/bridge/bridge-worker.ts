@@ -31,7 +31,7 @@ class BridgeWorker {
       await this.updateTasksFromDb();
       await pause(UPDATE_INTERVAL_MS);
       while (this.size > 0) {
-        await this.handleNewTask();
+        await this.handleOneTask();
         await pause(EXECUTE_INTERVAL_MS);
       }
     }
@@ -76,11 +76,14 @@ class BridgeWorker {
     // then update current to txn
   }
 
-  async handleNewTask() {
+  async handleOneTask() {
     const newTask = this._getOne();
     if (newTask === undefined) {
+      logger.info('[BW ]: No task to handle.');
       return;
     }
+    console.log('h1t : '); // DEV_LOG_TO_REMOVE
+
     await this.handleTask(newTask);
   }
 
@@ -125,21 +128,43 @@ class BridgeWorker {
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
     ) {
+      console.log('ht1 : '); // DEV_LOG_TO_REMOVE
+
+      logger.verbose(`[BW ]: Moved finished task ${bridgeTxn.uid}.`);
       await this._finishTask(bridgeTxn);
       return;
-    }
-    const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
-    if (actionName === 'MANUAL') {
-      emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
-      this._delete(bridgeTxn);
+    } else {
+      console.log('ht2 : '); // DEV_LOG_TO_REMOVE
+      const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
+      if (actionName === 'MANUAL') {
+        console.log('ht21 : '); // DEV_LOG_TO_REMOVE
+        logger.verbose(`[BW ]: Sent error mail for ${bridgeTxn.uid}.`);
+        emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
+        await this._dropTask(bridgeTxn);
+        return;
+      } else if (actionName === null) {
+        console.log('ht22 : '); // DEV_LOG_TO_REMOVE
+        throw new Error(
+          `[BW ]: actionName is null for ${bridgeTxn.uid} no action's needed.`
+        );
+        // TODO: should do something here like remove this task from queue
+      } else {
+        logger.verbose(
+          `[BW ]: Executing ${actionName} on ${bridgeTxn.uid} with status ${bridgeTxn.txnStatus}.`
+        );
+        await bridgeTxn[actionName]();
+      }
       return;
     }
-    if (actionName === null) {
-      throw new Error(
-        `actionName is null for ${bridgeTxn.uid} no action's needed.`
-      );
-    }
-    await bridgeTxn[actionName]();
+  }
+
+  private async _dropTask(bridgeTxn: BridgeTxn) {
+    // TODO: move this task to "error" table
+    await new Promise<void>((resolve) => {
+      resolve();
+    });
+    logger.warn('[BW ]: FAKE! moved finished task to error table.');
+    this._delete(bridgeTxn);
   }
 
   private async _finishTask(bridgeTxn: BridgeTxn) {
@@ -147,6 +172,7 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
+    logger.warn('[BW ]: FAKE! moved finished task to finished table.');
     this._delete(bridgeTxn);
   }
 

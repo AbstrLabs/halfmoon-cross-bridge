@@ -10,16 +10,15 @@ describe('singleton txnHandler', () => {
   it('double load will not cause repetition ', async () => {
     await bridgeWorker.loadUnfinishedTasksFromDb();
     const len1 = bridgeWorker.length;
-    console.log('len1 : ', len1);
     await bridgeWorker.loadUnfinishedTasksFromDb();
     const len2 = bridgeWorker.length;
-    console.log('len2 : ', len2);
     expect(len2).toEqual(len1);
   });
 
-  it('should load db items into queue', async () => {
+  it('should handle one task correctly', async () => {
     await bridgeWorker.loadUnfinishedTasksFromDb();
-    await bridgeWorker.handleNewTask();
+    console.log('bridgeWorker.length : ', bridgeWorker.length); // DEV_LOG_TO_REMOVE
+    await bridgeWorker.handleOneTask();
     expect(bridgeWorker.length).toBeGreaterThan(0);
   });
 });
