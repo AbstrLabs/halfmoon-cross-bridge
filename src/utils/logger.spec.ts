@@ -1,11 +1,14 @@
 import { logger } from './logger';
 
-describe('utils tool test, should skip', () => {
-  describe('logger', () => {
-    it('log "something"', () => {
-      logger.info('something');
-      console.log('something'); // this is better to show call stack
-      // TODO: override logger.info with console.log
-    });
+describe('logger', () => {
+  it('should log messages at correct logger levels', () => {
+    logger.error('logger with level "error"');
+    logger.warn('logger with level "warn"');
+    logger.info('logger with level "info"');
+    logger.http('logger with level "http"');
+    logger.verbose('logger with level "verbose"');
+    logger.debug('logger with level "debug"');
+    logger.silly('logger with level "silly"');
+    console.log('log from console.log, with better call stack');
   });
 });

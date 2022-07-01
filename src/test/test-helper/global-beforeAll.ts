@@ -20,7 +20,6 @@ jest.setTimeout(10 * SECOND); // in milliseconds
 beforeAll(async () => {
   try {
     await db.connect();
-    logger.info('connected to database');
   } catch {
     logger.error('Error connecting to database');
     return;
