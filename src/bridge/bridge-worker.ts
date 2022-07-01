@@ -3,6 +3,7 @@
  */
 export { type BridgeWorker, bridgeWorker };
 
+import ObjectSet from 'object-set-type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
@@ -15,11 +16,11 @@ const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
 
 class BridgeWorker {
-  queue: BridgeTxn[];
+  queue: ObjectSet<BridgeTxn>;
   database: Database;
 
   constructor(database = db) {
-    this.queue = [];
+    this.queue = new ObjectSet();
     this.database = database;
   }
 
@@ -29,7 +30,7 @@ class BridgeWorker {
     while (true) {
       await this.updateTasksFromDb();
       await pause(UPDATE_INTERVAL_MS);
-      while (this.length > 0) {
+      while (this.size > 0) {
         await this.handleNewTask();
         await pause(EXECUTE_INTERVAL_MS);
       }
@@ -54,7 +55,7 @@ class BridgeWorker {
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
         continue;
       }
-      this._push(bridgeTxn);
+      this._add(bridgeTxn);
     }
   }
 
@@ -76,7 +77,7 @@ class BridgeWorker {
   }
 
   async handleNewTask() {
-    const newTask = this._pop();
+    const newTask = this._getOne();
     if (newTask === undefined) {
       return;
     }
@@ -88,18 +89,21 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    this._push(bridgeTxn);
+    this._add(bridgeTxn);
   }
 
   /* GETTERS & SETTERS */
+  get size(): number {
+    return this.queue.size;
+  }
   get length(): number {
-    return this.queue.length;
+    return this.size;
   }
   get taskNum(): number {
-    return this.length;
+    return this.size;
   }
   get queueLength(): number {
-    return this.length;
+    return this.size;
   }
 
   toString() {
@@ -108,11 +112,12 @@ class BridgeWorker {
 
   /* PRIVATE METHODS */
 
-  private _push(bridgeTxn: BridgeTxn) {
-    if (this._hasTask(bridgeTxn)) {
-      throw new Error('task already exists in TxnHandler queue');
-    }
-    this.queue.push(bridgeTxn);
+  private _add(bridgeTxn: BridgeTxn) {
+    // ObjectSet did this check already.
+    // if (this._has(bridgeTxn)) {
+    //   throw new Error('task already exists in TxnHandler queue');
+    // }
+    this.queue.add(bridgeTxn);
   }
 
   private async handleTask(bridgeTxn: BridgeTxn) {
@@ -126,7 +131,7 @@ class BridgeWorker {
     const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
     if (actionName === 'MANUAL') {
       emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
-      this._removeTask(bridgeTxn);
+      this._delete(bridgeTxn);
       return;
     }
     if (actionName === null) {
@@ -142,19 +147,20 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    this._removeTask(bridgeTxn);
+    this._delete(bridgeTxn);
   }
 
-  private _removeTask(bridgeTxn: BridgeTxn) {
-    this.queue = this.queue.filter((txn) => txn !== bridgeTxn);
+  private _delete(bridgeTxn: BridgeTxn): boolean {
+    return this.queue.delete(bridgeTxn);
   }
 
-  private _hasTask(bridgeTxn: BridgeTxn): boolean {
-    return this.queue.includes(bridgeTxn); // TODO: should compare UID here.
+  private _has(bridgeTxn: BridgeTxn): boolean {
+    return this.queue.has(bridgeTxn); // TODO: should compare UID here.
   }
 
-  private _pop(): BridgeTxn | undefined {
-    return this.queue.pop();
+  private _getOne(): BridgeTxn | undefined {
+    const [task] = this.queue;
+    return task;
   }
 }
 
