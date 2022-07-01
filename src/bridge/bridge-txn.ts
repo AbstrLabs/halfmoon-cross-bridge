@@ -141,7 +141,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    *
    * @static
    * @param  {DbItem} dbItem
-   * @param  {TxnType} dbName
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
   static fromDbItem(dbItem: DbItem): BridgeTxn {
