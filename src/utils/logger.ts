@@ -7,6 +7,9 @@
 
 import { createLogger, format, transports } from 'winston';
 import { ENV } from './dotenv';
+// Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
+// Because `logger` is imported in `errors` which is imported in `dotenv.ts` which is imported here.
+// But importing ENV will not cause the problem assumably because `logger` is used before initialization of `ENV`.
 
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
@@ -43,7 +46,3 @@ const logger = createLogger({
     prettyPrint()
   ),
 });
-
-// Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
-// TODO: fix this or know why. the `logger` is not imported in `dotenv.ts`
-// loadDotEnv();

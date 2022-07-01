@@ -9,10 +9,10 @@
 export { ENV, loadDotEnv };
 
 import { BridgeError, ERRORS } from './errors';
+import { literals } from './literals';
 
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
-import { literals } from './literals';
 
 /**
  * Load and Parse .env file.
