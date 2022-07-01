@@ -161,6 +161,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
     });
+    bridgeTxn.#isCreatedInDb = true;
     return bridgeTxn;
   }
 
