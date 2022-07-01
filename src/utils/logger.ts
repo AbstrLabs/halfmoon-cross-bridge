@@ -6,6 +6,7 @@
 // UNRESOLVED: https://github.com/facebook/jest/issues/8790
 
 import { createLogger, format, transports } from 'winston';
+import { ENV } from './dotenv';
 
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
@@ -35,7 +36,7 @@ const logger = createLogger({
     }),
     // new transports.File({ filename: 'combined.log' }),
   ],
-  level: 'info',
+  level: ENV.LOGGER_LEVEL,
   format: combine(
     errors({ stack: true }), // <-- use errors format
     timestamp(),
@@ -46,5 +47,3 @@ const logger = createLogger({
 // Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
 // TODO: fix this or know why. the `logger` is not imported in `dotenv.ts`
 // loadDotEnv();
-// logger.level = ENV.LOGGER_LEVEL;
-// logger.info(`log level: ${ENV.LOGGER_LEVEL}`);
