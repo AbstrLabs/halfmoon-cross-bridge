@@ -3,6 +3,8 @@ import { loadDotEnv } from '../../utils/dotenv';
 import { logger } from '../../utils/logger';
 
 loadDotEnv(); // better than calling `ENV`.
+logger.level = 'verbose';
+
 const SECOND = 1000;
 jest.setTimeout(10 * SECOND); // in milliseconds
 
