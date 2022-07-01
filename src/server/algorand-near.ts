@@ -175,6 +175,8 @@ async function createBridgeTxnWithResp(
     return bridgeTxn;
   } catch (err) {
     logger.error('unknown error, maybe db?');
+    // db error happened once when I push.
+    //06:54:51Z error : (ERR_CODE: ANB301): Cannot query in database service: {"connected":true,"err":{"errno":-60,"code":"ETIMEDOUT","syscall":"read"},"query":"\n      SELECT * FROM anb_request WHERE db_id = $1;\n    ","params":{"0":57}}
     logger.error(err);
     res.status(500).send('Internal server error.');
     return null;
