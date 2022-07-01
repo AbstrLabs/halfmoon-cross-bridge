@@ -5,15 +5,15 @@
  */
 // UNRESOLVED: https://github.com/facebook/jest/issues/8790
 
-import { createLogger, format, transports } from 'winston';
-import { ENV } from './dotenv';
-// Calling `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
-// Because `logger` is imported in `errors` which is imported in `dotenv.ts` which is imported here.
-// But importing ENV will not cause the problem assumably because `logger` is used before initialization of `ENV`.
+export { logger };
 
+import { createLogger, format, transports } from 'winston';
+// Calling `ENV` or `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
+// Because of circular reference: `logger` is imported in `errors` which is imported in `dotenv.ts` which is imported here.
+import { config } from 'dotenv';
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
-export { logger };
+config();
 
 const logger = createLogger({
   transports: [
@@ -39,7 +39,7 @@ const logger = createLogger({
     }),
     // new transports.File({ filename: 'combined.log' }),
   ],
-  level: ENV.LOGGER_LEVEL,
+  level: process.env.LOGGER_LEVEL, // should be the only usage of nude `process.env`, for cir
   format: combine(
     errors({ stack: true }), // <-- use errors format
     timestamp(),
