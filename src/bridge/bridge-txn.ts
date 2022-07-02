@@ -1,5 +1,10 @@
 // TODO: no need to infer TxnType here anymore.
-export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
+export {
+  type BridgeTxnObj,
+  type BridgeTxnSafeObj,
+  BridgeTxn,
+  BridgeTxnActionName,
+};
 
 import {
   ApiCallParam,
@@ -55,7 +60,7 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   txnType: TxnType;
 }
 
-interface BridgeTxnSafeObject {
+interface BridgeTxnSafeObj {
   dbId: number | string;
   fixedFeeAtom: string;
   marginFeeAtom: string;
@@ -165,7 +170,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     return bridgeTxn;
   }
 
-  static fromObject(safeObj: BridgeTxnSafeObject) {
+  static fromObject(safeObj: BridgeTxnSafeObj) {
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId:
         typeof safeObj.dbId === 'number'
@@ -230,6 +235,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
       this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
+      // next line seems not needed, consider removing it.
       this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DOING_INITIALIZE;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -241,7 +247,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       });
     }
     this._selfValidate();
-    this.txnStatus = BridgeTxnStatusEnum.DONE_INITIALIZE;
+    this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DONE_INITIALIZE;
   }
 
   /* MAKE BRIDGE TRANSACTION */
@@ -426,8 +432,8 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     );
   }
 
-  public toSafeObject(): BridgeTxnSafeObject {
-    return stringifyBigintInObj(this.toObject()) as BridgeTxnSafeObject;
+  public toSafeObject(): BridgeTxnSafeObj {
+    return stringifyBigintInObj(this.toObject()) as BridgeTxnSafeObj;
   }
 
   /**
@@ -839,7 +845,12 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
   private async _updateToTxnId(toTxnId: TxnId): Promise<DbId> {
-    if (this.toTxnId !== undefined) {
+    const isOverwriting =
+      this.toTxnId !== undefined &&
+      this.toTxnId !== null &&
+      this.toTxnId !== toTxnId;
+
+    if (isOverwriting) {
       throw new BridgeError(ERRORS.INTERNAL.OVERWRITE_TO_TXN_ID, {
         bridgeTxn: this,
       });
