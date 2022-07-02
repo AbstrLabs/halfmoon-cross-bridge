@@ -795,7 +795,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
   /**
    * Update the {@link BridgeTxn.txnStatus} field in the instance and database.
-   *
+   * Throw error if current txnStatus is already error.
    * @async
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
@@ -806,7 +806,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     newStatus: BridgeTxnStatusEnum
   ): Promise<DbId> {
     // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
-    // will raise err if current txnStatus is error.
+    // TODO: check if update if valid
     if (
       [
         BridgeTxnStatusEnum.ERR_AWS_RDS_DB,

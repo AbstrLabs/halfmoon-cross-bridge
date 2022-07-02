@@ -151,7 +151,7 @@ const BridgeTxnStatusTree = {
   [BridgeTxnStatusEnum.DONE_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.DONE_OUTGOING,
     previous: BridgeTxnStatusEnum.DOING_VERIFY,
-    actionName: null,
+    actionName: null, // TODO: send email to user, if no email or no confirm in X days, move to USER_CONFIRMED
   }),
   [BridgeTxnStatusEnum.USER_CONFIRMED]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.USER_CONFIRMED,
