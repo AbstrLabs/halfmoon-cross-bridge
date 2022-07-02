@@ -131,7 +131,7 @@ const BridgeTxnStatusTree = {
   [BridgeTxnStatusEnum.DOING_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.DOING_OUTGOING,
     previous: BridgeTxnStatusEnum.DONE_INCOMING,
-    actionName: 'MANUAL',
+    actionName: BridgeTxnActionName.verifyOutgoingTxn,
   }),
   [BridgeTxnStatusEnum.ERR_MAKE_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
