@@ -52,9 +52,17 @@ class BridgeWorker {
     const allDbItems = await this.database.readAllTxn();
     for (const item of allDbItems) {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
+      // later this won't be needed since all finished items will be removed from that table.
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
         continue;
       }
+      logger.silly(
+        // 57 = 52 max len + 1 for '.' + 3 for dbId + 1 for backup
+        `Loaded bridgeTxn with uid,txnStatus: ${bridgeTxn.uid.padEnd(57)},${
+          bridgeTxn.txnStatus
+        }`
+      );
+
       this._add(bridgeTxn);
     }
   }
