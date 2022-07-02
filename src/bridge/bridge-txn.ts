@@ -361,14 +361,15 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       //     at: 'BridgeTxn.makeOutgoingTxn',
       //   });
       // }
-      await this._updateToTxnId(outgoingTxnId);
     } catch (err) {
       await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
+        detail: 'bridge txn make outgoing txn failed',
         err,
       });
     }
+    await this._updateToTxnId(outgoingTxnId);
   }
 
   /**
