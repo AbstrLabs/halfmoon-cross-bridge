@@ -20,7 +20,7 @@ class EmailServer {
 
   sendEmail(email: Email): void {
     logger.warn(
-      `Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
+      `[EMS]: Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
     );
   }
   sendErrEmail(uid: TxnUid, bridgeTxnSafeObj: BridgeTxnSafeObj): void {
