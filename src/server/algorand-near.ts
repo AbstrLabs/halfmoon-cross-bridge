@@ -153,7 +153,7 @@ async function verifyBlockchainTxnWithResp(
 
   switch (verifyResult) {
     case ConfirmOutcome.SUCCESS:
-      logger.verbose('verifyBlockchainTxnWithResp: passed');
+      logger.silly('verifyBlockchainTxnWithResp: passed');
       return ConfirmOutcome.SUCCESS;
     case ConfirmOutcome.WRONG_INFO:
       res.status(406).send('Invalid transaction');
