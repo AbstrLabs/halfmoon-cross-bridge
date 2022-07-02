@@ -304,6 +304,7 @@ class AlgorandBlockchain extends Blockchain {
       .catch((err: unknown) => {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
           blockchainName: this.name,
+          detail: 'algorand blockchain cannot send transaction',
           err,
         });
       });
