@@ -18,6 +18,6 @@ const EXAMPLE_TXN_FROM_DB = {
   toAmountAtom: '2320987543',
   toBlockchainName: 'NEAR' as BlockchainName.NEAR,
   toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
-  txnStatus: 'DONE_INITIALIZE' as BridgeTxnStatusEnum.DONE_INITIALIZE,
+  txnStatus: 'DONE_OUTGOING' as BridgeTxnStatusEnum.DONE_OUTGOING,
   txnType: 'BURN' as TxnType.BURN,
 };
