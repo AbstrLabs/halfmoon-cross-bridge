@@ -147,7 +147,7 @@ class BridgeWorker {
       if (actionName === 'MANUAL') {
         console.log('ht21 : '); // DEV_LOG_TO_REMOVE
         logger.verbose(`[BW ]: Sent error mail for ${bridgeTxn.uid}.`);
-        emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toObject());
+        emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toSafeObject());
         await this._dropTask(bridgeTxn);
         return;
       } else if (actionName === null) {

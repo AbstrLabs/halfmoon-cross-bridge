@@ -1,4 +1,4 @@
-import { BridgeTxnObj } from '../bridge';
+import { BridgeTxnSafeObj } from '../bridge';
 import { logger } from '../utils/logger';
 import { TxnUid } from '../utils/type';
 
@@ -9,6 +9,7 @@ interface Email {
   body: string;
   to: EmailAddr;
 }
+
 class EmailServer {
   /**
    * fake interface to send email
@@ -22,8 +23,8 @@ class EmailServer {
       `Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
     );
   }
-  sendErrEmail(uid: TxnUid, bridgeTxnObj: BridgeTxnObj): void {
-    const email: Email = genAnbErrEmailWithTemplate(uid, bridgeTxnObj);
+  sendErrEmail(uid: TxnUid, bridgeTxnSafeObj: BridgeTxnSafeObj): void {
+    const email: Email = genAnbErrEmailWithTemplate(uid, bridgeTxnSafeObj);
     this.sendEmail(email);
   }
 }
@@ -32,7 +33,7 @@ export const emailServer = new EmailServer();
 
 function genAnbErrEmailWithTemplate(
   uid: TxnUid,
-  bridgeTxnObj: BridgeTxnObj
+  bridgeTxnObj: BridgeTxnSafeObj
 ): Email {
   return {
     title: `[anb] error: {yyyyMMdd hhmmss}`,
