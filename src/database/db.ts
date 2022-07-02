@@ -186,6 +186,13 @@ class Database {
       SELECT * FROM ${tableName};
     `;
     const dbItems = await this.query(query);
+
+    logger.silly(
+      `[DB ]: readAllTxn: fetched ${dbItems.length} items:\n ${JSON.stringify(
+        dbItems
+      )}`
+    );
+    // parseDbItem for validation
     return dbItems.map((dbItem) => parseDbItem(dbItem as DbItem));
   }
   /**

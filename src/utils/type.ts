@@ -62,6 +62,7 @@ function parseWithZod<T>(
   zodParser: z.ZodType,
   errorTemplate: ErrorTemplate
 ): T {
+  logger.silly(`[ZOD]: parsingDbItem: ${JSON.stringify(zodShaped)}`);
   try {
     return zodParser.parse(zodShaped) as T;
   } catch (err) {
