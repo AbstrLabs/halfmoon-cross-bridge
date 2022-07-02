@@ -132,12 +132,14 @@ class BridgeWorker {
   }
 
   private async handleTask(bridgeTxn: BridgeTxn) {
+    logger.info(
+      `[BW ]: Handling task with uid, status: ${bridgeTxn.uid}, ${bridgeTxn.txnStatus}`
+    );
     if (
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
     ) {
       console.log('ht1 : '); // DEV_LOG_TO_REMOVE
-
       logger.verbose(`[BW ]: Moved finished task ${bridgeTxn.uid}.`);
       await this._finishTask(bridgeTxn);
       return;
@@ -171,7 +173,7 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    logger.warn('[BW ]: FAKE! moved finished task to error table.');
+    logger.warn('[BW ]: FAKE! (not) moved manual task to error table.');
     this._delete(bridgeTxn);
   }
 
@@ -180,7 +182,7 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    logger.warn('[BW ]: FAKE! moved finished task to finished table.');
+    logger.warn('[BW ]: FAKE! (not) moved finished task to finished table.');
     this._delete(bridgeTxn);
   }
 
