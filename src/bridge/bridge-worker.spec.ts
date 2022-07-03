@@ -24,7 +24,7 @@ describe('singleton bridgeWorker should', () => {
   });
 
   it.skip('update tasks correctly', async () => {
-    // not finished
+    // not finished yet
     await bridgeWorker.loadUnfinishedTasksFromDb();
     await expect(bridgeWorker.updateTasksFromDb()).resolves.toBeUndefined();
     // await bridgeWorker.updateTasksFromDb();

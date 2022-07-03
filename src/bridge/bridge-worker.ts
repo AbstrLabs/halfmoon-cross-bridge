@@ -3,6 +3,7 @@
  */
 export { type BridgeWorker, bridgeWorker };
 
+import lodash from 'lodash';
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
@@ -128,6 +129,15 @@ class BridgeWorker {
   }
   get queueLength(): number {
     return this.size;
+  }
+  get value() {
+    return this.#queue;
+  }
+  get copy() {
+    return lodash.cloneDeep(this.#queue);
+  }
+  valueOf() {
+    return this.value;
   }
   toString() {
     return JSON.stringify(this.#queue);
