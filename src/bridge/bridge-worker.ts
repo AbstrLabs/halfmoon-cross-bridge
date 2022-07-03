@@ -3,24 +3,24 @@
  */
 export { type BridgeWorker, bridgeWorker };
 
-import ObjectSet from 'object-set-type';
 import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
+import { TxnUid } from '../utils/type';
 
 // TODO: add this to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
 
 class BridgeWorker {
-  #queue: ObjectSet<BridgeTxn>;
+  #queue: Map<TxnUid, BridgeTxn>;
   database: Database;
 
   constructor(database = db) {
-    this.#queue = new ObjectSet();
+    this.#queue = new Map();
     this.database = database;
   }
 
@@ -48,6 +48,7 @@ class BridgeWorker {
   }
 
   async loadUnfinishedTasksFromDb() {
+    // TODO: merge with updateTasksFromDb
     // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
     for (const item of allDbItems) {
@@ -76,16 +77,27 @@ class BridgeWorker {
   async updateTasksFromDb(): Promise<void> {
     // get all unfinished txn
     // for txn, run updateTask
-  }
+    // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
+    const allDbItems = await this.database.readAllTxn();
+    for (const item of allDbItems) {
+      const bridgeTxn = BridgeTxn.fromDbItem(item);
+      // later this won't be needed since all finished items will be removed from that table.
+      if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
+        continue;
+      }
+      logger.silly(
+        // 57 = 52 max len + 1 for '.' + 3 for dbId + 1 for backup
+        `Loaded bridgeTxn with uid,txnStatus: ${bridgeTxn.uid.padEnd(57)},${
+          bridgeTxn.txnStatus
+        }`
+      );
 
-  async updateTask(/* bridgeTxn: BridgeTxn */) {
-    // get current with bridgeTxn.uid
-    // if txn.txnStatus > current, (need partial order on txnStatus)
-    // then update current to txn
+      this._update(bridgeTxn);
+    }
   }
 
   async handleOneTask() {
-    const newTask = this._getOne();
+    const newTask = this._getRandomOne();
     if (newTask === undefined) {
       logger.info('[BW ]: No task to handle.');
       return;
@@ -93,6 +105,7 @@ class BridgeWorker {
     console.log('h1t : '); // DEV_LOG_TO_REMOVE
 
     await this.handleTask(newTask);
+    return newTask.uid;
   }
 
   public async addTask(bridgeTxn: BridgeTxn) {
@@ -116,7 +129,6 @@ class BridgeWorker {
   get queueLength(): number {
     return this.size;
   }
-
   toString() {
     return JSON.stringify(this.#queue);
   }
@@ -125,10 +137,20 @@ class BridgeWorker {
 
   private _add(bridgeTxn: BridgeTxn) {
     // ObjectSet did this check already.
-    // if (this._has(bridgeTxn)) {
-    //   throw new Error('task already exists in TxnHandler queue');
-    // }
-    this.#queue.add(bridgeTxn);
+    if (this._has(bridgeTxn)) {
+      throw new Error('[BW ]: _add failed. Task existed, use _update');
+    }
+    this.#queue.set(bridgeTxn.uid, bridgeTxn);
+  }
+
+  private _update(bridgeTxn: BridgeTxn) {
+    // get current with bridgeTxn.uid
+    // if txn.txnStatus > current, (need partial order on txnStatus)
+    // then update current to txn
+    if (this._has(bridgeTxn)) {
+      // TODO: check if txn is newer than current
+    }
+    this.#queue.set(bridgeTxn.uid, bridgeTxn);
   }
 
   private async handleTask(bridgeTxn: BridgeTxn) {
@@ -187,16 +209,17 @@ class BridgeWorker {
   }
 
   private _delete(bridgeTxn: BridgeTxn): boolean {
-    return this.#queue.delete(bridgeTxn);
+    return this.#queue.delete(bridgeTxn.uid);
   }
 
   private _has(bridgeTxn: BridgeTxn): boolean {
-    return this.#queue.has(bridgeTxn); // TODO: should compare UID here.
+    // consider same UID implies same task
+    return this.#queue.has(bridgeTxn.uid); // TODO: should compare UID here.
   }
 
-  private _getOne(): BridgeTxn | undefined {
-    const [task] = this.#queue;
-    return task;
+  private _getRandomOne(): BridgeTxn | undefined {
+    const [uidTxnPair] = this.#queue;
+    return uidTxnPair[1];
   }
 }
 
