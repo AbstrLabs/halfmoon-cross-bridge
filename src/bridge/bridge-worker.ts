@@ -1,7 +1,7 @@
 /**
  * A worker to handle transactions with a queue.
  */
-export { type BridgeWorker, bridgeWorker };
+export { type BridgeWorker, bridgeWorker, FetchAction };
 
 import lodash from 'lodash';
 import { BridgeTxn, BridgeTxnObj } from '.';
@@ -17,6 +17,12 @@ import { TxnUid } from '../utils/type';
 const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
 
+// TODO: [SYM] ref: should use on more lik these?
+const LOAD = Symbol('LOAD');
+const UPDATE = Symbol('UPDATE');
+const FetchAction = { LOAD, UPDATE } as const;
+type FetchActionType = typeof FetchAction[keyof typeof FetchAction];
+
 class BridgeWorker {
   #queue: Map<TxnUid, BridgeTxn>;
   database: Database;
@@ -27,10 +33,10 @@ class BridgeWorker {
   }
 
   public async run() {
-    await this.loadUnfinishedTasksFromDb();
+    await this.fetchTasksFromDb(LOAD);
     // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
     while (true) {
-      await this.updateTasksFromDb();
+      await this.fetchTasksFromDb(UPDATE);
       await pause(UPDATE_INTERVAL_MS);
       while (this.size > 0) {
         await this.handleOneTask();
@@ -49,7 +55,13 @@ class BridgeWorker {
     // TODO: support BridgeTxn with more txnStatus
   }
 
-  async loadUnfinishedTasksFromDb() {
+  /**
+   * Fetch tasks from the database. Supports LOAD and UPDATE.
+   *
+   * @param  {FetchActionType} fetchAction
+   * @returns {Promise<void>}
+   */
+  async fetchTasksFromDb(fetchAction: FetchActionType) {
     // TODO: merge with updateTasksFromDb
     // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
@@ -65,36 +77,13 @@ class BridgeWorker {
           bridgeTxn.txnStatus
         }`
       );
-
-      this._add(bridgeTxn);
-    }
-  }
-
-  /**
-   * Fetch newly added tasks from the database.
-   * loadUnfinishedTasksFromDb can merge into this
-   *
-   * @returns {Promise<void>}
-   */
-  async updateTasksFromDb(): Promise<void> {
-    // get all unfinished txn
-    // for txn, run updateTask
-    // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
-    const allDbItems = await this.database.readAllTxn();
-    for (const item of allDbItems) {
-      const bridgeTxn = BridgeTxn.fromDbItem(item);
-      // later this won't be needed since all finished items will be removed from that table.
-      if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
-        continue;
+      switch (fetchAction) {
+        case LOAD:
+          this._add(bridgeTxn);
+          break;
+        case UPDATE:
+          this._update(bridgeTxn);
       }
-      logger.silly(
-        // 57 = 52 max len + 1 for '.' + 3 for dbId + 1 for backup
-        `Loaded bridgeTxn with uid,txnStatus: ${bridgeTxn.uid.padEnd(57)},${
-          bridgeTxn.txnStatus
-        }`
-      );
-
-      this._update(bridgeTxn);
     }
   }
 
