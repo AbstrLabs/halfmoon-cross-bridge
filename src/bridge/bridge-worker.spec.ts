@@ -1,5 +1,9 @@
 import { bridgeWorker } from './bridge-worker';
 
+beforeEach(() => {
+  bridgeWorker._test_DropAll();
+});
+
 describe('singleton bridgeWorker should', () => {
   it('should load db items into queue', async () => {
     await bridgeWorker.loadUnfinishedTasksFromDb();

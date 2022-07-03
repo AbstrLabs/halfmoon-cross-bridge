@@ -8,6 +8,7 @@ import { BridgeTxn, BridgeTxnObj } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../server/email';
+import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
 import { TxnUid } from '../utils/type';
@@ -230,6 +231,18 @@ class BridgeWorker {
   private _getRandomOne(): BridgeTxn | undefined {
     const [uidTxnPair] = this.#queue;
     return uidTxnPair[1];
+  }
+
+  /* TEST METHODS */
+  public _test_DropAll() {
+    // for test only
+    if (ENV.TS_NODE_DEV !== 'test') {
+      throw new Error(
+        '[BW ]: _test_DropAll can only be called in test mode.' +
+          ENV.TS_NODE_DEV.toString()
+      );
+    }
+    this.#queue.clear();
   }
 }
 
