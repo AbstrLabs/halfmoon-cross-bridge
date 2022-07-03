@@ -90,6 +90,7 @@ const loadDotEnv = ({ isTest } = { isTest: false }) => {
   if (isTest) {
     ENV.TS_NODE_DEV = 'test';
   }
+  Object.freeze(ENV);
   return ENV;
 };
 
