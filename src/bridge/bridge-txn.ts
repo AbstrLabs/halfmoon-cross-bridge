@@ -823,7 +823,11 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
         bridgeTxn: this,
       });
     }
+    logger.debug(`[BTX]: updating status of txn ${this.uid} to: ${newStatus}`);
     this.txnStatus = newStatus;
+    logger.debug(
+      `[BTX]: updated status of txn ${this.uid} to: ${this.txnStatus}`
+    );
     try {
       return await this._updateTxn();
     } catch (e) {

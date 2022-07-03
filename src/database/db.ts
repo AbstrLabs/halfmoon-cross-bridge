@@ -259,7 +259,7 @@ class Database {
       at: 'db.updateTxn',
     }) as { db_id: DbId };
 
-    logger.verbose(`Updated bridge txn with id ${bridgeTxn.dbId}`);
+    logger.debug(`[DB ]: Updated bridge txn with id ${bridgeTxn.dbId}`);
     return parseDbId(result.db_id);
   }
 
