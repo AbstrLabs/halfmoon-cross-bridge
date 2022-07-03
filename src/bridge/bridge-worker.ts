@@ -134,9 +134,6 @@ class BridgeWorker {
   get value() {
     return this.#queue;
   }
-  get copy() {
-    return lodash.cloneDeep(this.#queue);
-  }
   valueOf() {
     return this.value;
   }
@@ -227,22 +224,28 @@ class BridgeWorker {
     // consider same UID implies same task
     return this.#queue.has(bridgeTxn.uid); // TODO: should compare UID here.
   }
-
   private _getRandomOne(): BridgeTxn | undefined {
     const [uidTxnPair] = this.#queue;
     return uidTxnPair[1];
   }
-
-  /* TEST METHODS */
-  public _test_DropAll() {
-    // for test only
+  private _checkIfTestEnv() {
     if (ENV.TS_NODE_DEV !== 'test') {
       throw new Error(
         '[BW ]: _test_DropAll can only be called in test mode.' +
           ENV.TS_NODE_DEV.toString()
       );
     }
+    return true;
+  }
+
+  /* TEST METHODS */
+  public _test_dropAll() {
+    this._checkIfTestEnv();
     this.#queue.clear();
+  }
+  get _test_copy() {
+    this._checkIfTestEnv();
+    return lodash.cloneDeep(this.#queue);
   }
 }
 
