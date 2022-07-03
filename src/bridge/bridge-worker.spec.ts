@@ -29,7 +29,7 @@ describe('singleton bridgeWorker should', () => {
     expect(len2).toEqual(len1);
   });
 
-  it.skip('update tasks correctly', async () => {
+  it('update tasks correctly', async () => {
     // not finished yet
     await bridgeWorker.fetchTasksFromDb(FetchAction.LOAD);
     await expect(

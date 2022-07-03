@@ -144,6 +144,7 @@ class BridgeWorker {
     // get current with bridgeTxn.uid
     // if txn.txnStatus > current, (need partial order on txnStatus)
     // then update current to txn
+    // TODO [BTST]: check if can update
     if (this._has(bridgeTxn)) {
       // TODO: check if txn is newer than current
     }
