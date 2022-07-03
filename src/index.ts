@@ -38,7 +38,7 @@ enum BridgeTxnStatusEnum {
   USER_CONFIRMED = 'USER_CONFIRMED', //             User confirmed
 }
 
-// TODO: ref: move BridgeTxnStatusTree to a new file
+// TODO: [BTST] ref: move BridgeTxnStatusTree to a new file
 // TODO: use symbolic name or enum
 type ActionName = 'MANUAL' | BridgeTxnActionName | null;
 /**
