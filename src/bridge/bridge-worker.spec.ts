@@ -1,7 +1,8 @@
+import { BridgeTxnStatusTree } from '..';
 import { bridgeWorker } from './bridge-worker';
 
 beforeEach(() => {
-  bridgeWorker._test_DropAll();
+  bridgeWorker._test_dropAll();
 });
 
 describe('singleton bridgeWorker should', () => {
@@ -14,11 +15,12 @@ describe('singleton bridgeWorker should', () => {
   it('throw error on double load', async () => {
     await bridgeWorker.loadUnfinishedTasksFromDb();
     const len1 = bridgeWorker.size;
-    // this won't log "I run"
+    // this won't log "I run" and won't run.
     // expect(async () => {
     //   await bridgeWorker.loadUnfinishedTasksFromDb();
     //   console.log('I run');
     // }).not.toThrow();
+
     await expect(bridgeWorker.loadUnfinishedTasksFromDb()).rejects.toThrow(
       '[BW ]: _add failed. Task existed, use _update'
     );
@@ -34,18 +36,38 @@ describe('singleton bridgeWorker should', () => {
     // await bridgeWorker.updateTasksFromDb();
   });
 
-  it('should handle one task correctly', async () => {
+  it('handle one task correctly', async () => {
     await bridgeWorker.loadUnfinishedTasksFromDb();
     if (bridgeWorker.size === 0) {
       console.warn('no task to handle, this test did run');
+      // should tell how to create an unfinished task
+      expect(true).toBeTruthy();
       return;
     }
-    // const tasksCopy = bridgeWorker.copy;
+    const oldCopy = bridgeWorker._test_copy;
     const taskUid = await bridgeWorker.handleOneTask();
+    const newCopy = bridgeWorker._test_copy;
     if (taskUid === undefined) {
-      expect(bridgeWorker.size).toBe(0);
-    } else {
+      expect(taskUid).toBeDefined();
       return;
+    }
+    const oldTask = oldCopy.get(taskUid);
+    const newTask = newCopy.get(taskUid);
+
+    if (oldTask === undefined) {
+      expect(oldTask).toBeDefined();
+      return;
+    }
+    if (newTask === undefined) {
+      // meaning this job is done, removed from queue
+      console.log(`task [${taskUid}] is done, removed from queue`);
+      expect(true).toBeTruthy();
+    } else {
+      expect(newTask.txnStatus).not.toEqual(oldTask.txnStatus);
+      // TODO: [BTST]: have a getPrev() for BridgeTxnStatusTree
+      const prev1 = BridgeTxnStatusTree[newTask.txnStatus].previous;
+      const prev2 = prev1 ? BridgeTxnStatusTree[prev1].previous : null;
+      expect([prev1, prev2].includes(oldTask.txnStatus)).toBe(true);
     }
   });
 });
