@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { BridgeTxn } from '../../bridge';
-import { WELCOME_JSON } from '../../server';
-import { PostReturn } from '../../server/algorand-near';
+import { WELCOME_JSON } from '../../api';
+import { PostReturn } from '../../api/algorand-near';
 import { MintApiParam, parseTxnUid } from '../../utils/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,

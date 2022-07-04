@@ -2,7 +2,7 @@ import { ENV, loadDotEnv } from './utils/dotenv';
 
 import { db } from './database/db';
 import { logger } from './utils/logger';
-import { startApiServer } from './server/start-server';
+import { startApiServer } from './api/start-api-server';
 import { startBridgeTxnWorker } from './bridge/bridge-worker';
 
 async function main() {
