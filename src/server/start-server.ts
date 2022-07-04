@@ -1,7 +1,7 @@
 // TODO: CORS '*'
 // TODO: feat: add a RAM pool
 
-export { startServer };
+export { startApiServer };
 
 import express, { Request, Response } from 'express';
 
@@ -14,7 +14,7 @@ async function homePageTest() {
   /* Used once code */
 }
 
-function startServer() {
+function startApiServer() {
   const app = express();
 
   /* CORS */
