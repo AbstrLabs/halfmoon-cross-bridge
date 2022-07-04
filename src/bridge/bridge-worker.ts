@@ -1,7 +1,7 @@
 /**
  * A worker to handle transactions with a queue.
  */
-export { type BridgeWorker, bridgeWorker, FetchAction };
+export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
 import lodash from 'lodash';
 import { BridgeTxn, BridgeTxnObj } from '.';
@@ -240,3 +240,9 @@ class BridgeWorker {
 }
 
 const bridgeWorker = new BridgeWorker(db);
+
+function startBridgeTxnWorker() {
+  bridgeWorker.run().catch((err) => {
+    logger.error(err);
+  });
+}

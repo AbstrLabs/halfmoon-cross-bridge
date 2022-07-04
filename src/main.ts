@@ -3,6 +3,7 @@ import { ENV, loadDotEnv } from './utils/dotenv';
 import { db } from './database/db';
 import { logger } from './utils/logger';
 import { startApiServer } from './server/start-server';
+import { startBridgeTxnWorker } from './bridge/bridge-worker';
 
 async function main() {
   /* SETUP ENV */
@@ -11,6 +12,7 @@ async function main() {
   await setupRemoteEnv();
 
   /* START SERVER */
+  startBridgeTxnWorker();
   startApiServer();
 }
 
