@@ -204,7 +204,6 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
 
   try {
     const bridgeTxn = await apiWorker.create(apiCallParam);
-    // bridgeTxnObject = await _execute(bridgeTxn); // executed in main.ts bridgeWorker.run()
     bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
     logger.info(_literals.DONE);
     // TODO: use different literal template than transact

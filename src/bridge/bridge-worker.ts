@@ -4,7 +4,7 @@
 export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
 import lodash from 'lodash';
-import { BridgeTxn, BridgeTxnObj } from '.';
+import { BridgeTxn } from '.';
 import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../api/email';
@@ -43,16 +43,6 @@ class BridgeWorker {
         await pause(EXECUTE_INTERVAL_MS);
       }
     }
-  }
-
-  /**
-   * @deprecated use handleTasks() instead.
-   */
-  /* private */ async _execute(bridgeTxn: BridgeTxn): Promise<BridgeTxnObj> {
-    logger.warn('calling a methods that should be private');
-    // only handles fresh-new task
-    return await bridgeTxn.runWholeBridgeTxn();
-    // TODO: support BridgeTxn with more txnStatus
   }
 
   /**
