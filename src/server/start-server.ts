@@ -14,6 +14,10 @@ async function homePageTest() {
   /* Used once code */
 }
 
+/**
+ * Start the Express API server.
+ * Also start the ApiWorker singleton.
+ */
 function startApiServer() {
   const app = express();
 
