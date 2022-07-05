@@ -140,7 +140,7 @@
     "test:bridge": "jest src/bridge",
     "test:db": "jest src/database",
     "test:handler": "jest src/bridge/txn-handler",
-    "test:integration-test": "yarn start & jest src/test/integration-test ; pkill -f -n yarn start",
+    "test:integration-test": "yarn start & jest src/test/integration-test ; pkill -fn -yarn start",
     "test:near": "jest src/blockchain/near",
     "test:unit-test": "jest --testPathIgnorePatterns=src/test",
     "test:util": "jest src/utils",
