@@ -134,7 +134,6 @@
     "postinstall": "husky install",
     "prepare": "husky install",
     "start": "ts-node src/main.ts",
-    "start-c": "echo 'the start command needs change to PM2 or alternative'",
     "test": "yarn test:unit-test ; yarn test:integration-test",
     "test:algo": "jest src/blockchain/algorand",
     "test:bridge": "jest src/bridge",
@@ -147,5 +146,5 @@
     "unit-test": "yarn test:unit-test",
     "util": "yarn test:util"
   },
-  "version": "0.1.1"
+  "version": "0.1.2"
 }
