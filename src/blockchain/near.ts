@@ -214,12 +214,6 @@ class NearBlockchain extends Blockchain {
     // check amount
 
     if (receivedAtom !== atomAmount) {
-      console.log({
-        blockchainName: this.name,
-        receivedAmount: atomAmount,
-        blockchainAmount: receivedAtom,
-      }); // DEV_LOG_TO_REMOVE
-
       throw new BridgeError(ERRORS.API.TXN_AMOUNT_MISMATCH, {
         blockchainName: this.name,
         receivedAmount: atomAmount,

@@ -83,8 +83,6 @@ class BridgeWorker {
       logger.info('[BW ]: No task to handle.');
       return;
     }
-    console.log('h1t : '); // DEV_LOG_TO_REMOVE
-
     await this.handleTask(newTask);
     return newTask.uid;
   }
@@ -149,21 +147,17 @@ class BridgeWorker {
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
     ) {
-      console.log('ht1 : '); // DEV_LOG_TO_REMOVE
       logger.verbose(`[BW ]: Moved finished task ${bridgeTxn.uid}.`);
       await this._finishTask(bridgeTxn);
       return;
     } else {
-      console.log('ht2 : '); // DEV_LOG_TO_REMOVE
       const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
       if (actionName === 'MANUAL') {
-        console.log('ht21 : '); // DEV_LOG_TO_REMOVE
         logger.verbose(`[BW ]: Sent error mail for ${bridgeTxn.uid}.`);
         emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toSafeObject());
         await this._dropTask(bridgeTxn);
         return;
       } else if (actionName === null) {
-        console.log('ht22 : '); // DEV_LOG_TO_REMOVE
         throw new Error(
           `[BW ]: actionName is null for ${bridgeTxn.uid} no action's needed.`
         );

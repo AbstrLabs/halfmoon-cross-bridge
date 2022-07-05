@@ -8,8 +8,7 @@ beforeEach(() => {
 describe('singleton bridgeWorker should', () => {
   it('should load db items into queue', async () => {
     await bridgeWorker.fetchTasksFromDb(FetchAction.LOAD);
-    console.log(bridgeWorker.size);
-    expect(bridgeWorker.size).toBeGreaterThan(0);
+    expect(bridgeWorker.size).toBeGreaterThan(0); // This can be 0 when no items in db
   });
 
   it('throw error on double load', async () => {
@@ -25,7 +24,6 @@ describe('singleton bridgeWorker should', () => {
       bridgeWorker.fetchTasksFromDb(FetchAction.LOAD)
     ).rejects.toThrow('[BW ]: _add failed. Task existed, use _update');
     const len2 = bridgeWorker.size;
-    console.log('len1, len2 : ', len1, len2); // DEV_LOG_TO_REMOVE
     expect(len2).toEqual(len1);
   });
 
@@ -49,8 +47,8 @@ describe('singleton bridgeWorker should', () => {
     const oldCopy = bridgeWorker._test_copy;
     const taskUid = await bridgeWorker.handleOneTask();
     const newCopy = bridgeWorker._test_copy;
+    expect(taskUid).toBeDefined();
     if (taskUid === undefined) {
-      expect(taskUid).toBeDefined();
       return;
     }
     const oldTask = oldCopy.get(taskUid);
@@ -62,7 +60,7 @@ describe('singleton bridgeWorker should', () => {
     }
     if (newTask === undefined) {
       // meaning this job is done, removed from queue
-      console.log(`task [${taskUid}] is done, removed from queue`);
+      console.info(`task [${taskUid}] is done, removed from queue`);
       expect(true).toBeTruthy();
     } else {
       expect(newTask.txnStatus).not.toEqual(oldTask.txnStatus);

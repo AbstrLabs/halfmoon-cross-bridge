@@ -9,6 +9,6 @@ describe('logger', () => {
     logger.verbose('logger with level "verbose"');
     logger.debug('logger with level "debug"');
     logger.silly('logger with level "silly"');
-    console.log('log from console.log, with better call stack');
+    console.log('log from console log, with better call stack');
   });
 });

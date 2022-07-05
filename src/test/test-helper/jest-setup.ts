@@ -1,12 +1,9 @@
-import type { Config } from '@jest/types';
+// import type { Config } from '@jest/types';
 
-module.exports = function (
-  globalConfig: Config.GlobalConfig
-  // projectConfig: Config.ProjectConfig,
-) {
-  console.log(globalConfig.testPathPattern);
-  // console.log(projectConfig);
-
+module.exports = function () // globalConfig: Config.GlobalConfig
+// projectConfig: Config.ProjectConfig,
+{
+  // globalConfig is the result of loading global config file
   // Set reference to mongod in order to close the server during teardown.
   // globalThis.__MONGOD__ = mongod;
   process.on('unhandledRejection', (reason) => {

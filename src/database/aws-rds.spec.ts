@@ -117,7 +117,7 @@ it.skip('fs.read', () => {
 
   try {
     const data = fs.readFileSync(__dirname + '/creation.sql', 'utf8');
-    console.log(data);
+    console.info(data);
     expect(data).toBeDefined();
   } catch (err) {
     console.error(err);

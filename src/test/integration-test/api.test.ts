@@ -98,7 +98,6 @@ describe('/algorand-near API (POST)', () => {
     expect(res.status).toBe(200);
     expect(res.statusText).toBe('OK');
     const data = res.data as PostReturn;
-    console.log(data);
     expect(() => {
       parseTxnUid(data.uid);
     }).not.toThrow(); // starts with 2 digits
