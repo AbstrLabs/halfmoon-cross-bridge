@@ -9,9 +9,9 @@ CREATE TABLE request_test (
     to_addr VARCHAR(63) NOT NULL,
     to_amount_atom BIGINT NOT NULL,
     to_token_id SMALLINT NOT NULL,
-    to_txn_id VARCHAR(63)
+    to_txn_id VARCHAR(63),
     fixed_fee_atom BIGINT NOT NULL,
-    margin_fee_atom BIGINT NOT NULL,
+    margin_fee_atom BIGINT NOT NULL
 );
 
 -- COMMENTS
@@ -26,4 +26,7 @@ COMMENT ON COLUMN request_test.to_txn_id IS 'checked always 52, but not sure. us
 
 -- INDEX
 
-CREATE INDEX txn_status_index ON request_test(txn_status);
+CREATE INDEX txn_status_index_test ON request_test(txn_status);
+
+-- this way to drop: DROP INDEX txn_status_index;
+-- this is wrong: DROP INDEX request_test.txn_status_index;
