@@ -38,150 +38,124 @@ enum BridgeTxnStatusEnum {
   USER_CONFIRMED = 'USER_CONFIRMED', //             User confirmed
 }
 
+// TODO: [BTST] ref: move BridgeTxnStatusTree to a new file
+// TODO: use symbolic name or enum
+type ActionName = 'MANUAL' | BridgeTxnActionName | null;
+/**
+ * When actionName is null, there's no action to take,
+ * hence can be treated as finished. (TODO: DOING_INITIALIZE etc)
+ */
 class BridgeTxnStatus {
-  status: BridgeTxnStatusEnum;
+  name: BridgeTxnStatusEnum;
   isError: boolean;
-  previous: BridgeTxnStatusEnum | null;
-  actionName: 'MANUAL' | BridgeTxnActionName | null;
+  previous: BridgeTxnStatusEnum | null; // null means first status
+  actionName: ActionName;
 
-  constructor(
-    status: BridgeTxnStatusEnum,
-    previous: BridgeTxnStatusEnum | null
-  ) {
-    this.status = status;
+  constructor({
+    status,
+    previous,
+    actionName,
+  }: {
+    status: BridgeTxnStatusEnum;
+    previous: BridgeTxnStatusEnum | null;
+    actionName: ActionName;
+  }) {
+    this.name = status;
     this.previous = previous;
     this.isError = status.toString().startsWith('ERR_');
-    let actionName: typeof this.actionName;
     if (this.isError) {
-      // TODO: use symbolic name or enum
       actionName = 'MANUAL';
-    }
-    switch (status) {
-      case BridgeTxnStatusEnum.NOT_CREATED:
-        actionName = null;
-        break;
-      case BridgeTxnStatusEnum.ERR_SEVER_INTERNAL:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.ERR_AWS_RDS_DB:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.DOING_INITIALIZE:
-        actionName = null;
-        break;
-      case BridgeTxnStatusEnum.ERR_INITIALIZE:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.DONE_INITIALIZE:
-        actionName = BridgeTxnActionName.confirmIncomingTxn;
-        break;
-      case BridgeTxnStatusEnum.DOING_INCOMING:
-        actionName = BridgeTxnActionName.confirmIncomingTxn;
-        break;
-      case BridgeTxnStatusEnum.ERR_VERIFY_INCOMING:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.DONE_INCOMING:
-        actionName = BridgeTxnActionName.makeOutgoingTxn;
-        break;
-      case BridgeTxnStatusEnum.DOING_OUTGOING:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.ERR_MAKE_OUTGOING:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.DOING_VERIFY:
-        actionName = BridgeTxnActionName.verifyOutgoingTxn;
-        break;
-      case BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING:
-        actionName = 'MANUAL';
-        break;
-      case BridgeTxnStatusEnum.DONE_OUTGOING:
-        actionName = null;
-        break;
-      case BridgeTxnStatusEnum.USER_CONFIRMED:
-        actionName = null;
-        break;
-      default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unknown status: ${status}`);
     }
     this.actionName = actionName;
   }
   get value() {
-    return this.status;
+    return this.name;
   }
   toString() {
-    return this.status.toString();
+    return this.name.toString();
   }
 }
 
 const BridgeTxnStatusTree = {
-  [BridgeTxnStatusEnum.NOT_CREATED]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.NOT_CREATED,
-    null
-  ),
-  [BridgeTxnStatusEnum.ERR_SEVER_INTERNAL]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_SEVER_INTERNAL,
-    BridgeTxnStatusEnum.NOT_CREATED
-  ),
-  [BridgeTxnStatusEnum.ERR_AWS_RDS_DB]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
-    BridgeTxnStatusEnum.NOT_CREATED
-  ),
-  [BridgeTxnStatusEnum.DOING_INITIALIZE]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DOING_INITIALIZE,
-    BridgeTxnStatusEnum.NOT_CREATED
-  ),
-  [BridgeTxnStatusEnum.DONE_INITIALIZE]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DONE_INITIALIZE,
-    BridgeTxnStatusEnum.DOING_INITIALIZE
-  ),
-  [BridgeTxnStatusEnum.ERR_INITIALIZE]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_INITIALIZE,
-    BridgeTxnStatusEnum.DOING_INITIALIZE
-  ),
-  [BridgeTxnStatusEnum.DOING_INCOMING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DOING_INCOMING,
-    BridgeTxnStatusEnum.DONE_INITIALIZE
-  ),
-  [BridgeTxnStatusEnum.ERR_VERIFY_INCOMING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_VERIFY_INCOMING,
-    BridgeTxnStatusEnum.DOING_INCOMING
-  ),
-  [BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING,
-    BridgeTxnStatusEnum.DOING_INCOMING
-  ),
-  [BridgeTxnStatusEnum.DONE_INCOMING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DONE_INCOMING,
-    BridgeTxnStatusEnum.DOING_INCOMING
-  ),
-  [BridgeTxnStatusEnum.DOING_OUTGOING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DOING_OUTGOING,
-    BridgeTxnStatusEnum.DONE_INCOMING
-  ),
-  [BridgeTxnStatusEnum.ERR_MAKE_OUTGOING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
-    BridgeTxnStatusEnum.DOING_OUTGOING
-  ),
-  [BridgeTxnStatusEnum.DOING_VERIFY]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DOING_VERIFY,
-    BridgeTxnStatusEnum.DOING_OUTGOING
-  ),
-  [BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
-    BridgeTxnStatusEnum.DOING_VERIFY
-  ),
-  [BridgeTxnStatusEnum.DONE_OUTGOING]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.DONE_OUTGOING,
-    BridgeTxnStatusEnum.DOING_VERIFY
-  ),
-  [BridgeTxnStatusEnum.USER_CONFIRMED]: new BridgeTxnStatus(
-    BridgeTxnStatusEnum.USER_CONFIRMED,
-    BridgeTxnStatusEnum.DONE_OUTGOING
-  ),
+  [BridgeTxnStatusEnum.NOT_CREATED]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.NOT_CREATED,
+    previous: null,
+    actionName: null,
+  }),
+  [BridgeTxnStatusEnum.ERR_SEVER_INTERNAL]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_SEVER_INTERNAL,
+    previous: BridgeTxnStatusEnum.NOT_CREATED,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.ERR_AWS_RDS_DB]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
+    previous: BridgeTxnStatusEnum.NOT_CREATED,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.DOING_INITIALIZE]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DOING_INITIALIZE,
+    previous: BridgeTxnStatusEnum.NOT_CREATED,
+    actionName: null,
+  }),
+  [BridgeTxnStatusEnum.ERR_INITIALIZE]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_INITIALIZE,
+    previous: BridgeTxnStatusEnum.DOING_INITIALIZE,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.DONE_INITIALIZE]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DONE_INITIALIZE,
+    previous: BridgeTxnStatusEnum.DOING_INITIALIZE,
+    actionName: BridgeTxnActionName.confirmIncomingTxn,
+  }),
+
+  [BridgeTxnStatusEnum.DOING_INCOMING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DOING_INCOMING,
+    previous: BridgeTxnStatusEnum.DONE_INITIALIZE,
+    actionName: BridgeTxnActionName.confirmIncomingTxn, // ? DOING-> null
+  }),
+  [BridgeTxnStatusEnum.ERR_VERIFY_INCOMING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_VERIFY_INCOMING,
+    previous: BridgeTxnStatusEnum.DOING_INCOMING,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_TIMEOUT_INCOMING,
+    previous: BridgeTxnStatusEnum.DOING_INCOMING,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.DONE_INCOMING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DONE_INCOMING,
+    previous: BridgeTxnStatusEnum.DOING_INCOMING,
+    actionName: BridgeTxnActionName.makeOutgoingTxn,
+  }),
+  [BridgeTxnStatusEnum.DOING_OUTGOING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DOING_OUTGOING,
+    previous: BridgeTxnStatusEnum.DONE_INCOMING,
+    actionName: BridgeTxnActionName.verifyOutgoingTxn,
+  }),
+  [BridgeTxnStatusEnum.ERR_MAKE_OUTGOING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
+    previous: BridgeTxnStatusEnum.DOING_OUTGOING,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.DOING_VERIFY]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DOING_VERIFY,
+    previous: BridgeTxnStatusEnum.DOING_OUTGOING,
+    actionName: BridgeTxnActionName.verifyOutgoingTxn,
+  }),
+  [BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.ERR_CONFIRM_OUTGOING,
+    previous: BridgeTxnStatusEnum.DOING_VERIFY,
+    actionName: 'MANUAL',
+  }),
+  [BridgeTxnStatusEnum.DONE_OUTGOING]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.DONE_OUTGOING,
+    previous: BridgeTxnStatusEnum.DOING_VERIFY,
+    actionName: null, // TODO: send email to user, if no email or no confirm in X days, move to USER_CONFIRMED
+  }),
+  [BridgeTxnStatusEnum.USER_CONFIRMED]: new BridgeTxnStatus({
+    status: BridgeTxnStatusEnum.USER_CONFIRMED,
+    previous: BridgeTxnStatusEnum.DONE_OUTGOING,
+    actionName: null,
+  }),
 };

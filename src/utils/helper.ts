@@ -1,10 +1,11 @@
-export { ensureString, setImmediateInterval };
+export { ensureString, setImmediateInterval, pause };
 
 import { BridgeError, ERRORS } from './errors';
 
 /**
  * Ensure that the given value is a string.
  *
+ * @deprecated - use zod types instead.
  * @throws {ERRORS.INTERNAL.TYPE_ERROR} if the value is not a string
  * @param  {unknown} value - the value to check
  * @returns {string} the value as a string
@@ -17,7 +18,18 @@ function ensureString(value: unknown): string {
       value,
     });
   }
-  return value ;
+  return value;
+}
+
+/**
+ * Asynchronously function pause for a certain time in milliseconds.
+ *
+ * @param ms - milliseconds to pause
+ * @returns
+ */
+
+async function pause(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**

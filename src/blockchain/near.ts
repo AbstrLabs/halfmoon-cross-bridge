@@ -149,7 +149,7 @@ class NearBlockchain extends Blockchain {
     nearTxnParam: NearTxnParam
   ): boolean {
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
-    logger.verbose(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
+    logger.debug(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
     if (txnOutcome.status instanceof Object) {
       if (txnOutcome.status.Failure !== undefined) {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {
@@ -214,12 +214,6 @@ class NearBlockchain extends Blockchain {
     // check amount
 
     if (receivedAtom !== atomAmount) {
-      console.log({
-        blockchainName: this.name,
-        receivedAmount: atomAmount,
-        blockchainAmount: receivedAtom,
-      }); // DEV_LOG_TO_REMOVE
-
       throw new BridgeError(ERRORS.API.TXN_AMOUNT_MISMATCH, {
         blockchainName: this.name,
         receivedAmount: atomAmount,

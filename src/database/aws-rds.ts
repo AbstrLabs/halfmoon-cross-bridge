@@ -53,7 +53,7 @@ class Postgres {
     //   throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
     // }
     this.isConnected = true;
-    logger.info('database connected');
+    logger.info('[DB ]: database connected');
   }
 
   /**

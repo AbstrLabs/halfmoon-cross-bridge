@@ -1,13 +1,15 @@
-import { BridgeTxnObj } from '../bridge';
+import { BridgeTxnSafeObj } from '../bridge';
 import { logger } from '../utils/logger';
+import { TxnUid } from '../utils/type';
 
 type EmailAddr = string; // TODO: type this with zod regex
-type UID = string; // TODO: type this with zod regex, also apply to BridgeTxn.uid getter
+
 interface Email {
   title: string;
   body: string;
   to: EmailAddr;
 }
+
 class EmailServer {
   /**
    * fake interface to send email
@@ -18,11 +20,11 @@ class EmailServer {
 
   sendEmail(email: Email): void {
     logger.warn(
-      `Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
+      `[EMS]: Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
     );
   }
-  sendErrEmail(uid: UID, bridgeTxnObj: BridgeTxnObj): void {
-    const email: Email = genAnbErrEmailWithTemplate(uid, bridgeTxnObj);
+  sendErrEmail(uid: TxnUid, bridgeTxnSafeObj: BridgeTxnSafeObj): void {
+    const email: Email = genAnbErrEmailWithTemplate(uid, bridgeTxnSafeObj);
     this.sendEmail(email);
   }
 }
@@ -30,8 +32,8 @@ class EmailServer {
 export const emailServer = new EmailServer();
 
 function genAnbErrEmailWithTemplate(
-  uid: UID,
-  bridgeTxnObj: BridgeTxnObj
+  uid: TxnUid,
+  bridgeTxnObj: BridgeTxnSafeObj
 ): Email {
   return {
     title: `[anb] error: {yyyyMMdd hhmmss}`,

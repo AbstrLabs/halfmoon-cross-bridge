@@ -1,7 +1,7 @@
 // TODO: CORS '*'
 // TODO: feat: add a RAM pool
 
-export { startServer };
+export { startApiServer };
 
 import express, { Request, Response } from 'express';
 
@@ -14,7 +14,11 @@ async function homePageTest() {
   /* Used once code */
 }
 
-function startServer() {
+/**
+ * Start the Express API server.
+ * Also start the ApiWorker singleton.
+ */
+function startApiServer() {
   const app = express();
 
   /* CORS */
@@ -44,7 +48,8 @@ function startServer() {
 
   // TODO: move API to a new file of new folder server/api
 
-  app.use('/algorand-near', algorandNear);
+  // is it better to write "/algorand-near" here or in "algorand-near.ts"?
+  app.use('/', algorandNear);
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
   });

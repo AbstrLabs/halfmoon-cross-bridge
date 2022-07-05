@@ -1,15 +1,45 @@
 /**
- * Test helper used across tests.
- *
- * @todo: move to utils/test
+ * Test helper to simulate frontend mint call.
  */
 
-export { transferOnNearTestnetFromExampleToMaster };
+export { simulatedFrontendNearToGoNear };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
+import { MintApiParam } from '../../utils/type';
+import { NearTxnId, TxnType } from '../../blockchain';
+
+/**
+ * Simulate frontend: make NEAR -> goNEAR mint txn, returning an API call param.
+ * @param amountInNEAR amount in NEAR
+ * @returns - {@link: MintApiParam}
+ */
+async function simulatedFrontendNearToGoNear(
+  amountInNEAR: string
+): Promise<MintApiParam> {
+  const mintResponse = await transferOnNearTestnetFromExampleToMaster(
+    amountInNEAR
+  );
+
+  // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+  const nearTxnId = mintResponse?.transaction?.hash as NearTxnId | undefined; // or mintResponse.transaction_outcome.id;
+
+  if (nearTxnId === undefined) {
+    throw Error('no transaction hash');
+  }
+  const apiCallParam: MintApiParam = {
+    amount: amountInNEAR,
+    type: TxnType.MINT,
+    from: ENV.NEAR_EXAMPL_ADDR,
+    to: ENV.ALGO_EXAMPL_ADDR,
+    txnId: nearTxnId,
+  };
+
+  return apiCallParam;
+}
 
 /**
  * Transfer testnet NEAR faucet from example account to master account.

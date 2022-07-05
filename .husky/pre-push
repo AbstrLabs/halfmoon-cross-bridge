@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-
-yarn test # unit tests
-yarn integration-test # integration tests
+# unit tests and integration tests
+yarn unit-test --bail
+yarn integration-test --bail

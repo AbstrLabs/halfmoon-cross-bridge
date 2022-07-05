@@ -1,8 +1,10 @@
 import { db } from '../../database/db';
-import { loadDotEnv } from '../dotenv';
-import { logger } from '../logger';
+import { loadDotEnv } from '../../utils/dotenv';
+import { logger } from '../../utils/logger';
 
-loadDotEnv(); // better than calling `ENV`.
+loadDotEnv({ isTest: true }); // better than calling `ENV`.
+logger.level = 'verbose';
+
 const SECOND = 1000;
 jest.setTimeout(10 * SECOND); // in milliseconds
 
@@ -18,7 +20,6 @@ jest.setTimeout(10 * SECOND); // in milliseconds
 beforeAll(async () => {
   try {
     await db.connect();
-    logger.info('connected to database');
   } catch {
     logger.error('Error connecting to database');
     return;

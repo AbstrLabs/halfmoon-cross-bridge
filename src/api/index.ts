@@ -12,13 +12,23 @@ const WELCOME_JSON = {
     {
       URL: 'https://api.halfmooncross.com/algorand-near',
       METHOD: 'POST',
+      BODY: {
+        type: ['literal("MINT","BURN")', 'case sensitive'],
+        from: ['string', 'public address of the sender'],
+        to: ['string', 'public address of the receiver'],
+        amount: ['string', 'up to 10 decimal places'],
+        txnId: ['string', 'transaction ID'],
+      },
+    },
+    {
+      URL: 'https://api.halfmooncross.com/algorand-near',
+      METHOD: 'GET',
       PARAMS: {
-        type: 'literal("MINT","BURN")',
-        from: 'string',
-        to: 'string',
-        amount: 'string',
-        txnId: 'string',
+        uid: ['string', 'in form {number}.{txnId}'],
       },
     },
   ],
+  ADDITIONAL_INFO: {
+    SERVER_UP_TIMESTAMP: new Date().toISOString(),
+  },
 };

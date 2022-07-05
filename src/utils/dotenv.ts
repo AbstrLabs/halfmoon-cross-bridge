@@ -3,16 +3,16 @@
  *
  * @todo 1. separate ENV file to a new variable instead of exporting all.
  * 1. (to hide info like `npm_package_name: 'algorand-near-bridge',1`)
- * 1. I dont know where this was shown, maybe in console.log(ENV)?
+ * 1. I don't know where this was shown, maybe in console.log(ENV)?
  */
 
 export { ENV, loadDotEnv };
 
 import { BridgeError, ERRORS } from './errors';
+import { literals } from './literals';
 
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
-import { literals } from './literals';
 
 /**
  * Load and Parse .env file.
@@ -28,6 +28,7 @@ function parseDotEnv(): dpv.ParsedVariables {
 
   // ts-node compatibility
   // TODO: not sure if this is working!
+  // TODO: this is not working with jest, got TS_NODE_DEV undefined.
   process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
   process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
 
@@ -62,6 +63,8 @@ const default_ENV = {
   PGDATABASE: literals.NOT_LOADED_FROM_ENV_STR,
   PGPASSWORD: literals.NOT_LOADED_FROM_ENV_STR,
   PGPORT: literals.NOT_LOADED_FROM_ENV_NUM,
+  // default
+  TS_NODE_DEV: 'test',
 };
 
 const secret_ENV = {
@@ -83,7 +86,11 @@ const parsed_ENV = parseDotEnv();
 
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
 
-const loadDotEnv = () => {
+const loadDotEnv = ({ isTest } = { isTest: false }) => {
+  if (isTest) {
+    ENV.TS_NODE_DEV = 'test';
+  }
+  Object.freeze(ENV);
   return ENV;
 };
 

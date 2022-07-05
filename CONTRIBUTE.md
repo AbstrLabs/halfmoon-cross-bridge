@@ -4,7 +4,7 @@ To run this locally, the `.env` file is required.
 
 ## Project structure
 
-- integration-test-related literal templates should be first exported from some file in the integration-test folder, then re-export from the "literal.ts", because Playwright cannot read "node_modules".
+- (DEPRECATED) integration-test-related literal templates should be first exported from some file in the integration-test folder, then re-export from the "literal.ts", because Playwright cannot read "node_modules".
 
 ## Testing
 

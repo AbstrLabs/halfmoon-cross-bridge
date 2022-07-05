@@ -1,7 +1,19 @@
 // TODO: no need to infer TxnType here anymore.
-export { type BridgeTxnObj, BridgeTxn, BridgeTxnActionName };
+export {
+  type BridgeTxnObj,
+  type BridgeTxnSafeObj,
+  BridgeTxn,
+  BridgeTxnActionName,
+};
 
-import { ApiCallParam, DbId, DbItem, TxnId, parseDbItem } from '../utils/type';
+import {
+  ApiCallParam,
+  DbId,
+  DbItem,
+  TxnId,
+  parseDbItem,
+  parseTxnUid,
+} from '../utils/type';
 import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
@@ -42,6 +54,23 @@ interface BridgeTxnObj extends CriticalBridgeTxnObj {
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: bigint;
+  toBlockchainName: BlockchainName;
+  toTxnId?: string | null;
+  txnStatus: BridgeTxnStatusEnum;
+  txnType: TxnType;
+}
+
+interface BridgeTxnSafeObj {
+  dbId: number | string;
+  fixedFeeAtom: string;
+  marginFeeAtom: string;
+  createdTime: string;
+  fromAddr: string;
+  fromAmountAtom: string;
+  fromBlockchainName: BlockchainName;
+  fromTxnId: string;
+  toAddr: string;
+  toAmountAtom: string;
   toBlockchainName: BlockchainName;
   toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
@@ -117,7 +146,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    *
    * @static
    * @param  {DbItem} dbItem
-   * @param  {TxnType} dbName
    * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
    */
   static fromDbItem(dbItem: DbItem): BridgeTxn {
@@ -137,6 +165,30 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       toBlockchainName: undefined,
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
+    });
+    bridgeTxn.#isCreatedInDb = true;
+    return bridgeTxn;
+  }
+
+  static fromObject(safeObj: BridgeTxnSafeObj) {
+    const bridgeTxn: BridgeTxn = new BridgeTxn({
+      dbId:
+        typeof safeObj.dbId === 'number'
+          ? safeObj.dbId
+          : parseInt(safeObj.dbId),
+      txnType: safeObj.txnType,
+      fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
+      fromAddr: safeObj.fromAddr,
+      fromAmountAtom: BigInt(safeObj.fromAmountAtom),
+      fromBlockchainName: safeObj.fromBlockchainName,
+      fromTxnId: safeObj.fromTxnId,
+      marginFeeAtom: BigInt(safeObj.marginFeeAtom),
+      createdTime: BigInt(safeObj.createdTime),
+      toAddr: safeObj.toAddr,
+      toAmountAtom: BigInt(safeObj.toAmountAtom),
+      toBlockchainName: safeObj.toBlockchainName,
+      toTxnId: safeObj.toTxnId,
+      txnStatus: safeObj.txnStatus,
     });
     return bridgeTxn;
   }
@@ -169,15 +221,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     this.toBlockchainName = toBlockchainName ?? this.toBlockchainName;
 
     this.fromTxnId = fromTxnId;
-    // TODO: should not add all on creation. Creation queue is only used in API part.
-    // TODO+ these lines below should be moved to API part on creating.
-    // TODO+ Or add a "fromApiCallParam" function.
-    // TODO-ID:CQA;
-    // creationQueue.add({
-    //   fromBlockchainName: this.fromBlockchainName,
-    //   txnId: this.fromTxnId,
-    // });
-
     this.fromAmountAtom = fromAmountAtom;
     this.fromAddr = fromAddr;
     this.fromAmountAtom = fromAmountAtom;
@@ -192,6 +235,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
       this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
+      // next line seems not needed, consider removing it.
       this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DOING_INITIALIZE;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -203,7 +247,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       });
     }
     this._selfValidate();
-    this.txnStatus = BridgeTxnStatusEnum.DONE_INITIALIZE;
+    this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DONE_INITIALIZE;
   }
 
   /* MAKE BRIDGE TRANSACTION */
@@ -212,6 +256,8 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
   /**
    * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObj}.
    * This should be the only way used outside the {@link BridgeTxn} class.
+   *
+   * @deprecated - use new state pattern instead
    *
    * @async
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
@@ -249,6 +295,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {Promise<void>} promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
+    logger.verbose('[BTX]: running confirmIncomingTxn.');
     if (!this.#isCreatedInDb) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
@@ -314,14 +361,15 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       //     at: 'BridgeTxn.makeOutgoingTxn',
       //   });
       // }
-      await this._updateToTxnId(outgoingTxnId);
     } catch (err) {
       await this._updateTxnStatus(BridgeTxnStatusEnum.ERR_MAKE_OUTGOING);
       throw new BridgeError(ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED, {
         bridgeTxn: this,
+        detail: 'bridge txn make outgoing txn failed',
         err,
       });
     }
+    await this._updateToTxnId(outgoingTxnId);
   }
 
   /**
@@ -385,6 +433,10 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     );
   }
 
+  public toSafeObject(): BridgeTxnSafeObj {
+    return stringifyBigintInObj(this.toObject()) as BridgeTxnSafeObj;
+  }
+
   /**
    * Transform the {@link BridgeTxn} to an object with all info, wrapping up all important fields.
    *
@@ -418,7 +470,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {string} the JSON string representation of the {@link BridgeTxn}
    */
   public toString(): string {
-    return JSON.stringify(stringifyBigintInObj(this.toObject()));
+    return JSON.stringify(this.toSafeObject());
   }
 
   /* GETTERS */
@@ -448,7 +500,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     if (this.dbId === undefined) {
       this.dbId = this.getDbId();
     }
-    return `${this.dbId}.${this.fromTxnId}`;
+    return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
 
   /**  PRIVATE METHODS - CLASS INIT  **/
@@ -744,7 +796,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
   /**
    * Update the {@link BridgeTxn.txnStatus} field in the instance and database.
-   *
+   * Throw error if current txnStatus is already error.
    * @async
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
@@ -755,7 +807,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     newStatus: BridgeTxnStatusEnum
   ): Promise<DbId> {
     // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
-    // will raise err if current txnStatus is error.
+    // TODO: check if update if valid
     if (
       [
         BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
@@ -771,7 +823,11 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
         bridgeTxn: this,
       });
     }
+    logger.debug(`[BTX]: updating status of txn ${this.uid} to: ${newStatus}`);
     this.txnStatus = newStatus;
+    logger.debug(
+      `[BTX]: updated status of txn ${this.uid} to: ${this.txnStatus}`
+    );
     try {
       return await this._updateTxn();
     } catch (e) {
@@ -794,7 +850,12 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
    */
   private async _updateToTxnId(toTxnId: TxnId): Promise<DbId> {
-    if (this.toTxnId !== undefined) {
+    const isOverwriting =
+      this.toTxnId !== undefined &&
+      this.toTxnId !== null &&
+      this.toTxnId !== toTxnId;
+
+    if (isOverwriting) {
       throw new BridgeError(ERRORS.INTERNAL.OVERWRITE_TO_TXN_ID, {
         bridgeTxn: this,
       });

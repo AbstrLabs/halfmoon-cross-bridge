@@ -6,6 +6,5 @@
     "strictNullChecks": true
   },
   "extends": "./tsconfig.json",
-  "exclude": [""],
-  "include": ["playwright.config.ts"]
+  "exclude": [""]
 }

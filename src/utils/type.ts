@@ -23,12 +23,15 @@ export {
   type Stringer,
   type TxnId,
   type TxnParam,
+  type TxnUid,
   parseApiCallParam,
   parseBigInt,
   parseBurnApiParam,
   parseDbId,
   parseDbItem,
   parseMintApiParam,
+  parseTxnId,
+  parseTxnUid,
 };
 
 import { z } from 'zod';
@@ -59,6 +62,11 @@ function parseWithZod<T>(
   zodParser: z.ZodType,
   errorTemplate: ErrorTemplate
 ): T {
+  if (typeof zodShaped === 'bigint') {
+    logger.silly(`[ZOD]: parsingDbItem: ${zodShaped.toString()}`);
+  } else {
+    logger.silly(`[ZOD]: parsingDbItem: ${JSON.stringify(zodShaped)}`);
+  }
   try {
     return zodParser.parse(zodShaped) as T;
   } catch (err) {
@@ -74,11 +82,10 @@ function parseWithZod<T>(
 // Order of these is same as they are used in the txn process.
 // Same order as below zTypeName part
 
-// API -> server
+// API call param
 type MintApiParam = z.infer<typeof zMintApiParam>;
 type BurnApiParam = z.infer<typeof zBurnApiParam>;
 type ApiCallParam = z.infer<typeof zApiCallParam>;
-
 // blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
 type NearAddr = z.infer<typeof zNearAddr>;
@@ -90,12 +97,26 @@ type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
 type NearTxnParam = z.infer<typeof zNearTxnParam>;
 type TxnParam = z.infer<typeof zTxnParam>;
 type AlgoAssetTransferTxnOutcome = z.infer<typeof zAlgoAssetTransferTxnOutcome>;
-// Used by BridgeTxn Class - database
+// Class BridgeTxn
+type TxnUid = z.infer<typeof zTxnUid>;
+// Database
 type DbItem = z.infer<typeof zDbItem>;
 type DbId = z.infer<typeof zDbId>;
 type Biginter = z.infer<typeof zBiginter>;
 
-// API -> server
+/* COMMONLY USED */
+
+const zBiginter =
+  // can convert to bigint without loss of precision
+  z.union([
+    z.string().regex(/^[1-9][0-9]{0,18}$/),
+    // TODO: actually should remove "0" because minting/ burning 0 makes no sense
+    z.literal('0'),
+    z.number().int(),
+    z.bigint(),
+  ]);
+
+/* API CALL PARAMS */
 
 // from <https://forum.algorand.org/t/how-is-an-algorands-address-made/960> // no 0,1,8
 // TODO: algosdk.isValidAddress(addr)
@@ -128,7 +149,7 @@ const zApiAmount = z
     return true;
   });
 
-// TODO: unfinished zNearTxnId, zAlgoTxnId
+// TODO: unfinished zNearTxnId, zAlgoTxnId, copy from frontend code
 const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
@@ -139,9 +160,7 @@ const zMintApiParam = z.object({
   to: zAlgoAddr,
   txnId: zNearTxnId,
 });
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
-}
+
 const zBurnApiParam = z.object({
   type: z.literal(TxnType.BURN),
   amount: zApiAmount,
@@ -149,15 +168,10 @@ const zBurnApiParam = z.object({
   to: zNearAddr,
   txnId: zNearTxnId,
 });
-function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
-}
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
-function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
-  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
-}
 
-// blockchain specific
+/* BLOCKCHAIN SPECIFIC */
+
 const zAlgoTxnParam = z.object({
   atomAmount: z.bigint(),
   fromAddr: zAlgoAddr,
@@ -171,17 +185,6 @@ const zNearTxnParam = z.object({
   txnId: zNearTxnId,
 });
 const zTxnParam = z.union([zAlgoTxnParam, zNearTxnParam]);
-
-const zBiginter =
-  // can convert to bigint without loss of precision
-  z.union([
-    z.string().regex(/^[1-9][0-9]{0,18}$/),
-    // TODO: actually should remove "0" because minting/ burning 0 makes no sense
-    z.literal('0'),
-    z.number().int(),
-    z.bigint(),
-  ]);
-
 const zAlgoAssetTransferTxnOutcome = z.object({
   // from Indexer JSON response
   'current-round': z.number(),
@@ -212,20 +215,29 @@ const zAlgoAssetTransferTxnOutcome = z.object({
     'tx-type': z.literal('axfer'),
   }),
 });
-// Used by BridgeTxn Class - Database
 
-function parseBiginter(biginter: Biginter): Biginter {
-  return parseWithZod(biginter, zBiginter, ERRORS.INTERNAL.TYPE_ERR_BIGINT);
-}
-function parseBigInt(biginter: Biginter): bigint {
-  return BigInt(parseBiginter(biginter));
-}
-const zDbId = z.number().int().positive();
-function parseDbId(dbId: DbId): DbId {
-  return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
-}
+/* Class BridgeTxn */
+
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
 const zBridgeTxnType = z.nativeEnum(TxnType);
+const zTxnUid = z.string().refine((str: string) => {
+  const splitted = str.split('.');
+  if (splitted.length !== 2) {
+    return false;
+  }
+  const [dbId, txnId] = splitted;
+  try {
+    parseDbId(+dbId);
+    parseTxnId(txnId);
+  } catch (e) {
+    return false;
+  }
+  return true;
+});
+
+/* DATABASE */
+
+const zDbId = z.number().int().positive();
 
 // TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
@@ -242,6 +254,33 @@ const zDbItem = z.object({
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
   txn_status: zBridgeTxnStatus,
 });
+
+/* PARSER */
+
+function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
+  return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
+}
+function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
+  return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
+}
+function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
+  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
+}
 function parseDbItem(dbItem: DbItem): DbItem {
   return parseWithZod(dbItem, zDbItem, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
+function parseBiginter(biginter: Biginter): Biginter {
+  return parseWithZod(biginter, zBiginter, ERRORS.INTERNAL.TYPE_ERR_BIGINT);
+}
+function parseBigInt(biginter: Biginter): bigint {
+  return BigInt(parseBiginter(biginter));
+}
+function parseDbId(dbId: DbId): DbId {
+  return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
+function parseTxnId(txnId: TxnId): TxnId {
+  return parseWithZod(txnId, zTxnId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
+}
+function parseTxnUid(txnUid: TxnUid): TxnUid {
+  return parseWithZod(txnUid, zTxnUid, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
 }
