@@ -5,7 +5,7 @@ Tables have the following columns
 | Name             | Type                     | Description                    |
 | ---------------- | ------------------------ | ------------------------------ |
 | db_id            | SERIAL PRIMARY KEY       | The unique id of the database  |
-| txn_status       | txn_status_enum NOT NULL | The status of the transaction  |
+| txn_status       | txn_status_enum NOT NULL | The status of the txn          |
 | created_time     | BIGINT NOT NULL          | The time the txn was created   |
 | from_addr        | VARCHAR(63) NOT NULL     | The address of the sender      |
 | from_amount_atom | BIGINT NOT NULL          | The amount of the "from" txn   |
@@ -15,11 +15,13 @@ Tables have the following columns
 | to_amount_atom   | BIGINT NOT NULL          | The amount of the "to" txn     |
 | to_token_id      | NUMBER NOT NULL          | The token id of the "to" txn   |
 | to_txn_id        | VARCHAR(63)              | The txn id of the "to" txn     |
+| comments         | VARCHAR(255)             | Backup column                  |
+| txn_type         | txn_type_enum NOT NULL   | The type of the txn            |
 | fixed_fee_atom   | BIGINT NOT NULL          | The fixed fee of the txn       |
 | margin_fee_atom  | BIGINT NOT NULL          | The margin fee of the txn      |
-| comments         | VARCHAR(255)             | Backup column                  |
 
-VARCHAR is an alias for CHARACTER VARYING ([Doc](https://www.postgresql.org/docs/current/datatype-character.html))
+- VARCHAR is an alias for CHARACTER VARYING ([Doc](https://www.postgresql.org/docs/current/datatype-character.html))
+- Added "txn_type" back although having "token_id"s for the convenience. Fields after "comments" can be deduced by the other fields.
 
 ## Database
 

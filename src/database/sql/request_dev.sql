@@ -1,7 +1,6 @@
 CREATE TABLE request_dev (
     db_id SERIAL PRIMARY KEY,
     txn_status txn_status_enum NOT NULL, 
-    created_time BIGINT NOT NULL,
     from_addr VARCHAR(63) NOT NULL,
     from_amount_atom BIGINT NOT NULL,
     from_token_id SMALLINT NOT NULL,
@@ -10,9 +9,13 @@ CREATE TABLE request_dev (
     to_amount_atom BIGINT NOT NULL,
     to_token_id SMALLINT NOT NULL,
     to_txn_id VARCHAR(63),
+    created_time BIGINT NOT NULL,
+    comments VARCHAR(255),
+    txn_type txn_type_enum NOT NULL,
     fixed_fee_atom BIGINT NOT NULL,
     margin_fee_atom BIGINT NOT NULL
 );
+-- DROP TABLE request_dev;
 
 -- COMMENTS
 
