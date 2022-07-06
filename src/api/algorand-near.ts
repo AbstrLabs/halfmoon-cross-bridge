@@ -15,7 +15,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
-import { apiWorker } from '../bridge/api-worker';
+import { apiWorker } from './api-worker';
 import { db } from '../database/db';
 
 const algorandNear = express.Router();

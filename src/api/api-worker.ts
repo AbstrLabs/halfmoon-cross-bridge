@@ -5,7 +5,7 @@ export { type ApiWorker, apiWorker };
 
 import { TxnType } from '../blockchain';
 import { ApiCallParam, TxnId } from '../utils/type';
-import { BridgeTxn } from '.';
+import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
 
 // TODO: parse with zod
