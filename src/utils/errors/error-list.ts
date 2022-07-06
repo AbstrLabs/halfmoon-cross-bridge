@@ -189,6 +189,11 @@ const internalErrors = {
       'Trying to overwrite outgoing transaction ID in in bridge transaction.' +
       'When a bridge transaction has error status, manual fix is needed.',
   },
+  UNKNOWN_NODE_ENV: {
+    errId: 223,
+    name: 'Unknown Node Env',
+    message: 'Node Env is not in enum NodeEnvEnum',
+  },
 };
 
 const externalErrors = {

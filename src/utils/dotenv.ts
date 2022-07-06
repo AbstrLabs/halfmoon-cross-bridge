@@ -64,7 +64,8 @@ const default_ENV = {
   PGPASSWORD: literals.NOT_LOADED_FROM_ENV_STR,
   PGPORT: literals.NOT_LOADED_FROM_ENV_NUM,
   // default
-  TS_NODE_DEV: 'test',
+  NODE_ENV: 'development',
+  TS_NODE_DEV: 'development',
 };
 
 const secret_ENV = {

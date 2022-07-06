@@ -13,8 +13,20 @@ import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
+import { ENV } from '../utils/dotenv';
+import { NodeEnvEnum } from '..';
 
-const REQUEST_TABLE = 'anb_request';
+let _TABLE_NAME;
+if (ENV.NODE_ENV === 'development' || ENV.NODE_ENV === 'test') {
+  _TABLE_NAME = 'request_dev';
+  logger.info('[DB ]: using development database');
+} else if (ENV.NODE_ENV === 'production') {
+  _TABLE_NAME = 'request_test';
+  logger.info('[DB ]: using testnet database');
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV);
+}
+const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
 
 /**
  * A database class to handle all database requests. Should be used as a singleton.
@@ -28,7 +40,7 @@ class Database {
 
   constructor(instance: Postgres) {
     this.instance = instance;
-    this.requestTableName = REQUEST_TABLE;
+    this.requestTableName = TABLE_NAME;
   }
 
   /**
@@ -105,7 +117,7 @@ class Database {
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
 
-    const tableName = REQUEST_TABLE;
+    const tableName = TABLE_NAME;
     if (!this.isConnected) {
       logger.error('db is not connected while it should');
       await this.connect();
@@ -157,7 +169,7 @@ class Database {
    */
   public async readTxn(dbId: DbId): Promise<DbItem> {
     // this should always be unique with a dbId
-    const tableName = REQUEST_TABLE;
+    const tableName = TABLE_NAME;
 
     if (!this.isConnected) {
       await this.connect();
@@ -175,7 +187,7 @@ class Database {
   }
 
   public async readAllTxn(): Promise<DbItem[]> {
-    const tableName = REQUEST_TABLE;
+    const tableName = TABLE_NAME;
 
     // TODO: these 3 lines below needs refactor to a new decorator
     if (!this.isConnected) {
@@ -216,7 +228,7 @@ class Database {
       });
     }
 
-    const tableName = REQUEST_TABLE;
+    const tableName = TABLE_NAME;
     if (!this.isConnected) {
       await this.connect();
     }
@@ -271,7 +283,7 @@ class Database {
    * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
   public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
-    const tableName = REQUEST_TABLE;
+    const tableName = TABLE_NAME;
 
     if (!this.isConnected) {
       await this.connect();
