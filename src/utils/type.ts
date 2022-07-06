@@ -241,18 +241,21 @@ const zDbId = z.number().int().positive();
 
 // TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
-  txn_type: zBridgeTxnType,
   db_id: zDbId,
-  fixed_fee_atom: zBiginter,
+  txn_status: zBridgeTxnStatus,
   from_addr: zAddr,
   from_amount_atom: zBiginter,
+  from_token_id: z.number(), // set range from enum?
   from_txn_id: zTxnId,
-  margin_fee_atom: zBiginter,
-  created_time: zBiginter,
   to_addr: zAddr,
   to_amount_atom: zBiginter,
+  to_token_id: z.number(), // set range from enum?
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
-  txn_status: zBridgeTxnStatus,
+  txn_type: zBridgeTxnType,
+  comments: z.string(),
+  created_time: zBiginter,
+  fixed_fee_atom: zBiginter,
+  margin_fee_atom: zBiginter,
 });
 
 /* PARSER */
