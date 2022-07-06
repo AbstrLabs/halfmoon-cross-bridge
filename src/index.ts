@@ -4,6 +4,7 @@ export {
   BridgeTxnStatusEnum,
   BridgeTxnStatusTree,
   BridgeTxnActionName,
+  NodeEnvEnum,
 };
 
 enum BridgeTxnActionName {
@@ -159,3 +160,9 @@ const BridgeTxnStatusTree = {
     actionName: null,
   }),
 };
+
+enum NodeEnvEnum {
+  DEVELOPMENT = 'development',
+  PRODUCTION = 'production',
+  TEST = 'test',
+}
