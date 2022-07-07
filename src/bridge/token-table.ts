@@ -34,8 +34,8 @@ const NEAR: Token = {
 const goNEAR: Token = {
   tokenId: 2,
   tokenName: 'GO_NEAR',
-  implBlockchain: BlockchainName.NEAR, // note here is different than toBlockchainName
-  originBlockchain: BlockchainName.ALGO, // how TF does copilot predict this
+  implBlockchain: BlockchainName.ALGO, // note here is different than toBlockchainName
+  originBlockchain: BlockchainName.NEAR,
 };
 
 // use obj for non-consecutive tokenId
