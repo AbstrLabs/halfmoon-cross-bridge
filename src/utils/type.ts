@@ -56,19 +56,21 @@ interface Stringer {
  * @param  {T} zodShaped
  * @param  {z.ZodType} zodParser
  * @param  {ErrorTemplate} errorTemplate
- * @returns T
+ * @returns {T} - same zodShaped
  */
-function parseWithZod<T>(
+function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
   zodShaped: T,
-  zodParser: z.ZodType,
+  zodParser: U,
   errorTemplate: ErrorTemplate
 ): T {
   if (typeof zodShaped === 'bigint') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions
     logger.silly(`[ZOD]: parsingDbItem: ${zodShaped.toString()}`);
   } else {
     logger.silly(`[ZOD]: parsingDbItem: ${JSON.stringify(zodShaped)}`);
   }
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return zodParser.parse(zodShaped) as T;
   } catch (err) {
     logger.error(err);
