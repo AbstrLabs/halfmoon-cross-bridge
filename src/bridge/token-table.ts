@@ -1,9 +1,11 @@
 /**
  * This file is a convenient local variable for token table on RDS.
  * @todo - create token_table on RDS.
+ * @todo - move TOKEN_TABLE to constants file.
  */
 
 export type { Token, TokenId };
+export { TOKEN_TABLE };
 import { BlockchainName } from '..';
 
 interface Token {
@@ -36,6 +38,8 @@ const goNEAR: Token = {
   originBlockchain: BlockchainName.ALGO, // how TF does copilot predict this
 };
 
-const TOKEN_TABLE = { 0: ALGO, 1: NEAR, 2: goNEAR }; // use obj for non-consecutive tokenId
+// use obj for non-consecutive tokenId
+// also preserves the possibility of naming tokens with non-numeric value in the future
+const TOKEN_TABLE = { 0: ALGO, 1: NEAR, 2: goNEAR } as const;
 
 Object.freeze(TOKEN_TABLE);
