@@ -19,6 +19,7 @@ export {
   type MintApiParam,
   type NearAddr,
   type NearTxnId,
+  type NewApiCallParam,
   type NearTxnParam,
   type Stringer,
   type TxnId,
@@ -32,12 +33,13 @@ export {
   parseMintApiParam,
   parseTxnId,
   parseTxnUid,
+  fullyParseApiParam,
 };
 
 import { z } from 'zod';
 import { BridgeTxnStatusEnum } from '..';
 import { TxnType } from '../blockchain';
-import { TOKEN_TABLE } from '../bridge/token-table';
+import { TokenId, TOKEN_TABLE } from '../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
 
@@ -138,6 +140,11 @@ const zNearAddr = z
   );
 const zAddr = z.union([zAlgoAddr, zNearAddr]);
 
+const ADDR_MAP = {
+  ALGO: zAlgoAddr,
+  NEAR: zNearAddr,
+};
+
 const zApiAmount = z
   .string()
   .regex(/^ *[0-9,]{1,}\.?[0-9]{0,10} *$/, 'malformed amount')
@@ -178,37 +185,20 @@ const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
 // using snake_case instead of camelCase or spinal-case because youtube uses it.
 // this interface is for displaying purpose only, we may not use it in the code.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface newApiCallParam {
+interface NewApiCallParam {
   amount: string;
-  txn_id: string;
+  txn_id: TxnId;
   from_addr: string;
-  from_id: string; // token_id
+  from_id: TokenId; // token_id
   to_addr: string;
-  to_id: string; // token_id
+  to_id: TokenId; // token_id
 }
 // here from_id and from_addr should be from the same blockchain. so is (to_id and to_addr)
 // token = [from_id, to_id] (array) seems acceptable, but the order is too important for us.
 
-const zApiParamBase = z.object({
-  amount: zApiAmount,
-  txn_id: zNearTxnId,
-});
-
-// from pair and to pair should have the same structure but different prop names.
-// It's not supported by Zod, so we doing it twice
-
-const tokenIdLiterals = z.union(
-  [z.literal(0), z.literal(1), z.literal(2)]
-  // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
-  // Object.keys(TOKEN_TABLE).map((id: TokenId) => z.literal(id))
-);
-const ADDR_MAP = {
-  ALGO: zAlgoAddr,
-  NEAR: zNearAddr,
-};
-
+// this is for zod next version.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const zTokenAddrPair = z.discriminatedUnion('token_id', [
+const zTokenIdAddrPair = z.discriminatedUnion('token_id', [
   z.object({
     token_id: z.literal(TOKEN_TABLE[0].tokenId),
     addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
@@ -221,17 +211,76 @@ const zTokenAddrPair = z.discriminatedUnion('token_id', [
     token_id: z.literal(TOKEN_TABLE[2].tokenId),
     addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
   }),
+
+  // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
+  // Object.keys(TOKEN_TABLE).map((id: TokenId) => z.literal(id))
+  /* This won't work 
+  Object.entries(TOKEN_TABLE).map(
+  ([id, token]) =>
+    z.object({
+      token_id: z.literal(id),
+      addr: ADDR_MAP[token.implBlockchain],
+    })
+  ) */
 ]);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const zApiFromPair = z.object({
-  from_id: tokenIdLiterals,
-  from_addr: zAlgoAddr,
+const zApiParamBase = z.object({
+  amount: zApiAmount,
+  txn_id: zNearTxnId,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const zNewApiCallParam = zApiParamBase.merge(zApiFromPair);
+// from pair and to pair should have the same structure but different prop names.
+// It's not supported by Zod, so we doing it twice
 
+const zApiFromPair = z.discriminatedUnion('from_id', [
+  z.object({
+    from_id: z.literal(TOKEN_TABLE[0].tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+  }),
+  z.object({
+    from_id: z.literal(TOKEN_TABLE[1].tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
+  }),
+  z.object({
+    from_id: z.literal(TOKEN_TABLE[2].tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+  }),
+]);
+
+const zApiToPair = z.discriminatedUnion('to_id', [
+  z.object({
+    to_id: z.literal(TOKEN_TABLE[0].tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+  }),
+  z.object({
+    to_id: z.literal(TOKEN_TABLE[1].tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
+  }),
+  z.object({
+    to_id: z.literal(TOKEN_TABLE[2].tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+  }),
+]);
+
+function fullyParseApiParam(apiParam: NewApiCallParam): NewApiCallParam {
+  const { amount, txn_id, from_addr, from_id, to_addr, to_id } = apiParam;
+  const fromPair = {
+    from_id,
+    from_addr,
+  };
+  const toPair = {
+    to_id,
+    to_addr,
+  };
+  const apiParamBase = {
+    amount,
+    txn_id,
+  };
+  parseWithZod(fromPair, zApiFromPair, ERRORS.API.INVALID_API_PARAM);
+  parseWithZod(toPair, zApiToPair, ERRORS.API.INVALID_API_PARAM);
+  parseWithZod(apiParamBase, zApiParamBase, ERRORS.API.INVALID_API_PARAM);
+  return apiParam;
+}
 /* BLOCKCHAIN SPECIFIC */
 
 const zAlgoTxnParam = z.object({
