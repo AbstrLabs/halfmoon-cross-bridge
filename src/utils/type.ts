@@ -37,6 +37,7 @@ export {
 import { z } from 'zod';
 import { BridgeTxnStatusEnum } from '..';
 import { TxnType } from '../blockchain';
+import { TOKEN_TABLE } from '../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
 
@@ -169,6 +170,65 @@ const zBurnApiParam = z.object({
   txnId: zNearTxnId,
 });
 const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
+
+// new API Call Param, not in docs yet.
+// removed "type", its unclear when we have more than one token.
+// using snake_case instead of camelCase or spinal-case because youtube uses it.
+// this interface is for displaying purpose only, we may not use it in the code.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface newApiCallParam {
+  amount: string;
+  txn_id: string;
+  from_addr: string;
+  from_id: string; // token_id
+  to_addr: string;
+  to_id: string; // token_id
+}
+// here from_id and from_addr should be from the same blockchain. so is (to_id and to_addr)
+// token = [from_id, to_id] (array) seems acceptable, but the order is too important for us.
+
+const zApiParamBase = z.object({
+  amount: zApiAmount,
+  txn_id: zNearTxnId,
+});
+
+// from pair and to pair should have the same structure but different prop names.
+// It's not supported by Zod, so we doing it twice
+
+const tokenIdLiterals = z.union(
+  [z.literal(0), z.literal(1), z.literal(2)]
+  // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
+  // Object.keys(TOKEN_TABLE).map((id: TokenId) => z.literal(id))
+);
+const ADDR_MAP = {
+  ALGO: zAlgoAddr,
+  NEAR: zNearAddr,
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const zTokenAddrPair = z.discriminatedUnion('token_id', [
+  z.object({
+    token_id: z.literal(TOKEN_TABLE[0].tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+  }),
+  z.object({
+    token_id: z.literal(TOKEN_TABLE[1].tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
+  }),
+  z.object({
+    token_id: z.literal(TOKEN_TABLE[2].tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+  }),
+]);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const zApiFromPair = z.object({
+  from_id: tokenIdLiterals,
+  from_addr: zAlgoAddr,
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const zNewApiCallParam = zApiParamBase.merge(zApiFromPair);
 
 /* BLOCKCHAIN SPECIFIC */
 
