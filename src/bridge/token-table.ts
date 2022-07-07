@@ -3,15 +3,17 @@
  * @todo - create token_table on RDS.
  */
 
-export { type Token };
+export type { Token, TokenId };
 import { BlockchainName } from '..';
 
 interface Token {
-  tokenId: number;
+  tokenId: TokenId;
   tokenName: string;
   implBlockchain: BlockchainName; //   should we use toBlockchainName   for the consistency?
   originBlockchain: BlockchainName; // should we use fromBlockchainName for the consistency?
 }
+
+type TokenId = keyof typeof TOKEN_TABLE;
 
 const ALGO: Token = {
   tokenId: 0,
