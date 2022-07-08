@@ -13,10 +13,8 @@ export {
   type AlgoTxnParam,
   type ApiCallParam,
   type Biginter,
-  type BurnApiParam,
   type DbId,
   type DbItem,
-  type MintApiParam,
   type NearAddr,
   type NearTxnId,
   type NewApiCallParam,
@@ -26,12 +24,9 @@ export {
   type TxnParam,
   type TxnUid,
   parseAlgoAddr,
-  parseApiCallParam,
   parseBigInt,
-  parseBurnApiParam,
   parseDbId,
   parseDbItem,
-  parseMintApiParam,
   parseTxnId,
   parseTxnUid,
   fullyParseApiParam,
@@ -89,9 +84,14 @@ function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
 // Same order as below zTypeName part
 
 // API call param
-type MintApiParam = z.infer<typeof zMintApiParam>;
-type BurnApiParam = z.infer<typeof zBurnApiParam>;
-type ApiCallParam = z.infer<typeof zApiCallParam>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ApiCallParam {
+  type: TxnType;
+  amount: string;
+  from: AlgoAddr;
+  to: NearAddr;
+  txnId: TxnId;
+} // NewApiCallParam; // z.infer<typeof zApiCallParam>;
 // blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
 type NearAddr = z.infer<typeof zNearAddr>;
@@ -164,22 +164,6 @@ const zApiAmount = z
 const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
-const zMintApiParam = z.object({
-  type: z.literal(TxnType.MINT),
-  amount: zApiAmount,
-  from: zNearAddr,
-  to: zAlgoAddr,
-  txnId: zNearTxnId,
-});
-
-const zBurnApiParam = z.object({
-  type: z.literal(TxnType.BURN),
-  amount: zApiAmount,
-  from: zAlgoAddr,
-  to: zNearAddr,
-  txnId: zNearTxnId,
-});
-const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
 
 // new API Call Param, not in docs yet.
 // removed "type", its unclear when we have more than one token.
@@ -378,15 +362,6 @@ const zDbItem = z.object({
 
 function parseAlgoAddr(algoAddr: AlgoAddr): AlgoAddr {
   return parseWithZod(algoAddr, zAlgoAddr, ERRORS.API.INVALID_API_PARAM);
-}
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
-}
-function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
-}
-function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
-  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
 }
 function parseDbItem(dbItem: DbItem): DbItem {
   return parseWithZod(dbItem, zDbItem, ERRORS.INTERNAL.TYPE_PARSING_ERROR);

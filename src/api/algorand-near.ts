@@ -4,7 +4,7 @@
 export { algorandNear };
 
 import type { ApiCallParam, DbId, DbItem, TxnId, TxnUid } from '../utils/type';
-import { parseApiCallParam, parseTxnUid } from '../utils/type';
+import { parseTxnUid } from '../utils/type';
 import { ConfirmOutcome, TxnType } from '../blockchain';
 import express, { Request, Response } from 'express';
 
@@ -219,4 +219,13 @@ async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
     'API call ended, returned:\n' + JSON.stringify(stringifiedBridgeTxnObject)
   );
   return res.json(stringifiedBridgeTxnObject);
+}
+function parseApiCallParam(body: {
+  type: TxnType;
+  from: string;
+  to: string;
+  amount: string;
+  txnId: string;
+}) {
+  return body;
 }

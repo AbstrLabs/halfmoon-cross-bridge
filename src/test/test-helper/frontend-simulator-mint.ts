@@ -8,17 +8,17 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { MintApiParam } from '../../utils/type';
+import { ApiCallParam } from '../../utils/type';
 import { NearTxnId, TxnType } from '../../blockchain';
 
 /**
  * Simulate frontend: make NEAR -> goNEAR mint txn, returning an API call param.
  * @param amountInNEAR amount in NEAR
- * @returns - {@link: MintApiParam}
+ * @returns - {@link: ApiCallParam}
  */
 async function simulatedFrontendNearToGoNear(
   amountInNEAR: string
-): Promise<MintApiParam> {
+): Promise<ApiCallParam> {
   const mintResponse = await transferOnNearTestnetFromExampleToMaster(
     amountInNEAR
   );
@@ -30,7 +30,7 @@ async function simulatedFrontendNearToGoNear(
   if (nearTxnId === undefined) {
     throw Error('no transaction hash');
   }
-  const apiCallParam: MintApiParam = {
+  const apiCallParam: ApiCallParam = {
     amount: amountInNEAR,
     type: TxnType.MINT,
     from: ENV.NEAR_EXAMPL_ADDR,

@@ -5,9 +5,9 @@ it('test place holder to fix', () => {
 /* // TODO: fix this in full test branch.
 
 
-import { type BurnApiParam, type MintApiParam } from '..';
+import { type ,  } from '..';
 import { BridgeError, ERRORS } from './errors';
-import { parseBurnApiParam, parseMintApiParam } from './type';
+import { parse,  } from './type';
 import JsonBig from 'json-bigint';
 import { ENV } from './dotenv';
 import { exampleBridgeTxn } from './test-helper';
@@ -33,13 +33,13 @@ const exampleDbItem = {
   margin_fee_atom: '53789243',
 };
 
-const exampleMintApiTxnInfo: MintApiParam = {
+const exampleMintApiTxnInfo:  = {
   amount: '1.00',
   to: ENV.ALGO_EXAMPL_ADDR,
   from: ENV.NEAR_EXAMPL_ADDR,
   txnId: FAKE_TXN_ID,
 };
-const exampleBurnApiTxnInfo: BurnApiParam = {
+const exampleBurnApiTxnInfo:  = {
   amount: '1.00',
   to: ENV.NEAR_EXAMPL_ADDR,
   from: ENV.ALGO_EXAMPL_ADDR,
@@ -63,7 +63,7 @@ describe('param validation and formatting', () => {
 
   describe('parseMintApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxnInfo = parseMintApiParam(exampleMintApiTxnInfo);
+      const apiTxnInfo = parse(exampleMintApiTxnInfo);
       expect(apiTxnInfo).toEqual(exampleMintApiTxnInfo);
     });
     it('parse wrong malformed api call', () => {
@@ -73,7 +73,7 @@ describe('param validation and formatting', () => {
         to: exampleMintApiTxnInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseMintApiParam(wrongToAddrApiTxnInfo);
+        parse(wrongToAddrApiTxnInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {
@@ -94,7 +94,7 @@ describe('param validation and formatting', () => {
   });
   describe('parseBurnApiInfo', () => {
     it('parse mint api call', () => {
-      const apiTxnInfo = parseBurnApiParam(exampleBurnApiTxnInfo);
+      const apiTxnInfo = parse(exampleBurnApiTxnInfo);
       expect(apiTxnInfo).toEqual(exampleBurnApiTxnInfo);
     });
     it('parse wrong malformed api call', () => {
@@ -104,7 +104,7 @@ describe('param validation and formatting', () => {
         to: exampleBurnApiTxnInfo.to.slice(0, -1),
       };
       expect(() => {
-        parseBurnApiParam(wrongToAddrApiTxnInfo);
+        parse(wrongToAddrApiTxnInfo);
       }).toThrow(
         // new Error('any error') this won't work
         new BridgeError(ERRORS.TXN.INVALID_API_PARAM, {

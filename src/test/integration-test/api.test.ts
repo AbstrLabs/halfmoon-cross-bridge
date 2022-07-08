@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { BridgeTxn } from '../../bridge';
 import { WELCOME_JSON } from '../../api';
 import { PostReturn } from '../../api/algorand-near';
-import { MintApiParam, parseTxnUid } from '../../utils/type';
+import { ApiCallParam, parseTxnUid } from '../../utils/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,
   EXAMPLE_TXN_FROM_DB,
@@ -71,14 +71,14 @@ describe('/algorand-near API (POST)', () => {
     const amount = '1.2345678901';
 
     // simulate frontend:  make NEAR mint txn
-    const mintApiParam: MintApiParam = await simulatedFrontendNearToGoNear(
+    const apiCallParam: ApiCallParam = await simulatedFrontendNearToGoNear(
       amount
     );
 
     // same API call as frontend
     const res = await axios
       .post('http://localhost:4190/algorand-near', {
-        ...mintApiParam,
+        ...apiCallParam,
       })
       .catch((err: AxiosError) => {
         if (axios.isAxiosError(err)) {
