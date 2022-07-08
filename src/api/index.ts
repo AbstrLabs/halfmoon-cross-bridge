@@ -13,9 +13,10 @@ const WELCOME_JSON = {
       URL: 'https://api.halfmooncross.com/algorand-near',
       METHOD: 'POST',
       BODY: {
-        type: ['literal("MINT","BURN")', 'case sensitive'],
-        from: ['string', 'public address of the sender'],
-        to: ['string', 'public address of the receiver'],
+        from_token: ['literal("NEAR","goNEAR")', 'case sensitive'],
+        from_addr: ['string', 'public address of the sender'],
+        to_token: ['literal("NEAR","goNEAR")', 'case sensitive'],
+        to_addr: ['string', 'public address of the receiver'],
         amount: ['string', 'up to 10 decimal places'],
         txnId: ['string', 'transaction ID'],
       },
