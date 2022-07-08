@@ -25,6 +25,7 @@ export {
   type TxnId,
   type TxnParam,
   type TxnUid,
+  parseAlgoAddr,
   parseApiCallParam,
   parseBigInt,
   parseBurnApiParam,
@@ -196,7 +197,7 @@ interface NewApiCallParam {
 // here from_id and from_addr should be from the same blockchain. so is (to_id and to_addr)
 // token = [from_id, to_id] (array) seems acceptable, but the order is too important for us.
 
-// this is for zod next version.
+// this is for zod next version, and outdated.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const zTokenIdAddrPair = z.discriminatedUnion('token_id', [
   z.object({
@@ -227,26 +228,42 @@ const zApiParamBase = z.object({
 
 // from pair and to pair should have the same structure but different prop names.
 // It's not supported by Zod, so we doing it twice
-
+// better use zTokenIdAddrPair for the next two ZodTypes. Currently not supported by Zod.
 const zApiFromPair = z.discriminatedUnion('from_id', [
   z.object({
+    from_id: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
+  }),
+  z.object({
+    from_id: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
+  }),
+  z.object({
     from_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
-    from_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
+    from_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
   }),
   z.object({
     from_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
-    from_addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
+    from_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
   }),
 ]);
 
 const zApiToPair = z.discriminatedUnion('to_id', [
   z.object({
+    to_id: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
+  }),
+  z.object({
+    to_id: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
+  }),
+  z.object({
     to_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
-    to_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
+    to_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
   }),
   z.object({
     to_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
-    to_addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
+    to_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
   }),
 ]);
 
@@ -359,6 +376,9 @@ const zDbItem = z.object({
 
 /* PARSER */
 
+function parseAlgoAddr(algoAddr: AlgoAddr): AlgoAddr {
+  return parseWithZod(algoAddr, zAlgoAddr, ERRORS.API.INVALID_API_PARAM);
+}
 function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
   return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
 }
