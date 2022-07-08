@@ -16,7 +16,8 @@ interface TokenBase {
 }
 
 interface NativeToken extends TokenBase {
-  originBlockchain: BlockchainName;
+  implBlockchain: BlockchainName;
+  // originBlockchain is the same as implBlockchain
   // master address is not needed here.
 }
 
@@ -25,13 +26,13 @@ interface NativeToken extends TokenBase {
 const ALGO: NativeToken = {
   tokenId: 'ALGO',
   tokenName: 'ALGO',
-  originBlockchain: BlockchainName.ALGO,
+  implBlockchain: BlockchainName.ALGO,
 };
 
 const NEAR: NativeToken = {
   tokenId: 'NEAR',
   tokenName: 'NEAR',
-  originBlockchain: BlockchainName.NEAR,
+  implBlockchain: BlockchainName.NEAR,
 };
 
 /* ASSET TOKENS */
@@ -69,6 +70,7 @@ const wALGO: AssetToken = {
 
 // use obj for non-consecutive tokenId
 // also preserves the possibility of naming tokens with non-numeric value in the future
+// Record<T, Token> is not supported, see https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type
 const TOKEN_TABLE = { ALGO, NEAR, goNEAR, wALGO } as const;
 
 Object.freeze(TOKEN_TABLE);
