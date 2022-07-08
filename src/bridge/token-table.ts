@@ -24,18 +24,19 @@ type TokenId = keyof typeof TOKEN_TABLE;
 const goNEAR: Token = {
   tokenId: 'goNEAR',
   tokenName: 'goNEAR',
-  implBlockchain: BlockchainName.NEAR,
+  implBlockchain: BlockchainName.ALGO,
   implMaster: ENV.ALGO_MASTER_ADDR,
-  originBlockchain: BlockchainName.ALGO,
+  originBlockchain: BlockchainName.NEAR,
   originMaster: ENV.NEAR_MASTER_ADDR,
 };
+
 const wALGO: Token = {
   tokenId: 'wALGO',
   tokenName: 'wALGO',
-  implBlockchain: BlockchainName.ALGO,
-  implMaster: ENV.ALGO_MASTER_ADDR, // TODO: use another
-  originBlockchain: BlockchainName.NEAR,
-  originMaster: ENV.NEAR_MASTER_ADDR, // TODO: use another
+  implBlockchain: BlockchainName.NEAR,
+  implMaster: ENV.NEAR_MASTER_ADDR, // TODO: use another account
+  originBlockchain: BlockchainName.ALGO,
+  originMaster: ENV.ALGO_MASTER_ADDR, // TODO: use another account
 };
 
 // use obj for non-consecutive tokenId
