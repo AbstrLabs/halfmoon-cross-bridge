@@ -35,6 +35,7 @@ import {
 } from '../utils/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
+import { BlockchainName } from '..';
 
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
@@ -129,7 +130,7 @@ abstract class Blockchain {
   /* ABSTRACT */
   public abstract readonly centralizedAddr: Addr;
   public abstract readonly confirmTxnConfig: ConfirmTxnConfig;
-  public abstract readonly name: string;
+  public abstract readonly name: BlockchainName;
   protected abstract indexer: Indexer;
   protected abstract readonly centralizedAcc: GenericAcc;
   /**
