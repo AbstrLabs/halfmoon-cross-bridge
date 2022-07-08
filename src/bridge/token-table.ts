@@ -20,6 +20,22 @@ interface NativeToken extends TokenBase {
   // master address is not needed here.
 }
 
+/* NATIVE TOKENS */
+
+const ALGO: NativeToken = {
+  tokenId: 'ALGO',
+  tokenName: 'ALGO',
+  originBlockchain: BlockchainName.ALGO,
+};
+
+const NEAR: NativeToken = {
+  tokenId: 'NEAR',
+  tokenName: 'NEAR',
+  originBlockchain: BlockchainName.NEAR,
+};
+
+/* ASSET TOKENS */
+
 /**
  * The abstract assets created by us, AbstrLabs.
  */
@@ -53,6 +69,6 @@ const wALGO: AssetToken = {
 
 // use obj for non-consecutive tokenId
 // also preserves the possibility of naming tokens with non-numeric value in the future
-const TOKEN_TABLE = { goNEAR, wALGO } as const;
+const TOKEN_TABLE = { ALGO, NEAR, goNEAR, wALGO } as const;
 
 Object.freeze(TOKEN_TABLE);
