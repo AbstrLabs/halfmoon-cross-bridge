@@ -350,7 +350,7 @@ const zDbItem = z.object({
   fixed_fee_atom: zBiginter,
   margin_fee_atom: zBiginter,
 });
-
+``;
 /* PARSER */
 
 function parseAlgoAddr(algoAddr: AlgoAddr): AlgoAddr {

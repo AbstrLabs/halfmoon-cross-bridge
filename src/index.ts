@@ -164,5 +164,5 @@ const BridgeTxnStatusTree = {
 enum NodeEnvEnum {
   DEVELOPMENT = 'development',
   PRODUCTION = 'production',
-  TEST = 'test',
+  TEST = 'test', // jest use "test", not "testing" from https://jestjs.io/docs/environment-variables#node_env
 }

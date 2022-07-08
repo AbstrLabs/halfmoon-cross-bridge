@@ -16,14 +16,19 @@ import { ENV } from '../utils/dotenv';
 import { NodeEnvEnum } from '..';
 
 let _TABLE_NAME;
-if (ENV.NODE_ENV === 'development' || ENV.NODE_ENV === 'test') {
+if (
+  ENV.NODE_ENV === NodeEnvEnum.DEVELOPMENT ||
+  ENV.NODE_ENV === NodeEnvEnum.TEST
+) {
   _TABLE_NAME = 'request_dev';
   logger.info('[DB ]: using development database');
-} else if (ENV.NODE_ENV === 'production') {
+} else if (ENV.NODE_ENV === NodeEnvEnum.PRODUCTION) {
   _TABLE_NAME = 'request_test';
   logger.info('[DB ]: using testnet database');
 } else {
-  throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV);
+  throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV, {
+    current_ENV: ENV.NODE_ENV,
+  });
 }
 const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
 

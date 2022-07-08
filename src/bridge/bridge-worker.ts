@@ -5,7 +5,7 @@ export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
 import lodash from 'lodash';
 import { BridgeTxn } from '.';
-import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
+import { BridgeTxnStatusEnum, BridgeTxnStatusTree, NodeEnvEnum } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../api/email';
 import { ENV } from '../utils/dotenv';
@@ -203,10 +203,10 @@ class BridgeWorker {
     return uidTxnPair[1];
   }
   private _checkIfTestEnv() {
-    if (ENV.TS_NODE_DEV !== 'test') {
+    if (ENV.NODE_ENV !== NodeEnvEnum.TEST) {
       throw new Error(
-        '[BW ]: _test_DropAll can only be called in test mode.' +
-          ENV.TS_NODE_DEV.toString()
+        '[BW ]: _test_DropAll can only be called in test mode. Current mode:' +
+          ENV.NODE_ENV.toString()
       );
     }
     return true;
