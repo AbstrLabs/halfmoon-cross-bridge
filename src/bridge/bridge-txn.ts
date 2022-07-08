@@ -267,7 +267,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     logger.info(
       literals.MAKING_TXN(
-        `${this.fromBlockchainName}->${this.toBlockchainName}`,
+        `${this.#fromBlockchain.name}->${this.#toBlockchain.name}`,
         this.fromAmountAtom,
         this.fromAddr,
         this.toAddr
@@ -474,12 +474,12 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     }
     return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
-  get fromBlockchainName(): BlockchainName {
-    return this.#fromBlockchain.name;
-  }
-  get toBlockchainName(): BlockchainName {
-    return this.#toBlockchain.name;
-  }
+  // get fromBlockchainName(): BlockchainName {
+  //   return this.#fromBlockchain.name;
+  // }
+  // get toBlockchainName(): BlockchainName {
+  //   return this.#toBlockchain.name;
+  // }
 
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
