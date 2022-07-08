@@ -200,16 +200,12 @@ interface NewApiCallParam {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const zTokenIdAddrPair = z.discriminatedUnion('token_id', [
   z.object({
-    token_id: z.literal(TOKEN_TABLE[0].tokenId),
-    addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+    token_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
   }),
   z.object({
-    token_id: z.literal(TOKEN_TABLE[1].tokenId),
-    addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
-  }),
-  z.object({
-    token_id: z.literal(TOKEN_TABLE[2].tokenId),
-    addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+    token_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
   }),
 
   // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
@@ -234,31 +230,23 @@ const zApiParamBase = z.object({
 
 const zApiFromPair = z.discriminatedUnion('from_id', [
   z.object({
-    from_id: z.literal(TOKEN_TABLE[0].tokenId),
-    from_addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+    from_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
   }),
   z.object({
-    from_id: z.literal(TOKEN_TABLE[1].tokenId),
-    from_addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
-  }),
-  z.object({
-    from_id: z.literal(TOKEN_TABLE[2].tokenId),
-    from_addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+    from_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
   }),
 ]);
 
 const zApiToPair = z.discriminatedUnion('to_id', [
   z.object({
-    to_id: z.literal(TOKEN_TABLE[0].tokenId),
-    to_addr: ADDR_MAP[TOKEN_TABLE[0].implBlockchain],
+    to_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
   }),
   z.object({
-    to_id: z.literal(TOKEN_TABLE[1].tokenId),
-    to_addr: ADDR_MAP[TOKEN_TABLE[1].implBlockchain],
-  }),
-  z.object({
-    to_id: z.literal(TOKEN_TABLE[2].tokenId),
-    to_addr: ADDR_MAP[TOKEN_TABLE[2].implBlockchain],
+    to_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
   }),
 ]);
 

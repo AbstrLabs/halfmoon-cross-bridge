@@ -7,39 +7,39 @@
 export type { Token, TokenId };
 export { TOKEN_TABLE };
 import { BlockchainName } from '..';
+import { ENV } from '../utils/dotenv';
+import { Addr } from '../utils/type';
 
 interface Token {
   tokenId: TokenId;
   tokenName: string;
-  implBlockchain: BlockchainName; //   should we use toBlockchainName   for the consistency?
-  originBlockchain: BlockchainName; // should we use fromBlockchainName for the consistency?
+  implBlockchain: BlockchainName;
+  implMaster: Addr;
+  originBlockchain: BlockchainName;
+  originMaster: Addr;
 }
 
 type TokenId = keyof typeof TOKEN_TABLE;
 
-const ALGO: Token = {
-  tokenId: 0,
-  tokenName: 'ALGO',
-  implBlockchain: BlockchainName.ALGO, // note here is different than toBlockchainName
-  originBlockchain: BlockchainName.ALGO,
-};
-
-const NEAR: Token = {
-  tokenId: 1,
-  tokenName: 'NEAR',
-  implBlockchain: BlockchainName.NEAR, // note here is different than toBlockchainName
-  originBlockchain: BlockchainName.NEAR,
-};
-
 const goNEAR: Token = {
-  tokenId: 2,
-  tokenName: 'GO_NEAR',
-  implBlockchain: BlockchainName.ALGO, // note here is different than toBlockchainName
+  tokenId: 'goNEAR',
+  tokenName: 'goNEAR',
+  implBlockchain: BlockchainName.NEAR,
+  implMaster: ENV.ALGO_MASTER_ADDR,
+  originBlockchain: BlockchainName.ALGO,
+  originMaster: ENV.NEAR_MASTER_ADDR,
+};
+const wALGO: Token = {
+  tokenId: 'wALGO',
+  tokenName: 'wALGO',
+  implBlockchain: BlockchainName.ALGO,
+  implMaster: ENV.ALGO_MASTER_ADDR, // TODO: use another
   originBlockchain: BlockchainName.NEAR,
+  originMaster: ENV.NEAR_MASTER_ADDR, // TODO: use another
 };
 
 // use obj for non-consecutive tokenId
 // also preserves the possibility of naming tokens with non-numeric value in the future
-const TOKEN_TABLE = { 0: ALGO, 1: NEAR, 2: goNEAR } as const;
+const TOKEN_TABLE = { goNEAR, wALGO } as const;
 
 Object.freeze(TOKEN_TABLE);
