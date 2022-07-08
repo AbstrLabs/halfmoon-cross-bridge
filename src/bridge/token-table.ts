@@ -10,18 +10,30 @@ import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { Addr } from '../utils/type';
 
-interface Token {
-  tokenId: TokenId;
-  tokenName: string;
+interface TokenBase {
+  tokenId: TokenId; // our way to call it, usually same as tokenName
+  tokenName: string; // this is its real name
+}
+
+interface NativeToken extends TokenBase {
+  originBlockchain: BlockchainName;
+  // master address is not needed here.
+}
+
+/**
+ * The abstract assets created by us, AbstrLabs.
+ */
+interface AssetToken extends TokenBase {
   implBlockchain: BlockchainName;
   implMaster: Addr;
   originBlockchain: BlockchainName;
   originMaster: Addr;
 }
 
+type Token = NativeToken | AssetToken;
 type TokenId = keyof typeof TOKEN_TABLE;
 
-const goNEAR: Token = {
+const goNEAR: AssetToken = {
   tokenId: 'goNEAR',
   tokenName: 'goNEAR',
   implBlockchain: BlockchainName.ALGO,
@@ -30,7 +42,7 @@ const goNEAR: Token = {
   originMaster: ENV.NEAR_MASTER_ADDR,
 };
 
-const wALGO: Token = {
+const wALGO: AssetToken = {
   tokenId: 'wALGO',
   tokenName: 'wALGO',
   implBlockchain: BlockchainName.NEAR,
