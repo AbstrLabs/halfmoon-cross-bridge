@@ -97,9 +97,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   toTxnId?: string | null;
   txnType: TxnType;
   #db = db;
-  #fromBlockchain!: Blockchain;
+  #fromBlockchain: Blockchain;
   #fromToken: Token;
-  #toBlockchain!: Blockchain;
+  #toBlockchain: Blockchain;
   #toToken: Token;
   #isCreatedInDb: boolean;
 
@@ -213,6 +213,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     this.toTokenId = toTokenId;
     this.#fromToken = TOKEN_TABLE[this.fromTokenId];
     this.#toToken = TOKEN_TABLE[this.toTokenId];
+    this.#fromBlockchain = this._getBlockchain(this.#fromToken.implBlockchain);
+    this.#toBlockchain = this._getBlockchain(this.#toToken.implBlockchain);
 
     this.fromTxnId = fromTxnId;
     this.fromAmountAtom = fromAmountAtom;
@@ -221,7 +223,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     this.toAddr = toAddr;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
-    this._hookBlockchain();
 
     try {
       // Below will be overwritten if instantiated with value.
@@ -538,50 +539,17 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
    * @returns void
    */
-  private _hookBlockchain(): void {
-    this._hookFromBlockchain();
-    this._hookToBlockchain();
-  }
-  /**
-   * Hook the fromBlockchain of the {@link BridgeTxn}.
-   * Only used in {@link _hookBlockchain}
-   *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the blockchain name is unknown
-   * @returns void
-   */
-  private _hookFromBlockchain(): void {
-    if (this.fromBlockchainName === BlockchainName.NEAR) {
-      this.#fromBlockchain = nearBlockchain;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (this.fromBlockchainName === BlockchainName.ALGO) {
-      this.#fromBlockchain = algoBlockchain;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        fromBlockchain: this.fromBlockchainName,
-        at: 'BridgeTxn._hookBlockchain',
-      });
-    }
-  }
-  /**
-   * Hook the toBlockchain of the {@link BridgeTxn}.
-   * Only used in {@link _hookBlockchain}
-   *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
-   * @returns void
-   */
-  private _hookToBlockchain(): void {
-    if (this.toBlockchainName === BlockchainName.NEAR) {
-      this.#toBlockchain = nearBlockchain;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (this.toBlockchainName === BlockchainName.ALGO) {
-      this.#toBlockchain = algoBlockchain;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        toBlockchain: this.toBlockchainName,
-        at: 'BridgeTxn._hookBlockchain',
-      });
+  private _getBlockchain(blockchainName: BlockchainName): Blockchain {
+    switch (blockchainName) {
+      case BlockchainName.ALGO:
+        return algoBlockchain;
+      case BlockchainName.NEAR:
+        return nearBlockchain;
+      default:
+        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
+          blockchainName,
+          at: 'BridgeTxn._getBlockchain',
+        });
     }
   }
 
