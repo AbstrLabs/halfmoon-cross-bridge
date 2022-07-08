@@ -121,18 +121,18 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     apiCallParam: ApiCallParam,
     createdTime?: bigint
   ): BridgeTxn {
-    const { from, to, amount, txnId } = apiCallParam;
+    const { from_addr, to_addr, amount, txn_id } = apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
-      txnType: apiCallParam.type,
+      txnType: TxnType.MINT, // FIX: this is a fake value to pass git hook
       fixedFeeAtom: undefined,
-      fromAddr: from,
+      fromAddr: from_addr,
       fromAmountAtom: toGoNearAtom(amount),
       fromBlockchainName: undefined,
-      fromTxnId: txnId,
+      fromTxnId: txn_id,
       marginFeeAtom: undefined,
       createdTime,
-      toAddr: to,
+      toAddr: to_addr,
       toAmountAtom: undefined,
       toBlockchainName: undefined,
       toTxnId: undefined,

@@ -9,7 +9,7 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { ApiCallParam } from '../../utils/type';
-import { NearTxnId, TxnType } from '../../blockchain';
+import { NearTxnId } from '../../blockchain';
 
 /**
  * Simulate frontend: make NEAR -> goNEAR mint txn, returning an API call param.
@@ -32,10 +32,11 @@ async function simulatedFrontendNearToGoNear(
   }
   const apiCallParam: ApiCallParam = {
     amount: amountInNEAR,
-    type: TxnType.MINT,
-    from: ENV.NEAR_EXAMPL_ADDR,
-    to: ENV.ALGO_EXAMPL_ADDR,
-    txnId: nearTxnId,
+    from_token: 'NEAR',
+    from_addr: ENV.NEAR_EXAMPL_ADDR,
+    to_token: 'goNEAR',
+    to_addr: ENV.NEAR_MASTER_ADDR,
+    txn_id: nearTxnId,
   };
 
   return apiCallParam;

@@ -18,7 +18,7 @@ const WELCOME_JSON = {
         to_token: ['literal("NEAR","goNEAR")', 'case sensitive'],
         to_addr: ['string', 'public address of the receiver'],
         amount: ['string', 'up to 10 decimal places'],
-        txnId: ['string', 'transaction ID'],
+        txn_id: ['string', 'transaction ID'],
       },
     },
     {

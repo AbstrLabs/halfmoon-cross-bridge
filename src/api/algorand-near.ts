@@ -3,20 +3,27 @@
  */
 export { algorandNear };
 
-import type { ApiCallParam, DbId, DbItem, TxnId, TxnUid } from '../utils/type';
+import {
+  ApiCallParam,
+  DbId,
+  DbItem,
+  fullyParseApiParam,
+  TxnId,
+  TxnUid,
+} from '../utils/type';
 import { parseTxnUid } from '../utils/type';
-import { ConfirmOutcome, TxnType } from '../blockchain';
+import { ConfirmOutcome } from '../blockchain';
 import express, { Request, Response } from 'express';
 
-import { BlockchainName, BridgeTxnStatusEnum } from '..';
-import { BridgeTxn, BridgeTxnObj } from '../bridge';
+import { BridgeTxnStatusEnum } from '..';
+import { BridgeTxn } from '../bridge';
 import { WELCOME_JSON } from '.';
-import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
+import { TokenId } from '../bridge/token-table';
 
 const algorandNear = express.Router();
 
@@ -110,13 +117,14 @@ function verifyApiCallParamWithResp(
 ): ApiCallParam | null {
   try {
     const body = req.body as {
-      type: TxnType;
-      from: string;
-      to: string;
+      from_addr: string;
+      from_token: TokenId;
+      to_addr: string;
+      to_token: TokenId;
       amount: string;
-      txnId: string;
+      txn_id: string;
     };
-    const apiCallParam = parseApiCallParam(body);
+    const apiCallParam = fullyParseApiParam(body);
     return apiCallParam;
   } catch (err) {
     res.status(406).send('Wrong POST body');
@@ -135,17 +143,9 @@ async function verifyBlockchainTxnWithResp(
   apiCallParam: ApiCallParam,
   res: Response
 ): Promise<ConfirmOutcome.SUCCESS | null> {
-  const verifyBlockchainMap = {
-    [TxnType.MINT]: BlockchainName.NEAR,
-    [TxnType.BURN]: BlockchainName.ALGO,
-  };
-
   let verifyResult: ConfirmOutcome;
   try {
-    verifyResult = await verifyBlockchainTxn(
-      apiCallParam,
-      verifyBlockchainMap[apiCallParam.type]
-    );
+    verifyResult = await verifyBlockchainTxn(apiCallParam);
   } catch (err) {
     res.status(400).send('Invalid transaction');
     return null;

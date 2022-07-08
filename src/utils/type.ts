@@ -85,13 +85,8 @@ function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
 
 // API call param
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface ApiCallParam {
-  type: TxnType;
-  amount: string;
-  from: AlgoAddr;
-  to: NearAddr;
-  txnId: TxnId;
-} // NewApiCallParam; // z.infer<typeof zApiCallParam>;
+type ApiCallParam = NewApiCallParam; // TODO: Zod z.infer<typeof zApiCallParam>;
+type ApiAmount = z.infer<typeof zApiAmount>;
 // blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
 type NearAddr = z.infer<typeof zNearAddr>;
@@ -171,11 +166,11 @@ const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
 // this interface is for displaying purpose only, we may not use it in the code.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface NewApiCallParam {
-  amount: string;
+  amount: ApiAmount;
   txn_id: TxnId;
-  from_addr: string;
+  from_addr: Addr;
   from_token: TokenId; // token_id
-  to_addr: string;
+  to_addr: Addr;
   to_token: TokenId; // token_id
 }
 // here from_token and from_addr should be from the same blockchain. so is (to_token and to_addr)
