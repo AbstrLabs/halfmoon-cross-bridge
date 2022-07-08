@@ -9,11 +9,11 @@ Tables have the following columns
 | created_time     | BIGINT NOT NULL          | The time the txn was created   |
 | from_addr        | VARCHAR(63) NOT NULL     | The address of the sender      |
 | from_amount_atom | BIGINT NOT NULL          | The amount of the "from" txn   |
-| from_token_id    | NUMBER NOT NULL          | The token id of the "from" txn |
+| from_token_id    | VARCHAR(7) NOT NULL      | The token id of the "from" txn |
 | from_txn_id      | VARCHAR(63) NOT NULL     | The txn id of the "from" txn   |
 | to_addr          | VARCHAR(63) NOT NULL     | The address of the receiver    |
 | to_amount_atom   | BIGINT NOT NULL          | The amount of the "to" txn     |
-| to_token_id      | NUMBER NOT NULL          | The token id of the "to" txn   |
+| to_token_id      | VARCHAR(7) NOT NULL      | The token id of the "to" txn   |
 | to_txn_id        | VARCHAR(63)              | The txn id of the "to" txn     |
 | comments         | VARCHAR(255)             | Backup column                  |
 | txn_type         | txn_type_enum NOT NULL   | The type of the txn            |
