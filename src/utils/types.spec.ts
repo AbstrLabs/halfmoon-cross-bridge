@@ -11,6 +11,15 @@ describe('type.ts', () => {
         const parsedAddr = parseAlgoAddr(EXAMPLE_ALGO_ADDR);
         expect(parsedAddr).toEqual(EXAMPLE_ALGO_ADDR);
       });
+      it('should throw error on malformed Algo Addr', () => {
+        // cannot check this yet
+        // const malformed = EXAMPLE_ALGO_ADDR.slice(-1) + 'X';
+        const malformed = EXAMPLE_ALGO_ADDR + 'X';
+        // const parsedAddr = parseAlgoAddr();
+        expect(() => {
+          parseAlgoAddr(malformed);
+        }).toThrow();
+      });
     });
     describe('fullyParseApiParam', () => {
       it('should parse correct API param', () => {

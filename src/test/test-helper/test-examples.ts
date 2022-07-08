@@ -36,10 +36,11 @@ const EXAMPLE_NEAR_ADDR = ENV.NEAR_EXAMPL_ADDR;
 const EXAMPLE_ALGO_ADDR = ENV.ALGO_EXAMPL_ADDR;
 
 const EXAMPLE_API_PARAM: NewApiCallParam = {
-  to_id: 2,
-  to_addr: EXAMPLE_ALGO_ADDR,
-  from_id: 1,
-  from_addr: EXAMPLE_NEAR_ADDR,
+  // simulates a goNEAR->NEAR burn txn
+  from_id: 'goNEAR',
+  from_addr: EXAMPLE_ALGO_ADDR,
+  to_id: 'NEAR',
+  to_addr: EXAMPLE_NEAR_ADDR,
   amount: '1.23456789',
   txn_id: EXAMPLE_FROM_TXN_ID,
 };
