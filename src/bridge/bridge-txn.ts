@@ -25,6 +25,7 @@ import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
+import { Token, TokenId, TOKEN_TABLE } from './token-table';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -32,9 +33,11 @@ interface BridgeTxnObjBase {
   marginFeeAtom?: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom?: bigint;
+  toTokenId: TokenId;
   txnStatus?: BridgeTxnStatusEnum;
   toTxnId?: string | null;
   txnType: TxnType;
@@ -51,15 +54,18 @@ interface BridgeTxnObj extends BridgeTxnObjBase {
 }
 
 interface BridgeTxnSafeObj {
+  // TODO: type better (addr,txnId)
   dbId: number | string;
   fixedFeeAtom: string;
   marginFeeAtom: string;
   createdTime: string;
   fromAddr: string;
   fromAmountAtom: string;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: string;
+  toTokenId: TokenId;
   toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
   txnType: TxnType;
@@ -82,15 +88,19 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: bigint;
+  toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
   txnType: TxnType;
   #db = db;
   #fromBlockchain!: Blockchain;
+  #fromToken: Token;
   #toBlockchain!: Blockchain;
+  #toToken: Token;
   #isCreatedInDb: boolean;
 
   /* CONSTRUCTORS  */
@@ -107,18 +117,21 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     apiCallParam: ApiCallParam,
     createdTime?: bigint
   ): BridgeTxn {
-    const { from_addr, to_addr, amount, txn_id } = apiCallParam;
+    const { from_addr, from_token, to_addr, to_token, amount, txn_id } =
+      apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
       txnType: TxnType.MINT, // FIX: this is a fake value to pass git hook
       fixedFeeAtom: undefined,
       fromAddr: from_addr,
       fromAmountAtom: toGoNearAtom(amount),
+      fromTokenId: from_token,
       fromTxnId: txn_id,
       marginFeeAtom: undefined,
       createdTime,
       toAddr: to_addr,
       toAmountAtom: undefined,
+      toTokenId: to_token,
       toTxnId: undefined,
       txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
     });
@@ -140,11 +153,13 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
       fromAmountAtom: BigInt(_dbItem.from_amount_atom),
+      fromTokenId: _dbItem.from_token_id,
       fromTxnId: _dbItem.from_txn_id,
       marginFeeAtom: BigInt(_dbItem.margin_fee_atom),
       createdTime: BigInt(_dbItem.created_time),
       toAddr: _dbItem.to_addr,
       toAmountAtom: BigInt(_dbItem.to_amount_atom),
+      toTokenId: _dbItem.to_token_id,
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
     });
@@ -162,11 +177,13 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
       fromAddr: safeObj.fromAddr,
       fromAmountAtom: BigInt(safeObj.fromAmountAtom),
+      fromTokenId: safeObj.fromTokenId,
       fromTxnId: safeObj.fromTxnId,
       marginFeeAtom: BigInt(safeObj.marginFeeAtom),
       createdTime: BigInt(safeObj.createdTime),
       toAddr: safeObj.toAddr,
       toAmountAtom: BigInt(safeObj.toAmountAtom),
+      toTokenId: safeObj.toTokenId,
       toTxnId: safeObj.toTxnId,
       txnStatus: safeObj.txnStatus,
     });
@@ -179,9 +196,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     createdTime,
     fromAddr,
     fromAmountAtom,
+    fromTokenId,
     fromTxnId,
     toAddr,
     toAmountAtom,
+    toTokenId,
     txnStatus,
     txnType,
     toTxnId,
@@ -190,7 +209,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     this.#isCreatedInDb = false;
 
     this.txnType = txnType;
-    // TODO: shouldn't infer here
+    this.fromTokenId = fromTokenId;
+    this.toTokenId = toTokenId;
+    this.#fromToken = TOKEN_TABLE[this.fromTokenId];
+    this.#toToken = TOKEN_TABLE[this.toTokenId];
 
     this.fromTxnId = fromTxnId;
     this.fromAmountAtom = fromAmountAtom;
@@ -418,9 +440,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
+      fromTokenId: this.fromTokenId,
       fromTxnId: this.fromTxnId,
       toAddr: this.toAddr,
       toAmountAtom: this.toAmountAtom,
+      toTokenId: this.toTokenId,
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
       txnType: this.txnType,
