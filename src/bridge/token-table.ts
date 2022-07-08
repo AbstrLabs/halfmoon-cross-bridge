@@ -4,11 +4,19 @@
  * @todo - move TOKEN_TABLE to constants file.
  */
 
-export type { Token, TokenId };
+export type { Token };
+export { TokenId };
 export { TOKEN_TABLE };
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { Addr } from '../utils/type';
+
+enum TokenId {
+  ALGO = 'ALGO',
+  NEAR = 'NEAR',
+  wALGO = 'wALGO',
+  goNEAR = 'goNEAR',
+}
 
 interface TokenBase {
   tokenId: TokenId; // our way to call it, usually same as tokenName
@@ -24,13 +32,13 @@ interface NativeToken extends TokenBase {
 /* NATIVE TOKENS */
 
 const ALGO: NativeToken = {
-  tokenId: 'ALGO',
+  tokenId: TokenId.ALGO,
   tokenName: 'ALGO',
   implBlockchain: BlockchainName.ALGO,
 };
 
 const NEAR: NativeToken = {
-  tokenId: 'NEAR',
+  tokenId: TokenId.NEAR,
   tokenName: 'NEAR',
   implBlockchain: BlockchainName.NEAR,
 };
@@ -50,11 +58,9 @@ interface AssetToken extends TokenBase {
 }
 
 type Token = NativeToken | AssetToken;
-// TokenId is used too many times, maybe should make it an ENUM
-type TokenId = keyof typeof TOKEN_TABLE;
 
 const goNEAR: AssetToken = {
-  tokenId: 'goNEAR',
+  tokenId: TokenId.goNEAR,
   tokenName: 'goNEAR',
   implBlockchain: BlockchainName.ALGO,
   implMaster: ENV.ALGO_MASTER_ADDR,
@@ -63,7 +69,7 @@ const goNEAR: AssetToken = {
 };
 
 const wALGO: AssetToken = {
-  tokenId: 'wALGO',
+  tokenId: TokenId.wALGO,
   tokenName: 'wALGO',
   implBlockchain: BlockchainName.NEAR,
   implMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
@@ -74,6 +80,11 @@ const wALGO: AssetToken = {
 // use obj for non-consecutive tokenId
 // also preserves the possibility of naming tokens with non-numeric value in the future
 // Record<T, Token> is not supported, see https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type
-const TOKEN_TABLE = { ALGO, NEAR, goNEAR, wALGO } as const;
+const TOKEN_TABLE: Record<TokenId, Token> = {
+  ALGO,
+  NEAR,
+  goNEAR,
+  wALGO,
+} as const;
 
 Object.freeze(TOKEN_TABLE);

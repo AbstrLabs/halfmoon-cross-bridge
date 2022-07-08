@@ -181,11 +181,11 @@ interface NewApiCallParam {
 const zTokenIdAddrPair = z.discriminatedUnion('token_id', [
   z.object({
     token_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
-    addr: ADDR_MAP[TOKEN_TABLE.goNEAR.originBlockchain],
+    addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
   }),
   z.object({
     token_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
-    addr: ADDR_MAP[TOKEN_TABLE.wALGO.originBlockchain],
+    addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
   }),
 
   // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
@@ -340,11 +340,11 @@ const zDbItem = z.object({
   txn_status: zBridgeTxnStatus,
   from_addr: zAddr,
   from_amount_atom: zBiginter,
-  from_token_id: z.number(), // set range from enum?
+  from_token_id: z.string(), // FIX: use enum
   from_txn_id: zTxnId,
   to_addr: zAddr,
   to_amount_atom: zBiginter,
-  to_token_id: z.number(), // set range from enum?
+  to_token_id: z.string(), // FIX: use enum
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
   txn_type: zBridgeTxnType,
   comments: z.string(),

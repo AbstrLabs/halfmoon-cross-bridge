@@ -10,6 +10,7 @@
  * "goNEAR_NEAR" means the old "BURN" action. (Better than "goNEAR_NEAR")
  */
 
+export type { BridgeInfoMap };
 export { BRIDGE_INFO_MAP };
 
 import { ENV } from '../utils/dotenv';
@@ -24,36 +25,38 @@ interface BridgeInfo {
 }
 
 const NEAR_goNEAR: BridgeInfo = {
-  fromToken: 'NEAR',
+  fromToken: TokenId.NEAR,
   fromMaster: ENV.NEAR_MASTER_ADDR,
-  toToken: 'goNEAR',
+  toToken: TokenId.goNEAR,
   toMaster: ENV.ALGO_MASTER_ADDR,
 };
 
 const goNEAR_NEAR: BridgeInfo = {
-  fromToken: 'goNEAR',
+  fromToken: TokenId.goNEAR,
   fromMaster: ENV.ALGO_MASTER_ADDR,
-  toToken: 'NEAR',
+  toToken: TokenId.NEAR,
   toMaster: ENV.NEAR_MASTER_ADDR,
 };
 
 const ALGO_wALGO: BridgeInfo = {
-  fromToken: 'ALGO',
+  fromToken: TokenId.ALGO,
   fromMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
-  toToken: 'wALGO',
+  toToken: TokenId.wALGO,
   toMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
 };
 
 const wALGO_ALGO: BridgeInfo = {
-  fromToken: 'wALGO',
+  fromToken: TokenId.wALGO,
   fromMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
-  toToken: 'ALGO',
+  toToken: TokenId.ALGO,
   toMaster: ENV.ALGO_MASTER_ADDR,
 };
 
 const BRIDGE_INFO_MAP: Map<[TokenId, TokenId], BridgeInfo> = new Map([
-  [['NEAR', 'goNEAR'], NEAR_goNEAR],
-  [['goNEAR', 'NEAR'], goNEAR_NEAR],
-  [['ALGO', 'wALGO'], ALGO_wALGO],
-  [['wALGO', 'ALGO'], wALGO_ALGO],
+  [[TokenId.NEAR, TokenId.goNEAR], NEAR_goNEAR],
+  [[TokenId.goNEAR, TokenId.NEAR], goNEAR_NEAR],
+  [[TokenId.ALGO, TokenId.wALGO], ALGO_wALGO],
+  [[TokenId.wALGO, TokenId.ALGO], wALGO_ALGO],
 ]);
+
+type BridgeInfoMap = typeof BRIDGE_INFO_MAP;
