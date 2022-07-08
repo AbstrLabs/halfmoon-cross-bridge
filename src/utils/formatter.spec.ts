@@ -11,7 +11,6 @@ import { parse,  } from './type';
 import JsonBig from 'json-bigint';
 import { ENV } from './dotenv';
 import { exampleBridgeTxn } from './test-helper';
-import { TxnType } from '../blockchain';
 import { BridgeTxn } from '../blockchain/bridge';
 
 // TODO: move to test-helper + ren

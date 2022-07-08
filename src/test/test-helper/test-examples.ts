@@ -7,7 +7,7 @@ export {
 };
 
 import { BlockchainName, BridgeTxnStatusEnum } from '../..';
-import { TxnType } from '../../blockchain';
+import { TokenId } from '../../bridge/token-table';
 import { ENV } from '../../utils/dotenv';
 import { type NewApiCallParam } from '../../utils/type';
 
@@ -15,6 +15,7 @@ const EXAMPLE_MALFORMED_UID_FROM_DB =
   '58.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
 const EXAMPLE_FROM_TXN_ID =
   '2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
+// outdated EXAMPLE_TXN_FROM_DB
 const EXAMPLE_TXN_FROM_DB = {
   createdTime: '1656171676417',
   dbId: 57,
@@ -29,7 +30,6 @@ const EXAMPLE_TXN_FROM_DB = {
   toBlockchainName: 'NEAR' as BlockchainName.NEAR,
   toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
   txnStatus: 'DONE_OUTGOING' as BridgeTxnStatusEnum.DONE_OUTGOING,
-  txnType: 'BURN' as TxnType.BURN,
 };
 
 const EXAMPLE_NEAR_ADDR = ENV.NEAR_EXAMPL_ADDR;
@@ -37,9 +37,9 @@ const EXAMPLE_ALGO_ADDR = ENV.ALGO_EXAMPL_ADDR;
 
 const EXAMPLE_API_PARAM: NewApiCallParam = {
   // simulates a goNEAR->NEAR burn txn
-  from_token: 'goNEAR',
+  from_token: TokenId.goNEAR,
   from_addr: EXAMPLE_ALGO_ADDR,
-  to_token: 'NEAR',
+  to_token: TokenId.NEAR,
   to_addr: EXAMPLE_NEAR_ADDR,
   amount: '1.23456789',
   txn_id: EXAMPLE_FROM_TXN_ID,

@@ -6,7 +6,6 @@
 export {
   Blockchain,
   ConfirmOutcome,
-  TxnType,
   type AlgoAcc,
   type AlgoAddr,
   type AlgoTxnId,
@@ -60,11 +59,6 @@ type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 interface ConfirmTxnConfig {
   timeoutSec: number;
   intervalSec: number;
-}
-
-enum TxnType {
-  MINT = 'MINT',
-  BURN = 'BURN',
 }
 
 enum ConfirmOutcome {

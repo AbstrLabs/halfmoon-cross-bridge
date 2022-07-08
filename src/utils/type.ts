@@ -34,7 +34,6 @@ export {
 
 import { z } from 'zod';
 import { BridgeTxnStatusEnum } from '..';
-import { TxnType } from '../blockchain';
 import { TokenId, TOKEN_TABLE } from '../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
@@ -314,7 +313,6 @@ const zAlgoAssetTransferTxnOutcome = z.object({
 /* Class BridgeTxn */
 
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
-const zBridgeTxnType = z.nativeEnum(TxnType);
 const zTxnUid = z.string().refine((str: string) => {
   const splitted = str.split('.');
   if (splitted.length !== 2) {
@@ -347,7 +345,6 @@ const zDbItem = z.object({
   to_amount_atom: zBiginter,
   to_token_id: zTokenId,
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
-  txn_type: zBridgeTxnType,
   comments: z.string(),
   created_time: zBiginter,
   fixed_fee_atom: zBiginter,

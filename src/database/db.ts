@@ -9,7 +9,6 @@ import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
 import { type DbId, type DbItem, parseDbItem, parseDbId } from '../utils/type';
-import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
@@ -126,27 +125,32 @@ class Database {
     const query = `
       INSERT INTO ${tableName} 
       (
-        txn_type, txn_status, created_time, fixed_fee_atom, from_addr, from_amount_atom,
-        from_txn_id, margin_fee_atom, to_addr, to_amount_atom, to_txn_id
+        txn_status, 
+        from_addr, from_amount_atom, from_token_id, from_txn_id,
+        to_addr, to_amount_atom, from_token_id, to_txn_id,
+        created_time, fixed_fee_atom, margin_fee_atom
       ) 
       VALUES (
-        $1, $2, $3, $4, $5, $6,
-        $7, $8, $9, $10, $11
+        $1,
+        $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12
       ) 
       RETURNING db_id;
     `;
     const params: (string | bigint | undefined | null)[] = [
-      bridgeTxn.txnType,
       bridgeTxn.txnStatus,
-      bridgeTxn.createdTime,
-      bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromTokenId,
       bridgeTxn.fromTxnId,
-      bridgeTxn.marginFeeAtom,
       bridgeTxn.toAddr,
       bridgeTxn.toAmountAtom,
+      bridgeTxn.toTokenId,
       bridgeTxn.toTxnId,
+      bridgeTxn.createdTime,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.marginFeeAtom,
     ];
     const queryResult = await this.query(query, params);
     const result = this._verifyResultUniqueness(queryResult, {
@@ -155,7 +159,7 @@ class Database {
     }) as { db_id: DbId };
 
     const dbId = parseDbId(result.db_id);
-    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
+    logger.info(literals.DB_ENTRY_CREATED(tableName, bridgeTxn.uid));
     bridgeTxn.dbId = dbId;
     return dbId;
   }
@@ -306,10 +310,9 @@ class Database {
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION} if not connected
    * @param  {DbId} dbId
-   * @param  {TxnType} txnType
    * @returns {Promise<void>} promise of `void`
    */
-  private async deleteTxn(dbId: DbId, txnType: TxnType): Promise<void> {
+  private async deleteTxn(dbId: DbId): Promise<void> {
     // never used.
 
     const query = `
@@ -322,7 +325,6 @@ class Database {
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',
       dbId,
-      txnType,
     });
   }
 

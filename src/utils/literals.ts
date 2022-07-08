@@ -56,8 +56,8 @@ const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
 const UNUSED_BIGINT = BigInt(0);
-const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
-  `Created bridge txn in table ${txnType} with id ${dbId}`;
+const DB_ENTRY_CREATED = (tableName: Stringer, dbId: Stringer) =>
+  `Created bridge txn in table ${tableName} with id ${dbId}`;
 const FOURTEEN_ZEROS = '0'.repeat(14);
 const SILLY_LOG = {};
 
