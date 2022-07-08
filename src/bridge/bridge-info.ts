@@ -22,6 +22,9 @@ interface BridgeInfo {
   fromMaster: Addr;
   toToken: TokenId;
   toMaster: Addr;
+  fixedFee: number;
+  marginBips: number;
+  // TODO: conversion method. now only toGoNearAtom
 }
 
 const NEAR_goNEAR: BridgeInfo = {
@@ -29,6 +32,8 @@ const NEAR_goNEAR: BridgeInfo = {
   fromMaster: ENV.NEAR_MASTER_ADDR,
   toToken: TokenId.goNEAR,
   toMaster: ENV.ALGO_MASTER_ADDR,
+  fixedFee: ENV.MINT_FIX_FEE,
+  marginBips: ENV.MINT_MARGIN_FEE_BIPS,
 };
 
 const goNEAR_NEAR: BridgeInfo = {
@@ -36,6 +41,8 @@ const goNEAR_NEAR: BridgeInfo = {
   fromMaster: ENV.ALGO_MASTER_ADDR,
   toToken: TokenId.NEAR,
   toMaster: ENV.NEAR_MASTER_ADDR,
+  fixedFee: ENV.BURN_FIX_FEE,
+  marginBips: ENV.BURN_MARGIN_FEE_BIPS,
 };
 
 const ALGO_wALGO: BridgeInfo = {
@@ -43,13 +50,17 @@ const ALGO_wALGO: BridgeInfo = {
   fromMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
   toToken: TokenId.wALGO,
   toMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
+  fixedFee: ENV.MINT_FIX_FEE,
+  marginBips: ENV.MINT_MARGIN_FEE_BIPS,
 };
 
 const wALGO_ALGO: BridgeInfo = {
   fromToken: TokenId.wALGO,
   fromMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
   toToken: TokenId.ALGO,
-  toMaster: ENV.ALGO_MASTER_ADDR,
+  toMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
+  fixedFee: ENV.BURN_FIX_FEE,
+  marginBips: ENV.BURN_MARGIN_FEE_BIPS,
 };
 
 const BRIDGE_INFO_MAP: Map<[TokenId, TokenId], BridgeInfo> = new Map([

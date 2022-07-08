@@ -1,4 +1,6 @@
-// TODO: no need to infer TxnType here anymore.
+/**
+ * @todo - maybe split bridge and bridge-txn
+ */
 export {
   type BridgeTxnObj,
   type BridgeTxnSafeObj,
@@ -14,11 +16,10 @@ import {
   parseDbItem,
   parseTxnUid,
 } from '../utils/type';
-import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
+import { Blockchain, ConfirmOutcome } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
@@ -26,6 +27,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 import { Token, TokenId, TOKEN_TABLE } from './token-table';
+import { BRIDGE_INFO_MAP } from './bridge-info';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -40,7 +42,6 @@ interface BridgeTxnObjBase {
   toTokenId: TokenId;
   txnStatus?: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnType: TxnType;
   createdTime?: bigint;
 }
 
@@ -68,7 +69,6 @@ interface BridgeTxnSafeObj {
   toTokenId: TokenId;
   toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
-  txnType: TxnType;
 }
 
 type BridgeTxnAction = {
@@ -95,7 +95,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnType: TxnType;
   #db = db;
   #fromBlockchain: Blockchain;
   #fromToken: Token;
@@ -121,7 +120,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
-      txnType: TxnType.MINT, // FIX: this is a fake value to pass git hook
       fixedFeeAtom: undefined,
       fromAddr: from_addr,
       fromAmountAtom: toGoNearAtom(amount),
@@ -149,7 +147,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: _dbItem.db_id,
-      txnType: _dbItem.txn_type,
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
       fromAmountAtom: BigInt(_dbItem.from_amount_atom),
@@ -173,7 +170,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         typeof safeObj.dbId === 'number'
           ? safeObj.dbId
           : parseInt(safeObj.dbId),
-      txnType: safeObj.txnType,
       fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
       fromAddr: safeObj.fromAddr,
       fromAmountAtom: BigInt(safeObj.fromAmountAtom),
@@ -202,13 +198,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     toAmountAtom,
     toTokenId,
     txnStatus,
-    txnType,
     toTxnId,
     dbId,
   }: BridgeTxnObjBase) {
     this.#isCreatedInDb = false;
 
-    this.txnType = txnType;
     this.fromTokenId = fromTokenId;
     this.toTokenId = toTokenId;
     this.#fromToken = TOKEN_TABLE[this.fromTokenId];
@@ -410,12 +404,13 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     return (
       this.fromAddr === other.fromAddr &&
       this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
+      this.fromTokenId === other.fromTokenId &&
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
       this.toAmountAtom.toString() === other.toAmountAtom.toString() &&
+      this.toTokenId === other.toTokenId &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
-      this.txnType === other.txnType &&
       this.dbId === other.dbId &&
       this.fixedFeeAtom.toString() === other.fixedFeeAtom.toString() &&
       this.marginFeeAtom.toString() === other.marginFeeAtom.toString() &&
@@ -433,7 +428,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObj {
-    // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
     const bridgeTxnObject: BridgeTxnObj = {
       dbId: this.dbId,
       fixedFeeAtom: this.fixedFeeAtom,
@@ -448,7 +442,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       toTokenId: this.toTokenId,
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
-      txnType: this.txnType,
     };
     return bridgeTxnObject;
     // return Object.assign(bridgeTxnObject, this);
@@ -561,23 +554,18 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns {bigint} the fixedFeeAtom
    */
   private _readFixedFeeAtom(): bigint {
-    let fixedFee: bigint;
-    if (this.txnType === TxnType.MINT) {
-      fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
-    } else if (
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      this.txnType === TxnType.BURN
-    ) {
-      fixedFee = toGoNearAtom(ENV.MINT_FIX_FEE);
-    } else {
+    const fixedFee: number | undefined = BRIDGE_INFO_MAP.get([
+      this.fromTokenId,
+      this.toTokenId,
+    ])?.fixedFee;
+
+    if (fixedFee === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: this.txnType,
+        from_to_id: [this.fromTokenId, this.toTokenId],
       });
     }
-
-    this.fixedFeeAtom = fixedFee;
-    return fixedFee;
+    this.fixedFeeAtom = toGoNearAtom(fixedFee);
+    return this.fixedFeeAtom;
   }
 
   /**
@@ -590,18 +578,14 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
-    let marginBips: number;
-    if (this.txnType === TxnType.MINT) {
-      marginBips = ENV.MINT_MARGIN_FEE_BIPS;
-    } else if (
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      this.txnType === TxnType.BURN
-    ) {
-      marginBips = ENV.BURN_MARGIN_FEE_BIPS;
-    } else {
+    const marginBips: number | undefined = BRIDGE_INFO_MAP.get([
+      this.fromTokenId,
+      this.toTokenId,
+    ])?.marginBips;
+
+    if (marginBips === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: this.txnType,
+        from_to_id: [this.fromTokenId, this.toTokenId],
       });
     }
 
