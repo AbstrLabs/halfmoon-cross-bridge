@@ -26,7 +26,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 
-interface CriticalBridgeTxnObj {
+interface BridgeTxnObjBase {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
@@ -43,21 +43,15 @@ interface CriticalBridgeTxnObj {
   createdTime?: bigint;
 }
 
-interface BridgeTxnObj extends CriticalBridgeTxnObj {
+interface BridgeTxnObj extends BridgeTxnObjBase {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
   createdTime: bigint;
-  fromAddr: string;
-  fromAmountAtom: bigint;
   fromBlockchainName: BlockchainName;
-  fromTxnId: string;
-  toAddr: string;
   toAmountAtom: bigint;
   toBlockchainName: BlockchainName;
-  toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
-  txnType: TxnType;
 }
 
 interface BridgeTxnSafeObj {
@@ -84,10 +78,10 @@ type BridgeTxnAction = {
 /**
  * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
- * @param  {CriticalBridgeTxnObj} bridgeTxnObject
+ * @param  {BridgeTxnObjBase} bridgeTxnObject
  * @param  {InitializeOptions} initializeOptions
  */
-class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
+class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
@@ -208,7 +202,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     txnType,
     toTxnId,
     dbId,
-  }: CriticalBridgeTxnObj) {
+  }: BridgeTxnObjBase) {
     this.#isCreatedInDb = false;
 
     this.txnType = txnType;
