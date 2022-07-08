@@ -28,7 +28,7 @@ describe('type.ts', () => {
       it('should reject wrong API param', () => {
         expect(() => {
           const copy = { ...EXAMPLE_API_PARAM };
-          // copy.to_id = 3; TS handles this
+          // copy.to_token = 3; TS handles this
           copy.to_addr = 'wrong';
           fullyParseApiParam(copy);
         }).toThrow();

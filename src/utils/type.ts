@@ -174,12 +174,12 @@ interface NewApiCallParam {
   amount: string;
   txn_id: TxnId;
   from_addr: string;
-  from_id: TokenId; // token_id
+  from_token: TokenId; // token_id
   to_addr: string;
-  to_id: TokenId; // token_id
+  to_token: TokenId; // token_id
 }
-// here from_id and from_addr should be from the same blockchain. so is (to_id and to_addr)
-// token = [from_id, to_id] (array) seems acceptable, but the order is too important for us.
+// here from_token and from_addr should be from the same blockchain. so is (to_token and to_addr)
+// token = [from_id, to_token] (array) seems acceptable, but the order is too important for us.
 
 // this is for zod next version, and outdated.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -213,52 +213,52 @@ const zApiParamBase = z.object({
 // from pair and to pair should have the same structure but different prop names.
 // It's not supported by Zod, so we doing it twice
 // better use zTokenIdAddrPair for the next two ZodTypes. Currently not supported by Zod.
-const zApiFromPair = z.discriminatedUnion('from_id', [
+const zApiFromPair = z.discriminatedUnion('from_token', [
   z.object({
-    from_id: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    from_token: z.literal(TOKEN_TABLE.ALGO.tokenId),
     from_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
   }),
   z.object({
-    from_id: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    from_token: z.literal(TOKEN_TABLE.NEAR.tokenId),
     from_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
   }),
   z.object({
-    from_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    from_token: z.literal(TOKEN_TABLE.goNEAR.tokenId),
     from_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
   }),
   z.object({
-    from_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    from_token: z.literal(TOKEN_TABLE.wALGO.tokenId),
     from_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
   }),
 ]);
 
-const zApiToPair = z.discriminatedUnion('to_id', [
+const zApiToPair = z.discriminatedUnion('to_token', [
   z.object({
-    to_id: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    to_token: z.literal(TOKEN_TABLE.ALGO.tokenId),
     to_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
   }),
   z.object({
-    to_id: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    to_token: z.literal(TOKEN_TABLE.NEAR.tokenId),
     to_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
   }),
   z.object({
-    to_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    to_token: z.literal(TOKEN_TABLE.goNEAR.tokenId),
     to_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
   }),
   z.object({
-    to_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    to_token: z.literal(TOKEN_TABLE.wALGO.tokenId),
     to_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
   }),
 ]);
 
 function fullyParseApiParam(apiParam: NewApiCallParam): NewApiCallParam {
-  const { amount, txn_id, from_addr, from_id, to_addr, to_id } = apiParam;
+  const { amount, txn_id, from_addr, from_token, to_addr, to_token } = apiParam;
   const fromPair = {
-    from_id,
+    from_token,
     from_addr,
   };
   const toPair = {
-    to_id,
+    to_token,
     to_addr,
   };
   const apiParamBase = {
