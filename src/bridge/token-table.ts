@@ -45,9 +45,12 @@ interface AssetToken extends TokenBase {
   implMaster: Addr;
   originBlockchain: BlockchainName;
   originMaster: Addr;
+  // These two master addresses are stored here to check the
+  // consistence between issuance and collateral assets.
 }
 
 type Token = NativeToken | AssetToken;
+// TokenId is used too many times, maybe should make it an ENUM
 type TokenId = keyof typeof TOKEN_TABLE;
 
 const goNEAR: AssetToken = {
@@ -63,9 +66,9 @@ const wALGO: AssetToken = {
   tokenId: 'wALGO',
   tokenName: 'wALGO',
   implBlockchain: BlockchainName.NEAR,
-  implMaster: ENV.NEAR_MASTER_ADDR, // TODO: use another account
+  implMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
   originBlockchain: BlockchainName.ALGO,
-  originMaster: ENV.ALGO_MASTER_ADDR, // TODO: use another account
+  originMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
 };
 
 // use obj for non-consecutive tokenId
