@@ -11,14 +11,14 @@ import { toGoNearAtom } from '../utils/formatter';
 import { ConfirmOutcome, type Blockchain } from '.';
 import { nearBlockchain } from './near';
 import { algoBlockchain } from './algorand';
+import { TOKEN_TABLE } from '../bridge/token-table';
 
 async function verifyBlockchainTxn(
-  apiCallParam: ApiCallParam,
-  blockchainName: BlockchainName // TODO: remove this param, infer it from apiCallParam.
+  apiCallParam: ApiCallParam
 ): Promise<ConfirmOutcome> {
   let blockchain: Blockchain;
-
-  // TODO: wrap inferBlockchainName in a function in blockchain/index.ts
+  const blockchainName = TOKEN_TABLE[apiCallParam.from_token].implBlockchain;
+  // TODO: use match.
   if (blockchainName === BlockchainName.ALGO) {
     blockchain = algoBlockchain;
     // for extendability, we can add more blockchain names here.
@@ -31,10 +31,10 @@ async function verifyBlockchainTxn(
     throw new Error(`Blockchain ${blockchainName} is not supported.`);
   }
   const txnParam: TxnParam = {
-    fromAddr: apiCallParam.from,
+    fromAddr: apiCallParam.from_addr,
     toAddr: blockchain.centralizedAddr,
     atomAmount: toGoNearAtom(apiCallParam.amount),
-    txnId: apiCallParam.txnId,
+    txnId: apiCallParam.txn_id,
   };
 
   return await blockchain.confirmTxn(txnParam);
