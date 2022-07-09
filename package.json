@@ -145,5 +145,5 @@
     "unit-test": "yarn test:unit-test",
     "util": "yarn test:util"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
