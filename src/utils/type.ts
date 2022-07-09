@@ -345,7 +345,7 @@ const zDbItem = z.object({
   to_amount_atom: zBiginter,
   to_token_id: zTokenId,
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
-  comments: z.string(),
+  txn_comment: z.string(),
   created_time: zBiginter,
   fixed_fee_atom: zBiginter,
   margin_fee_atom: zBiginter,

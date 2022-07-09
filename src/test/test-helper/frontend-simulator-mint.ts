@@ -36,7 +36,7 @@ async function simulatedFrontendNearToGoNear(
     from_token: TokenId.NEAR,
     from_addr: ENV.NEAR_EXAMPL_ADDR,
     to_token: TokenId.goNEAR,
-    to_addr: ENV.NEAR_MASTER_ADDR,
+    to_addr: ENV.ALGO_EXAMPL_ADDR,
     txn_id: nearTxnId,
   };
 
