@@ -23,7 +23,7 @@ describe('DATABASE test', () => {
 
       expect(BridgeTxn.fromDbItem(res)).toEqual(exampleBridgeTxn);
     });
-    it('update a transaction', async () => {
+    it.skip('update a transaction', async () => {
       exampleBridgeTxn.txnStatus = BridgeTxnStatusEnum.DONE_OUTGOING;
       exampleBridgeTxn.toTxnId = 'some_fake_txn_id';
       const res1 = await db.updateTxn(exampleBridgeTxn);
@@ -38,7 +38,7 @@ describe('DATABASE test', () => {
       expect(BridgeTxn.fromDbItem(res2)).toEqual(exampleBridgeTxn);
     });
   });
-  it('should read all burn txn in db', async () => {
+  it('should read all txn in table', async () => {
     const res = await db.readAllTxn();
     expect(typeof res).toBe('object');
     expect(Array.isArray(res)).toBe(true);

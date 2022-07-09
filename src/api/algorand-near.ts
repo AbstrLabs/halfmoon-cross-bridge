@@ -80,7 +80,7 @@ async function handleGetCall(req: Request, res: Response) {
     return res.json(safeObj);
   } catch (err) {
     logger.error(err);
-    return res.status(500).send('Internal server error.');
+    return res.status(406).send('Internal server error.');
   }
 }
 
