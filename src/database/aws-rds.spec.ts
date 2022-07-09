@@ -1,76 +1,66 @@
 import { ENV } from '../utils/dotenv';
 import fs from 'fs';
 import { postgres } from './aws-rds';
+import { getNonce } from '../utils/literals';
+
+const NONCE = getNonce();
+const TEST_TABLE_NAME = `test_${NONCE}`;
 
 describe('AWS-RDS capability test', () => {
-  ENV; // to load .env file
-
   // it('connect to AWS-RDS via class', async () => {
   //   expect(await postgres._connectionTest()).toBe('Hello world!');
   // });
-
-  it('create and drop a new table', async () => {
-    const tableName = 'test_table_fakeNonce';
-    const query = `CREATE TABLE ${tableName} (
+  it('create and drop a new table, do CRUD in between', async () => {
+    // this large test did too many things because they need to run in order
+    /* CREATE TABLE */
+    const createTableQuery = `CREATE TABLE ${TEST_TABLE_NAME} (
         id SERIAL PRIMARY KEY,
         test_date BIGINT NOT NULL
         );`;
-    const res = await postgres.query(query);
+    const createRes = await postgres.query(createTableQuery);
+    expect(createRes.length).toBe(0);
 
-    expect(res.length).toBe(0);
-    const res2 = await postgres.query(`DROP TABLE ${tableName};`);
-    expect(res2.length).toBe(0);
-  });
-  // it('CRUD in test_table', async () => {
-  it.skip('read and write to test_table', async () => {
-    // cannot use test_table
-    const tableName = 'test_table';
-    const date = +new Date();
-    const query = `INSERT INTO ${tableName} (test_date) VALUES ($1);`;
-
-    // await postgres.connect();
-    const res = await postgres.query(query, [date]);
-    const res2 = await postgres.query(`SELECT * FROM ${tableName};`);
-    // postgres.disconnect();
-
-    expect(res.length).toBe(0);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res2.at(-1).test_date).toBe(date.toString());
-  });
-  it.skip('update in test_table', async () => {
-    // TODO: should run sequentially. skipped for now
-    const tableName = 'test_table';
-    const targetId = 1;
-    const date = +new Date();
-    const query = `UPDATE ${tableName} SET test_date = $1 WHERE id = $2;`;
-
-    await postgres.connect();
-    const res = await postgres.query(query, [date, targetId]);
-    const res2 = await postgres.query(
-      `SELECT * FROM ${tableName} WHERE id = $1;`,
-      [targetId]
+    /* CREATE ENTRY */
+    const createDate = +new Date();
+    const createEntryQuery = `INSERT INTO ${TEST_TABLE_NAME} (test_date) VALUES ($1);`;
+    const createEntryRes = await postgres.query(createEntryQuery, [createDate]);
+    const readEntryRes = await postgres.query(
+      `SELECT * FROM ${TEST_TABLE_NAME};`
     );
-    postgres.disconnect();
-
-    expect(res.length).toBe(0);
-    // Without sorting, first element in res2 has id 2.
+    expect(createEntryRes.length).toBe(0);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res2[0].test_date).toBe(date.toString());
-  });
-  it.skip('delete last entry in test_table', async () => {
-    // TODO: should run sequentially. skipped for now
-    // maybe just check MAX(id)?
-    const tableName = 'test_table';
-    const query = `DELETE FROM ${tableName} WHERE id = (SELECT MAX(id) FROM ${tableName});`;
+    expect(readEntryRes.at(-1).test_date).toBe(createDate.toString());
 
-    await postgres.connect();
-    const res_before_del = await postgres.query(`SELECT * FROM ${tableName} ;`);
-    const res = await postgres.query(query);
-    const res_after_del = await postgres.query(`SELECT * FROM ${tableName} ;`);
-    postgres.disconnect();
+    /* UPDATE ENTRY */
+    const updateDate = +new Date();
+    const updateEntryQuery = `UPDATE ${TEST_TABLE_NAME} SET test_date = $1 WHERE id = $2;`;
+    const updateEntryRes = await postgres.query(updateEntryQuery, [
+      updateDate,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      readEntryRes.at(-1).id,
+    ]);
+    const readUpdatedEntryRes = await postgres.query(
+      `SELECT * FROM ${TEST_TABLE_NAME};`
+    );
+    expect(updateEntryRes.length).toBe(0);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(readUpdatedEntryRes.at(-1).test_date).toBe(updateDate.toString());
 
-    expect(res.length).toBe(0);
-    expect(res_before_del.length - res_after_del.length).toBe(1);
+    /* DELETE ENTRY */
+    const deleteEntryQuery = `DELETE FROM ${TEST_TABLE_NAME} WHERE id = $1;`;
+    const deleteEntryRes = await postgres.query(deleteEntryQuery, [
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      readUpdatedEntryRes.at(-1).id,
+    ]);
+    const readDeletedEntryRes = await postgres.query(
+      `SELECT * FROM ${TEST_TABLE_NAME};`
+    );
+    expect(deleteEntryRes.length).toBe(0);
+    expect(readDeletedEntryRes.length).toBe(0);
+
+    /* DROP TABLE */
+    const dropTableRes = await postgres.query(`DROP TABLE ${TEST_TABLE_NAME};`);
+    expect(dropTableRes.length).toBe(0);
   });
 });
 
