@@ -56,7 +56,7 @@ async function handleGetCall(req: Request, res: Response) {
     parseTxnUid(uid);
   } catch (err) {
     logger.info('[API]: handled GET /algorand-near with malformed UID');
-    res.status(406).send('Wrong get param format');
+    res.status(406).send('Wrong GET param format');
     return;
   }
 
@@ -64,20 +64,19 @@ async function handleGetCall(req: Request, res: Response) {
     .split('.')
     .map((val, ind) => (ind === 0 ? parseInt(val) : val)) as [DbId, TxnId];
 
-  // TODO: maybe shouldn't use db here for too much coupling.
+  // TODO: maybe shouldn't use db here, too much coupling.
   try {
     const dbItem: DbItem = await db.readTxn(dbId);
-
+    // here the error handling is not good., because readTxn throws on fetch error and {0,>1} result.
     if (dbItem.from_txn_id !== txnId) {
       logger.warn('[API]: handled GET /algorand-near with invalid UID');
-      return res.status(406).send('Wrong get param format');
+      return res.status(406).send('Transaction not found in database');
     }
     // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
     const safeObj = stringifyBigintInObj(
       BridgeTxn.fromDbItem(dbItem).toObject()
     );
     logger.warn('[API]: handled GET /algorand-near with valid UID');
-
     return res.json(safeObj);
   } catch (err) {
     logger.error(err);

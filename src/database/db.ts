@@ -176,7 +176,9 @@ class Database {
 
   /**
    * Read a {@link BridgeTxn} from the database with its ID.
-   *
+   * @throws {BridgeError} if the database query result was not unique
+   * @throws {BridgeError} if the database query failed
+
    * @async
    * @param   {DbId} dbId - database primary key
    * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
