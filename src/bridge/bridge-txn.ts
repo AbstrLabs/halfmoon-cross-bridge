@@ -27,7 +27,7 @@ import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 import { Token, TokenId, TOKEN_TABLE } from './token-table';
-import { BRIDGE_INFO_MAP } from './bridge-info';
+import { getBridgeInfo } from './bridge-info';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -95,6 +95,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
+  txnComment?: string = undefined;
   #db = db;
   #fromBlockchain: Blockchain;
   #fromToken: Token;
@@ -554,16 +555,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns {bigint} the fixedFeeAtom
    */
   private _readFixedFeeAtom(): bigint {
-    const fixedFee: number | undefined = BRIDGE_INFO_MAP.get([
+    const fixedFee: number = getBridgeInfo(
       this.fromTokenId,
-      this.toTokenId,
-    ])?.fixedFee;
-
-    if (fixedFee === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        from_to_id: [this.fromTokenId, this.toTokenId],
-      });
-    }
+      this.toTokenId
+    ).fixedFee;
     this.fixedFeeAtom = toGoNearAtom(fixedFee);
     return this.fixedFeeAtom;
   }
@@ -578,16 +573,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
-    const marginBips: number | undefined = BRIDGE_INFO_MAP.get([
+    const marginBips: number = getBridgeInfo(
       this.fromTokenId,
-      this.toTokenId,
-    ])?.marginBips;
-
-    if (marginBips === undefined) {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        from_to_id: [this.fromTokenId, this.toTokenId],
-      });
-    }
+      this.toTokenId
+    ).marginBips;
 
     const marginFee: bigint = // TODO: supposing no bigint overflow
       this.fromAmountAtom -

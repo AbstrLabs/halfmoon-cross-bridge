@@ -10,10 +10,10 @@
  * "goNEAR_NEAR" means the old "BURN" action. (Better than "goNEAR_NEAR")
  */
 
-export type { BridgeInfoMap };
-export { BRIDGE_INFO_MAP };
+export { BRIDGE_INFO_MAP, getBridgeInfo };
 
 import { ENV } from '../utils/dotenv';
+import { BridgeError, ERRORS } from '../utils/errors';
 import { Addr } from '../utils/type';
 import { TokenId } from './token-table';
 
@@ -63,11 +63,57 @@ const wALGO_ALGO: BridgeInfo = {
   marginBips: ENV.BURN_MARGIN_FEE_BIPS,
 };
 
-const BRIDGE_INFO_MAP: Map<[TokenId, TokenId], BridgeInfo> = new Map([
-  [[TokenId.NEAR, TokenId.goNEAR], NEAR_goNEAR],
-  [[TokenId.goNEAR, TokenId.NEAR], goNEAR_NEAR],
-  [[TokenId.ALGO, TokenId.wALGO], ALGO_wALGO],
-  [[TokenId.wALGO, TokenId.ALGO], wALGO_ALGO],
-]);
+// Mapping this way will not work since [] != [].
+// const BRIDGE_INFO_MAP: Map<[TokenId, TokenId], BridgeInfo> = new Map([
+//   [[TokenId.NEAR, TokenId.goNEAR], NEAR_goNEAR],
+//   [[TokenId.goNEAR, TokenId.NEAR], goNEAR_NEAR],
+//   [[TokenId.ALGO, TokenId.wALGO], ALGO_wALGO],
+//   [[TokenId.wALGO, TokenId.ALGO], wALGO_ALGO],
+// ]);
 
-type BridgeInfoMap = typeof BRIDGE_INFO_MAP;
+// backup
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type BridgeInfoMap = Record<TokenId, Partial<Record<TokenId, BridgeInfo>>>;
+
+// Maybe make it a Class with get method, returning a defined value / throw error.
+const BRIDGE_INFO_MAP: BridgeInfoMap = {
+  [TokenId.NEAR]: {
+    [TokenId.goNEAR]: NEAR_goNEAR,
+  },
+  [TokenId.goNEAR]: {
+    [TokenId.NEAR]: goNEAR_NEAR,
+  },
+  [TokenId.ALGO]: {
+    [TokenId.wALGO]: ALGO_wALGO,
+  },
+  [TokenId.wALGO]: {
+    [TokenId.ALGO]: wALGO_ALGO,
+  },
+}; // as const;
+
+function getBridgeInfo(fromToken: TokenId, toToken: TokenId): BridgeInfo {
+  const a = BRIDGE_INFO_MAP[fromToken];
+  // TS seems not knowing this
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (a === undefined) {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+      true_message: `No bridge info found for ${fromToken}`,
+      at: 'bridge-info :getBridgeInfo',
+    });
+  }
+  if (!(toToken in a)) {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+      true_message: `No bridge info found for ${fromToken} -> ${toToken}`,
+      at: 'bridge-info :getBridgeInfo',
+    });
+  }
+  const b = a[toToken];
+  if (b === undefined) {
+    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
+      true_message: `No bridge info found for ${fromToken} -> ${toToken}`,
+      at: 'bridge-info :getBridgeInfo',
+    });
+  }
+
+  return b;
+}
