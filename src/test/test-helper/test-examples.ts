@@ -7,7 +7,7 @@ export {
   EXAMPLE_TXN_FOR_CREATE_TEST,
 };
 
-import { BlockchainName, BridgeTxnStatusEnum } from '../..';
+import { BridgeTxnStatusEnum } from '../..';
 import { BridgeTxn } from '../../bridge';
 import { TokenId } from '../../bridge/token-table';
 import { ENV } from '../../utils/dotenv';
@@ -19,21 +19,23 @@ const EXAMPLE_FROM_TXN_ID =
   '2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
 // outdated EXAMPLE_TXN_FROM_DB
 const EXAMPLE_TXN_FROM_DB = {
-  createdTime: '1656171676417',
-  dbId: 57,
+  dbId: 1,
   fixedFeeAtom: '10000000000',
+  marginFeeAtom: '24691358',
+  createdTime: '1656171676417',
   fromAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
   fromAmountAtom: '12345678901',
-  fromBlockchainName: 'ALGO' as BlockchainName.NEAR,
+  fromTokenId: 'goNEAR' as TokenId,
   fromTxnId: '2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA',
-  marginFeeAtom: '24691358',
   toAddr: 'abstrlabs-test.testnet',
   toAmountAtom: '2320987543',
-  toBlockchainName: 'NEAR' as BlockchainName.NEAR,
+  toTokenId: 'NEAR' as TokenId,
   toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
-  txnStatus: 'DONE_OUTGOING' as BridgeTxnStatusEnum.DONE_OUTGOING,
+  txnStatus: 'DONE_OUTGOING' as BridgeTxnStatusEnum,
 };
 
+// used in XXX
+// also used to test double minting
 const EXAMPLE_TXN_FOR_CREATE_TEST = new BridgeTxn({
   createdTime: 1656171676417n,
   fixedFeeAtom: 10000000000n,

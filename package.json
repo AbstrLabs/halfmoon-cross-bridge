@@ -126,7 +126,7 @@
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
     "handler": "yarn test:handler",
-    "int": "yarn test:integration",
+    "int": "yarn test:integration-test",
     "integration-test": "yarn test:integration-test",
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",

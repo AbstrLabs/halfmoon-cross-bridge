@@ -7,6 +7,7 @@ import {
   EXAMPLE_TXN_FROM_DB,
 } from '../test-helper/test-examples';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
+import { BridgeTxn } from '../../bridge';
 
 describe('root API (GET)', () => {
   it('hosted API root server returns welcome JSON on GET', async () => {
@@ -39,10 +40,10 @@ describe('/algorand-near API (GET)', () => {
     expect(res.statusText).toBe('OK');
   });
 
-  it.skip('/algorand-near returns welcome JSON on VALID-param-ed GET', async () => {
+  it('/algorand-near returns result JSON on VALID-param-ed GET', async () => {
     const res = await axios.get(
-      'http://localhost:4190/algorand-near?uid='
-      //+ BridgeTxn.fromObject(EXAMPLE_TXN_FROM_DB).uid
+      'http://localhost:4190/algorand-near?uid=' +
+        BridgeTxn.fromObject(EXAMPLE_TXN_FROM_DB).uid
     );
 
     expect(res.data).toStrictEqual(EXAMPLE_TXN_FROM_DB);
