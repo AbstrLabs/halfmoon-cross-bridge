@@ -1,4 +1,4 @@
-import { ENV, loadDotEnv } from './utils/dotenv';
+import { loadDotEnv } from './utils/dotenv';
 
 import { db } from './database/db';
 import { logger } from './utils/logger';
@@ -20,8 +20,8 @@ function setupLocalEnv() {
   loadDotEnv();
 }
 function showWelcome() {
-  logger.level = ENV.LOGGER_LEVEL;
-  logger.info(`log level: ${ENV.LOGGER_LEVEL}`);
+  logger.info(`log level: ${logger.level}`);
+  // logger.info(`process.env.TS_NODE_DEV: ${process.env.TS_NODE_DEV}`);
   // TODO: show some settings like network (testnet/mainnet), accounts, database, etc.
 }
 async function setupRemoteEnv() {
