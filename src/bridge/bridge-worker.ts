@@ -25,10 +25,12 @@ type FetchActionType = typeof FetchAction[keyof typeof FetchAction];
 
 class BridgeWorker {
   #queue: Map<TxnUid, BridgeTxn>;
+  #lastFetchedTime: Date;
   database: Database;
 
   constructor(database = db) {
     this.#queue = new Map();
+    this.#lastFetchedTime = new Date(0);
     this.database = database;
   }
 
@@ -55,6 +57,7 @@ class BridgeWorker {
     // TODO: merge with updateTasksFromDb
     // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
+    this.#lastFetchedTime = new Date(Date.now());
     for (const item of allDbItems) {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
       // later this won't be needed since all finished items will be removed from that table.
@@ -99,6 +102,14 @@ class BridgeWorker {
   get size(): number {
     return this.#queue.size;
   }
+  get value() {
+    return this.#queue;
+  }
+  get lastFetchedTime(): Date {
+    return this.#lastFetchedTime;
+  }
+
+  // rename
   get length(): number {
     return this.size;
   }
@@ -108,9 +119,7 @@ class BridgeWorker {
   get queueLength(): number {
     return this.size;
   }
-  get value() {
-    return this.#queue;
-  }
+
   valueOf() {
     return this.value;
   }
