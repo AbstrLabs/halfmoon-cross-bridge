@@ -1,6 +1,7 @@
 /**
  * Export a singleton instance `db` to handle all database requests
  *
+ * @todo: ref: check this.isConnected with decorator.
  * @exports db
  */
 
@@ -85,6 +86,7 @@ class Database {
     } catch (err: unknown) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_QUERY_FAILED, {
         connected: this.isConnected,
+        requestTableName: this.requestTableName,
         err,
         query,
         params,
@@ -120,26 +122,26 @@ class Database {
    */
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
-
-    const tableName = TABLE_NAME;
     if (!this.isConnected) {
-      logger.error('db is not connected while it should');
+      logger.error('db is not connected while it should be');
       await this.connect();
     }
     // const bridgeTxnObj = bridgeTxn.toObject();
     const query = `
-      INSERT INTO ${tableName} 
+      INSERT INTO ${this.requestTableName} 
       (
         txn_status, 
         from_addr, from_amount_atom, from_token_id, from_txn_id,
-        to_addr, to_amount_atom, from_token_id, to_txn_id,
-        created_time, fixed_fee_atom, margin_fee_atom
+        to_addr, to_amount_atom, to_token_id, to_txn_id,
+        created_time, fixed_fee_atom, margin_fee_atom,
+        txn_comment
       ) 
       VALUES (
         $1,
         $2, $3, $4, $5,
         $6, $7, $8, $9,
-        $10, $11, $12
+        $10, $11, $12,
+        $13
       ) 
       RETURNING db_id;
     `;
@@ -156,6 +158,7 @@ class Database {
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
       bridgeTxn.marginFeeAtom,
+      bridgeTxn.txnComment,
     ];
     const queryResult = await this.query(query, params);
     const result = this._verifyResultUniqueness(queryResult, {
@@ -164,8 +167,10 @@ class Database {
     }) as { db_id: DbId };
 
     const dbId = parseDbId(result.db_id);
-    logger.info(literals.DB_ENTRY_CREATED(tableName, bridgeTxn.uid));
     bridgeTxn.dbId = dbId;
+    logger.info(
+      literals.DB_ENTRY_CREATED(this.requestTableName, bridgeTxn.uid)
+    );
     return dbId;
   }
 
@@ -178,14 +183,13 @@ class Database {
    */
   public async readTxn(dbId: DbId): Promise<DbItem> {
     // this should always be unique with a dbId
-    const tableName = TABLE_NAME;
 
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName} WHERE db_id = $1;
+      SELECT * FROM ${this.requestTableName} WHERE db_id = $1;
     `;
     const params = [dbId];
     const queryResult = await this.query(query, params);
@@ -196,15 +200,13 @@ class Database {
   }
 
   public async readAllTxn(): Promise<DbItem[]> {
-    const tableName = TABLE_NAME;
-
     // TODO: these 3 lines below needs refactor to a new decorator
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName};
+      SELECT * FROM ${this.requestTableName};
     `;
     const dbItems = await this.query(query);
 
@@ -232,46 +234,51 @@ class Database {
     if (bridgeTxn.dbId === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         at: 'updateTxn',
-        why: 'dbId is undefined',
+        why: 'dbId should be defined if txn is in database',
         bridgeTxn: bridgeTxn,
       });
     }
 
-    const tableName = TABLE_NAME;
     if (!this.isConnected) {
       await this.connect();
     }
-
+    // todo: separate this txnStatus and toTxnId update into 2 separate queries
     const query = `
-      UPDATE ${tableName} SET
-        txn_status=$2, to_txn_id = $11
+      UPDATE ${this.requestTableName} SET
+        txn_status=$2, to_txn_id = $10
           WHERE (
-            db_id=$1 
-            -- AND txn_status=$2 
-            AND created_time=$3 
-            AND fixed_fee_atom=$4 
-            AND from_addr=$5 
-            AND from_amount_atom=$6 
-            AND from_txn_id=$7 
-            AND margin_fee_atom=$8 
-            AND to_addr=$9 
-            AND to_amount_atom=$10 
-            -- AND to_txn_id=$11
+            db_id=$1
+            -- AND txn_status=$2
+            AND from_addr=$3
+            AND from_amount_atom=$4
+            AND from_token_id=$5
+            AND from_txn_id=$6
+            AND to_addr=$7
+            AND to_amount_atom=$8
+            AND to_token_id=$9
+            -- AND to_txn_id=$10
+            AND created_time=$11
+            AND fixed_fee_atom=$12
+            AND margin_fee_atom=$13
+            AND txn_comment=$14
           )
       RETURNING db_id;
     `;
     const params = [
       bridgeTxn.dbId,
       bridgeTxn.txnStatus,
-      bridgeTxn.createdTime,
-      bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromTokenId,
       bridgeTxn.fromTxnId,
-      bridgeTxn.marginFeeAtom,
       bridgeTxn.toAddr,
       bridgeTxn.toAmountAtom,
+      bridgeTxn.toTokenId,
       bridgeTxn.toTxnId,
+      bridgeTxn.createdTime,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.marginFeeAtom,
+      bridgeTxn.txnComment,
     ];
     const queryResult = await this.query(query, params);
 
@@ -292,14 +299,12 @@ class Database {
    * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
   public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
-    const tableName = TABLE_NAME;
-
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName} WHERE from_txn_id = $1;
+      SELECT * FROM ${this.requestTableName} WHERE from_txn_id = $1;
     `;
     const params = [fromTxnId];
     const result = await this.query(query, params);
@@ -341,8 +346,10 @@ class Database {
    * @param  {unknown[]} result - query result to be verified
    * @param  {object} extraErrInfo? - extra error info
    * @returns {boolean} - true if result is not empty
+   * @deprecated - should use decorator (not finished)
    *
    * @todo change the object type
+   * @todo use decorator
    */
   private _verifyResultUniqueness<T>(result: T[], extraErrInfo?: object): T {
     if (result.length === 0) {
