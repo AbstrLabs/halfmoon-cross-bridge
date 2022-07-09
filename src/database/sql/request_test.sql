@@ -10,8 +10,7 @@ CREATE TABLE request_test (
     to_token_id VARCHAR(7) NOT NULL,
     to_txn_id VARCHAR(63),
     created_time BIGINT NOT NULL,
-    comments VARCHAR(255),
-    txn_type txn_type_enum NOT NULL,
+    txn_comment VARCHAR(255),
     fixed_fee_atom BIGINT NOT NULL,
     margin_fee_atom BIGINT NOT NULL
 );

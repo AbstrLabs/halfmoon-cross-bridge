@@ -15,7 +15,7 @@ Tables have the following columns
 | to_amount_atom   | BIGINT NOT NULL          | The amount of the "to" txn     |
 | to_token_id      | VARCHAR(7) NOT NULL      | The token id of the "to" txn   |
 | to_txn_id        | VARCHAR(63)              | The txn id of the "to" txn     |
-| comments         | VARCHAR(255)             | Backup column                  |
+| txn_comment      | VARCHAR(255)             | Backup column                  |
 | txn_type         | txn_type_enum NOT NULL   | The type of the txn            |
 | fixed_fee_atom   | BIGINT NOT NULL          | The fixed fee of the txn       |
 | margin_fee_atom  | BIGINT NOT NULL          | The margin fee of the txn      |
