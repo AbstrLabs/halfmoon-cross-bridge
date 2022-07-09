@@ -1,6 +1,8 @@
 /**
  * NEAR functionalities wrapped up with our centralized account
+ *
  * @throws {BridgeError} - {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
+ * @todo: master acc should be dynamic, or create a new instance per unidirectional bridge.
  */
 
 export { nearBlockchain, type NearBlockchain };

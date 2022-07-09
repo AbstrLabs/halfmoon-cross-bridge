@@ -5,7 +5,7 @@ export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
 import lodash from 'lodash';
 import { BridgeTxn } from '.';
-import { BridgeTxnStatusEnum, BridgeTxnStatusTree } from '..';
+import { BridgeTxnStatusEnum, BridgeTxnStatusTree, NodeEnvEnum } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../api/email';
 import { ENV } from '../utils/dotenv';
@@ -25,10 +25,12 @@ type FetchActionType = typeof FetchAction[keyof typeof FetchAction];
 
 class BridgeWorker {
   #queue: Map<TxnUid, BridgeTxn>;
+  #lastFetchedTime: Date;
   database: Database;
 
   constructor(database = db) {
     this.#queue = new Map();
+    this.#lastFetchedTime = new Date(0);
     this.database = database;
   }
 
@@ -55,6 +57,7 @@ class BridgeWorker {
     // TODO: merge with updateTasksFromDb
     // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
+    this.#lastFetchedTime = new Date(Date.now());
     for (const item of allDbItems) {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
       // later this won't be needed since all finished items will be removed from that table.
@@ -99,6 +102,14 @@ class BridgeWorker {
   get size(): number {
     return this.#queue.size;
   }
+  get value() {
+    return this.#queue;
+  }
+  get lastFetchedTime(): Date {
+    return this.#lastFetchedTime;
+  }
+
+  // rename
   get length(): number {
     return this.size;
   }
@@ -108,9 +119,7 @@ class BridgeWorker {
   get queueLength(): number {
     return this.size;
   }
-  get value() {
-    return this.#queue;
-  }
+
   valueOf() {
     return this.value;
   }
@@ -203,10 +212,10 @@ class BridgeWorker {
     return uidTxnPair[1];
   }
   private _checkIfTestEnv() {
-    if (ENV.TS_NODE_DEV !== 'test') {
+    if (ENV.NODE_ENV !== NodeEnvEnum.TEST) {
       throw new Error(
-        '[BW ]: _test_DropAll can only be called in test mode.' +
-          ENV.TS_NODE_DEV.toString()
+        '[BW ]: _test_DropAll can only be called in test mode. Current mode:' +
+          ENV.NODE_ENV.toString()
       );
     }
     return true;

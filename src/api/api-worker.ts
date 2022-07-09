@@ -3,15 +3,16 @@
  */
 export { type ApiWorker, apiWorker };
 
-import { TxnType } from '../blockchain';
 import { ApiCallParam, TxnId } from '../utils/type';
-import { BridgeTxn } from '.';
+import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
+import { TokenId } from '../bridge/token-table';
 
 // TODO: parse with zod
 interface CriticalApiCallParam {
-  type: TxnType;
-  txnId: TxnId;
+  to_token: TokenId;
+  from_token: TokenId;
+  txn_id: TxnId;
 }
 
 class ApiWorker {
@@ -28,7 +29,7 @@ class ApiWorker {
 
     if (this._includes(criticalApiCallParam)) {
       throw new Error(
-        'Txn already in creation queue ' + criticalApiCallParam.txnId
+        'Txn already in creation queue ' + criticalApiCallParam.txn_id
       );
     }
     this._push(criticalApiCallParam);
@@ -60,7 +61,7 @@ class ApiWorker {
 
     this.queue = this.queue.filter(
       (ExistedCallParam) =>
-        ExistedCallParam.txnId !== criticalApiCallParam.txnId
+        ExistedCallParam.txn_id !== criticalApiCallParam.txn_id
     );
     return true;
   }
@@ -72,6 +73,7 @@ class ApiWorker {
   /* PRIVATE METHODS */
 
   private _includes(criticalApiCallParam: CriticalApiCallParam) {
+    // FIX: this is SUPER dangerous, not sure if `includes` compares object (assumably not)
     return this.queue.includes(criticalApiCallParam);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }

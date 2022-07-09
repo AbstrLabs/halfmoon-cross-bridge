@@ -25,12 +25,16 @@ const MAKING_TXN = (
   to: Stringer
 ) => `Making ${txnType} transaction of ${amount} from ${from} to ${to}`;
 
+// remove this later.
 const START_MINTING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Minting ${amount} NEAR from [${from}](NEAR) to [${to}](ALGO).`;
+// remove this later.
 const START_BURNING = (amount: Stringer, from: Stringer, to: Stringer) =>
   `Burning ${amount} goNEAR from [${from}](ALGO) to [${to}](NEAR)`;
 
+// remove this later.
 const DONE_MINT = 'mint success';
+// remove this later.
 const DONE_BURN = 'burn success';
 const BURN_AWAITING =
   'Will redirect to "history" after burn transaction finished.';
@@ -52,8 +56,8 @@ const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 const UNUSED = 'not required value';
 const UNUSED_BIGINT = BigInt(0);
-const DB_ENTRY_CREATED = (txnType: Stringer, dbId: Stringer) =>
-  `Created bridge txn in table ${txnType} with id ${dbId}`;
+const DB_ENTRY_CREATED = (tableName: Stringer, dbId: Stringer) =>
+  `Created bridge txn in table ${tableName} with id ${dbId}`;
 const FOURTEEN_ZEROS = '0'.repeat(14);
 const SILLY_LOG = {};
 
@@ -75,3 +79,7 @@ const literals = {
   UNUSED,
   UNUSED_BIGINT,
 };
+
+export function getNonce(): string {
+  return Math.floor(Math.random() * 1000000).toString();
+}

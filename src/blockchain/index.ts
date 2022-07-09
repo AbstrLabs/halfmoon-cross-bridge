@@ -6,7 +6,6 @@
 export {
   Blockchain,
   ConfirmOutcome,
-  TxnType,
   type AlgoAcc,
   type AlgoAddr,
   type AlgoTxnId,
@@ -35,6 +34,7 @@ import {
 } from '../utils/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
+import { BlockchainName } from '..';
 
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
@@ -59,11 +59,6 @@ type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 interface ConfirmTxnConfig {
   timeoutSec: number;
   intervalSec: number;
-}
-
-enum TxnType {
-  MINT = 'MINT',
-  BURN = 'BURN',
 }
 
 enum ConfirmOutcome {
@@ -129,7 +124,7 @@ abstract class Blockchain {
   /* ABSTRACT */
   public abstract readonly centralizedAddr: Addr;
   public abstract readonly confirmTxnConfig: ConfirmTxnConfig;
-  public abstract readonly name: string;
+  public abstract readonly name: BlockchainName;
   protected abstract indexer: Indexer;
   protected abstract readonly centralizedAcc: GenericAcc;
   /**

@@ -1,6 +1,7 @@
 /**
  * Export a singleton instance `db` to handle all database requests
  *
+ * @todo: ref: check this.isConnected with decorator.
  * @exports db
  */
 
@@ -9,12 +10,28 @@ import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
 import { type DbId, type DbItem, parseDbItem, parseDbId } from '../utils/type';
-import { TxnType } from '../blockchain';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
+import { ENV } from '../utils/dotenv';
+import { NodeEnvEnum } from '..';
 
-const REQUEST_TABLE = 'anb_request';
+let _TABLE_NAME;
+if (
+  ENV.NODE_ENV === NodeEnvEnum.DEVELOPMENT ||
+  ENV.NODE_ENV === NodeEnvEnum.TEST
+) {
+  _TABLE_NAME = 'request_dev';
+  logger.info('[DB ]: using development database');
+} else if (ENV.NODE_ENV === NodeEnvEnum.PRODUCTION) {
+  _TABLE_NAME = 'request_test';
+  logger.info('[DB ]: using testnet database');
+} else {
+  throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV, {
+    current_ENV: ENV.NODE_ENV,
+  });
+}
+const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
 
 /**
  * A database class to handle all database requests. Should be used as a singleton.
@@ -28,7 +45,7 @@ class Database {
 
   constructor(instance: Postgres) {
     this.instance = instance;
-    this.requestTableName = REQUEST_TABLE;
+    this.requestTableName = TABLE_NAME;
   }
 
   /**
@@ -69,6 +86,7 @@ class Database {
     } catch (err: unknown) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_QUERY_FAILED, {
         connected: this.isConnected,
+        requestTableName: this.requestTableName,
         err,
         query,
         params,
@@ -104,37 +122,43 @@ class Database {
    */
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
-
-    const tableName = REQUEST_TABLE;
     if (!this.isConnected) {
-      logger.error('db is not connected while it should');
+      logger.error('db is not connected while it should be');
       await this.connect();
     }
     // const bridgeTxnObj = bridgeTxn.toObject();
     const query = `
-      INSERT INTO ${tableName} 
+      INSERT INTO ${this.requestTableName} 
       (
-        txn_type, txn_status, created_time, fixed_fee_atom, from_addr, from_amount_atom,
-        from_txn_id, margin_fee_atom, to_addr, to_amount_atom, to_txn_id
+        txn_status, 
+        from_addr, from_amount_atom, from_token_id, from_txn_id,
+        to_addr, to_amount_atom, to_token_id, to_txn_id,
+        created_time, fixed_fee_atom, margin_fee_atom,
+        txn_comment
       ) 
       VALUES (
-        $1, $2, $3, $4, $5, $6,
-        $7, $8, $9, $10, $11
+        $1,
+        $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12,
+        $13
       ) 
       RETURNING db_id;
     `;
     const params: (string | bigint | undefined | null)[] = [
-      bridgeTxn.txnType,
       bridgeTxn.txnStatus,
-      bridgeTxn.createdTime,
-      bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromTokenId,
       bridgeTxn.fromTxnId,
-      bridgeTxn.marginFeeAtom,
       bridgeTxn.toAddr,
       bridgeTxn.toAmountAtom,
+      bridgeTxn.toTokenId,
       bridgeTxn.toTxnId,
+      bridgeTxn.createdTime,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.marginFeeAtom,
+      bridgeTxn.txnComment,
     ];
     const queryResult = await this.query(query, params);
     const result = this._verifyResultUniqueness(queryResult, {
@@ -143,28 +167,31 @@ class Database {
     }) as { db_id: DbId };
 
     const dbId = parseDbId(result.db_id);
-    logger.info(literals.DB_ENTRY_CREATED(bridgeTxn.txnType, dbId));
     bridgeTxn.dbId = dbId;
+    logger.info(
+      literals.DB_ENTRY_CREATED(this.requestTableName, bridgeTxn.uid)
+    );
     return dbId;
   }
 
   /**
    * Read a {@link BridgeTxn} from the database with its ID.
-   *
+   * @throws {BridgeError} if the database query result was not unique
+   * @throws {BridgeError} if the database query failed
+
    * @async
    * @param   {DbId} dbId - database primary key
    * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
    */
   public async readTxn(dbId: DbId): Promise<DbItem> {
     // this should always be unique with a dbId
-    const tableName = REQUEST_TABLE;
 
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName} WHERE db_id = $1;
+      SELECT * FROM ${this.requestTableName} WHERE db_id = $1;
     `;
     const params = [dbId];
     const queryResult = await this.query(query, params);
@@ -175,15 +202,13 @@ class Database {
   }
 
   public async readAllTxn(): Promise<DbItem[]> {
-    const tableName = REQUEST_TABLE;
-
     // TODO: these 3 lines below needs refactor to a new decorator
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName};
+      SELECT * FROM ${this.requestTableName};
     `;
     const dbItems = await this.query(query);
 
@@ -211,46 +236,51 @@ class Database {
     if (bridgeTxn.dbId === undefined) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED, {
         at: 'updateTxn',
-        why: 'dbId is undefined',
+        why: 'dbId should be defined if txn is in database',
         bridgeTxn: bridgeTxn,
       });
     }
 
-    const tableName = REQUEST_TABLE;
     if (!this.isConnected) {
       await this.connect();
     }
-
+    // todo: separate this txnStatus and toTxnId update into 2 separate queries
     const query = `
-      UPDATE ${tableName} SET
-        txn_status=$2, to_txn_id = $11
+      UPDATE ${this.requestTableName} SET
+        txn_status=$2, to_txn_id = $10
           WHERE (
-            db_id=$1 
-            -- AND txn_status=$2 
-            AND created_time=$3 
-            AND fixed_fee_atom=$4 
-            AND from_addr=$5 
-            AND from_amount_atom=$6 
-            AND from_txn_id=$7 
-            AND margin_fee_atom=$8 
-            AND to_addr=$9 
-            AND to_amount_atom=$10 
-            -- AND to_txn_id=$11
+            db_id=$1
+            -- AND txn_status=$2
+            AND from_addr=$3
+            AND from_amount_atom=$4
+            AND from_token_id=$5
+            AND from_txn_id=$6
+            AND to_addr=$7
+            AND to_amount_atom=$8
+            AND to_token_id=$9
+            -- AND to_txn_id=$10
+            AND created_time=$11
+            AND fixed_fee_atom=$12
+            AND margin_fee_atom=$13
+            AND txn_comment=$14
           )
       RETURNING db_id;
     `;
     const params = [
       bridgeTxn.dbId,
       bridgeTxn.txnStatus,
-      bridgeTxn.createdTime,
-      bridgeTxn.fixedFeeAtom,
       bridgeTxn.fromAddr,
       bridgeTxn.fromAmountAtom,
+      bridgeTxn.fromTokenId,
       bridgeTxn.fromTxnId,
-      bridgeTxn.marginFeeAtom,
       bridgeTxn.toAddr,
       bridgeTxn.toAmountAtom,
+      bridgeTxn.toTokenId,
       bridgeTxn.toTxnId,
+      bridgeTxn.createdTime,
+      bridgeTxn.fixedFeeAtom,
+      bridgeTxn.marginFeeAtom,
+      bridgeTxn.txnComment,
     ];
     const queryResult = await this.query(query, params);
 
@@ -271,14 +301,12 @@ class Database {
    * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
   public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
-    const tableName = REQUEST_TABLE;
-
     if (!this.isConnected) {
       await this.connect();
     }
 
     const query = `
-      SELECT * FROM ${tableName} WHERE from_txn_id = $1;
+      SELECT * FROM ${this.requestTableName} WHERE from_txn_id = $1;
     `;
     const params = [fromTxnId];
     const result = await this.query(query, params);
@@ -294,10 +322,9 @@ class Database {
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION} if not connected
    * @param  {DbId} dbId
-   * @param  {TxnType} txnType
    * @returns {Promise<void>} promise of `void`
    */
-  private async deleteTxn(dbId: DbId, txnType: TxnType): Promise<void> {
+  private async deleteTxn(dbId: DbId): Promise<void> {
     // never used.
 
     const query = `
@@ -310,7 +337,6 @@ class Database {
     throw new BridgeError(ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION, {
       action: 'deleteTxn',
       dbId,
-      txnType,
     });
   }
 
@@ -322,8 +348,10 @@ class Database {
    * @param  {unknown[]} result - query result to be verified
    * @param  {object} extraErrInfo? - extra error info
    * @returns {boolean} - true if result is not empty
+   * @deprecated - should use decorator (not finished)
    *
    * @todo change the object type
+   * @todo use decorator
    */
   private _verifyResultUniqueness<T>(result: T[], extraErrInfo?: object): T {
     if (result.length === 0) {

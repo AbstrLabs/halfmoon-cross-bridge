@@ -3,20 +3,27 @@
  */
 export { algorandNear };
 
-import type { ApiCallParam, DbId, DbItem, TxnId, TxnUid } from '../utils/type';
-import { parseApiCallParam, parseTxnUid } from '../utils/type';
-import { ConfirmOutcome, TxnType } from '../blockchain';
+import {
+  ApiCallParam,
+  DbId,
+  DbItem,
+  fullyParseApiParam,
+  TxnId,
+  TxnUid,
+} from '../utils/type';
+import { parseTxnUid } from '../utils/type';
+import { ConfirmOutcome } from '../blockchain';
 import express, { Request, Response } from 'express';
 
-import { BlockchainName, BridgeTxnStatusEnum } from '..';
-import { BridgeTxn, BridgeTxnObj } from '../bridge';
+import { BridgeTxnStatusEnum } from '..';
+import { BridgeTxn } from '../bridge';
 import { WELCOME_JSON } from '.';
-import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
-import { apiWorker } from '../bridge/api-worker';
+import { apiWorker } from './api-worker';
 import { db } from '../database/db';
+import { TokenId } from '../bridge/token-table';
 
 const algorandNear = express.Router();
 
@@ -49,7 +56,7 @@ async function handleGetCall(req: Request, res: Response) {
     parseTxnUid(uid);
   } catch (err) {
     logger.info('[API]: handled GET /algorand-near with malformed UID');
-    res.status(406).send('Wrong get param format');
+    res.status(406).send('Wrong GET param format');
     return;
   }
 
@@ -57,24 +64,23 @@ async function handleGetCall(req: Request, res: Response) {
     .split('.')
     .map((val, ind) => (ind === 0 ? parseInt(val) : val)) as [DbId, TxnId];
 
-  // TODO: maybe shouldn't use db here for too much coupling.
+  // TODO: maybe shouldn't use db here, too much coupling.
   try {
     const dbItem: DbItem = await db.readTxn(dbId);
-
+    // here the error handling is not good., because readTxn throws on fetch error and {0,>1} result.
     if (dbItem.from_txn_id !== txnId) {
       logger.warn('[API]: handled GET /algorand-near with invalid UID');
-      return res.status(406).send('Wrong get param format');
+      return res.status(406).send('Transaction not found in database');
     }
     // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
     const safeObj = stringifyBigintInObj(
       BridgeTxn.fromDbItem(dbItem).toObject()
     );
     logger.warn('[API]: handled GET /algorand-near with valid UID');
-
     return res.json(safeObj);
   } catch (err) {
     logger.error(err);
-    return res.status(500).send('Internal server error.');
+    return res.status(406).send('Internal server error.');
   }
 }
 
@@ -110,13 +116,14 @@ function verifyApiCallParamWithResp(
 ): ApiCallParam | null {
   try {
     const body = req.body as {
-      type: TxnType;
-      from: string;
-      to: string;
+      from_addr: string;
+      from_token: TokenId;
+      to_addr: string;
+      to_token: TokenId;
       amount: string;
-      txnId: string;
+      txn_id: string;
     };
-    const apiCallParam = parseApiCallParam(body);
+    const apiCallParam = fullyParseApiParam(body);
     return apiCallParam;
   } catch (err) {
     res.status(406).send('Wrong POST body');
@@ -135,17 +142,9 @@ async function verifyBlockchainTxnWithResp(
   apiCallParam: ApiCallParam,
   res: Response
 ): Promise<ConfirmOutcome.SUCCESS | null> {
-  const verifyBlockchainMap = {
-    [TxnType.MINT]: BlockchainName.NEAR,
-    [TxnType.BURN]: BlockchainName.ALGO,
-  };
-
   let verifyResult: ConfirmOutcome;
   try {
-    verifyResult = await verifyBlockchainTxn(
-      apiCallParam,
-      verifyBlockchainMap[apiCallParam.type]
-    );
+    verifyResult = await verifyBlockchainTxn(apiCallParam);
   } catch (err) {
     res.status(400).send('Invalid transaction');
     return null;
@@ -181,42 +180,4 @@ async function createBridgeTxnWithResp(
     res.status(500).send('Internal server error.');
     return null;
   }
-}
-
-/**
- * @deprecated
- * @param apiCallParam
- * @param res
- * @returns
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function transactWithResp(apiCallParam: ApiCallParam, res: Response) {
-  /* CONFIG */
-  let bridgeTxnObject: BridgeTxnObj;
-  const _literals =
-    apiCallParam.type === TxnType.MINT
-      ? { START: literals.START_MINTING, DONE: literals.DONE_MINT }
-      : { START: literals.START_BURNING, DONE: literals.DONE_BURN };
-  logger.info(
-    _literals.START(apiCallParam.amount, apiCallParam.from, apiCallParam.to) +
-      `txnId: ${apiCallParam.txnId}`
-  );
-
-  try {
-    const bridgeTxn = await apiWorker.create(apiCallParam);
-    bridgeTxnObject = await bridgeTxn.runWholeBridgeTxn();
-    logger.info(_literals.DONE);
-    // TODO: use different literal template than transact
-  } catch (err) {
-    logger.error(err);
-    res.status(406).send('Missing required query params');
-    res.end();
-    return;
-  }
-  // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
-  const stringifiedBridgeTxnObject = stringifyBigintInObj(bridgeTxnObject);
-  logger.info(
-    'API call ended, returned:\n' + JSON.stringify(stringifiedBridgeTxnObject)
-  );
-  return res.json(stringifiedBridgeTxnObject);
 }

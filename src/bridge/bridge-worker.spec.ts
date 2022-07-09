@@ -7,24 +7,30 @@ beforeEach(() => {
 
 describe('singleton bridgeWorker should', () => {
   it('should load db items into queue', async () => {
+    expect(+bridgeWorker.lastFetchedTime).toBe(0);
     await bridgeWorker.fetchTasksFromDb(FetchAction.LOAD);
-    expect(bridgeWorker.size).toBeGreaterThan(0); // This can be 0 when no items in db
+    expect(+bridgeWorker.lastFetchedTime).toBeGreaterThan(Date.now() - 15_000); // This can be 0 when no items in db
   });
 
   it('throw error on double load', async () => {
     await bridgeWorker.fetchTasksFromDb(FetchAction.LOAD);
     const len1 = bridgeWorker.size;
+    const time1 = +bridgeWorker.lastFetchedTime;
+    if (len1 !== 0) {
+      await expect(
+        bridgeWorker.fetchTasksFromDb(FetchAction.LOAD)
+      ).rejects.toThrow('[BW ]: _add failed. Task existed, use _update');
+    }
+    const len2 = bridgeWorker.size;
+    const time2 = +bridgeWorker.lastFetchedTime;
+    expect(len2).toBeGreaterThanOrEqual(len1);
+    expect(time2).toBeGreaterThanOrEqual(time1);
+
     // this won't log "I run" and won't run.
     // expect(async () => {
     //   await bridgeWorker.loadUnfinishedTasksFromDb();
     //   console.log('I run');
     // }).not.toThrow();
-
-    await expect(
-      bridgeWorker.fetchTasksFromDb(FetchAction.LOAD)
-    ).rejects.toThrow('[BW ]: _add failed. Task existed, use _update');
-    const len2 = bridgeWorker.size;
-    expect(len2).toEqual(len1);
   });
 
   it('update tasks correctly', async () => {

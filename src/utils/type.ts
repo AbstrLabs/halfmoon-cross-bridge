@@ -13,30 +13,28 @@ export {
   type AlgoTxnParam,
   type ApiCallParam,
   type Biginter,
-  type BurnApiParam,
   type DbId,
   type DbItem,
-  type MintApiParam,
   type NearAddr,
   type NearTxnId,
+  type NewApiCallParam,
   type NearTxnParam,
   type Stringer,
   type TxnId,
   type TxnParam,
   type TxnUid,
-  parseApiCallParam,
+  parseAlgoAddr,
   parseBigInt,
-  parseBurnApiParam,
   parseDbId,
   parseDbItem,
-  parseMintApiParam,
   parseTxnId,
   parseTxnUid,
+  fullyParseApiParam,
 };
 
 import { z } from 'zod';
 import { BridgeTxnStatusEnum } from '..';
-import { TxnType } from '../blockchain';
+import { TokenId, TOKEN_TABLE } from '../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from './errors';
 import { logger } from './logger';
 
@@ -55,19 +53,21 @@ interface Stringer {
  * @param  {T} zodShaped
  * @param  {z.ZodType} zodParser
  * @param  {ErrorTemplate} errorTemplate
- * @returns T
+ * @returns {T} - same zodShaped
  */
-function parseWithZod<T>(
+function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
   zodShaped: T,
-  zodParser: z.ZodType,
+  zodParser: U,
   errorTemplate: ErrorTemplate
 ): T {
   if (typeof zodShaped === 'bigint') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions
     logger.silly(`[ZOD]: parsingDbItem: ${zodShaped.toString()}`);
   } else {
     logger.silly(`[ZOD]: parsingDbItem: ${JSON.stringify(zodShaped)}`);
   }
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return zodParser.parse(zodShaped) as T;
   } catch (err) {
     logger.error(err);
@@ -83,9 +83,9 @@ function parseWithZod<T>(
 // Same order as below zTypeName part
 
 // API call param
-type MintApiParam = z.infer<typeof zMintApiParam>;
-type BurnApiParam = z.infer<typeof zBurnApiParam>;
-type ApiCallParam = z.infer<typeof zApiCallParam>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ApiCallParam = NewApiCallParam; // TODO: Zod z.infer<typeof zApiCallParam>;
+type ApiAmount = z.infer<typeof zApiAmount>;
 // blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
 type NearAddr = z.infer<typeof zNearAddr>;
@@ -135,6 +135,11 @@ const zNearAddr = z
   );
 const zAddr = z.union([zAlgoAddr, zNearAddr]);
 
+const ADDR_MAP = {
+  ALGO: zAlgoAddr,
+  NEAR: zNearAddr,
+};
+
 const zApiAmount = z
   .string()
   .regex(/^ *[0-9,]{1,}\.?[0-9]{0,10} *$/, 'malformed amount')
@@ -153,23 +158,112 @@ const zApiAmount = z
 const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
-const zMintApiParam = z.object({
-  type: z.literal(TxnType.MINT),
+
+// new API Call Param, not in docs yet.
+// removed "type", its unclear when we have more than one token.
+// using snake_case instead of camelCase or spinal-case because youtube uses it.
+// this interface is for displaying purpose only, we may not use it in the code.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface NewApiCallParam {
+  amount: ApiAmount;
+  txn_id: TxnId;
+  from_addr: Addr;
+  from_token: TokenId; // token_id
+  to_addr: Addr;
+  to_token: TokenId; // token_id
+}
+// here from_token and from_addr should be from the same blockchain. so is (to_token and to_addr)
+// token = [from_id, to_token] (array) seems acceptable, but the order is too important for us.
+
+// this is for zod next version, and outdated.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const zTokenIdAddrPair = z.discriminatedUnion('token_id', [
+  z.object({
+    token_id: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
+  }),
+  z.object({
+    token_id: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
+  }),
+
+  // Can't use next line due to https://github.com/colinhacks/zod/issues/1145
+  // Object.keys(TOKEN_TABLE).map((id: TokenId) => z.literal(id))
+  /* This won't work 
+  Object.entries(TOKEN_TABLE).map(
+  ([id, token]) =>
+    z.object({
+      token_id: z.literal(id),
+      addr: ADDR_MAP[token.implBlockchain],
+    })
+  ) */
+]);
+
+const zApiParamBase = z.object({
   amount: zApiAmount,
-  from: zNearAddr,
-  to: zAlgoAddr,
-  txnId: zNearTxnId,
+  txn_id: zNearTxnId,
 });
 
-const zBurnApiParam = z.object({
-  type: z.literal(TxnType.BURN),
-  amount: zApiAmount,
-  from: zAlgoAddr,
-  to: zNearAddr,
-  txnId: zNearTxnId,
-});
-const zApiCallParam = z.union([zMintApiParam, zBurnApiParam]);
+// from pair and to pair should have the same structure but different prop names.
+// It's not supported by Zod, so we doing it twice
+// better use zTokenIdAddrPair for the next two ZodTypes. Currently not supported by Zod.
+const zApiFromPair = z.discriminatedUnion('from_token', [
+  z.object({
+    from_token: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
+  }),
+  z.object({
+    from_token: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
+  }),
+  z.object({
+    from_token: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
+  }),
+  z.object({
+    from_token: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    from_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
+  }),
+]);
 
+const zApiToPair = z.discriminatedUnion('to_token', [
+  z.object({
+    to_token: z.literal(TOKEN_TABLE.ALGO.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.ALGO.implBlockchain],
+  }),
+  z.object({
+    to_token: z.literal(TOKEN_TABLE.NEAR.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.NEAR.implBlockchain],
+  }),
+  z.object({
+    to_token: z.literal(TOKEN_TABLE.goNEAR.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.goNEAR.implBlockchain],
+  }),
+  z.object({
+    to_token: z.literal(TOKEN_TABLE.wALGO.tokenId),
+    to_addr: ADDR_MAP[TOKEN_TABLE.wALGO.implBlockchain],
+  }),
+]);
+
+function fullyParseApiParam(apiParam: NewApiCallParam): NewApiCallParam {
+  const { amount, txn_id, from_addr, from_token, to_addr, to_token } = apiParam;
+  const fromPair = {
+    from_token,
+    from_addr,
+  };
+  const toPair = {
+    to_token,
+    to_addr,
+  };
+  const apiParamBase = {
+    amount,
+    txn_id,
+  };
+  parseWithZod(fromPair, zApiFromPair, ERRORS.API.INVALID_API_PARAM);
+  parseWithZod(toPair, zApiToPair, ERRORS.API.INVALID_API_PARAM);
+  parseWithZod(apiParamBase, zApiParamBase, ERRORS.API.INVALID_API_PARAM);
+  return apiParam;
+}
 /* BLOCKCHAIN SPECIFIC */
 
 const zAlgoTxnParam = z.object({
@@ -219,7 +313,6 @@ const zAlgoAssetTransferTxnOutcome = z.object({
 /* Class BridgeTxn */
 
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
-const zBridgeTxnType = z.nativeEnum(TxnType);
 const zTxnUid = z.string().refine((str: string) => {
   const splitted = str.split('.');
   if (splitted.length !== 2) {
@@ -238,33 +331,30 @@ const zTxnUid = z.string().refine((str: string) => {
 /* DATABASE */
 
 const zDbId = z.number().int().positive();
+const zTokenId = z.nativeEnum(TokenId);
 
 // TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
-  txn_type: zBridgeTxnType,
   db_id: zDbId,
-  fixed_fee_atom: zBiginter,
+  txn_status: zBridgeTxnStatus,
   from_addr: zAddr,
   from_amount_atom: zBiginter,
+  from_token_id: zTokenId,
   from_txn_id: zTxnId,
-  margin_fee_atom: zBiginter,
-  created_time: zBiginter,
   to_addr: zAddr,
   to_amount_atom: zBiginter,
+  to_token_id: zTokenId,
   to_txn_id: z.union([zTxnId, z.undefined(), z.null()]),
-  txn_status: zBridgeTxnStatus,
+  txn_comment: z.union([z.string(), z.null(), z.undefined()]),
+  created_time: zBiginter,
+  fixed_fee_atom: zBiginter,
+  margin_fee_atom: zBiginter,
 });
-
+``;
 /* PARSER */
 
-function parseMintApiParam(apiParam: MintApiParam): MintApiParam {
-  return parseWithZod(apiParam, zMintApiParam, ERRORS.API.INVALID_API_PARAM);
-}
-function parseBurnApiParam(apiParam: BurnApiParam): BurnApiParam {
-  return parseWithZod(apiParam, zBurnApiParam, ERRORS.API.INVALID_API_PARAM);
-}
-function parseApiCallParam(apiParam: ApiCallParam): ApiCallParam {
-  return parseWithZod(apiParam, zApiCallParam, ERRORS.API.INVALID_API_PARAM);
+function parseAlgoAddr(algoAddr: AlgoAddr): AlgoAddr {
+  return parseWithZod(algoAddr, zAlgoAddr, ERRORS.API.INVALID_API_PARAM);
 }
 function parseDbItem(dbItem: DbItem): DbItem {
   return parseWithZod(dbItem, zDbItem, ERRORS.INTERNAL.TYPE_PARSING_ERROR);

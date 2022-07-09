@@ -1,4 +1,6 @@
-// TODO: no need to infer TxnType here anymore.
+/**
+ * @todo - maybe split bridge and bridge-txn
+ */
 export {
   type BridgeTxnObj,
   type BridgeTxnSafeObj,
@@ -14,67 +16,59 @@ import {
   parseDbItem,
   parseTxnUid,
 } from '../utils/type';
-import { Blockchain, ConfirmOutcome, TxnType } from '../blockchain';
+import { Blockchain, ConfirmOutcome } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { ENV } from '../utils/dotenv';
 import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
+import { Token, TokenId, TOKEN_TABLE } from './token-table';
+import { getBridgeInfo } from './bridge-info';
 
-interface CriticalBridgeTxnObj {
+interface BridgeTxnObjBase {
   dbId?: number;
   fixedFeeAtom?: bigint;
   marginFeeAtom?: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchainName?: BlockchainName;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom?: bigint;
-  toBlockchainName?: BlockchainName;
+  toTokenId: TokenId;
   txnStatus?: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnType: TxnType;
   createdTime?: bigint;
 }
 
-interface BridgeTxnObj extends CriticalBridgeTxnObj {
+interface BridgeTxnObj extends BridgeTxnObjBase {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
   createdTime: bigint;
-  fromAddr: string;
-  fromAmountAtom: bigint;
-  fromBlockchainName: BlockchainName;
-  fromTxnId: string;
-  toAddr: string;
   toAmountAtom: bigint;
-  toBlockchainName: BlockchainName;
-  toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
-  txnType: TxnType;
 }
 
 interface BridgeTxnSafeObj {
+  // TODO: type better (addr,txnId)
   dbId: number | string;
   fixedFeeAtom: string;
   marginFeeAtom: string;
   createdTime: string;
   fromAddr: string;
   fromAmountAtom: string;
-  fromBlockchainName: BlockchainName;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: string;
-  toBlockchainName: BlockchainName;
+  toTokenId: TokenId;
   toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
-  txnType: TxnType;
 }
 
 type BridgeTxnAction = {
@@ -84,27 +78,29 @@ type BridgeTxnAction = {
 /**
  * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
- * @param  {CriticalBridgeTxnObj} bridgeTxnObject
+ * @param  {BridgeTxnObjBase} bridgeTxnObject
  * @param  {InitializeOptions} initializeOptions
  */
-class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
+class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
   createdTime: bigint;
   fromAddr: string;
   fromAmountAtom: bigint;
-  fromBlockchainName: BlockchainName;
+  fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
   toAmountAtom: bigint;
-  toBlockchainName: BlockchainName;
+  toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnType: TxnType;
+  txnComment?: string = undefined;
   #db = db;
-  #fromBlockchain!: Blockchain;
-  #toBlockchain!: Blockchain;
+  #fromBlockchain: Blockchain;
+  #fromToken: Token;
+  #toBlockchain: Blockchain;
+  #toToken: Token;
   #isCreatedInDb: boolean;
 
   /* CONSTRUCTORS  */
@@ -121,20 +117,20 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     apiCallParam: ApiCallParam,
     createdTime?: bigint
   ): BridgeTxn {
-    const { from, to, amount, txnId } = apiCallParam;
+    const { from_addr, from_token, to_addr, to_token, amount, txn_id } =
+      apiCallParam;
     const bridgeTxn = new BridgeTxn({
       dbId: undefined,
-      txnType: apiCallParam.type,
       fixedFeeAtom: undefined,
-      fromAddr: from,
+      fromAddr: from_addr,
       fromAmountAtom: toGoNearAtom(amount),
-      fromBlockchainName: undefined,
-      fromTxnId: txnId,
+      fromTokenId: from_token,
+      fromTxnId: txn_id,
       marginFeeAtom: undefined,
       createdTime,
-      toAddr: to,
+      toAddr: to_addr,
       toAmountAtom: undefined,
-      toBlockchainName: undefined,
+      toTokenId: to_token,
       toTxnId: undefined,
       txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
     });
@@ -152,17 +148,16 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     const _dbItem = parseDbItem(dbItem);
     const bridgeTxn: BridgeTxn = new BridgeTxn({
       dbId: _dbItem.db_id,
-      txnType: _dbItem.txn_type,
       fixedFeeAtom: BigInt(_dbItem.fixed_fee_atom),
       fromAddr: _dbItem.from_addr,
       fromAmountAtom: BigInt(_dbItem.from_amount_atom),
-      fromBlockchainName: undefined,
+      fromTokenId: _dbItem.from_token_id,
       fromTxnId: _dbItem.from_txn_id,
       marginFeeAtom: BigInt(_dbItem.margin_fee_atom),
       createdTime: BigInt(_dbItem.created_time),
       toAddr: _dbItem.to_addr,
       toAmountAtom: BigInt(_dbItem.to_amount_atom),
-      toBlockchainName: undefined,
+      toTokenId: _dbItem.to_token_id,
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
     });
@@ -176,17 +171,16 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
         typeof safeObj.dbId === 'number'
           ? safeObj.dbId
           : parseInt(safeObj.dbId),
-      txnType: safeObj.txnType,
       fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
       fromAddr: safeObj.fromAddr,
       fromAmountAtom: BigInt(safeObj.fromAmountAtom),
-      fromBlockchainName: safeObj.fromBlockchainName,
+      fromTokenId: safeObj.fromTokenId,
       fromTxnId: safeObj.fromTxnId,
       marginFeeAtom: BigInt(safeObj.marginFeeAtom),
       createdTime: BigInt(safeObj.createdTime),
       toAddr: safeObj.toAddr,
       toAmountAtom: BigInt(safeObj.toAmountAtom),
-      toBlockchainName: safeObj.toBlockchainName,
+      toTokenId: safeObj.toTokenId,
       toTxnId: safeObj.toTxnId,
       txnStatus: safeObj.txnStatus,
     });
@@ -199,26 +193,23 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     createdTime,
     fromAddr,
     fromAmountAtom,
-    fromBlockchainName,
+    fromTokenId,
     fromTxnId,
     toAddr,
     toAmountAtom,
-    toBlockchainName,
+    toTokenId,
     txnStatus,
-    txnType,
     toTxnId,
     dbId,
-  }: CriticalBridgeTxnObj) {
+  }: BridgeTxnObjBase) {
     this.#isCreatedInDb = false;
 
-    this.txnType = txnType;
-    // TODO: shouldn't infer here
-    ({
-      fromBlockchainName: this.fromBlockchainName,
-      toBlockchainName: this.toBlockchainName,
-    } = this._inferBlockchainNames());
-    this.fromBlockchainName = fromBlockchainName ?? this.fromBlockchainName;
-    this.toBlockchainName = toBlockchainName ?? this.toBlockchainName;
+    this.fromTokenId = fromTokenId;
+    this.toTokenId = toTokenId;
+    this.#fromToken = TOKEN_TABLE[this.fromTokenId];
+    this.#toToken = TOKEN_TABLE[this.toTokenId];
+    this.#fromBlockchain = this._getBlockchain(this.#fromToken.implBlockchain);
+    this.#toBlockchain = this._getBlockchain(this.#toToken.implBlockchain);
 
     this.fromTxnId = fromTxnId;
     this.fromAmountAtom = fromAmountAtom;
@@ -227,7 +218,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     this.toAddr = toAddr;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
-    this._hookBlockchain();
 
     try {
       // Below will be overwritten if instantiated with value.
@@ -272,7 +262,7 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
 
     logger.info(
       literals.MAKING_TXN(
-        `${this.fromBlockchainName}->${this.toBlockchainName}`,
+        `${this.#fromBlockchain.name}->${this.#toBlockchain.name}`,
         this.fromAmountAtom,
         this.fromAddr,
         this.toAddr
@@ -415,19 +405,15 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     return (
       this.fromAddr === other.fromAddr &&
       this.fromAmountAtom.toString() === other.fromAmountAtom.toString() &&
-      this.fromBlockchainName === other.fromBlockchainName &&
+      this.fromTokenId === other.fromTokenId &&
       this.fromTxnId === other.fromTxnId &&
       this.toAddr === other.toAddr &&
-      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.toAmountAtom.toString() === other.toAmountAtom.toString() &&
-      this.toBlockchainName === other.toBlockchainName &&
+      this.toTokenId === other.toTokenId &&
       this.toTxnId === other.toTxnId &&
       this.txnStatus === other.txnStatus &&
-      this.txnType === other.txnType &&
       this.dbId === other.dbId &&
-      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.fixedFeeAtom.toString() === other.fixedFeeAtom.toString() &&
-      //eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.marginFeeAtom.toString() === other.marginFeeAtom.toString() &&
       this.createdTime.toString() === other.createdTime.toString()
     );
@@ -443,7 +429,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObj {
-    // this._initialize({ notCreateInDb: true }); // this makes all fields non-null
     const bridgeTxnObject: BridgeTxnObj = {
       dbId: this.dbId,
       fixedFeeAtom: this.fixedFeeAtom,
@@ -451,14 +436,13 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
       createdTime: this.createdTime,
       fromAddr: this.fromAddr,
       fromAmountAtom: this.fromAmountAtom,
-      fromBlockchainName: this.fromBlockchainName,
+      fromTokenId: this.fromTokenId,
       fromTxnId: this.fromTxnId,
       toAddr: this.toAddr,
       toAmountAtom: this.toAmountAtom,
-      toBlockchainName: this.toBlockchainName,
+      toTokenId: this.toTokenId,
       toTxnId: this.toTxnId,
       txnStatus: this.txnStatus,
-      txnType: this.txnType,
     };
     return bridgeTxnObject;
     // return Object.assign(bridgeTxnObject, this);
@@ -476,6 +460,22 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
   /* GETTERS */
 
   /**
+   * UID {DbId}.{TxnId}
+   */
+  get uid(): string {
+    if (this.dbId === undefined) {
+      this.dbId = this.getDbId();
+    }
+    return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
+  }
+  // get fromBlockchainName(): BlockchainName {
+  //   return this.#fromBlockchain.name;
+  // }
+  // get toBlockchainName(): BlockchainName {
+  //   return this.#toBlockchain.name;
+  // }
+
+  /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
@@ -491,16 +491,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
     } else {
       return this.dbId;
     }
-  }
-
-  /**
-   * UID {DbId}.{TxnId}
-   */
-  get uid(): string {
-    if (this.dbId === undefined) {
-      this.dbId = this.getDbId();
-    }
-    return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
 
   /**  PRIVATE METHODS - CLASS INIT  **/
@@ -536,44 +526,6 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
   }
 
   /**
-   * Infer the blockchain names of the {@link BridgeTxn}.
-   * This is one step of the initialization.
-   *
-   * @deprecated this should be done on receiving the request, not here.
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn} is invalid
-   * @returns {{fromBlockchain: BlockchainName; toBlockchain: BlockchainName;}} the blockchain names
-   */
-  private _inferBlockchainNames(): {
-    fromBlockchainName: BlockchainName;
-    toBlockchainName: BlockchainName;
-  } {
-    // TODO: deprecate this
-
-    let fromBlockchain: BlockchainName;
-    let toBlockchain: BlockchainName;
-    if (this.txnType === TxnType.MINT) {
-      fromBlockchain = BlockchainName.NEAR;
-      toBlockchain = BlockchainName.ALGO;
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (this.txnType === TxnType.BURN) {
-      fromBlockchain = BlockchainName.ALGO;
-      toBlockchain = BlockchainName.NEAR;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: this.txnType,
-      });
-    }
-    this.fromBlockchainName = fromBlockchain;
-    this.toBlockchainName = toBlockchain;
-    return {
-      fromBlockchainName: fromBlockchain,
-      toBlockchainName: toBlockchain,
-    };
-  }
-
-  /**
    * Hook the blockchains of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
@@ -581,50 +533,17 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
    * @returns void
    */
-  private _hookBlockchain(): void {
-    this._hookFromBlockchain();
-    this._hookToBlockchain();
-  }
-  /**
-   * Hook the fromBlockchain of the {@link BridgeTxn}.
-   * Only used in {@link _hookBlockchain}
-   *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the blockchain name is unknown
-   * @returns void
-   */
-  private _hookFromBlockchain(): void {
-    if (this.fromBlockchainName === BlockchainName.NEAR) {
-      this.#fromBlockchain = nearBlockchain;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (this.fromBlockchainName === BlockchainName.ALGO) {
-      this.#fromBlockchain = algoBlockchain;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        fromBlockchain: this.fromBlockchainName,
-        at: 'BridgeTxn._hookBlockchain',
-      });
-    }
-  }
-  /**
-   * Hook the toBlockchain of the {@link BridgeTxn}.
-   * Only used in {@link _hookBlockchain}
-   *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
-   * @returns void
-   */
-  private _hookToBlockchain(): void {
-    if (this.toBlockchainName === BlockchainName.NEAR) {
-      this.#toBlockchain = nearBlockchain;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (this.toBlockchainName === BlockchainName.ALGO) {
-      this.#toBlockchain = algoBlockchain;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-        toBlockchain: this.toBlockchainName,
-        at: 'BridgeTxn._hookBlockchain',
-      });
+  private _getBlockchain(blockchainName: BlockchainName): Blockchain {
+    switch (blockchainName) {
+      case BlockchainName.ALGO:
+        return algoBlockchain;
+      case BlockchainName.NEAR:
+        return nearBlockchain;
+      default:
+        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
+          blockchainName,
+          at: 'BridgeTxn._getBlockchain',
+        });
     }
   }
 
@@ -636,23 +555,12 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @returns {bigint} the fixedFeeAtom
    */
   private _readFixedFeeAtom(): bigint {
-    let fixedFee: bigint;
-    if (this.txnType === TxnType.MINT) {
-      fixedFee = toGoNearAtom(ENV.BURN_FIX_FEE);
-    } else if (
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      this.txnType === TxnType.BURN
-    ) {
-      fixedFee = toGoNearAtom(ENV.MINT_FIX_FEE);
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: this.txnType,
-      });
-    }
-
-    this.fixedFeeAtom = fixedFee;
-    return fixedFee;
+    const fixedFee: number = getBridgeInfo(
+      this.fromTokenId,
+      this.toTokenId
+    ).fixedFee;
+    this.fixedFeeAtom = toGoNearAtom(fixedFee);
+    return this.fixedFeeAtom;
   }
 
   /**
@@ -665,20 +573,10 @@ class BridgeTxn implements CriticalBridgeTxnObj, BridgeTxnAction {
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
-    let marginBips: number;
-    if (this.txnType === TxnType.MINT) {
-      marginBips = ENV.MINT_MARGIN_FEE_BIPS;
-    } else if (
-      // for extendability, we can add more txn types here.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      this.txnType === TxnType.BURN
-    ) {
-      marginBips = ENV.BURN_MARGIN_FEE_BIPS;
-    } else {
-      throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-        txnType: this.txnType,
-      });
-    }
+    const marginBips: number = getBridgeInfo(
+      this.fromTokenId,
+      this.toTokenId
+    ).marginBips;
 
     const marginFee: bigint = // TODO: supposing no bigint overflow
       this.fromAmountAtom -

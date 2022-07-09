@@ -1,13 +1,13 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { BridgeTxn } from '../../bridge';
 import { WELCOME_JSON } from '../../api';
 import { PostReturn } from '../../api/algorand-near';
-import { MintApiParam, parseTxnUid } from '../../utils/type';
+import { ApiCallParam, parseTxnUid } from '../../utils/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,
   EXAMPLE_TXN_FROM_DB,
 } from '../test-helper/test-examples';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
+import { BridgeTxn } from '../../bridge';
 
 describe('root API (GET)', () => {
   it('hosted API root server returns welcome JSON on GET', async () => {
@@ -40,7 +40,7 @@ describe('/algorand-near API (GET)', () => {
     expect(res.statusText).toBe('OK');
   });
 
-  it('/algorand-near returns welcome JSON on VALID-param-ed GET', async () => {
+  it('/algorand-near returns result JSON on VALID-param-ed GET', async () => {
     const res = await axios.get(
       'http://localhost:4190/algorand-near?uid=' +
         BridgeTxn.fromObject(EXAMPLE_TXN_FROM_DB).uid
@@ -71,14 +71,14 @@ describe('/algorand-near API (POST)', () => {
     const amount = '1.2345678901';
 
     // simulate frontend:  make NEAR mint txn
-    const mintApiParam: MintApiParam = await simulatedFrontendNearToGoNear(
+    const apiCallParam: ApiCallParam = await simulatedFrontendNearToGoNear(
       amount
     );
 
     // same API call as frontend
     const res = await axios
       .post('http://localhost:4190/algorand-near', {
-        ...mintApiParam,
+        ...apiCallParam,
       })
       .catch((err: AxiosError) => {
         if (axios.isAxiosError(err)) {
@@ -136,7 +136,6 @@ describe('/algorand-near API (POST)', () => {
   //   const algoTxnId = burnResponse;
 
   //   const apiCallParam: ApiCallParam = {
-  //     type: TxnType.BURN,
   //     from: ENV.ALGO_EXAMPL_ADDR,
   //     to: ENV.NEAR_EXAMPL_ADDR,
   //     amount,

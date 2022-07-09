@@ -13,6 +13,7 @@ import { literals } from './literals';
 
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
+import { NodeEnvEnum } from '..';
 
 /**
  * Load and Parse .env file.
@@ -29,8 +30,10 @@ function parseDotEnv(): dpv.ParsedVariables {
   // ts-node compatibility
   // TODO: not sure if this is working!
   // TODO: this is not working with jest, got TS_NODE_DEV undefined.
-  process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
-  process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
+  // process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
+  // process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
+  // TODO: next line returns undefined
+  // console.warn('process.env.TS_NODE_DEV : ', process.env.TS_NODE_DEV);
 
   return dpv(env.parsed, {
     assignToProcessEnv: true,
@@ -64,7 +67,8 @@ const default_ENV = {
   PGPASSWORD: literals.NOT_LOADED_FROM_ENV_STR,
   PGPORT: literals.NOT_LOADED_FROM_ENV_NUM,
   // default
-  TS_NODE_DEV: 'test',
+  NODE_ENV: 'development',
+  TS_NODE_DEV: 'development',
 };
 
 const secret_ENV = {
@@ -88,7 +92,7 @@ const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
 
 const loadDotEnv = ({ isTest } = { isTest: false }) => {
   if (isTest) {
-    ENV.TS_NODE_DEV = 'test';
+    ENV.NODE_ENV = NodeEnvEnum.TEST;
   }
   Object.freeze(ENV);
   return ENV;

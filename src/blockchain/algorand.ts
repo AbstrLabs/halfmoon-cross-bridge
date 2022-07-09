@@ -2,6 +2,7 @@
  * Algorand functionalities wrapped up with our centralized account
  *
  * @throws {BridgeError} - {@link BridgeError.ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} - if network is not supported
+ * @todo: master acc should be dynamic, or create a new instance per unidirectional bridge.
  */
 
 export { algoBlockchain, type AlgorandBlockchain, testAlgo };
