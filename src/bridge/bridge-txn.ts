@@ -95,7 +95,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnComment?: string = undefined;
+  txnComment: string | null = null;
   #db = db;
   #fromBlockchain: Blockchain;
   #fromToken: Token;
@@ -132,7 +132,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       toAmountAtom: undefined,
       toTokenId: to_token,
       toTxnId: undefined,
-      txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
+      txnStatus: undefined,
     });
     return bridgeTxn;
   }

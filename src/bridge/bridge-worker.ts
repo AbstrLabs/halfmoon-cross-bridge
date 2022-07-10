@@ -25,25 +25,27 @@ type FetchActionType = typeof FetchAction[keyof typeof FetchAction];
 
 class BridgeWorker {
   #queue: Map<TxnUid, BridgeTxn>;
-  #lastFetchedTime: Date;
+  #lastFetchingTime: Date;
   database: Database;
 
   constructor(database = db) {
     this.#queue = new Map();
-    this.#lastFetchedTime = new Date(0);
+    this.#lastFetchingTime = new Date(0);
     this.database = database;
   }
 
   public async run() {
+    logger.info('[BW ]: Start running.');
     await this.fetchTasksFromDb(LOAD);
     // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
     while (true) {
-      await this.fetchTasksFromDb(UPDATE);
       await pause(UPDATE_INTERVAL_MS);
       while (this.size > 0) {
         await this.handleOneTask();
         await pause(EXECUTE_INTERVAL_MS);
       }
+      logger.info(`[BW ]: No task left, fetching new tasks.`);
+      await this.fetchTasksFromDb(UPDATE);
     }
   }
 
@@ -53,15 +55,16 @@ class BridgeWorker {
    * @param  {FetchActionType} fetchAction
    * @returns {Promise<void>}
    */
-  async fetchTasksFromDb(fetchAction: FetchActionType) {
+  async fetchTasksFromDb(fetchAction: FetchActionType): Promise<void> {
     // TODO: merge with updateTasksFromDb
     // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
-    this.#lastFetchedTime = new Date(Date.now());
+    this.#lastFetchingTime = new Date(Date.now());
     for (const item of allDbItems) {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
       // later this won't be needed since all finished items will be removed from that table.
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
+        logger.debug(`[BW ]: Skipping finished task ${bridgeTxn.uid}`);
         continue;
       }
       logger.silly(
@@ -105,8 +108,8 @@ class BridgeWorker {
   get value() {
     return this.#queue;
   }
-  get lastFetchedTime(): Date {
-    return this.#lastFetchedTime;
+  get lastFetchingTime(): Date {
+    return this.#lastFetchingTime;
   }
 
   // rename
