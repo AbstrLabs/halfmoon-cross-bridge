@@ -10,7 +10,7 @@ export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 import * as algosdk from 'algosdk';
 
 import { AlgoAcc, AlgoAddr, AlgoTxnId } from '.';
-import { Algodv2 as AlgodClient, Indexer, SuggestedParams } from 'algosdk';
+import { Algodv2 as AlgodClient, Indexer } from 'algosdk';
 import {
   AsaConfig,
   type NoParamAsaConfig,
@@ -57,7 +57,6 @@ interface BridgeConfig {
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
   public readonly indexer: Indexer;
-  public readonly defaultTxnParamsPromise: Promise<SuggestedParams>;
   public readonly name = BlockchainName.ALGO;
   public readonly centralizedAssetId: number;
   public readonly centralizedAddr: AlgoAddr;
@@ -90,8 +89,6 @@ class AlgorandBlockchain extends Blockchain {
       indexerParam.server,
       indexerParam.port
     );
-
-    this.defaultTxnParamsPromise = this.client.getTransactionParams().do();
   }
 
   /**
@@ -280,7 +277,7 @@ class AlgorandBlockchain extends Blockchain {
     senderAccount: AlgoAcc,
     asaId: number
   ): Promise<AlgoTxnId> {
-    const params = await this.defaultTxnParamsPromise;
+    const params = await this.client.getTransactionParams().do();
     // comment out the next two lines to use suggested fee
     // params.fee = algosdk.ALGORAND_MIN_TXN_FEE;
     // params.flatFee = true;
@@ -396,7 +393,7 @@ class AlgorandBlockchain extends Blockchain {
   ): Promise<NoParamAsaConfig> {
     const asaConfigWithSuggestedParams: AsaConfig = {
       ...noParamAsaConfig,
-      suggestedParams: await this.defaultTxnParamsPromise,
+      suggestedParams: await this.client.getTransactionParams().do(),
     };
     const createdTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
       asaConfigWithSuggestedParams
