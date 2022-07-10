@@ -243,16 +243,23 @@ class AlgorandBlockchain extends Blockchain {
     algoTxnParam: AlgoTxnParam
     // txnId, fromAddr are never used
   ): Promise<AlgoTxnId> {
-    return await this._makeAsaTxn(
-      {
-        toAddr: algoTxnParam.toAddr,
-        fromAddr: this.centralizedAcc.addr,
-        atomAmount: algoTxnParam.atomAmount,
-        txnId: literals.UNUSED,
-      },
-      this.centralizedAcc,
-      this.centralizedAssetId
-    );
+    try {
+      const algoTxnId = await this._makeAsaTxn(
+        {
+          toAddr: algoTxnParam.toAddr,
+          fromAddr: this.centralizedAcc.addr,
+          atomAmount: algoTxnParam.atomAmount,
+          txnId: literals.UNUSED,
+        },
+        this.centralizedAcc,
+        this.centralizedAssetId
+      );
+      return algoTxnId;
+    } catch (e) {
+      logger.error('error by algorand blockchain:');
+      logger.error(e);
+      throw e;
+    }
   }
 
   /**
