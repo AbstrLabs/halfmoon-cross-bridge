@@ -134,6 +134,8 @@ const BridgeTxnStatusTree = {
     previous: BridgeTxnStatusEnum.DONE_INCOMING,
     actionName: BridgeTxnActionName.verifyOutgoingTxn,
   }),
+  // TODO: should move DONE_OUTGOING here and add a DONE_VERIFY status
+  // TODO: +Currently using DOING_OUTGOING as DONE_OUTGOING
   [BridgeTxnStatusEnum.ERR_MAKE_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
     previous: BridgeTxnStatusEnum.DOING_OUTGOING,

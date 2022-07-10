@@ -292,7 +292,9 @@ class Database {
       params,
     }) as { db_id: DbId };
 
-    logger.debug(`[DB ]: Updated bridge txn with id ${bridgeTxn.dbId}`);
+    logger.debug(
+      `[DB ]: Updated bridge txn with dbId ${bridgeTxn.dbId} to ${bridgeTxn.txnStatus}`
+    );
     return parseDbId(result.db_id);
   }
 

@@ -66,7 +66,8 @@ class BridgeWorker {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
       // later this won't be needed since all finished items will be removed from that table.
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
-        logger.debug(`[BW ]: Skipping finished task ${bridgeTxn.uid}`);
+        logger.silly(`[BW ]: Skipping finished task ${bridgeTxn.uid}`);
+        // TODO: change this back to debug, and filter in db.
         continue;
       }
       logger.silly(
@@ -187,6 +188,7 @@ class BridgeWorker {
         );
         try {
           await bridgeTxn[actionName]();
+          await this._finishTask(bridgeTxn);
         } catch (e) {
           logger.error(
             `[BW ]: Error executing ${actionName} on ${bridgeTxn.uid}.`
