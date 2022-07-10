@@ -48,7 +48,7 @@ describe('Txn should', () => {
     }).not.toThrow(); // starts with 2 digits
 
     // below can be a `while`, but we only running for 20 seconds.
-    await pause(20_000);
+    await pause(25_000);
     const check1Res = await axios.get(
       `http://localhost:4190/algorand-near?uid=${createResData.uid}`
     );
@@ -58,7 +58,7 @@ describe('Txn should', () => {
       expect(check1ResData.txnStatus).toBe('DONE_OUTGOING');
       return;
     } else {
-      await pause(10_000);
+      await pause(15_000);
       const check2Res = await axios.get(
         `http://localhost:4190/algorand-near?uid=${createResData.uid}`
       );
@@ -117,7 +117,7 @@ describe('Txn should', () => {
     }).not.toThrow(); // starts with 2 digits
 
     // below can be a `while`, but we only running for 20 seconds.
-    await pause(20_000);
+    await pause(25_000);
     const check1Res = await axios.get(
       `http://localhost:4190/algorand-near?uid=${createResData.uid}`
     );
@@ -127,7 +127,7 @@ describe('Txn should', () => {
       expect(check1ResData.txnStatus).toBe('DONE_OUTGOING');
       return;
     } else {
-      await pause(10_000);
+      await pause(15_000);
       const check2Res = await axios.get(
         `http://localhost:4190/algorand-near?uid=${createResData.uid}`
       );
