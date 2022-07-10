@@ -339,7 +339,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     let outgoingTxnId: TxnId;
     try {
-      await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
@@ -359,6 +358,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         err,
       });
     }
+    // FIX: using DOING_OUTGOING as DONE_OUTGOING now
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
     await this._updateToTxnId(outgoingTxnId);
   }
 
@@ -776,6 +777,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
    *
+   * @todo: make this a decorator.
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
    * @param  {BridgeTxnStatusEnum} expected
