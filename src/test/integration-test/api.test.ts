@@ -102,6 +102,7 @@ describe('/algorand-near API (POST)', () => {
       parseTxnUid(data.uid);
     }).not.toThrow(); // starts with 2 digits
   });
+  // rejects something
 
   /* TODO: More tests:
    * - wrong amount,
@@ -120,28 +121,4 @@ describe('/algorand-near API (POST)', () => {
   //   expect(res.ok()).toBeTruthy();
   //   console.dir(await res.json());
   // });
-
-  // BURN API TEST
-
-  //   'burn 1.2345678901 goNEAR from ALGO to NEAR',
-  // async () => {
-  //   // config
-  //   const amount = '1.2345678901';
-
-  //   // simulate frontend: make NEAR txn
-  //   const burnResponse = await testAlgo.sendFromExampleToMaster(
-  //     toGoNearAtom(amount)
-  //   );
-  //   // manually checked the amount is correct.
-  //   const algoTxnId = burnResponse;
-
-  //   const apiCallParam: ApiCallParam = {
-  //     from: ENV.ALGO_EXAMPL_ADDR,
-  //     to: ENV.NEAR_EXAMPL_ADDR,
-  //     amount,
-  //     txnId: algoTxnId,
-  //   };
-
-  //   // call API
-  //   const bridgeTxn = await _create(apiCallParam);
 });
