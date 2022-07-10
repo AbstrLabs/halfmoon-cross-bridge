@@ -1,5 +1,7 @@
 /**
  * A worker to handle transactions with a queue.
+ *
+ * @todo pass UID instead of BridgeTxn across this singleton.
  */
 export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
@@ -151,6 +153,11 @@ class BridgeWorker {
     this.#queue.set(bridgeTxn.uid, bridgeTxn);
   }
 
+  /**
+   * @todo ref: pass UID here.
+   * @param bridgeTxn BridgeTxn
+   * @returns
+   */
   private async handleTask(bridgeTxn: BridgeTxn) {
     logger.info(
       `[BW ]: Handling task with uid, status: ${bridgeTxn.uid}, ${bridgeTxn.txnStatus}`
@@ -178,7 +185,16 @@ class BridgeWorker {
         logger.verbose(
           `[BW ]: Executing ${actionName} on ${bridgeTxn.uid} with status ${bridgeTxn.txnStatus}.`
         );
-        await bridgeTxn[actionName]();
+        try {
+          await bridgeTxn[actionName]();
+        } catch (e) {
+          logger.error(
+            `[BW ]: Error executing ${actionName} on ${bridgeTxn.uid}.`
+          );
+          logger.error(e);
+          await this._dropTask(bridgeTxn);
+          return;
+        }
       }
       return;
     }
