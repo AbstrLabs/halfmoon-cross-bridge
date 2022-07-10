@@ -1,12 +1,16 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { PostReturn } from '../../api/algorand-near';
+import { testAlgo } from '../../blockchain/algorand';
 import { BridgeTxnSafeObj } from '../../bridge';
+import { TokenId } from '../../bridge/token-table';
+import { ENV } from '../../utils/dotenv';
+import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
 import { ApiCallParam, parseTxnUid } from '../../utils/type';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 
-describe('Txn should ', () => {
-  it('finish MINT correctly', async () => {
+describe('Txn should', () => {
+  it('execute whole MINT correctly', async () => {
     // config
     const mintAmount = '1.2345678901';
 
@@ -35,6 +39,7 @@ describe('Txn should ', () => {
         throw err;
       });
 
+    // TODO: REF-POST-START
     expect(createRes.status).toBe(200);
     expect(createRes.statusText).toBe('OK');
     const createResData = createRes.data as PostReturn;
@@ -61,42 +66,30 @@ describe('Txn should ', () => {
       expect(check2ResData.txnStatus).toBe('DONE_OUTGOING');
       return;
     }
+    // TODO: REF-POST-END
   }, 60_000);
-  it('finish BURN correctly', async () => {
-    // BURN API TEST
-
-    //   'burn 1.2345678901 goNEAR from ALGO to NEAR',
-    // async () => {
-    //   // config
-    //   const amount = '1.2345678901';
-
-    //   // simulate frontend: make NEAR txn
-    //   const burnResponse = await testAlgo.sendFromExampleToMaster(
-    //     toGoNearAtom(amount)
-    //   );
-    //   // manually checked the amount is correct.
-    //   const algoTxnId = burnResponse;
-
-    //   const apiCallParam: ApiCallParam = {
-    //     from: ENV.ALGO_EXAMPL_ADDR,
-    //     to: ENV.NEAR_EXAMPL_ADDR,
-    //     amount,
-    //     txnId: algoTxnId,
-    //   };
-
-    //   // call API
-    //   const bridgeTxn = await _create(apiCallParam);
-
+  it('execute whole BURN correctly', async () => {
     // config
-    const mintAmount = '1.2345678901';
+    const burnAmount = '1.2345678901';
 
-    // simulate frontend:  make NEAR mint txn
-    const apiCallParam: ApiCallParam = await simulatedFrontendNearToGoNear(
-      mintAmount
+    // simulate frontend:  make NEAR BURN txn
+
+    const burnResponse = await testAlgo.sendFromExampleToMaster(
+      toGoNearAtom(burnAmount)
     );
+    const algoBurnTxnId = burnResponse;
+
+    const apiCallParam: ApiCallParam = {
+      from_addr: ENV.ALGO_EXAMPL_ADDR,
+      to_addr: ENV.NEAR_EXAMPL_ADDR,
+      amount: burnAmount,
+      from_token: TokenId.goNEAR,
+      to_token: TokenId.NEAR,
+      txn_id: algoBurnTxnId,
+    };
 
     // same API call as frontend
-    const res = await axios
+    const createRes = await axios
       .post('http://localhost:4190/algorand-near', {
         ...apiCallParam,
       })
@@ -115,11 +108,33 @@ describe('Txn should ', () => {
         throw err;
       });
 
-    expect(res.status).toBe(200);
-    expect(res.statusText).toBe('OK');
-    const data = res.data as PostReturn;
+    // TODO: REF-POST-START
+    expect(createRes.status).toBe(200);
+    expect(createRes.statusText).toBe('OK');
+    const createResData = createRes.data as PostReturn;
     expect(() => {
-      parseTxnUid(data.uid);
+      parseTxnUid(createResData.uid);
     }).not.toThrow(); // starts with 2 digits
-  });
+
+    // below can be a `while`, but we only running for 20 seconds.
+    await pause(20_000);
+    const check1Res = await axios.get(
+      `http://localhost:4190/algorand-near?uid=${createResData.uid}`
+    );
+    const check1ResData = check1Res.data as BridgeTxnSafeObj;
+    expect(check1ResData.txnStatus).not.toBe('DONE_INITIALIZE');
+    if (check1ResData.txnStatus === 'DONE_OUTGOING') {
+      expect(check1ResData.txnStatus).toBe('DONE_OUTGOING');
+      return;
+    } else {
+      await pause(10_000);
+      const check2Res = await axios.get(
+        `http://localhost:4190/algorand-near?uid=${createResData.uid}`
+      );
+      const check2ResData = check2Res.data as BridgeTxnSafeObj;
+      expect(check2ResData.txnStatus).toBe('DONE_OUTGOING');
+      return;
+    }
+    // TODO: REF-POST-END
+  }, 60_000);
 });
