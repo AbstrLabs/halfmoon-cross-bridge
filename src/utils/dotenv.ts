@@ -94,6 +94,9 @@ const loadDotEnv = ({ isTest } = { isTest: false }) => {
   if (isTest) {
     ENV.NODE_ENV = NodeEnvEnum.TEST;
   }
+  if (process.env.TS_NODE_DEV) {
+    ENV.NODE_ENV = 'development';
+  }
   Object.freeze(ENV);
   return ENV;
 };

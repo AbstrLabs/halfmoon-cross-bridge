@@ -262,7 +262,7 @@ class Database {
             AND created_time=$11
             AND fixed_fee_atom=$12
             AND margin_fee_atom=$13
-            AND txn_comment=$14
+            -- AND txn_comment=$14
           )
       RETURNING db_id;
     `;
@@ -280,16 +280,21 @@ class Database {
       bridgeTxn.createdTime,
       bridgeTxn.fixedFeeAtom,
       bridgeTxn.marginFeeAtom,
-      bridgeTxn.txnComment,
+      // bridgeTxn.txnComment,
     ];
     const queryResult = await this.query(query, params);
 
     const result = this._verifyResultUniqueness(queryResult, {
       bridgeTxn,
       at: 'db.updateTxn',
+      queryResult,
+      query,
+      params,
     }) as { db_id: DbId };
 
-    logger.debug(`[DB ]: Updated bridge txn with id ${bridgeTxn.dbId}`);
+    logger.debug(
+      `[DB ]: Updated bridge txn with dbId ${bridgeTxn.dbId} to ${bridgeTxn.txnStatus}`
+    );
     return parseDbId(result.db_id);
   }
 

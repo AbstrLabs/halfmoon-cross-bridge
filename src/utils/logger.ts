@@ -11,7 +11,17 @@ import { createLogger, format, transports } from 'winston';
 // Calling `ENV` or `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
 // Because of circular reference: `logger` is imported in `errors` which is imported in `dotenv.ts` which is imported here.
 import { config } from 'dotenv';
+import { NodeEnvEnum } from '..';
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
+
+const level =
+  process.env.TS_NODE_DEV || process.env.NODE_ENV === NodeEnvEnum.DEVELOPMENT
+    ? 'debug'
+    : process.env.NODE_ENV === NodeEnvEnum.TEST
+    ? 'verbose'
+    : process.env.NODE_ENV === NodeEnvEnum.PRODUCTION
+    ? process.env.LOGGER_LEVEL
+    : 'info'; // should be the only usage of nude `process.env`, for cir
 
 config();
 
@@ -39,7 +49,7 @@ const logger = createLogger({
     }),
     // new transports.File({ filename: 'combined.log' }),
   ],
-  level: process.env.LOGGER_LEVEL, // should be the only usage of nude `process.env`, for cir
+  level,
   format: combine(
     errors({ stack: true }), // <-- use errors format
     timestamp(),

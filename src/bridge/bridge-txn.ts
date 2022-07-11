@@ -95,7 +95,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   toTokenId: TokenId;
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
-  txnComment?: string = undefined;
+  txnComment: string | null = null;
   #db = db;
   #fromBlockchain: Blockchain;
   #fromToken: Token;
@@ -132,7 +132,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       toAmountAtom: undefined,
       toTokenId: to_token,
       toTxnId: undefined,
-      txnStatus: BridgeTxnStatusEnum.DOING_INITIALIZE,
+      txnStatus: undefined,
     });
     return bridgeTxn;
   }
@@ -339,7 +339,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     let outgoingTxnId: TxnId;
     try {
-      await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
@@ -359,6 +358,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         err,
       });
     }
+    // FIX: using DOING_OUTGOING as DONE_OUTGOING now
+    await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_OUTGOING);
     await this._updateToTxnId(outgoingTxnId);
   }
 
@@ -776,6 +777,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
    *
+   * @todo: make this a decorator.
    * @private
    * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
    * @param  {BridgeTxnStatusEnum} expected
