@@ -23,7 +23,7 @@ import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
-import { TokenId } from '../utils/type/shared-types';
+import { TokenId } from '../utils/type/shared-types/token';
 
 const algorandNear = express.Router();
 

@@ -10,7 +10,7 @@ export type { Token };
 export { TOKEN_TABLE };
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
-import { TokenId } from '../utils/type/shared-types';
+import { TokenId } from '../utils/type/shared-types/token';
 import { Addr } from '../utils/type/type';
 
 interface TokenBase {

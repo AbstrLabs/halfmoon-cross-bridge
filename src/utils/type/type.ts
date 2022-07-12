@@ -11,7 +11,7 @@ export {
   type AlgoAssetTransferTxnOutcome,
   type AlgoTxnId,
   type AlgoTxnParam,
-  type ApiCallParam,
+  type ApiAmount,
   type Biginter,
   type DbId,
   type DbItem,
@@ -31,12 +31,14 @@ export {
   fullyParseApiParam,
 };
 
+export { ApiCallParam } from './shared-types/api';
 import { z } from 'zod';
 import { BridgeTxnStatusEnum } from '../..';
 import { TOKEN_TABLE } from '../../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from '../errors';
 import { logger } from '../logger';
-import { TokenId } from './shared-types';
+import { ApiCallParam } from './shared-types/api';
+import { TokenId } from './shared-types/token';
 
 /* NON-ZOD TYPES */
 
@@ -83,20 +85,6 @@ function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
 // Same order as below zTypeName part
 
 // API call param
-
-// new API Call Param, not in docs yet.
-// removed "type", its unclear when we have more than one token.
-// using snake_case instead of camelCase or spinal-case because youtube uses it.
-// this interface is for displaying purpose only, we may not use it in the code.
-// TODO: Zod z.infer<typeof zApiCallParam>;
-interface ApiCallParam {
-  amount: ApiAmount;
-  txn_id: TxnId;
-  from_addr: Addr;
-  from_token: TokenId; // token_id
-  to_addr: Addr;
-  to_token: TokenId; // token_id
-}
 
 type ApiAmount = z.infer<typeof zApiAmount>;
 // blockchain specific
