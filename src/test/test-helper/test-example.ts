@@ -1,10 +1,9 @@
 // Used across many tests
 export { exampleBridgeTxn };
 
-import { BridgeTxnStatusEnum } from '../..';
-
 import { BridgeTxn } from '../../bridge';
 import { TokenId } from '../../utils/type/shared-types/token';
+import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
 
 const FAKE_TXN_ID = 'some_fake_txn_id';
 

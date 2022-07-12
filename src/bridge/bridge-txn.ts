@@ -1,12 +1,7 @@
 /**
  * @todo - maybe split bridge and bridge-txn
  */
-export {
-  type BridgeTxnObj,
-  type BridgeTxnSafeObj,
-  BridgeTxn,
-  BridgeTxnActionName,
-};
+export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
 
 import {
   ApiCallParam,
@@ -17,7 +12,7 @@ import {
   parseTxnUid,
 } from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain';
-import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
+import { BlockchainName, BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { algoBlockchain } from '../blockchain/algorand';
@@ -29,6 +24,7 @@ import { nearBlockchain } from '../blockchain/near';
 import { Token, TOKEN_TABLE } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../utils/type/shared-types/token';
+import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 
 interface BridgeTxnObjBase {
   dbId?: number;

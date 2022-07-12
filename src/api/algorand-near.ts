@@ -15,7 +15,6 @@ import { parseTxnUid } from '../utils/type/type';
 import { ConfirmOutcome } from '../blockchain';
 import express, { Request, Response } from 'express';
 
-import { BridgeTxnStatusEnum } from '..';
 import { BridgeTxn } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { logger } from '../utils/logger';
@@ -24,6 +23,7 @@ import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
 import { TokenId } from '../utils/type/shared-types/token';
+import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 
 const algorandNear = express.Router();
 
