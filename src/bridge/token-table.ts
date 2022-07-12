@@ -11,7 +11,7 @@ export { TOKEN_TABLE };
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { TokenId } from '../utils/shared-types';
-import { Addr } from '../utils/type';
+import { Addr } from '../utils/type/type';
 
 interface TokenBase {
   tokenId: TokenId; // our way to call it, usually same as tokenName

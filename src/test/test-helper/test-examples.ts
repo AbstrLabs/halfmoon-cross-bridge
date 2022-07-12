@@ -11,7 +11,7 @@ import { BridgeTxnStatusEnum } from '../..';
 import { BridgeTxn } from '../../bridge';
 import { ENV } from '../../utils/dotenv';
 import { TokenId } from '../../utils/shared-types';
-import { type NewApiCallParam } from '../../utils/type';
+import { type NewApiCallParam } from '../../utils/type/type';
 
 const EXAMPLE_MALFORMED_UID_FROM_DB =
   '58.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';

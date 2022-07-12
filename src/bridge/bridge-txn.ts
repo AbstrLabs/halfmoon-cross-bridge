@@ -15,7 +15,7 @@ import {
   TxnId,
   parseDbItem,
   parseTxnUid,
-} from '../utils/type';
+} from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';

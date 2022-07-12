@@ -24,7 +24,7 @@ import { Blockchain } from '.';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
-import { NearTxnParam } from '../utils/type';
+import { NearTxnParam } from '../utils/type/type';
 
 interface ClientParam {
   networkId: string;

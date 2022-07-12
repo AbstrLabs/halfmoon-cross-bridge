@@ -6,7 +6,7 @@ import { ENV } from '../../utils/dotenv';
 import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
 import { TokenId } from '../../utils/shared-types';
-import { ApiCallParam, parseTxnUid } from '../../utils/type';
+import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 
 describe('Txn should', () => {

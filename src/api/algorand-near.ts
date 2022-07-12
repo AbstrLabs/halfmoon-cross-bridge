@@ -10,8 +10,8 @@ import {
   fullyParseApiParam,
   TxnId,
   TxnUid,
-} from '../utils/type';
-import { parseTxnUid } from '../utils/type';
+} from '../utils/type/type';
+import { parseTxnUid } from '../utils/type/type';
 import { ConfirmOutcome } from '../blockchain';
 import express, { Request, Response } from 'express';
 
@@ -23,7 +23,7 @@ import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
-import { TokenId } from '../bridge/token-table';
+import { TokenId } from '../utils/shared-types';
 
 const algorandNear = express.Router();
 

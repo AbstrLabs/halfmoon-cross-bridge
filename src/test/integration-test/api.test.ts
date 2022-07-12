@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { WELCOME_JSON } from '../../api';
 import { PostReturn } from '../../api/algorand-near';
-import { ApiCallParam, parseTxnUid } from '../../utils/type';
+import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,
   EXAMPLE_TXN_FROM_DB,

@@ -33,11 +33,11 @@ export {
 };
 
 import { z } from 'zod';
-import { BridgeTxnStatusEnum } from '..';
-import { TOKEN_TABLE } from '../bridge/token-table';
-import { BridgeError, ErrorTemplate, ERRORS } from './errors';
-import { logger } from './logger';
-import { TokenId } from './shared-types';
+import { BridgeTxnStatusEnum } from '../..';
+import { TOKEN_TABLE } from '../../bridge/token-table';
+import { BridgeError, ErrorTemplate, ERRORS } from '../errors';
+import { logger } from '../logger';
+import { TokenId } from '../shared-types';
 
 /* NON-ZOD TYPES */
 

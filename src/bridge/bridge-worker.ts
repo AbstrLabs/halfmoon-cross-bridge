@@ -13,7 +13,7 @@ import { emailServer } from '../api/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
-import { TxnUid } from '../utils/type';
+import { TxnUid } from '../utils/type/type';
 
 // TODO: add this to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;

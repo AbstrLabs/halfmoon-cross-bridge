@@ -27,7 +27,7 @@ import {
   AlgoAssetTransferTxnOutcome,
   AlgoTxnParam,
   parseBigInt,
-} from '../utils/type';
+} from '../utils/type/type';
 
 interface ClientParam {
   token: { 'X-API-Key': string };

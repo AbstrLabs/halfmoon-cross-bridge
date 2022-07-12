@@ -8,7 +8,7 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
 import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
-import { ApiCallParam } from '../../utils/type';
+import { ApiCallParam } from '../../utils/type/type';
 import { NearTxnId } from '../../blockchain';
 import { TokenId } from '../../utils/shared-types';
 
