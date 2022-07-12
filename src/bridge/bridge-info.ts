@@ -14,8 +14,8 @@ export { BRIDGE_INFO_MAP, getBridgeInfo };
 
 import { ENV } from '../utils/dotenv';
 import { BridgeError, ERRORS } from '../utils/errors';
+import { TokenId } from '../utils/shared-types';
 import { Addr } from '../utils/type';
-import { TokenId } from './token-table';
 
 interface BridgeInfo {
   fromToken: TokenId;

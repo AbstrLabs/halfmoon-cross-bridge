@@ -26,8 +26,9 @@ import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
-import { Token, TokenId, TOKEN_TABLE } from './token-table';
+import { Token, TOKEN_TABLE } from './token-table';
 import { getBridgeInfo } from './bridge-info';
+import { TokenId } from '../utils/shared-types';
 
 interface BridgeTxnObjBase {
   dbId?: number;
