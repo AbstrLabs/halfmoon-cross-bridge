@@ -28,7 +28,7 @@ import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
 import { Token, TOKEN_TABLE } from './token-table';
 import { getBridgeInfo } from './bridge-info';
-import { TokenId } from '../utils/shared-types';
+import { TokenId } from '../utils/type/shared-types';
 
 interface BridgeTxnObjBase {
   dbId?: number;

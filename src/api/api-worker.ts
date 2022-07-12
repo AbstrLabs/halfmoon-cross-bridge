@@ -6,7 +6,7 @@ export { type ApiWorker, apiWorker };
 import { ApiCallParam, TxnId } from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
-import { TokenId } from '../utils/shared-types';
+import { TokenId } from '../utils/type/shared-types';
 
 // TODO: parse with zod
 interface CriticalApiCallParam {
