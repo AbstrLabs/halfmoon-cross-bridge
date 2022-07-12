@@ -2,6 +2,7 @@
  * This file is a convenient local variable for token table on RDS.
  * @todo - create token_table on RDS.
  * @todo - move TOKEN_TABLE to constants file.
+ * @todo - add Asset_ID to the Token type
  */
 
 export type { Token };
