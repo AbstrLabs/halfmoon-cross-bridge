@@ -1,4 +1,6 @@
-export { BridgeTxnStatusEnum };
+export { BridgeTxnStatusEnum, BridgeTxnSafeObj };
+
+import { TokenId } from './token';
 
 enum BridgeTxnStatusEnum {
   // By order
@@ -18,4 +20,21 @@ enum BridgeTxnStatusEnum {
   ERR_CONFIRM_OUTGOING = 'ERR_CONFIRM_OUTGOING', // Confirm outgoing timeout
   DONE_OUTGOING = 'DONE_OUTGOING', //               Confirm outgoing success
   USER_CONFIRMED = 'USER_CONFIRMED', //             User confirmed
+}
+
+interface BridgeTxnSafeObj {
+  // TODO: type better (addr,txnId)
+  dbId: number | string;
+  fixedFeeAtom: string;
+  marginFeeAtom: string;
+  createdTime: string;
+  fromAddr: string;
+  fromAmountAtom: string;
+  fromTokenId: TokenId;
+  fromTxnId: string;
+  toAddr: string;
+  toAmountAtom: string;
+  toTokenId: TokenId;
+  toTxnId?: string | null;
+  txnStatus: BridgeTxnStatusEnum;
 }

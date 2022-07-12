@@ -24,7 +24,10 @@ import { nearBlockchain } from '../blockchain/near';
 import { Token, TOKEN_TABLE } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../utils/type/shared-types/token';
-import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
+import {
+  BridgeTxnSafeObj,
+  BridgeTxnStatusEnum,
+} from '../utils/type/shared-types/txn';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -48,23 +51,6 @@ interface BridgeTxnObj extends BridgeTxnObjBase {
   marginFeeAtom: bigint;
   createdTime: bigint;
   toAmountAtom: bigint;
-  txnStatus: BridgeTxnStatusEnum;
-}
-
-interface BridgeTxnSafeObj {
-  // TODO: type better (addr,txnId)
-  dbId: number | string;
-  fixedFeeAtom: string;
-  marginFeeAtom: string;
-  createdTime: string;
-  fromAddr: string;
-  fromAmountAtom: string;
-  fromTokenId: TokenId;
-  fromTxnId: string;
-  toAddr: string;
-  toAmountAtom: string;
-  toTokenId: TokenId;
-  toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
 }
 
