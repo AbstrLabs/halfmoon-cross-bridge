@@ -18,7 +18,6 @@ import express, { Request, Response } from 'express';
 import { BridgeTxn } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { logger } from '../utils/logger';
-import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
@@ -72,10 +71,7 @@ async function handleGetCall(req: Request, res: Response) {
       logger.warn('[API]: handled GET /algorand-near with invalid UID');
       return res.status(406).send('Transaction not found in database');
     }
-    // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
-    const safeObj = stringifyBigintInObj(
-      BridgeTxn.fromDbItem(dbItem).toObject()
-    );
+    const safeObj = BridgeTxn.fromDbItem(dbItem).toSafeObject();
     logger.warn('[API]: handled GET /algorand-near with valid UID');
     return res.json(safeObj);
   } catch (err) {
