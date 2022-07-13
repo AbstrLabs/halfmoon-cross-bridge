@@ -9,7 +9,12 @@ export { db, type Database };
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { type BridgeTxn } from '../bridge';
-import { type DbId, type DbItem, parseDbItem, parseDbId } from '../utils/type';
+import {
+  type DbId,
+  type DbItem,
+  parseDbItem,
+  parseDbId,
+} from '../utils/type/type';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';

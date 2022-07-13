@@ -1,7 +1,7 @@
 import {
   EXAMPLE_ALGO_ADDR,
   EXAMPLE_API_PARAM,
-} from '../test/test-helper/test-examples';
+} from '../../test/test-helper/test-examples';
 import { fullyParseApiParam, parseAlgoAddr } from './type';
 
 describe('type.ts', () => {

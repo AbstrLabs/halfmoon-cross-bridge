@@ -4,7 +4,7 @@
 
 export { verifyBlockchainTxn };
 
-import { ApiCallParam, TxnParam } from '../utils/type';
+import { ApiCallParam, TxnParam } from '../utils/type/type';
 
 import { BlockchainName } from '..';
 import { toGoNearAtom } from '../utils/formatter';

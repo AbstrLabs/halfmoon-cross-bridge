@@ -11,13 +11,12 @@ export {
   type AlgoAssetTransferTxnOutcome,
   type AlgoTxnId,
   type AlgoTxnParam,
-  type ApiCallParam,
+  type ApiAmount,
   type Biginter,
   type DbId,
   type DbItem,
   type NearAddr,
   type NearTxnId,
-  type NewApiCallParam,
   type NearTxnParam,
   type Stringer,
   type TxnId,
@@ -32,11 +31,14 @@ export {
   fullyParseApiParam,
 };
 
+export { ApiCallParam } from './shared-types/api';
 import { z } from 'zod';
-import { BridgeTxnStatusEnum } from '..';
-import { TokenId, TOKEN_TABLE } from '../bridge/token-table';
-import { BridgeError, ErrorTemplate, ERRORS } from './errors';
-import { logger } from './logger';
+import { TOKEN_TABLE } from '../../bridge/token-table';
+import { BridgeError, ErrorTemplate, ERRORS } from '../errors';
+import { logger } from '../logger';
+import { ApiCallParam } from './shared-types/api';
+import { TokenId } from './shared-types/token';
+import { BridgeTxnStatusEnum } from './shared-types/txn';
 
 /* NON-ZOD TYPES */
 
@@ -83,8 +85,7 @@ function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
 // Same order as below zTypeName part
 
 // API call param
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ApiCallParam = NewApiCallParam; // TODO: Zod z.infer<typeof zApiCallParam>;
+
 type ApiAmount = z.infer<typeof zApiAmount>;
 // blockchain specific
 type AlgoAddr = z.infer<typeof zAlgoAddr>;
@@ -159,19 +160,6 @@ const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
 
-// new API Call Param, not in docs yet.
-// removed "type", its unclear when we have more than one token.
-// using snake_case instead of camelCase or spinal-case because youtube uses it.
-// this interface is for displaying purpose only, we may not use it in the code.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface NewApiCallParam {
-  amount: ApiAmount;
-  txn_id: TxnId;
-  from_addr: Addr;
-  from_token: TokenId; // token_id
-  to_addr: Addr;
-  to_token: TokenId; // token_id
-}
 // here from_token and from_addr should be from the same blockchain. so is (to_token and to_addr)
 // token = [from_id, to_token] (array) seems acceptable, but the order is too important for us.
 
@@ -245,7 +233,7 @@ const zApiToPair = z.discriminatedUnion('to_token', [
   }),
 ]);
 
-function fullyParseApiParam(apiParam: NewApiCallParam): NewApiCallParam {
+function fullyParseApiParam(apiParam: ApiCallParam): ApiCallParam {
   const { amount, txn_id, from_addr, from_token, to_addr, to_token } = apiParam;
   const fromPair = {
     from_token,

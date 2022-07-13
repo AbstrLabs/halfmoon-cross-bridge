@@ -7,13 +7,14 @@ export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
 import lodash from 'lodash';
 import { BridgeTxn } from '.';
-import { BridgeTxnStatusEnum, BridgeTxnStatusTree, NodeEnvEnum } from '..';
+import { BridgeTxnStatusTree, NodeEnvEnum } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../api/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';
-import { TxnUid } from '../utils/type';
+import { TxnUid } from '../utils/type/type';
+import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 
 // TODO: add this to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;

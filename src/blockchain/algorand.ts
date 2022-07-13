@@ -27,7 +27,7 @@ import {
   AlgoAssetTransferTxnOutcome,
   AlgoTxnParam,
   parseBigInt,
-} from '../utils/type';
+} from '../utils/type/type';
 
 interface ClientParam {
   token: { 'X-API-Key': string };
@@ -253,7 +253,7 @@ class AlgorandBlockchain extends Blockchain {
       );
       return algoTxnId;
     } catch (e) {
-      logger.error('error by algorand blockchain:');
+      logger.error('error in algorand blockchain:');
       logger.error(e);
       throw e;
     }
@@ -320,7 +320,7 @@ class AlgorandBlockchain extends Blockchain {
     const confirmedTxn: ConfirmedTxn = (await algosdk.waitForConfirmation(
       this.client,
       txnId,
-      4
+      10
     )) as ConfirmedTxn;
 
     if (rcpt.txId !== txnId) {

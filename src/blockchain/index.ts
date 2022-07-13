@@ -31,7 +31,7 @@ import {
   type NearAddr,
   TxnParam,
   AlgoAssetTransferTxnOutcome,
-} from '../utils/type';
+} from '../utils/type/type';
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 import { BlockchainName } from '..';

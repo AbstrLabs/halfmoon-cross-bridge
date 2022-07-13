@@ -1,12 +1,7 @@
 /**
  * @todo - maybe split bridge and bridge-txn
  */
-export {
-  type BridgeTxnObj,
-  type BridgeTxnSafeObj,
-  BridgeTxn,
-  BridgeTxnActionName,
-};
+export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
 
 import {
   ApiCallParam,
@@ -15,9 +10,9 @@ import {
   TxnId,
   parseDbItem,
   parseTxnUid,
-} from '../utils/type';
+} from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain';
-import { BlockchainName, BridgeTxnActionName, BridgeTxnStatusEnum } from '..';
+import { BlockchainName, BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { algoBlockchain } from '../blockchain/algorand';
@@ -26,8 +21,13 @@ import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
-import { Token, TokenId, TOKEN_TABLE } from './token-table';
+import { Token, TOKEN_TABLE } from './token-table';
 import { getBridgeInfo } from './bridge-info';
+import { TokenId } from '../utils/type/shared-types/token';
+import {
+  BridgeTxnSafeObj,
+  BridgeTxnStatusEnum,
+} from '../utils/type/shared-types/txn';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -51,23 +51,6 @@ interface BridgeTxnObj extends BridgeTxnObjBase {
   marginFeeAtom: bigint;
   createdTime: bigint;
   toAmountAtom: bigint;
-  txnStatus: BridgeTxnStatusEnum;
-}
-
-interface BridgeTxnSafeObj {
-  // TODO: type better (addr,txnId)
-  dbId: number | string;
-  fixedFeeAtom: string;
-  marginFeeAtom: string;
-  createdTime: string;
-  fromAddr: string;
-  fromAmountAtom: string;
-  fromTokenId: TokenId;
-  fromTxnId: string;
-  toAddr: string;
-  toAmountAtom: string;
-  toTokenId: TokenId;
-  toTxnId?: string | null;
   txnStatus: BridgeTxnStatusEnum;
 }
 

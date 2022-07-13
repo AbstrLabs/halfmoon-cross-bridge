@@ -2,11 +2,11 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { PostReturn } from '../../api/algorand-near';
 import { testAlgo } from '../../blockchain/algorand';
 import { BridgeTxnSafeObj } from '../../bridge';
-import { TokenId } from '../../bridge/token-table';
 import { ENV } from '../../utils/dotenv';
 import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
-import { ApiCallParam, parseTxnUid } from '../../utils/type';
+import { TokenId } from '../../utils/type/shared-types/token';
+import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 
 describe('Txn should', () => {

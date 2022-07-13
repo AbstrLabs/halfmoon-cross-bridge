@@ -2,21 +2,16 @@
  * This file is a convenient local variable for token table on RDS.
  * @todo - create token_table on RDS.
  * @todo - move TOKEN_TABLE to constants file.
+ * @todo - add Asset_ID to the Token type
  */
 
 export type { Token };
-export { TokenId };
+
 export { TOKEN_TABLE };
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
-import { Addr } from '../utils/type';
-
-enum TokenId {
-  ALGO = 'ALGO',
-  NEAR = 'NEAR',
-  wALGO = 'wALGO',
-  goNEAR = 'goNEAR',
-}
+import { TokenId } from '../utils/type/shared-types/token';
+import { Addr } from '../utils/type/type';
 
 interface TokenBase {
   tokenId: TokenId; // our way to call it, usually same as tokenName

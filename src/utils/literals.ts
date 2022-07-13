@@ -10,7 +10,7 @@
 
 export { literals, exampleNearTxnId };
 
-import { Stringer } from './type';
+import { Stringer } from './type/type';
 
 const exampleNearTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7'; // TODO: use temp string
 

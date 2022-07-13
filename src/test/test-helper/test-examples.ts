@@ -7,11 +7,11 @@ export {
   EXAMPLE_TXN_FOR_CREATE_TEST,
 };
 
-import { BridgeTxnStatusEnum } from '../..';
 import { BridgeTxn } from '../../bridge';
-import { TokenId } from '../../bridge/token-table';
 import { ENV } from '../../utils/dotenv';
-import { type NewApiCallParam } from '../../utils/type';
+import { TokenId } from '../../utils/type/shared-types/token';
+import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
+import { type ApiCallParam } from '../../utils/type/type';
 
 const EXAMPLE_MALFORMED_UID_FROM_DB =
   '58.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA';
@@ -54,7 +54,7 @@ const EXAMPLE_TXN_FOR_CREATE_TEST = new BridgeTxn({
 const EXAMPLE_NEAR_ADDR = ENV.NEAR_EXAMPL_ADDR;
 const EXAMPLE_ALGO_ADDR = ENV.ALGO_EXAMPL_ADDR;
 
-const EXAMPLE_API_PARAM: NewApiCallParam = {
+const EXAMPLE_API_PARAM: ApiCallParam = {
   // simulates a goNEAR->NEAR burn txn
   from_token: TokenId.goNEAR,
   from_addr: EXAMPLE_ALGO_ADDR,
