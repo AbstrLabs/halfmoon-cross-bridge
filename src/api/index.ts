@@ -24,6 +24,21 @@ const WELCOME_JSON = {
         txn_id: ['string', 'transaction ID'],
       },
       RESPOND_JSON_TYPE: {
+        BridgeTxnStatus: 'enum BridgeTxnStatusEnum',
+        uid: 'string with form {number}.{txnId}',
+      },
+      RESPOND_JSON_EXAMPLE: {
+        BridgeTxnStatus: 'DONE_INITIALIZE',
+        uid: '1.2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA',
+      },
+    },
+    {
+      URL: 'https://api.halfmooncross.com/algorand-near',
+      METHOD: 'GET',
+      PARAMS: {
+        uid: ['string', 'with form {number}.{txnId}'],
+      },
+      RESPOND_JSON_TYPE: {
         dbId: 'number',
         fixedFeeAtom: 'bigint as string',
         marginFeeAtom: 'bigint as string',
@@ -53,13 +68,6 @@ const WELCOME_JSON = {
         toTokenId: 'NEAR',
         toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
         txnStatus: 'DONE_OUTGOING',
-      },
-    },
-    {
-      URL: 'https://api.halfmooncross.com/algorand-near',
-      METHOD: 'GET',
-      PARAMS: {
-        uid: ['string', 'with form {number}.{txnId}'],
       },
     },
   ],
