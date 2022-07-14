@@ -48,6 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^5.25.0",
     "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^8.16.0",
+    "eslint-plugin-tsdoc": "^0.2.16",
     "husky": "^7.0.0",
     "jest": "^27.5.1",
     "json-bigint": "^1.0.0",
@@ -78,9 +79,13 @@
       ]
     },
     "plugins": [
-      "@typescript-eslint"
+      "@typescript-eslint",
+      "eslint-plugin-tsdoc"
     ],
-    "root": true
+    "root": true,
+    "rules": {
+      "tsdoc/syntax": "warn"
+    }
   },
   "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",
   "jest": {
@@ -142,8 +147,8 @@
     "test:near": "jest src/blockchain/near",
     "test:unit-test": "jest --testPathIgnorePatterns=src/test",
     "test:util": "jest src/utils",
-    "unit-test": "yarn test:unit-test",
     "unit": "yarn test:unit-test",
+    "unit-test": "yarn test:unit-test",
     "util": "yarn test:util"
   },
   "version": "0.1.4"
