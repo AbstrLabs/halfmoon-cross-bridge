@@ -22,9 +22,9 @@ import { utils } from 'near-api-js';
  * Convert a human-readable string or number of NEAR amount to a bigint of atomNEAR.
  * Throw Error if input is not valid.
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a string or number
- * @param  {string|number} goNearPlain - a human readable string of goNear
- * @return {bigint} - a bigint representation of the goNear
+ * @throws {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a string or number
+ * @param goNearPlain - A human readable string or number of goNear
+ * @returns A bigint representation of the goNear atomic unit
  */
 function toGoNearAtom(goNearPlain: string | number): bigint {
   // TODO: l10n: temp-fix: added an regex to make sure that the input is in correct format
@@ -67,8 +67,8 @@ function toGoNearAtom(goNearPlain: string | number): bigint {
 /**
  * Remove leading zeroes from an input.
  *
- * @param {string} value a value that may contain leading zeroes
- * @returns {string} the value without the leading zeroes
+ * @param value - a value that may contain leading zeroes
+ * @returns the same {@link value} without the leading zeroes
  */
 function trimLeadingZeroes(value: string): string {
   // from https://github.com/near/near-api-js/blob/6f83d39f47624b4223746c0d27d10f78471575f7/src/utils/format.ts#L83-L88
@@ -82,10 +82,10 @@ function trimLeadingZeroes(value: string): string {
 /**
  * Convert a string of yoctoNEAR to a bigint of atomNEAR.
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a `string|number|bigint`
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT} if input is not a valid yoctoNEAR amount
- * @param  {string|number|bigint} yoctoNear
- * @returns {bigint} a bigint representation of the atomNEAR.
+ * @throws {@link ERRORS.INTERNAL.TYPE_ERROR} if input is not a `type string|number|bigint`
+ * @throws {@link ERRORS.INTERNAL.INVALID_YOCTO_NEAR_AMOUNT} if input is not a valid yoctoNEAR amount
+ * @param yoctoNear - amount of the yoctoNEAR in string, number or bigint
+ * @returns A bigint representation of the atomNEAR.
  *
  * @todo rename to yoctoNearToAtomNear
  *
@@ -137,10 +137,11 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
 }
 
 /**
- * Convert atomNEAR to yoctoNear.
+ * Convert atomNEAR to yoctoNear. Due to the JS {@link Number.MAX_SAFE_INTEGER} limit,
+ * the result is output as a string.
  *
- * @param  {bigint} atom - a bigint representation of the atomNEAR
- * @returns {string} a string of yoctoNEAR amount
+ * @param atom - a bigint representation of the atomNEAR
+ * @returns A string of yoctoNEAR amount
  *
  * @todo rename to atomNearToYoctoNear
  * @todo add test
@@ -154,15 +155,15 @@ function atomToYoctoNear(atom: bigint): string {
  * JSON.stringify() an object with bigint without serializing problem.
  *
  *
- * @param  {object} obj?
- * @returns {string}
+ * @param obj - The object to stringify that might contain a bigint as its property value.
+ * @returns Stringified object
  *
  * @todo add test
  */
 function stringifyObjWithBigint(obj?: object): string {
   if (!obj) {
-    return '';
     logger.warn('stringifyObjWithBigint: no obj');
+    return '';
     // TODO: should raise error?
   }
   return JSON.stringify(stringifyBigintInObj(obj));
@@ -172,9 +173,10 @@ type Obj = Record<string, unknown>;
 /**
  * Stringify all bigint in an object recursively.
  *
- * @todo - type this function (obj: Record<key, bigint|Types>) => Record<key, string|Types>
- * @param  {object} obj
- * @returns object
+ * @todo type this function with `(obj: Record<key, bigint|Types>) => Record<key, string|Types>`
+ *
+ * @param obj - The object to stringify that might contain a bigint as its property value.
+ * @returns The object with all bigint value stringified.
  */
 function stringifyBigintInObj(obj: object): object {
   const newObj: Obj = { ...obj };

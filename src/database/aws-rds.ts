@@ -1,8 +1,5 @@
 /**
  * Wrapping up AWS-RDS service of postgreSQL into one singleton instance `postgres`
- *
- * @exports postgres
- * @typedef {Postgres} : Class {@link Postgres}
  */
 
 export { postgres, type Postgres };
@@ -23,9 +20,8 @@ interface PgConfig {
 
 /**
  * Wrap up AWS-RDS service of postgreSQL into one singleton instance `postgres`.
- * @classdesc A class for AWS-RDS,  singleton instance of postgres.
  *
- * @param  {PgConfig} pgConfig
+ * @param pgConfig - PostgreSQL configuration
  */
 class Postgres {
   // private readonly pgConfig = getEnvConfig();
@@ -40,8 +36,7 @@ class Postgres {
   /**
    * Connect to the database.
    *
-   * @async
-   * @returns {Promise<void>}
+   * @returns Promise of void
    */
   async connect(): Promise<void> {
     if (this.isConnected) {
@@ -59,11 +54,9 @@ class Postgres {
   /**
    * Generic query method.
    *
-   * @async
-   * @inheritdoc {@link Pool.query}
-   * @param  {string} query - SQL query string
-   * @param  {unknown[]} params - parameters for the query
-   * @returns  {Promise<any[]>} result of the query.
+   * @param query - SQL query string
+   * @param params - List of parameters for the query
+   * @returns Promise of the query result
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async query(query: string, params: any[] = []): Promise<any[]> {
@@ -80,7 +73,6 @@ class Postgres {
   /**
    * Disconnect thread from the database POOL.
    *
-   * @returns {void} void
    */
   disconnect(): void {
     if (this.isConnected) {
@@ -95,8 +87,7 @@ class Postgres {
   /**
    * End the database pool connection.
    *
-   * @async
-   * @returns {Promise<void>}
+   * @returns Promise of void
    */
   async end(): Promise<void> {
     if (this.isConnected) {
@@ -109,7 +100,6 @@ class Postgres {
    * Create a new database table.
    * Only for testing purpose.
    *
-   * @async
    * @returns Promise
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

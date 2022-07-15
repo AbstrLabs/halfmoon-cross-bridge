@@ -55,8 +55,8 @@ class BridgeWorker {
   /**
    * Fetch tasks from the database. Supports LOAD and UPDATE.
    *
-   * @param  {FetchActionType} fetchAction
-   * @returns {Promise<void>}
+   * @param fetchAction - action of {@link FetchActionType}
+   * @returns Promise of void
    */
   async fetchTasksFromDb(fetchAction: FetchActionType): Promise<void> {
     // TODO: merge with updateTasksFromDb
@@ -157,7 +157,7 @@ class BridgeWorker {
 
   /**
    * @todo ref: pass UID here.
-   * @param bridgeTxn BridgeTxn
+   * @param bridgeTxn - A BridgeTxn
    * @returns
    */
   private async handleTask(bridgeTxn: BridgeTxn) {

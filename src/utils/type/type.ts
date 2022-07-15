@@ -49,13 +49,15 @@ interface Stringer {
 /* ZOD TYPES (WITH PARSER) */
 
 /**
- * Parses the given object with the given Zod schema.
+ * Parse (verify) the given object with the given Zod schema.
  * If the parsing fails, throws a {@link BridgeError} with the given {@link ErrorTemplate}.
  *
- * @param  {T} zodShaped
- * @param  {z.ZodType} zodParser
- * @param  {ErrorTemplate} errorTemplate
- * @returns {T} - same zodShaped
+ * @typeParam T - Type of the object to parse.
+ * @typeParam U - Type of the ZodType.
+ * @param zodShaped - Zod shaped object to parse.
+ * @param zodParser - Zod parser to use.
+ * @param errorTemplate - Error template to use.
+ * @returns - same zodShaped as {@link zodShaped}.
  */
 function parseWithZod<T extends z.infer<U>, U extends z.ZodType>(
   zodShaped: T,

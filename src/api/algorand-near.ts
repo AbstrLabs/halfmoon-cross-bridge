@@ -38,8 +38,8 @@ export interface PostReturn {
  * Handle GET call on /algorand-near
  * return WELCOME_JSON if no uid is provided.
  *
- * @param  {Request} req
- * @param  {Response} res
+ * @param req - Express request
+ * @param res - Express response
  * @returns
  */
 async function handleGetCall(req: Request, res: Response) {
@@ -84,8 +84,8 @@ async function handleGetCall(req: Request, res: Response) {
  * Handle POST call on /algorand-near
  * return WELCOME_JSON if no uid is provided.
  *
- * @param  {Request} req
- * @param  {Response} res
+ * @param req - Express request
+ * @param res - Express response
  */
 async function handlePostCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
@@ -130,8 +130,8 @@ function verifyApiCallParamWithResp(
  *
  * @todo - verify within both ram and db.
  *
- * @param apiCallParam
- * @param res
+ * @param apiCallParam - ApiCallParam
+ * @param res - Express response
  * @returns
  */
 async function verifyBlockchainTxnWithResp(

@@ -84,7 +84,7 @@
     ],
     "root": true,
     "rules": {
-      "tsdoc/syntax": "warn"
+      "tsdoc/syntax": "error"
     }
   },
   "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",

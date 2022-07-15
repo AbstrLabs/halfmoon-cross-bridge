@@ -5,10 +5,10 @@ import { BridgeError, ERRORS } from './errors';
 /**
  * Ensure that the given value is a string.
  *
- * @deprecated - use zod types instead.
- * @throws {ERRORS.INTERNAL.TYPE_ERROR} if the value is not a string
- * @param  {unknown} value - the value to check
- * @returns {string} the value as a string
+ * @deprecated - Use zod types instead.
+ * @throws {@link ERRORS.INTERNAL.TYPE_ERROR} If the value is not a string
+ * @param value - The value to check
+ * @returns The same value of {@link value} as a string
  */
 function ensureString(value: unknown): string {
   if (typeof value !== 'string') {
@@ -24,7 +24,7 @@ function ensureString(value: unknown): string {
 /**
  * Asynchronously function pause for a certain time in milliseconds.
  *
- * @param ms - milliseconds to pause
+ * @param ms - Milliseconds to pause
  * @returns
  */
 
@@ -35,14 +35,14 @@ async function pause(ms: number): Promise<void> {
 /**
  * Set an interval whose callback will be called immediately.
  *
- * @param  {()=>unknown} func - the callback to call
- * @param  {number} interval - the interval in milliseconds
- * @returns {NodeJS.Timer} object same as setInterval
+ * @param func - The callback to call
+ * @param interval_ms - The interval in milliseconds
+ * @returns A {@link NodeJS.Timer} object same as setInterval
  */
 function setImmediateInterval(
   func: () => unknown,
-  interval: number
+  interval_ms: number
 ): NodeJS.Timer {
   func();
-  return setInterval(func, interval);
+  return setInterval(func, interval_ms);
 }

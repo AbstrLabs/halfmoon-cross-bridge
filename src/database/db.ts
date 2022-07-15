@@ -1,8 +1,7 @@
 /**
  * Export a singleton instance `db` to handle all database requests
  *
- * @todo: ref: check this.isConnected with decorator.
- * @exports db
+ * @todo ref: check this.isConnected with decorator.
  */
 
 export { db, type Database };
@@ -40,14 +39,16 @@ const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
 
 /**
  * A database class to handle all database requests. Should be used as a singleton.
- *
- * @param  {Postgres} instance - an instance of {@link Postgres}
- * @param  {{mintTableName:TableName;burnTableName:TableName}} tableNames - table names in the database
  */
 class Database {
   private instance;
   private requestTableName;
 
+  /**
+   *
+   *
+   * @param instance - An instance of {@link Postgres}
+   */
   constructor(instance: Postgres) {
     this.instance = instance;
     this.requestTableName = TABLE_NAME;
@@ -56,7 +57,7 @@ class Database {
   /**
    * Wrapped getter of isConnected.
    *
-   * @returns {boolean} true if connected, false otherwise
+   * @returns Boolean if db is connected, false otherwise
    */
   get isConnected(): boolean {
     return this.instance.isConnected;
@@ -65,8 +66,7 @@ class Database {
   /**
    * Connects to the database.
    *
-   * @async
-   * @returns {Promise<void>} promise of `void`
+   * @returns Promise of void
    */
   async connect(): Promise<void> {
     await this.instance.connect();
@@ -75,10 +75,9 @@ class Database {
   /**
    * Generic database query method.
    *
-   * @async
-   * @param {string} query a sql query string
-   * @param {any[]} params
-   * @returns {Promise<any[]>} query result
+   * @param query - SQL query string
+   * @param params - SQL query parameters
+   * @returns Promise of query result
    */
   async query(
     query: string,
@@ -101,8 +100,6 @@ class Database {
 
   /**
    * Disconnects pool thread from the database.
-   *
-   * @returns {void} no return value
    */
   disconnect(): void {
     this.instance.disconnect();
@@ -111,8 +108,7 @@ class Database {
   /**
    * Stop the database pool.
    *
-   * @async
-   * @returns {Promise<void>} promise of `void`
+   * @returns Promise of void
    */
   async end(): Promise<void> {
     await this.instance.end();
@@ -121,9 +117,8 @@ class Database {
   /**
    * Create a new {@link BridgeTxn} in the database.
    *
-   * @async
-   * @param   {BridgeTxn} bridgeTxn - a {@link BridgeTxn} to be inserted into the database
-   * @returns {Promise<DbId>}  promise of the created dbId
+   * @param bridgeTxn - A {@link BridgeTxn} to be inserted into the database
+   * @returns Promise of {@link D8bId} of the created {@link BridgeTxn}
    */
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // will assign and return a dbId on creation.
@@ -181,12 +176,11 @@ class Database {
 
   /**
    * Read a {@link BridgeTxn} from the database with its ID.
-   * @throws {BridgeError} if the database query result was not unique
-   * @throws {BridgeError} if the database query failed
+   * @throws if the database query result was not unique
+   * @throws if the database query failed
 
-   * @async
-   * @param   {DbId} dbId - database primary key
-   * @returns {Promise<DbItem[]>} promise of list of {@link DbItem} of the query result
+   * @param dbId - database primary key
+   * @returns Promise of list of {@link DbItem} of the query result
    */
   public async readTxn(dbId: DbId): Promise<DbItem> {
     // this should always be unique with a dbId
@@ -232,9 +226,8 @@ class Database {
    * They are the only two fields that are allowed to change after created.
    * Will raise err if other fields mismatch.
    *
-   * @async
-   * @param  {BridgeTxn} bridgeTxn - the {@link BridgeTxn} to be updated in the database
-   * @returns {Promise<DbId>} promise of the updated dbId
+   * @param bridgeTxn - the {@link BridgeTxn} to be updated in the database
+   * @returns Promise of the updated dbId
    */
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // ensure bridgeTxn is created
@@ -306,9 +299,8 @@ class Database {
   /**
    * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
    *
-   * @async
-   * @param  {string} fromTxnId
-   * @returns {Promise<DbItem[]>} promise of the list of {@link DbItem} of the query result, list can be `[]`.
+   * @param fromTxnId - the `fromTxnId` of the {@link BridgeTxn} to be read
+   * @returns Promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
   public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
     if (!this.isConnected) {
@@ -328,11 +320,10 @@ class Database {
   /**
    * Unused for now.
    *
-   * @async
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION} if not connected
-   * @param  {DbId} dbId
-   * @returns {Promise<void>} promise of `void`
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.DB_UNAUTHORIZED_ACTION} if not connected
+   * @param dbId - the primary key of table
+   * @returns Promise of void
    */
   private async deleteTxn(dbId: DbId): Promise<void> {
     // never used.
@@ -353,11 +344,11 @@ class Database {
   /**
    * Verify the length of the result is 1.
    *
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_TXN_NOT_FOUND} if length is 0
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE} if length is more than 1
-   * @param  {unknown[]} result - query result to be verified
-   * @param  {object} extraErrInfo? - extra error info
-   * @returns {boolean} - true if result is not empty
+   * @throws {@link ERRORS.EXTERNAL.DB_TXN_NOT_FOUND} if length is 0
+   * @throws {@link ERRORS.EXTERNAL.DB_TXN_NOT_UNIQUE} if length is more than 1
+   * @param result - Query result to be verified of type unknown[]
+   * @param extraErrInfo - extra error info
+   * @returns boolean if result is not empty
    * @deprecated - should use decorator (not finished)
    *
    * @todo change the object type

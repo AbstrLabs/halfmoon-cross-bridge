@@ -1,8 +1,5 @@
 /** Build a new Error class {@link BridgeError} from the template.
  *
- * @exports BridgeError - {@link BridgeError}
- * @exports any - related constants and templates for {@link BridgeError}
- *
  * inspirited by
  * - https://github.com/scale-it/algo-builder/blob/master/packages/web/src/errors/errors-list.ts
  * - https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/errors/errors-list.ts

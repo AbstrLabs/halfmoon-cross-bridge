@@ -1,8 +1,8 @@
 /**
  * NEAR functionalities wrapped up with our centralized account
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
- * @todo: master acc should be dynamic, or create a new instance per unidirectional bridge.
+ * @throws {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
+ * @todo master acc should be dynamic, or create a new instance per unidirectional bridge.
  */
 
 export { nearBlockchain, type NearBlockchain };
@@ -48,9 +48,9 @@ interface BridgeConfig {
 /**
  * NEAR blockchain wrapper, with centralized account. Implements {@link Blockchain}.
  *
- * @param  {ClientParam} clientParam
- * @param  {IndexerParam} indexerParam
- * @param  {BridgeConfig} bridgeConfig
+ * @param clientParam - NEAR client parameters
+ * @param indexerParam - NEAR indexer parameters
+ * @param bridgeConfig - NEAR bridge configuration
  */
 class NearBlockchain extends Blockchain {
   public readonly centralizedAddr: NearAddr;
@@ -108,10 +108,9 @@ class NearBlockchain extends Blockchain {
   /**
    * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
    *
-   * @async
-   * @inheritdoc {@link Blockchain}
-   * @param  {NearTxnParam} txnParam
-   * @returns {Promise<NearTxnOutcome> }
+   * @override
+   * @param txnParam - NEAR Transaction parameters
+   * @returns NEAR Transaction outcome
    */
   async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
     logger.silly('nearIndexer: getTxnStatus()');
@@ -135,15 +134,15 @@ class NearBlockchain extends Blockchain {
   /**
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if the transaction is not valid.
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_NOT_CONFIRMED} if the transaction is not confirmed.
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_ID_MISMATCH} if the transaction id is not correct.
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_SENDER_MISMATCH} if the transaction sender is not correct.
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if the transaction receiver is not correct.
-   * @throws {BridgeError} - {@link API.TXN_AMOUNT_MISMATCH} if the transaction amount is not correct.
-   * @inheritdoc {@link Blockchain}
-   * @param  {NearTxnOutcome} txnOutcome
-   * @param  {NearTxnParam} nearTxnParam
+   * @throws {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if the transaction is not valid.
+   * @throws {@link ERRORS.API.TXN_NOT_CONFIRMED} if the transaction is not confirmed.
+   * @throws {@link ERRORS.API.TXN_ID_MISMATCH} if the transaction id is not correct.
+   * @throws {@link ERRORS.API.TXN_SENDER_MISMATCH} if the transaction sender is not correct.
+   * @throws {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if the transaction receiver is not correct.
+   * @throws {@link API.TXN_AMOUNT_MISMATCH} if the transaction amount is not correct.
+   * @override
+   * @param txnOutcome - NEAR Transaction outcome
+   * @param nearTxnParam - NEAR Transaction parameters
    * @returns boolean
    */
   verifyCorrectness(
@@ -229,9 +228,8 @@ class NearBlockchain extends Blockchain {
    * Send a transaction of the amount in `NearTxnParam` from centralized account to target in `NearTxnParam`.
    * Implements the abstract method in {@link Blockchain}.
    *
-   * @async
-   * @inheritdoc {@link Blockchain}
-   * @param  {NearTxnParam} nearTxnParam
+   * @override
+   * @param nearTxnParam - NEAR Transaction parameters
    * @returns Promise
    */
   async makeOutgoingTxn(nearTxnParam: NearTxnParam): Promise<AlgoTxnId> {
@@ -246,7 +244,7 @@ class NearBlockchain extends Blockchain {
   // /**
   //  * Unused slot for get recent transactions of an account.
   //  *
-  //  * @throws {BridgeError} - {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
+  //  * @throws {@link ERRORS.INTERNAL.NOT_IMPLEMENTED} if the transaction amount is not correct.
   //  * @param  {address} addr - not implemented yet
   //  * @param  {number} limit
   //  * @returns {Promise<NearTxnId[]>} - list of transaction ids

@@ -1,9 +1,7 @@
 /**
  * An implementation of winston logger.
- *
- * @exports winston.Logger - {@link logger}
  */
-// UNRESOLVED: https://github.com/facebook/jest/issues/8790
+// UNRESOLVED: error in jest not showing correct reference https://github.com/facebook/jest/issues/8790
 
 export { logger };
 
