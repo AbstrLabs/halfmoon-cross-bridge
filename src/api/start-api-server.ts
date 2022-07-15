@@ -9,6 +9,7 @@ import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
 import { algorandNear } from './algorand-near';
 import { logger } from '../utils/logger';
+import { docsRoute } from './docs';
 
 async function homePageTest() {
   /* Used once code */
@@ -50,6 +51,8 @@ function startApiServer() {
 
   // is it better to write "/algorand-near" here or in "algorand-near.ts"?
   app.use('/', algorandNear);
+  app.use('/', docsRoute);
+
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
   });
