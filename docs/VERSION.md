@@ -23,7 +23,7 @@ type PostBody =
     };
 ```
 
-## 0.2 (not yet released)
+## 0.2 (released, not yet applied)
 
 - In the new version, server will have two workers `ApiWorker` and `BridgeWorker`, which both are started on the server run. [See the design pattern](./design-pattern.drawio.svg)
 - Update new API endpoint <http://api.halfmooncross.com/algorand-near/> to receive both `GET` and `POST` requests.
