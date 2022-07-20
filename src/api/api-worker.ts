@@ -23,6 +23,12 @@ class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
     new ObjectSet<CriticalApiCallParam>();
 
+  /**
+   * Create a BridgeTxn from API call params checking double mint from both RAM and DB.
+   *
+   * @param apiCallParam - API call param
+   * @returns
+   */
   public async create(apiCallParam: ApiCallParam) {
     // TODO: zod parse
     // TODO: only use fields in critical api call param
@@ -37,24 +43,21 @@ class ApiWorker {
 
     const bridgeTxn = BridgeTxn.fromApiCallParam(
       apiCallParam,
-      BigInt(Date.now())
+      BigInt(Date.now()) // maybe use frontend time instead of server time
     );
 
     try {
       // BTX.createInDb compares BTX.fromTxnId with DbItem.from_txn_id and wil throw err
       await bridgeTxn.createInDb();
+      // TBD1: should we add more coupling to save execution time?
+      // bridgeWorker.addTask(bridgeTxn);
     } catch (err) {
       logger.error('[AWK]: Double mint: from_txn_id existed in db.');
       logger.error(err);
-      this._remove(criticalApiCallParam);
       throw err;
+    } finally {
+      apiWorker._delete(criticalApiCallParam);
     }
-
-    // TBD1: should we add more coupling to save execution time?
-    // bridgeWorker.addTask(bridgeTxn);
-
-    apiWorker._remove(criticalApiCallParam);
-
     logger.verbose(
       `[ApiWorker]: bridge txn created with uid: ${bridgeTxn.uid.toString()}`
     );
@@ -62,14 +65,16 @@ class ApiWorker {
     return bridgeTxn;
   }
 
-  private _remove(criticalApiCallParam: CriticalApiCallParam) {
+  private _delete(criticalApiCallParam: CriticalApiCallParam) {
     if (!this._has(criticalApiCallParam)) {
       throw new Error('Txn not in creation queue');
     }
 
     return this.#queue.delete(criticalApiCallParam);
   }
-  /* GETTERS & SETTERs */
+
+  /* GETTERS & SETTER */
+
   public get size() {
     return this.#queue.size;
   }
@@ -77,7 +82,7 @@ class ApiWorker {
     return this.size;
   }
 
-  /* PRIVATE METHODS */
+  /* PRIVATE METHOD */
 
   private _has(criticalApiCallParam: CriticalApiCallParam) {
     return this.#queue.has(criticalApiCallParam);
