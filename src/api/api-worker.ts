@@ -20,7 +20,7 @@ interface CriticalApiCallParam {
 }
 
 class ApiWorker {
-  /* private */ queue: ObjectSet<CriticalApiCallParam> =
+  /* private */ #queue: ObjectSet<CriticalApiCallParam> =
     new ObjectSet<CriticalApiCallParam>();
 
   public async create(apiCallParam: ApiCallParam) {
@@ -67,11 +67,11 @@ class ApiWorker {
       throw new Error('Txn not in creation queue');
     }
 
-    return this.queue.delete(criticalApiCallParam);
+    return this.#queue.delete(criticalApiCallParam);
   }
   /* GETTERS & SETTERs */
   public get size() {
-    return this.queue.size;
+    return this.#queue.size;
   }
   public get length() {
     return this.size;
@@ -80,11 +80,11 @@ class ApiWorker {
   /* PRIVATE METHODS */
 
   private _has(criticalApiCallParam: CriticalApiCallParam) {
-    return this.queue.has(criticalApiCallParam);
+    return this.#queue.has(criticalApiCallParam);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }
   private _add(criticalApiCallParam: CriticalApiCallParam) {
-    this.queue.add(criticalApiCallParam);
+    this.#queue.add(criticalApiCallParam);
   }
 }
 
