@@ -13,6 +13,7 @@ export {
   type AlgoTxnParam,
   type ApiAmount,
   type Biginter,
+  type CriticalApiCallParam,
   type DbId,
   type DbItem,
   type NearAddr,
@@ -100,6 +101,7 @@ type AlgoTxnParam = z.infer<typeof zAlgoTxnParam>;
 type NearTxnParam = z.infer<typeof zNearTxnParam>;
 type TxnParam = z.infer<typeof zTxnParam>;
 type AlgoAssetTransferTxnOutcome = z.infer<typeof zAlgoAssetTransferTxnOutcome>;
+type CriticalApiCallParam = z.infer<typeof zCriticalApiCallParam>;
 // Class BridgeTxn
 type TxnUid = z.infer<typeof zTxnUid>;
 // Database
@@ -161,6 +163,13 @@ const zApiAmount = z
 const zNearTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zAlgoTxnId = z.string().regex(/^.{0,64}$/); // max length is 64
 const zTxnId = z.union([zAlgoTxnId, zNearTxnId]);
+const zTokenId = z.nativeEnum(TokenId);
+
+const zCriticalApiCallParam = z.object({
+  to_token: zTokenId,
+  from_token: zTokenId,
+  txn_id: zTxnId,
+});
 
 // here from_token and from_addr should be from the same blockchain. so is (to_token and to_addr)
 // token = [from_id, to_token] (array) seems acceptable, but the order is too important for us.
@@ -321,7 +330,6 @@ const zTxnUid = z.string().refine((str: string) => {
 /* DATABASE */
 
 const zDbId = z.number().int().positive();
-const zTokenId = z.nativeEnum(TokenId);
 
 // TODO: type more clearly on mint/burn like type:burn->from:algoAddr, to:nearAddr
 const zDbItem = z.object({
