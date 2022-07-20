@@ -7,7 +7,7 @@ import express, { Request, Response } from 'express';
 
 import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
-import { algorandNear } from './algorand-near';
+import { txnRoute } from './routes/txn-route';
 import { logger } from '../utils/logger';
 import { docsRoute } from './docs';
 
@@ -50,7 +50,7 @@ function startApiServer() {
   // TODO: move API to a new file of new folder server/api
 
   // is it better to write "/algorand-near" here or in "algorand-near.ts"?
-  app.use('/', algorandNear);
+  app.use('/', txnRoute);
   app.use('/', docsRoute);
 
   app.use('/', (req: Request, res: Response) => {
