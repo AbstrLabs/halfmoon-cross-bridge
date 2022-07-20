@@ -1,5 +1,8 @@
-/** A singleton responsible for converting API call to initialized and
+/**
+ * A singleton responsible for converting API call to initialized and
  * uploaded BridgeTxn.
+ *
+ * @TODO use ObjectSet for queue
  */
 export { type ApiWorker, apiWorker };
 
@@ -49,8 +52,8 @@ class ApiWorker {
       throw err;
     }
 
-    // TODO: should we add more coupling to save execution time?
-    // bridgeWorker._push(bridgeTxn);
+    // TBD1: should we add more coupling to save execution time?
+    // bridgeWorker.addTask(bridgeTxn);
 
     apiWorker._remove(criticalApiCallParam);
 
