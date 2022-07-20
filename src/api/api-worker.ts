@@ -10,6 +10,7 @@ import { ApiCallParam, TxnId } from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
 import { TokenId } from '../utils/type/shared-types/token';
+import ObjectSet from 'object-set-type';
 
 // TODO: parse with zod
 interface CriticalApiCallParam {
@@ -19,23 +20,20 @@ interface CriticalApiCallParam {
 }
 
 class ApiWorker {
-  /* private */ queue: CriticalApiCallParam[];
-
-  constructor() {
-    this.queue = [];
-  }
+  /* private */ queue: ObjectSet<CriticalApiCallParam> =
+    new ObjectSet<CriticalApiCallParam>();
 
   public async create(apiCallParam: ApiCallParam) {
     // TODO: zod parse
     // TODO: only use fields in critical api call param
     const criticalApiCallParam: CriticalApiCallParam = apiCallParam;
 
-    if (this._includes(criticalApiCallParam)) {
+    if (this._has(criticalApiCallParam)) {
       throw new Error(
         'Txn already in creation queue ' + criticalApiCallParam.txn_id
       );
     }
-    this._push(criticalApiCallParam);
+    this._add(criticalApiCallParam);
 
     const bridgeTxn = BridgeTxn.fromApiCallParam(
       apiCallParam,
@@ -65,30 +63,28 @@ class ApiWorker {
   }
 
   private _remove(criticalApiCallParam: CriticalApiCallParam) {
-    if (!this._includes(criticalApiCallParam)) {
+    if (!this._has(criticalApiCallParam)) {
       throw new Error('Txn not in creation queue');
     }
 
-    this.queue = this.queue.filter(
-      (ExistedCallParam) =>
-        ExistedCallParam.txn_id !== criticalApiCallParam.txn_id
-    );
-    return true;
+    return this.queue.delete(criticalApiCallParam);
   }
   /* GETTERS & SETTERs */
+  public get size() {
+    return this.queue.size;
+  }
   public get length() {
-    return this.queue.length;
+    return this.size;
   }
 
   /* PRIVATE METHODS */
 
-  private _includes(criticalApiCallParam: CriticalApiCallParam) {
-    // FIX: this is SUPER dangerous, not sure if `includes` compares object (assumably not)
-    return this.queue.includes(criticalApiCallParam);
+  private _has(criticalApiCallParam: CriticalApiCallParam) {
+    return this.queue.has(criticalApiCallParam);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }
-  private _push(criticalApiCallParam: CriticalApiCallParam) {
-    this.queue.push(criticalApiCallParam);
+  private _add(criticalApiCallParam: CriticalApiCallParam) {
+    this.queue.add(criticalApiCallParam);
   }
 }
 
