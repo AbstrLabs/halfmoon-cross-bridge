@@ -25,6 +25,7 @@ export {
   type TxnUid,
   parseAlgoAddr,
   parseBigInt,
+  parseCriticalApiCallParam,
   parseDbId,
   parseDbItem,
   parseTxnId,
@@ -362,6 +363,16 @@ function parseBiginter(biginter: Biginter): Biginter {
 }
 function parseBigInt(biginter: Biginter): bigint {
   return BigInt(parseBiginter(biginter));
+}
+function parseCriticalApiCallParam(
+  criticalApiCallParam: CriticalApiCallParam
+): CriticalApiCallParam {
+  return parseWithZod(
+    // TODO: ApiPostParam
+    criticalApiCallParam,
+    zCriticalApiCallParam,
+    ERRORS.API.INVALID_API_PARAM
+  );
 }
 function parseDbId(dbId: DbId): DbId {
   return parseWithZod(dbId, zDbId, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
