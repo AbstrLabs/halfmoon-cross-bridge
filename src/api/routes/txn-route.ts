@@ -1,7 +1,7 @@
 /**
  * Route for /algorand-near with POST and GET method.
  */
-export { algorandNear };
+export { txnRoute };
 
 import {
   ApiCallParam,
@@ -10,23 +10,23 @@ import {
   fullyParseApiParam,
   TxnId,
   TxnUid,
-} from '../utils/type/type';
-import { parseTxnUid } from '../utils/type/type';
-import { ConfirmOutcome } from '../blockchain';
+} from '../../utils/type/type';
+import { parseTxnUid } from '../../utils/type/type';
+import { ConfirmOutcome } from '../../blockchain';
 import express, { Request, Response } from 'express';
 
-import { BridgeTxn } from '../bridge';
-import { WELCOME_JSON } from '.';
-import { logger } from '../utils/logger';
-import { verifyBlockchainTxn } from '../blockchain/verify';
-import { apiWorker } from './api-worker';
-import { db } from '../database/db';
-import { TokenId } from '../utils/type/shared-types/token';
-import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
+import { BridgeTxn } from '../../bridge';
+import { WELCOME_JSON } from '..';
+import { logger } from '../../utils/logger';
+import { verifyBlockchainTxn } from '../../blockchain/verify';
+import { apiWorker } from '../api-worker';
+import { db } from '../../database/db';
+import { TokenId } from '../../utils/type/shared-types/token';
+import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
 
-const algorandNear = express.Router();
+const txnRoute = express.Router();
 
-algorandNear.route('/algorand-near').get(handleGetCall).post(handlePostCall);
+txnRoute.route('/algorand-near').get(handleGetCall).post(handlePostCall);
 
 // TODO: refactor move to types with better typing
 export interface PostReturn {

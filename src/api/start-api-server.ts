@@ -7,7 +7,7 @@ import express, { Request, Response } from 'express';
 
 import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
-import { algorandNear } from './algorand-near';
+import { txnRoute } from './routes/txn-route';
 import { logger } from '../utils/logger';
 import { docsRoute } from './docs';
 
