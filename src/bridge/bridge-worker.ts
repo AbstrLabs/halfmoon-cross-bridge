@@ -9,7 +9,7 @@ import lodash from 'lodash';
 import { BridgeTxn } from '.';
 import { BridgeTxnStatusTree, NodeEnvEnum } from '..';
 import { db, type Database } from '../database/db';
-import { emailServer } from '../api/email';
+import { emailServer } from '../utils/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
 import { logger } from '../utils/logger';

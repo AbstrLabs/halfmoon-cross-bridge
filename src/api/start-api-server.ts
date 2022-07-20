@@ -1,5 +1,4 @@
 // TODO: CORS '*'
-// TODO: feat: add a RAM pool
 
 export { startApiServer };
 
@@ -9,7 +8,7 @@ import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
 import { logger } from '../utils/logger';
-import { docsRoute } from './docs';
+import { docsRoute } from './routes/docs';
 
 async function homePageTest() {
   /* Used once code */
@@ -47,9 +46,7 @@ function startApiServer() {
   app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
   app.use(express.json()); // parse application/json
 
-  // TODO: move API to a new file of new folder server/api
-
-  // is it better to write "/algorand-near" here or in "algorand-near.ts"?
+  // TBD2: is it better to write "/docs" here or in "routes/docs.ts"?
   app.use('/', txnRoute);
   app.use('/', docsRoute);
 

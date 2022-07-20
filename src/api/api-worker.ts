@@ -74,7 +74,6 @@ class ApiWorker {
 
   private _has(criticalApiCallParam: CriticalApiCallParam) {
     return this.#queue.has(criticalApiCallParam);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }
   private _add(criticalApiCallParam: CriticalApiCallParam) {
     this.#queue.add(parseCriticalApiCallParam(criticalApiCallParam));
