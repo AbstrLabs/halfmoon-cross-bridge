@@ -24,15 +24,10 @@ class ApiWorker {
    * @returns
    */
   public async create(apiCallParam: ApiCallParam) {
-    const criticalApiCallParam: CriticalApiCallParam =
-      parseCriticalApiCallParam(apiCallParam);
-
-    if (this._has(criticalApiCallParam)) {
-      throw new Error(
-        'Txn already in creation queue ' + criticalApiCallParam.txn_id
-      );
+    if (this._has(apiCallParam)) {
+      throw new Error('Txn already in creation queue ' + apiCallParam.txn_id);
     }
-    this._add(criticalApiCallParam);
+    this._add(apiCallParam);
 
     const bridgeTxn = BridgeTxn.fromApiCallParam(
       apiCallParam,
@@ -49,7 +44,7 @@ class ApiWorker {
       logger.error(err);
       throw err;
     } finally {
-      apiWorker._delete(criticalApiCallParam);
+      apiWorker._delete(apiCallParam);
     }
     logger.verbose(
       `[ApiWorker]: bridge txn created with uid: ${bridgeTxn.uid.toString()}`
@@ -82,7 +77,7 @@ class ApiWorker {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   }
   private _add(criticalApiCallParam: CriticalApiCallParam) {
-    this.#queue.add(criticalApiCallParam);
+    this.#queue.add(parseCriticalApiCallParam(criticalApiCallParam));
   }
 }
 
