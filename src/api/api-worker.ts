@@ -1,17 +1,17 @@
 /**
  * A singleton responsible for converting API call to initialized and
  * uploaded BridgeTxn.
- *
- * @TODO use ObjectSet for queue
  */
 export { type ApiWorker, apiWorker };
 
-import { ApiCallParam, CriticalApiCallParam } from '../utils/type/type';
+import {
+  ApiCallParam,
+  CriticalApiCallParam,
+  parseCriticalApiCallParam,
+} from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
 import ObjectSet from 'object-set-type';
-
-// TODO: parse with zod
 
 class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
@@ -24,9 +24,8 @@ class ApiWorker {
    * @returns
    */
   public async create(apiCallParam: ApiCallParam) {
-    // TODO: zod parse
-    // TODO: only use fields in critical api call param
-    const criticalApiCallParam: CriticalApiCallParam = apiCallParam;
+    const criticalApiCallParam: CriticalApiCallParam =
+      parseCriticalApiCallParam(apiCallParam);
 
     if (this._has(criticalApiCallParam)) {
       throw new Error(
