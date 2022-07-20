@@ -6,18 +6,12 @@
  */
 export { type ApiWorker, apiWorker };
 
-import { ApiCallParam, TxnId } from '../utils/type/type';
+import { ApiCallParam, CriticalApiCallParam } from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
 import { logger } from '../utils/logger';
-import { TokenId } from '../utils/type/shared-types/token';
 import ObjectSet from 'object-set-type';
 
 // TODO: parse with zod
-interface CriticalApiCallParam {
-  to_token: TokenId;
-  from_token: TokenId;
-  txn_id: TxnId;
-}
 
 class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
