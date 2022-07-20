@@ -15,7 +15,7 @@ import {
   AsaConfig,
   type NoParamAsaConfig,
   noParamGoNearConfig,
-} from '../utils/config/asa';
+} from '../utils/config-once/asa';
 
 import { Blockchain } from '.';
 import { ENV } from '../utils/dotenv';
