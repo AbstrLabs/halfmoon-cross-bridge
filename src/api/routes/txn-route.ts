@@ -1,5 +1,7 @@
 /**
  * Route for /algorand-near with POST and GET method.
+ *
+ * @todo v0.3 change `/algorand-near` to `/txn`
  */
 export { txnRoute };
 
@@ -23,10 +25,11 @@ import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';
 import { TokenId } from '../../utils/type/shared-types/token';
 import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
+import { TXN_ROUTE_PATH } from '../../config';
 
 const txnRoute = express.Router();
 
-txnRoute.route('/algorand-near').get(handleGetCall).post(handlePostCall);
+txnRoute.route(TXN_ROUTE_PATH).get(handleGetCall).post(handlePostCall);
 
 // TODO: refactor move to types with better typing
 export interface PostReturn {
