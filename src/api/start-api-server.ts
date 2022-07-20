@@ -1,5 +1,4 @@
 // TODO: CORS '*'
-// TODO: feat: add a RAM pool
 
 export { startApiServer };
 
@@ -9,7 +8,7 @@ import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
 import { logger } from '../utils/logger';
-import { docsRoute } from './docs';
+import { docsRoute } from './routes/docs';
 
 async function homePageTest() {
   /* Used once code */
