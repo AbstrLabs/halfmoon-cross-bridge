@@ -3,20 +3,22 @@
  * Abstract class {@link Blockchain}.
  */
 
+export type {
+  AlgoAcc,
+  AlgoAddr,
+  AlgoTxnId,
+  AlgoTxnOutcome,
+  GenericAcc,
+  NearAcc,
+  NearAddr,
+  NearTxnId,
+  NearTxnOutcome,
+  TxnOutcome,
+};
 export {
   Blockchain, // abstract class
   BLOCKCHAIN_MAP,
   ConfirmOutcome,
-  type AlgoAcc,
-  type AlgoAddr,
-  type AlgoTxnId,
-  type AlgoTxnOutcome,
-  type GenericAcc,
-  type NearAcc,
-  type NearAddr,
-  type NearTxnId,
-  type NearTxnOutcome,
-  type TxnOutcome,
 };
 
 import algosdk from 'algosdk';
