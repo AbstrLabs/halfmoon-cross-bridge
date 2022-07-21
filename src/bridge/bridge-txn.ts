@@ -68,7 +68,6 @@ type BridgeTxnAction = {
  * @decorator this is a decorator factory
  * @throws {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function requireStatus(txnStatus: BridgeTxnStatusEnum) {
   return function (
     target: BridgeTxn,
@@ -303,6 +302,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns Promise of void
    */
+  @requireStatus(BridgeTxnStatusEnum.DONE_INITIALIZE)
   async confirmIncomingTxn(): Promise<void> {
     logger.verbose('[BTX]: running confirmIncomingTxn.');
     if (!this.#isCreatedInDb) {
@@ -313,11 +313,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         bridgeTxn: this,
       });
     }
-    this._checkStatus(
-      BridgeTxnStatusEnum.DONE_INITIALIZE,
-      'confirmIncomingTxn'
-    );
-
     await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_INCOMING);
 
     let confirmOutcome;
@@ -352,9 +347,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
    * @returns Promise of void
    */
+  @requireStatus(BridgeTxnStatusEnum.DONE_INCOMING)
   async makeOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatusEnum.DONE_INCOMING, 'makeOutgoingTxn');
-
     let outgoingTxnId: TxnId;
     try {
       outgoingTxnId = await this.#toBlockchain.makeOutgoingTxn({
@@ -388,8 +382,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
    * @returns Promise of void
    */
+  @requireStatus(BridgeTxnStatusEnum.DOING_OUTGOING)
   async verifyOutgoingTxn(): Promise<void> {
-    this._checkStatus(BridgeTxnStatusEnum.DOING_OUTGOING, 'verifyOutgoingTxn');
     try {
       await this.#toBlockchain.confirmTxn({
         fromAddr: this.#toBlockchain.centralizedAddr,
@@ -781,26 +775,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
         at: 'BridgeTxn._updateToTxnId',
         error: e,
-        bridgeTxn: this,
-      });
-    }
-  }
-
-  /* PRIVATE METHODS - HELPERS */
-
-  /**
-   * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
-   *
-   * @todo make this a decorator.
-   * @internal
-   * @throws {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
-   * @param expected - Expected {@link BridgeTxnStatusEnum} of the {@link BridgeTxn}
-   * @param at - Location of the call
-   */
-  private _checkStatus(expected: BridgeTxnStatusEnum, at: string): void {
-    if (!(this.txnStatus === expected)) {
-      throw new BridgeError(ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, {
-        at: `BridgeTxn.${at}`,
         bridgeTxn: this,
       });
     }
