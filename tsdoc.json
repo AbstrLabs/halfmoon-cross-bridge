@@ -4,6 +4,10 @@
     {
       "tagName": "@todo",
       "syntaxKind": "block"
+    },
+    {
+      "tagName": "@update",
+      "syntaxKind": "block"
     }
   ]
 }

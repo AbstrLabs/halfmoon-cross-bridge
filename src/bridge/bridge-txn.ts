@@ -403,7 +403,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @param other - The other instance of {@link BridgeTxn} to compare with
    * @returns Boolean if the two BridgeTxn are considered same
    *
-   * @todo Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
+   * @update Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
   public equals(other: BridgeTxn): boolean {
     return (
