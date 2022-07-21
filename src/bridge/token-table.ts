@@ -7,8 +7,9 @@
 
 export type { Token };
 
-export { TOKEN_TABLE };
+export { TOKEN_TABLE, getTokenImplBlockchain };
 import { BlockchainName } from '..';
+import { Blockchain, BLOCKCHAIN_MAP } from '../blockchain';
 import { ENV } from '../utils/dotenv';
 import { TokenId } from '../utils/type/shared-types/token';
 import { Addr } from '../utils/type/type';
@@ -81,5 +82,10 @@ const TOKEN_TABLE: Record<TokenId, Token> = {
   goNEAR,
   wALGO,
 } as const;
+
+const getTokenImplBlockchain = (tokenId: TokenId): Blockchain => {
+  const token = TOKEN_TABLE[tokenId];
+  return BLOCKCHAIN_MAP[token.implBlockchain];
+};
 
 Object.freeze(TOKEN_TABLE);
