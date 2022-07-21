@@ -1,7 +1,5 @@
 /**
  * A worker to handle transactions with a queue.
- *
- * @todo pass UID instead of BridgeTxn across this singleton.
  */
 export { type BridgeWorker, bridgeWorker, FetchAction, startBridgeTxnWorker };
 
@@ -154,7 +152,6 @@ class BridgeWorker {
   }
 
   /**
-   * @todo ref: pass UID here.
    * @param bridgeTxn - A BridgeTxn
    * @returns
    */
@@ -224,7 +221,7 @@ class BridgeWorker {
 
   private _has(bridgeTxn: BridgeTxn): boolean {
     // consider same UID implies same task
-    return this.#queue.has(bridgeTxn.uid); // TODO: should compare UID here.
+    return this.#queue.has(bridgeTxn.uid);
   }
   private _getRandomOne(): BridgeTxn | undefined {
     const [uidTxnPair] = this.#queue;
