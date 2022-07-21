@@ -16,11 +16,11 @@ import { logger } from '../utils/logger';
 import { TxnUid } from '../utils/type/type';
 import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 
-// TODO: add this to setting (maybe .env)
+// TBD3: add config to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
 
-// TODO: [SYM] ref: should use on more lik these?
+// TBD4: [SYM] ref: should use on more lik these?
 const LOAD = Symbol('LOAD');
 const UPDATE = Symbol('UPDATE');
 const FetchAction = { LOAD, UPDATE } as const;
