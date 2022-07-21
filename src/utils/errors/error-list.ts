@@ -194,6 +194,11 @@ const internalErrors = {
     name: 'Unknown Node Env',
     message: 'Node Env is not in enum NodeEnvEnum',
   },
+  TS_ENGINE_ERROR: {
+    errId: 224,
+    name: 'TypeScript Engine Error',
+    message: 'This error is used to guide TypeScript, should never be thrown.',
+  },
 };
 
 const externalErrors = {
