@@ -118,12 +118,12 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   txnStatus: BridgeTxnStatusEnum;
   toTxnId?: string | null;
   txnComment: string | null = null;
+  private _isCreatedInDb: boolean;
   #db = db;
   #fromBlockchain: Blockchain;
   #fromToken: Token;
   #toBlockchain: Blockchain;
   #toToken: Token;
-  #isCreatedInDb: boolean;
 
   /* CONSTRUCTORS  */
 
@@ -181,7 +181,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       toTxnId: _dbItem.to_txn_id,
       txnStatus: _dbItem.txn_status,
     });
-    bridgeTxn.#isCreatedInDb = true;
+    bridgeTxn._isCreatedInDb = true;
     return bridgeTxn;
   }
 
@@ -222,7 +222,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     toTxnId,
     dbId,
   }: BridgeTxnObjBase) {
-    this.#isCreatedInDb = false;
+    this._isCreatedInDb = false;
 
     this.fromTokenId = fromTokenId;
     this.toTokenId = toTokenId;
@@ -275,7 +275,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
     // TODO: should not create in db automatically
-    if (!this.#isCreatedInDb) {
+    if (!this._isCreatedInDb) {
       await this.createInDb();
     }
 
@@ -305,7 +305,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   @requireStatus(BridgeTxnStatusEnum.DONE_INITIALIZE)
   async confirmIncomingTxn(): Promise<void> {
     logger.verbose('[BTX]: running confirmIncomingTxn.');
-    if (!this.#isCreatedInDb) {
+    if (!this._isCreatedInDb) {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn.confirmIncomingTxn',
         reason:
@@ -665,7 +665,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         at: 'BridgeTxn._updateTxnStatus',
       });
     }
-    this.#isCreatedInDb = true;
+    this._isCreatedInDb = true;
 
     return this.dbId;
   }
