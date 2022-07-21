@@ -269,8 +269,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    *
    * @deprecated - use new state pattern instead
    *
-   * @throws 8{@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
-   * @throws 8{@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns - Promise of {@link BridgeTxnObj} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
