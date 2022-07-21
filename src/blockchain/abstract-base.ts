@@ -17,7 +17,6 @@ export type {
 };
 export {
   Blockchain, // abstract class
-  BLOCKCHAIN_MAP,
   ConfirmOutcome,
 };
 
@@ -38,8 +37,6 @@ import {
 import { setImmediateInterval } from '../utils/helper';
 import { logger } from '../utils/logger';
 import { BlockchainName } from '..';
-import { algoBlockchain } from './algorand';
-import { nearBlockchain } from './near';
 
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
@@ -152,8 +149,3 @@ abstract class Blockchain {
 
   // getRecentTransactions(limit: number): Promise<TxnID[]>;
 }
-
-const BLOCKCHAIN_MAP: Record<BlockchainName, Blockchain> = {
-  [BlockchainName.ALGO]: algoBlockchain,
-  [BlockchainName.NEAR]: nearBlockchain,
-};
