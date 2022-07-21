@@ -27,6 +27,7 @@ import {
   BridgeTxnSafeObj,
   BridgeTxnStatusEnum,
 } from '../utils/type/shared-types/txn';
+import { bigintBips } from '../utils/helper';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -509,7 +510,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     // TODO: (ANB-126) verify to address is legal with indexer.
 
-    // TODO: (later) we can also do a min/max of amount check here.
+    // TODO: (ANB-127) we can also do a min/max of amount check here.
     return this;
   }
 
@@ -535,8 +536,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @internal
    * @throws {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
    * @returns The marginFeeAtom
-   *
-   * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
   private _calculateMarginFeeAtom(): bigint {
     const marginBips: number = getBridgeInfo(
@@ -544,12 +543,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       this.toTokenId
     ).marginBips;
 
-    const marginFee: bigint = // TODO: supposing no bigint overflow
-      this.fromAmountAtom -
-      (this.fromAmountAtom * (BigInt(10000) - BigInt(marginBips))) /
-        BigInt(10000); // X-(X*(1-%)) instead of X*% for rounding.
-    // algorithm discussed with algomint team.
-
+    const marginFee: bigint = bigintBips(
+      this.fromAmountAtom,
+      BigInt(10000) - BigInt(marginBips)
+    );
     this.marginFeeAtom = marginFee;
     return marginFee;
   }
@@ -640,7 +637,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       });
     }
     try {
-      return await this.#db.updateTxn(this); // TODO: err handling in this async
+      return await this.#db.updateTxn(this);
     } catch (e) {
       logger.error('error at _updateTxn', e);
       throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
