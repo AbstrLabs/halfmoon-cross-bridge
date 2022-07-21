@@ -16,11 +16,11 @@ import {
   providers,
 } from 'near-api-js';
 
-import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from '.';
+import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
 import { BlockchainName } from '..';
 import { ENV } from '../utils/dotenv';
 import { logger } from '../utils/logger';
-import { Blockchain } from '.';
+import { Blockchain } from './abstract-base';
 import { literals } from '../utils/literals';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
