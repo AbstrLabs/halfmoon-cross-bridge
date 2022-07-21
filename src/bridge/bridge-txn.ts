@@ -508,9 +508,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       });
     }
 
-    // TODO: (ANB-126) verify to address is legal with indexer.
+    // TODO: (ANB-126) verify to_address is legal with indexer.
 
-    // TODO: (ANB-127) we can also do a min/max of amount check here.
+    // TBD: (ANB-127) we can also do a min/max of amount check here.
     return this;
   }
 
