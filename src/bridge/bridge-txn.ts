@@ -13,15 +13,13 @@ import {
   Override,
 } from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain';
-import { BlockchainName, BridgeTxnActionName } from '..';
+import { BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
-import { algoBlockchain } from '../blockchain/algorand';
 import { db } from '../database/db';
 import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
-import { nearBlockchain } from '../blockchain/near';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../utils/type/shared-types/token';
@@ -266,7 +264,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     this.dbId = dbId;
 
     try {
-      // Below will be overwritten if instantiated with value.
+      // TODO: (ANB-114) v0.3, Below will be overwritten if instantiated with value.
       this.fixedFeeAtom = fixedFeeAtom ?? this._readFixedFeeAtom();
       this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
@@ -471,12 +469,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     }
     return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
-  // get fromBlockchainName(): BlockchainName {
-  //   return this.#fromBlockchain.name;
-  // }
-  // get toBlockchainName(): BlockchainName {
-  //   return this.#toBlockchain.name;
-  // }
 
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
@@ -509,12 +501,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns The {@link BridgeTxn} itself
    */
   private _selfValidate(): this {
-    // if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
-    //   throw new BridgeError(ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM, {
-    //     at: 'BridgeTxn._selfValidate',
-    //   });
-    // }
-
     if (this.fromAmountAtom < this.fixedFeeAtom) {
       throw new BridgeError(ERRORS.INTERNAL.INVALID_AMOUNT, {
         fromAmountAtom: this.fromAmountAtom,
@@ -525,28 +511,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     // TODO: (later) we can also do a min/max of amount check here.
     return this;
-  }
-
-  /**
-   * Hook the blockchains of the {@link BridgeTxn}.
-   * This is one step of the initialization.
-   *
-   * @internal
-   * @throws {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
-   * @returns A {@link Blockchain}, should be a singleton
-   */
-  private _getBlockchain(blockchainName: BlockchainName): Blockchain {
-    switch (blockchainName) {
-      case BlockchainName.ALGO:
-        return algoBlockchain;
-      case BlockchainName.NEAR:
-        return nearBlockchain;
-      default:
-        throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME, {
-          blockchainName,
-          at: 'BridgeTxn._getBlockchain',
-        });
-    }
   }
 
   /**
