@@ -264,38 +264,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   // process according to sequence diagram
 
   /**
-   * Run the whole mint or burn process of the {@link BridgeTxn} and wrap the result in a {@link BridgeTxnObj}.
-   * This should be the only way used outside the {@link BridgeTxn} class.
-   *
-   * @deprecated - use new state pattern instead
-   *
-   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
-   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @returns - Promise of {@link BridgeTxnObj} representing the {@link BridgeTxn}
-   */
-  async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
-    // TODO: should not create in db automatically
-    if (!this._isCreatedInDb) {
-      await this.createInDb();
-    }
-
-    logger.info(
-      literals.MAKING_TXN(
-        `${this.#fromBlockchain.name}->${this.#toBlockchain.name}`,
-        this.fromAmountAtom,
-        this.fromAddr,
-        this.toAddr
-      )
-    );
-
-    await this.confirmIncomingTxn();
-    await this.makeOutgoingTxn();
-    await this.verifyOutgoingTxn();
-    return this.toObject();
-    // return this;
-  }
-
-  /**
    * Confirm the incoming transaction of the {@link BridgeTxn}.
    * Change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    *
