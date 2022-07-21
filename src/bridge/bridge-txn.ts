@@ -11,6 +11,7 @@ import {
   TxnId,
   parseDbItem,
   parseTxnUid,
+  Override,
 } from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain';
 import { BlockchainName, BridgeTxnActionName } from '..';
@@ -94,6 +95,34 @@ function requireStatus(txnStatus: BridgeTxnStatusEnum) {
         return descriptor.value.apply(this);
       },
     };
+  };
+}
+
+function requireCreatedInDb(
+  target: BridgeTxn,
+  key: `${BridgeTxnActionName}`,
+  descriptor: TypedPropertyDescriptor<BridgeTxnActionFn>
+) {
+  interface _PrivateBridgeTxn {
+    // for TS Engine
+    _isCreatedInDb: boolean;
+  }
+  return {
+    value: function (this: Override<BridgeTxn, _PrivateBridgeTxn>) {
+      if (descriptor.value === undefined) {
+        throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
+      }
+      if (!this._isCreatedInDb) {
+        throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+          at: `BridgeTxn.${key}`,
+          bridgeTxn: this,
+          reason:
+            'BridgeTxn should be created in DB before confirming incoming txn',
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return descriptor.value.apply(this);
+    },
   };
 }
 
@@ -270,17 +299,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns Promise of void
    */
+  @requireCreatedInDb
   @requireStatus(BridgeTxnStatusEnum.DONE_INITIALIZE)
   async confirmIncomingTxn(): Promise<void> {
     logger.verbose('[BTX]: running confirmIncomingTxn.');
-    if (!this._isCreatedInDb) {
-      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-        at: 'BridgeTxn.confirmIncomingTxn',
-        reason:
-          'BridgeTxn should be created in DB before confirming incoming txn',
-        bridgeTxn: this,
-      });
-    }
     await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_INCOMING);
 
     let confirmOutcome;
@@ -315,6 +337,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
    * @returns Promise of void
    */
+  @requireCreatedInDb
   @requireStatus(BridgeTxnStatusEnum.DONE_INCOMING)
   async makeOutgoingTxn(): Promise<void> {
     let outgoingTxnId: TxnId;
@@ -350,6 +373,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @throws {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
    * @returns Promise of void
    */
+  @requireCreatedInDb
   @requireStatus(BridgeTxnStatusEnum.DOING_OUTGOING)
   async verifyOutgoingTxn(): Promise<void> {
     try {
