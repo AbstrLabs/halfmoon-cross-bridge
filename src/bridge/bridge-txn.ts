@@ -507,7 +507,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       });
     }
 
-    // TODO: verify to address is legal with indexer.
+    // TODO: (ANB-126) verify to address is legal with indexer.
 
     // TODO: (later) we can also do a min/max of amount check here.
     return this;
@@ -634,11 +634,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns Promise
    */
   private async _updateTxn(): Promise<DbId> {
-    // if (this.txnStatus === undefined) {
-    //   throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-    //     at: 'BridgeTxn._updateTxnStatus',
-    //   });
-    // }
     if (!this.#db.isConnected) {
       throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
         at: 'BridgeTxn._updateTxnStatus',
@@ -667,8 +662,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   private async _updateTxnStatus(
     newStatus: BridgeTxnStatusEnum
   ): Promise<DbId> {
-    // TODO: have a hierarchy tree of status. newStatus can only be one of the children of this.txnStatus
-    // TODO: check if update if valid
+    // TODO: [BTSE] have a hierarchy tree of status. newStatus can only be one of the
+    // TODO: [BTSE] children of this. txnStatus to check if update if valid
     if (
       [
         BridgeTxnStatusEnum.ERR_AWS_RDS_DB,
