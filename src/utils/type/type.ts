@@ -71,6 +71,10 @@ export type ExpandRecursively<T> = T extends (...args: infer A) => infer R
   : T;
 
 export type Merge<T, U> = { [K in keyof T]: K extends keyof U ? U[K] : T[K] };
+export type Override<T, U> = Merge<T, U> & U;
+// export type Override<T extends U, U> = {
+//   [K in keyof U]: K extends keyof T ? U[K] : never;
+// };
 
 /* ZOD TYPES (WITH PARSER) */
 
