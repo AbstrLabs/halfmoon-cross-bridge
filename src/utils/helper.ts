@@ -1,5 +1,6 @@
-export { ensureString, setImmediateInterval, pause };
+export { ensureString, setImmediateInterval, pause, bigintBips };
 
+import BigNumber from 'bignumber.js';
 import { BridgeError, ERRORS } from './errors';
 
 /**
@@ -45,4 +46,30 @@ function setImmediateInterval(
 ): NodeJS.Timer {
   func();
   return setInterval(func, interval_ms);
+}
+
+function bigintBips(
+  bigint: bigint,
+  bips: number | bigint | BigNumber,
+  option: {
+    rounding: 'floor' | 'ceil'; // | 'round'
+  } = { rounding: 'floor' }
+): bigint {
+  let ratio: BigNumber;
+  if (typeof bips === 'number') {
+    ratio = new BigNumber(bips / 10000);
+  } else if (typeof bips === 'bigint') {
+    ratio = new BigNumber((bips / 10000n).toString());
+  } else {
+    ratio = bips.div(10000);
+  }
+  const bn = new BigNumber(bigint.toString());
+  const multi = bn.times(ratio);
+  const flooredResult = BigInt(multi.toString().split('.')[0]);
+  if (option.rounding === 'floor') {
+    return flooredResult;
+  } else {
+    //if (option.rounding === 'ceil') {
+    return flooredResult + 1n;
+  }
 }
