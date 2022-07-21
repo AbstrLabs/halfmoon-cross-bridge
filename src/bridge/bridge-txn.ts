@@ -63,7 +63,7 @@ type BridgeTxnAction = {
 /* DECORATOR */
 
 /**
- * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
+ * Helper to throw an error if the {@link txnStatus} is not equal to the expected status.
  *
  * @decorator this is a decorator factory
  * @throws {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
@@ -72,12 +72,14 @@ type BridgeTxnAction = {
 function requireStatus(txnStatus: BridgeTxnStatusEnum) {
   return function (
     target: BridgeTxn,
-    key: BridgeTxnActionName,
-    descriptor: { value: BridgeTxnActionFn }
+    key: `${BridgeTxnActionName}`,
+    descriptor: TypedPropertyDescriptor<BridgeTxnActionFn>
   ) {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       value: function (this: BridgeTxn) {
+        if (descriptor.value === undefined) {
+          throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
+        }
         if (this.txnStatus !== txnStatus) {
           throw new BridgeError(
             ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, //BRIDGE_TXN_STATUS_MISMATCH,
@@ -89,6 +91,7 @@ function requireStatus(txnStatus: BridgeTxnStatusEnum) {
             }
           );
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return descriptor.value.apply(this);
       },
     };
