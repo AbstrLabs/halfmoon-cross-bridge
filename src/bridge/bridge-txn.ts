@@ -1,5 +1,4 @@
 /**
- * @todo - maybe split bridge and bridge-txn
  * @todo docs: alternative constructors not marked
  */
 export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
@@ -23,7 +22,7 @@ import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { nearBlockchain } from '../blockchain/near';
-import { Token, TOKEN_TABLE } from './token-table';
+import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../utils/type/shared-types/token';
 import {
@@ -149,10 +148,12 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   txnComment: string | null = null;
   private _isCreatedInDb: boolean;
   #db = db;
-  #fromBlockchain: Blockchain;
-  #fromToken: Token;
-  #toBlockchain: Blockchain;
-  #toToken: Token;
+  get #fromBlockchain(): Blockchain {
+    return getTokenImplBlockchain(this.fromTokenId);
+  }
+  get #toBlockchain(): Blockchain {
+    return getTokenImplBlockchain(this.toTokenId);
+  }
 
   /* CONSTRUCTORS  */
 
@@ -255,10 +256,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     this.fromTokenId = fromTokenId;
     this.toTokenId = toTokenId;
-    this.#fromToken = TOKEN_TABLE[this.fromTokenId];
-    this.#toToken = TOKEN_TABLE[this.toTokenId];
-    this.#fromBlockchain = this._getBlockchain(this.#fromToken.implBlockchain);
-    this.#toBlockchain = this._getBlockchain(this.#toToken.implBlockchain);
 
     this.fromTxnId = fromTxnId;
     this.fromAmountAtom = fromAmountAtom;
