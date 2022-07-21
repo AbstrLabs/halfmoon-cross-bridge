@@ -8,7 +8,7 @@ import { ApiCallParam, TxnParam } from '../utils/type/type';
 
 import { BlockchainName } from '..';
 import { toGoNearAtom } from '../utils/formatter';
-import { ConfirmOutcome, type Blockchain } from '.';
+import { ConfirmOutcome, type Blockchain } from './abstract-base';
 import { nearBlockchain } from './near';
 import { algoBlockchain } from './algorand';
 import { TOKEN_TABLE } from '../bridge/token-table';

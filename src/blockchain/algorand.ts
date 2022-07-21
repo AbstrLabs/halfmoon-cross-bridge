@@ -9,7 +9,7 @@ export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAcc, AlgoAddr, AlgoTxnId } from '.';
+import { AlgoAddr, AlgoTxnId } from './../utils/type/type';
 import { Algodv2 as AlgodClient, Indexer } from 'algosdk';
 import {
   AsaConfig,
@@ -17,7 +17,7 @@ import {
   noParamGoNearConfig,
 } from '../utils/config-once/asa';
 
-import { Blockchain } from '.';
+import { AlgoAcc, Blockchain } from './abstract-base';
 import { ENV } from '../utils/dotenv';
 import { BlockchainName } from '..';
 import { logger } from '../utils/logger';

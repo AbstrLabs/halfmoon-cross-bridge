@@ -14,7 +14,7 @@ import {
   TxnUid,
 } from '../../utils/type/type';
 import { parseTxnUid } from '../../utils/type/type';
-import { ConfirmOutcome } from '../../blockchain';
+import { ConfirmOutcome } from '../../blockchain/abstract-base';
 import express, { Request, Response } from 'express';
 
 import { BridgeTxn } from '../../bridge';

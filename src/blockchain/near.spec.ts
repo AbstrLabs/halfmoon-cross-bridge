@@ -1,4 +1,4 @@
-import { ConfirmOutcome } from '.';
+import { ConfirmOutcome } from './abstract-base';
 import { ENV } from '../utils/dotenv';
 import { literals } from '../utils/literals';
 import { nearBlockchain } from './near';
