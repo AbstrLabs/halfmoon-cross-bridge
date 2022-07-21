@@ -59,8 +59,7 @@ class BridgeWorker {
    * @returns Promise of void
    */
   async fetchTasksFromDb(fetchAction: FetchActionType): Promise<void> {
-    // TODO: merge with updateTasksFromDb
-    // TODO: prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
+    // TODO: [FDB] filter and prune DB. this should be done with db operation. copy from T to U first then remove intersect(T,U) from U.
     const allDbItems = await this.database.readAllTxn();
     this.#lastFetchingTime = new Date(Date.now());
     for (const item of allDbItems) {
@@ -68,7 +67,7 @@ class BridgeWorker {
       // later this won't be needed since all finished items will be removed from that table.
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
         logger.silly(`[BW ]: Skipping finished task ${bridgeTxn.uid}`);
-        // TODO: change this back to debug, and filter in db.
+        // TODO: [FDB] change this back to debug, and filter in db.
         continue;
       }
       logger.silly(
@@ -98,7 +97,6 @@ class BridgeWorker {
   }
 
   public async addTask(bridgeTxn: BridgeTxn) {
-    // TODO: check if task already exists in DB
     await new Promise<void>((resolve) => {
       resolve();
     });
@@ -150,7 +148,7 @@ class BridgeWorker {
     // then update current to txn
     // TODO [BTST]: check if can update
     if (this._has(bridgeTxn)) {
-      // TODO: check if txn is newer than current
+      // TODO [BTST]: check if txn is newer than current
     }
     this.#queue.set(bridgeTxn.uid, bridgeTxn);
   }
@@ -182,7 +180,6 @@ class BridgeWorker {
         throw new Error(
           `[BW ]: actionName is null for ${bridgeTxn.uid} no action's needed.`
         );
-        // TODO: should do something here like remove this task from queue
       } else {
         logger.verbose(
           `[BW ]: Executing ${actionName} on ${bridgeTxn.uid} with status ${bridgeTxn.txnStatus}.`
@@ -204,7 +201,7 @@ class BridgeWorker {
   }
 
   private async _dropTask(bridgeTxn: BridgeTxn) {
-    // TODO: move this task to "error" table
+    // TODO [FDB]: move this task to "error" table
     await new Promise<void>((resolve) => {
       resolve();
     });
@@ -213,7 +210,7 @@ class BridgeWorker {
   }
 
   private async _finishTask(bridgeTxn: BridgeTxn) {
-    // TODO: move this task to "finished" table
+    // TODO [FDB]: move this task to "finished" table
     await new Promise<void>((resolve) => {
       resolve();
     });
