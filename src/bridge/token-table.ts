@@ -1,8 +1,6 @@
 /**
  * This file is a convenient local variable for token table on RDS.
  * @todo - create token_table on RDS.
- * @todo - move TOKEN_TABLE to constants file.
- * @todo - add Asset_ID to the Token type
  */
 
 export type { Token };
@@ -18,10 +16,12 @@ import { Addr } from '../utils/type/type';
 interface TokenBase {
   tokenId: TokenId; // our way to call it, usually same as tokenName
   tokenName: string; // this is its real name
+  assetId: number; // Asset ID on blockchains. 0 = native token; -1 = not implemented.
 }
 
 interface NativeToken extends TokenBase {
   implBlockchain: BlockchainName;
+  assetId: 0;
   // originBlockchain is the same as implBlockchain
   // master address is not needed here.
 }
@@ -32,12 +32,14 @@ const ALGO: NativeToken = {
   tokenId: TokenId.ALGO,
   tokenName: 'ALGO',
   implBlockchain: BlockchainName.ALGO,
+  assetId: 0,
 };
 
 const NEAR: NativeToken = {
   tokenId: TokenId.NEAR,
   tokenName: 'NEAR',
   implBlockchain: BlockchainName.NEAR,
+  assetId: 0,
 };
 
 /* ASSET TOKENS */
@@ -63,6 +65,7 @@ const goNEAR: AssetToken = {
   implMaster: ENV.ALGO_MASTER_ADDR,
   originBlockchain: BlockchainName.NEAR,
   originMaster: ENV.NEAR_MASTER_ADDR,
+  assetId: ENV.TEST_NET_GO_NEAR_ASSET_ID,
 };
 
 const wALGO: AssetToken = {
@@ -72,6 +75,7 @@ const wALGO: AssetToken = {
   implMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
   originBlockchain: BlockchainName.ALGO,
   originMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
+  assetId: -1,
 };
 
 // use obj for non-consecutive tokenId
