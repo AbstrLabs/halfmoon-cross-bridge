@@ -24,12 +24,11 @@ interface PgConfig {
  * @param pgConfig - PostgreSQL configuration
  */
 class Postgres {
-  // private readonly pgConfig = getEnvConfig();
   private client?: PoolClient;
   private pool: Pool;
   isConnected = false;
 
-  constructor(pgConfig?: PgConfig) {
+  constructor(pgConfig: PgConfig) {
     this.pool = new Pool(pgConfig);
   }
 
@@ -43,10 +42,13 @@ class Postgres {
       logger.verbose('db is already connected');
       return;
     }
-    this.client = await this.pool.connect();
-    // if (!this.client) {
-    //   throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED);
-    // }
+    try {
+      this.client = await this.pool.connect();
+    } catch (err) {
+      throw new BridgeError(ERRORS.EXTERNAL.DB_CONNECTION_FAILED, {
+        dbServerError: err,
+      });
+    }
     this.isConnected = true;
     logger.info('[DB ]: database connected');
   }
