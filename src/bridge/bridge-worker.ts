@@ -18,7 +18,7 @@ import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
 
-// TBD4: [SYM] ref: should use on more lik these?
+// TBD4: [SYM] ref: prefer Enum or Symbol?
 const LOAD = Symbol('LOAD');
 const UPDATE = Symbol('UPDATE');
 const FetchAction = { LOAD, UPDATE } as const;

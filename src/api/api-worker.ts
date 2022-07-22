@@ -37,7 +37,7 @@ class ApiWorker {
     try {
       // BTX.createInDb compares BTX.fromTxnId with DbItem.from_txn_id and wil throw err
       await bridgeTxn.createInDb();
-      // TBD1: should we add more coupling to save execution time?
+      // TBD1: less coupling vs less execution cost (to fetch db)?
       // bridgeWorker.addTask(bridgeTxn);
     } catch (err) {
       logger.error('[AWK]: Double mint: from_txn_id existed in db.');
