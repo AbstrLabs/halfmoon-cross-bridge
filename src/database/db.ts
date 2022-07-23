@@ -352,9 +352,10 @@ class Database {
    * @deprecated - should use decorator (not finished)
    *
    * @todo change the object type
-   * @todo use decorator
    */
   private _verifyResultUniqueness<T>(result: T[], extraErrInfo?: object): T {
+    // changing this to decorator is worse because it will change the return type
+    // of the function from T to [T] (array of length 1).
     if (result.length === 0) {
       throw new BridgeError(ERRORS.EXTERNAL.DB_TXN_NOT_FOUND, extraErrInfo);
     }
