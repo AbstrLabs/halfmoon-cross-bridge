@@ -350,10 +350,11 @@ class Database {
    * @param extraErrInfo - extra error info
    * @returns boolean if result is not empty
    * @deprecated - should use decorator (not finished)
-   *
-   * @todo change the object type
    */
-  private _verifyResultUniqueness<T>(result: T[], extraErrInfo?: object): T {
+  private _verifyResultUniqueness<T>(
+    result: T[],
+    extraErrInfo?: Record<string, unknown> // unknown because of `queryResult`
+  ): T {
     // changing this to decorator is worse because it will change the return type
     // of the function from T to [T] (array of length 1).
     if (result.length === 0) {
