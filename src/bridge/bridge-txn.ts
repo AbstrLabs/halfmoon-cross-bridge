@@ -292,6 +292,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Confirm the incoming transaction of the {@link BridgeTxn}.
    * Change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    *
+   * @decorator `@requireCreatedInDb`
+   * @decorator `@requireStatus(BridgeTxnStatusEnum.DONE_INITIALIZE)`
    * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
    * @returns Promise of void
    */
@@ -329,6 +331,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Make the outgoing transaction of the {@link BridgeTxn}.
    * Change the txnStatus from {@link BridgeTxnStatusEnum.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatusEnum.DOING_OUTGOING} or the corresponding errors.
    *
+   * @decorator `@requireCreatedInDb`
+   * @decorator `@requireStatus(BridgeTxnStatusEnum.DONE_INCOMING)`
    * @throws {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
    * @throws {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
    * @returns Promise of void
@@ -366,6 +370,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Verify the outgoing transaction of the {@link BridgeTxn}.
    * Change the txnStatus from {@link BridgeTxnStatusEnum.DOING_OUTGOING} to {@link BridgeTxnStatusEnum.DONE_OUTGOING} or the corresponding errors.
    *
+   * @decorator `@requireCreatedInDb`
+   * @decorator `@requireStatus(BridgeTxnStatusEnum.DONE_OUTGOING)`
    * @throws {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
    * @returns Promise of void
    */
