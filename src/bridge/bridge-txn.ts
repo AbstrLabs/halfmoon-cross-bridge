@@ -73,26 +73,25 @@ function requireStatus(txnStatus: BridgeTxnStatusEnum) {
     key: `${BridgeTxnActionName}`,
     descriptor: TypedPropertyDescriptor<BridgeTxnActionFn>
   ) {
-    return {
-      value: function (this: BridgeTxn) {
-        if (descriptor.value === undefined) {
-          throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
-        }
-        if (this.txnStatus !== txnStatus) {
-          throw new BridgeError(
-            ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, //BRIDGE_TXN_STATUS_MISMATCH,
-            {
-              at: `BridgeTxn.${key}`,
-              bridgeTxn: this,
-              expected: txnStatus,
-              actual: this.txnStatus,
-            }
-          );
-        }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return descriptor.value.apply(this);
-      },
+    const originalMethod = descriptor.value;
+    if (originalMethod === undefined) {
+      throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
+    }
+    descriptor.value = function (this: BridgeTxn) {
+      if (this.txnStatus !== txnStatus) {
+        throw new BridgeError(
+          ERRORS.INTERNAL.ILLEGAL_TXN_STATUS, //BRIDGE_TXN_STATUS_MISMATCH,
+          {
+            at: `BridgeTxn.${key}`,
+            bridgeTxn: this,
+            expected: txnStatus,
+            actual: this.txnStatus,
+          }
+        );
+      }
+      return originalMethod.apply(this);
     };
+    return descriptor;
   };
 }
 
@@ -105,23 +104,23 @@ function requireCreatedInDb(
     // for TS Engine
     _isCreatedInDb: boolean;
   }
-  return {
-    value: function (this: Override<BridgeTxn, _PrivateBridgeTxn>) {
-      if (descriptor.value === undefined) {
-        throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
-      }
-      if (!this._isCreatedInDb) {
-        throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
-          at: `BridgeTxn.${key}`,
-          bridgeTxn: this,
-          reason:
-            'BridgeTxn should be created in DB before confirming incoming txn',
-        });
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return descriptor.value.apply(this);
-    },
+  const originalMethod = descriptor.value;
+  if (originalMethod === undefined) {
+    throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR);
+  }
+  descriptor.value = function (this: Override<BridgeTxn, _PrivateBridgeTxn>) {
+    if (!this._isCreatedInDb) {
+      throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
+        at: `BridgeTxn.${key}`,
+        bridgeTxn: this,
+        reason:
+          'BridgeTxn should be created in DB before confirming incoming txn',
+      });
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return originalMethod.apply(this);
   };
+  return descriptor;
 }
 
 /**
