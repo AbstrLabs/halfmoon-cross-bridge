@@ -338,7 +338,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         fromAddr: this.#toBlockchain.centralizedAddr,
         toAddr: this.toAddr,
         atomAmount: this.toAmountAtom,
-        txnId: literals.UNUSED,
+        txnId: literals.UNUSED_STR,
       });
       // if (outgoingTxnId === undefined) {
       //   throw new BridgeError(ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID, {

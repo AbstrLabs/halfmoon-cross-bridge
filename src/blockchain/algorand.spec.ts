@@ -66,8 +66,8 @@ describe('AlgorandBlockchain', () => {
     // make a txn (then verify)
     const amount = '0.767';
     const newTxnParam: TxnParam = {
-      fromAddr: literals.UNUSED,
-      txnId: literals.UNUSED,
+      fromAddr: literals.UNUSED_STR,
+      txnId: literals.UNUSED_STR,
       toAddr: ENV.ALGO_EXAMPL_ADDR,
       atomAmount: toGoNearAtom(amount),
     };
@@ -78,8 +78,8 @@ describe('AlgorandBlockchain', () => {
     //verify the txn
     const rcpt = await algoBlockchain.getTxnStatus({
       txnId: algoTxnId,
-      fromAddr: literals.UNUSED,
-      toAddr: literals.UNUSED,
+      fromAddr: literals.UNUSED_STR,
+      toAddr: literals.UNUSED_STR,
       atomAmount: literals.UNUSED_BIGINT,
     });
     newTxnParam.fromAddr = ENV.ALGO_MASTER_ADDR;
@@ -91,8 +91,8 @@ describe('AlgorandBlockchain', () => {
   it('get example txn status', async () => {
     const rcpt = await algoBlockchain.getTxnStatus({
       txnId: exampleAlgoTxnId,
-      fromAddr: literals.UNUSED,
-      toAddr: literals.UNUSED,
+      fromAddr: literals.UNUSED_STR,
+      toAddr: literals.UNUSED_STR,
       atomAmount: literals.UNUSED_BIGINT,
     });
     expect(rcpt.transaction).toEqual(exampleRcpt.transaction);
@@ -100,8 +100,8 @@ describe('AlgorandBlockchain', () => {
   it('verify transaction status on algo', async () => {
     const rcpt = await algoBlockchain.getTxnStatus({
       txnId: exampleAlgoTxnId,
-      fromAddr: literals.UNUSED,
-      toAddr: literals.UNUSED,
+      fromAddr: literals.UNUSED_STR,
+      toAddr: literals.UNUSED_STR,
       atomAmount: literals.UNUSED_BIGINT,
     });
     const answer = algoBlockchain.verifyCorrectness(rcpt, exampleAlgoParam);

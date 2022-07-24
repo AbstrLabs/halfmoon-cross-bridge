@@ -17,6 +17,8 @@ const exampleNearTxnId = '8mdZck4aC7UCNsM86W7fTqi8P9r1upw8vtoFscqJwgC7'; // TODO
 /* LITERAL TEMPLATES */
 const NOT_LOADED_FROM_ENV_STR = 'NOT_LOADED_FROM_ENV';
 const NOT_LOADED_FROM_ENV_NUM = 1234567890;
+const UNUSED_STR = 'not required value';
+const UNUSED_BIGINT = BigInt(0);
 
 const TXN_CONFIRMED = (
   from: Stringer,
@@ -34,9 +36,6 @@ const ASA_CREATED = (assetName: Stringer, txnId: Stringer, assetId: Stringer) =>
 const NEAR_VERIFY_OUTCOME = (outcome: Stringer) =>
   `NEAR verifyCorrectness txnOutcome : ${JSON.stringify(outcome)}`;
 
-const UNUSED = 'not required value';
-const UNUSED_BIGINT = BigInt(0);
-
 const DB_ENTRY_CREATED = (tableName: Stringer, dbId: Stringer) =>
   `Created bridge txn in table ${tableName} with id ${dbId}`;
 const FOURTEEN_ZEROS = '0'.repeat(14);
@@ -49,7 +48,7 @@ const literals = {
   NOT_LOADED_FROM_ENV_STR,
   NOT_LOADED_FROM_ENV_NUM,
   TXN_CONFIRMED,
-  UNUSED,
+  UNUSED_STR,
   UNUSED_BIGINT,
 };
 
