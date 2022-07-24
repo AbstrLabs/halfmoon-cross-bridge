@@ -21,7 +21,7 @@ enum BlockchainName {
 }
 
 // TODO [BTST] ref: move BridgeTxnStatusTree to a new file
-// TODO: use symbolic name or enum
+// TODO [SYM]: prefer Enum or Symbol?
 type ActionName = 'MANUAL' | BridgeTxnActionName | null;
 /**
  * When actionName is null, there's no action to take,

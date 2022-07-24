@@ -173,7 +173,7 @@ class NearBlockchain extends Blockchain {
     }
 
     const receivedAtom = yoctoNearToAtom(
-      // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+      // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
       txnOutcome.transaction.actions[0].Transfer.deposit
     );
@@ -188,26 +188,26 @@ class NearBlockchain extends Blockchain {
     }
 
     // check from address
-    // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+    // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
     if (txnOutcome.transaction.signer_id !== fromAddr) {
       throw new BridgeError(ERRORS.API.TXN_SENDER_MISMATCH, {
         blockchainName: this.name,
         receivedSender: fromAddr,
-        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+        // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
         blockchainSender: txnOutcome.transaction.signer_id,
       });
     } // TODO: later: maybe signer != sender?
 
     // check to address
-    // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+    // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
     if (txnOutcome.transaction.receiver_id !== toAddr) {
       throw new BridgeError(ERRORS.API.TXN_RECEIVER_MISMATCH, {
         blockchainName: this.name,
         receivedReceiver: toAddr,
-        // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+        // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
         blockchainReceiver: txnOutcome.transaction.receiver_id,
       });

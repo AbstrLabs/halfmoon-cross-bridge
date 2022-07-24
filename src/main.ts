@@ -22,7 +22,7 @@ function setupLocalEnv() {
 function showWelcome() {
   logger.info(`log level: ${logger.level}`);
   // logger.info(`process.env.TS_NODE_DEV: ${process.env.TS_NODE_DEV}`);
-  // TODO: show some settings like network (testnet/mainnet), accounts, database, etc.
+  // TODO [LOG]: show some settings like network (testnet/mainnet), accounts, database, etc.
 }
 async function setupRemoteEnv() {
   // TODO: check statuses of all blockchains
