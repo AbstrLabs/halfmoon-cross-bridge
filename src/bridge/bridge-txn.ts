@@ -147,12 +147,6 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   txnComment: string | null = null;
   private _isCreatedInDb: boolean;
   #db = db;
-  get #fromBlockchain(): Blockchain {
-    return getTokenImplBlockchain(this.fromTokenId);
-  }
-  get #toBlockchain(): Blockchain {
-    return getTokenImplBlockchain(this.toTokenId);
-  }
 
   /* CONSTRUCTORS  */
 
@@ -477,6 +471,16 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     return parseTxnUid(`${this.dbId}.${this.fromTxnId}`);
   }
 
+  get #fromBlockchain(): Blockchain {
+    return getTokenImplBlockchain(this.fromTokenId);
+  }
+  get #toBlockchain(): Blockchain {
+    return getTokenImplBlockchain(this.toTokenId);
+  }
+
+  protected get bridgeInfo() {
+    return getBridgeInfo(this.fromTokenId, this.toTokenId);
+  }
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
