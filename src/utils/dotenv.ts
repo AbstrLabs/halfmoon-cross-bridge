@@ -6,7 +6,7 @@
  * 1. I don't know where this was shown, maybe in console.log(ENV)?
  */
 
-export { ENV, loadDotEnv };
+export { ENV, loadDotEnv, NETWORK_INSTANCE };
 
 import { BridgeError, ERRORS } from './errors';
 import { literals } from './literals';
@@ -14,6 +14,12 @@ import { literals } from './literals';
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';
 import { NodeEnvEnum } from '..';
+
+enum NETWORK_INSTANCE {
+  TESTNET = 'TESTNET',
+  PLACEHOLDER = 'PLACEHOLDER',
+  // MAINNET = 'MAINNET',
+}
 
 /**
  * Load and Parse .env file.
@@ -54,8 +60,8 @@ const default_ENV = {
   NEAR_TOTAL: 1_000_000_000,
   DB_ORIGIN: 'NEDB',
   ALGO_CONFIRM_ROUND: 60,
-  ALGO_NETWORK: 'testnet',
-  NEAR_NETWORK: 'testnet',
+  ALGO_NETWORK: NETWORK_INSTANCE.TESTNET as NETWORK_INSTANCE,
+  NEAR_NETWORK: NETWORK_INSTANCE.TESTNET as NETWORK_INSTANCE,
   MINT_FIX_FEE: 1,
   MINT_MARGIN_FEE_BIPS: 0,
   BURN_FIX_FEE: 1,

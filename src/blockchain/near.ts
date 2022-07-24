@@ -3,6 +3,7 @@
  *
  * @throws {@link ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} if network is not supported
  * @todo master acc should be dynamic, or create a new instance per unidirectional bridge.
+ * @todo should dynamic select networkInstanceName
  */
 
 export { nearBlockchain, type NearBlockchain };
@@ -18,7 +19,7 @@ import {
 
 import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
 import { BlockchainName } from '..';
-import { ENV } from '../utils/dotenv';
+import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 import { Blockchain } from './abstract-base';
 import { literals } from '../utils/literals';
@@ -44,6 +45,10 @@ interface BridgeConfig {
   centralizedAddr: NearAddr;
   centralizedPrivateKey: string;
 }
+
+// TODO: should dynamic select networkInstanceName
+const networkInstanceName =
+  ENV.NEAR_NETWORK === NETWORK_INSTANCE.TESTNET ? 'testnet' : 'unsupported';
 
 /**
  * NEAR blockchain wrapper, with centralized account. Implements {@link Blockchain}.
@@ -83,7 +88,7 @@ class NearBlockchain extends Blockchain {
         const centralizedAccPrivKey = bridgeConfig.centralizedPrivateKey;
         const keyPair = KeyPair.fromString(centralizedAccPrivKey);
         this.#keyStore
-          .setKey('testnet', this.centralizedAddr, keyPair)
+          .setKey(networkInstanceName, this.centralizedAddr, keyPair)
           .then(async () => {
             this.centralizedAcc = await this.client.account(
               this.centralizedAddr
@@ -259,9 +264,9 @@ class NearBlockchain extends Blockchain {
 let clientParam: ClientParam,
   indexerParam: IndexerParam,
   bridgeConfig: BridgeConfig;
-if (ENV.NEAR_NETWORK === 'testnet') {
+if (ENV.NEAR_NETWORK === NETWORK_INSTANCE.TESTNET) {
   clientParam = {
-    networkId: 'testnet',
+    networkId: networkInstanceName,
     nodeUrl: 'https://rpc.testnet.near.org',
     walletUrl: 'https://wallet.testnet.near.org',
     helperUrl: 'https://helper.testnet.near.org',
@@ -281,7 +286,7 @@ if (ENV.NEAR_NETWORK === 'testnet') {
   throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
     blockchainName: BlockchainName.NEAR,
     network: ENV.NEAR_NETWORK,
-    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+    currentSupportedNetworks: Object.values(NETWORK_INSTANCE), // TODO: make this a constant
   });
 }
 
