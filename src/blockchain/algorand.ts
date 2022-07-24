@@ -243,7 +243,7 @@ class AlgorandBlockchain extends Blockchain {
           toAddr: algoTxnParam.toAddr,
           fromAddr: this.centralizedAcc.addr,
           atomAmount: algoTxnParam.atomAmount,
-          txnId: literals.UNUSED,
+          txnId: literals.UNUSED_STR,
         },
         this.centralizedAcc,
         this.centralizedAssetId
@@ -473,7 +473,7 @@ class TestAlgo extends AlgorandBlockchain {
         toAddr: algoTxnParam.toAddr,
         fromAddr: algoTxnParam.fromAddr,
         atomAmount: parseBigInt(algoTxnParam.atomAmount),
-        txnId: literals.UNUSED,
+        txnId: literals.UNUSED_STR,
       },
       sender,
       this.centralizedAssetId
@@ -485,7 +485,7 @@ class TestAlgo extends AlgorandBlockchain {
         toAddr: ENV.ALGO_MASTER_ADDR,
         fromAddr: ENV.ALGO_EXAMPL_ADDR,
         atomAmount,
-        txnId: literals.UNUSED,
+        txnId: literals.UNUSED_STR,
       },
       ENV.ALGO_EXAMPL_PASS
     );
