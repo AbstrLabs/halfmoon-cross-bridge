@@ -14,7 +14,7 @@ import {
   parseDbItem,
   parseDbId,
 } from '../utils/type/type';
-import { literals } from '../utils/literals';
+import { literals } from '../utils/bridge-const';
 import { logger } from '../utils/logger';
 import { type Postgres, postgres } from './aws-rds';
 import { ENV } from '../utils/dotenv';

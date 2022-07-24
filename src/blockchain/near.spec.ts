@@ -1,6 +1,6 @@
 import { ConfirmOutcome } from './abstract-base';
 import { ENV } from '../utils/dotenv';
-import { literals } from '../utils/literals';
+import { literals } from '../utils/bridge-const';
 import { nearBlockchain } from './near';
 import { toGoNearAtom } from '../utils/formatter';
 

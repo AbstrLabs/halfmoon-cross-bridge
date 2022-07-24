@@ -22,7 +22,7 @@ import { BlockchainName } from '..';
 import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { logger } from '../utils/logger';
 import { Blockchain } from './abstract-base';
-import { literals } from '../utils/literals';
+import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/errors';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 import { NearTxnParam } from '../utils/type/type';

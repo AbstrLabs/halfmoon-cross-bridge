@@ -1,7 +1,7 @@
 import { ENV } from '../utils/dotenv';
 import fs from 'fs';
 import { postgres } from './aws-rds';
-import { getNonce } from '../utils/literals';
+import { getNonce } from '../utils/bridge-const';
 
 const NONCE = getNonce();
 const TEST_TABLE_NAME = `test_${NONCE}`;

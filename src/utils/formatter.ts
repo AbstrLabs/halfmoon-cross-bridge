@@ -12,7 +12,7 @@ export {
 import { BridgeError, ERRORS } from './errors';
 
 import { ENV } from './dotenv';
-import { literals } from './literals';
+import { literals } from './bridge-const';
 import { logger } from './logger';
 import { utils } from 'near-api-js';
 

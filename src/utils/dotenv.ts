@@ -9,7 +9,7 @@
 export { ENV, loadDotEnv, NETWORK_INSTANCE };
 
 import { BridgeError, ERRORS } from './errors';
-import { literals } from './literals';
+import { literals } from './bridge-const';
 
 import { config } from 'dotenv';
 import dpv from 'dotenv-parse-variables';

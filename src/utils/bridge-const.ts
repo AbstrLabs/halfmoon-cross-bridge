@@ -1,4 +1,5 @@
 /**
+ *
  * All the literal templates used in the application.
  * Try to gather all strings in one place (here).
  *
