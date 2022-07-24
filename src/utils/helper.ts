@@ -65,11 +65,20 @@ function bigintBips(
   }
   const bn = new BigNumber(bigint.toString());
   const multi = bn.times(ratio);
-  const flooredResult = BigInt(multi.toString().split('.')[0]);
+  const [integer, fractional] = multi.toString().split('.');
+  const flooredResult = BigInt(integer);
   if (option.rounding === 'floor') {
     return flooredResult;
   } else {
     //if (option.rounding === 'ceil') {
+    // fractional can be undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (fractional === undefined) {
+      return flooredResult;
+    }
+    if (fractional.match(/^0*$/) !== null) {
+      return flooredResult;
+    }
     return flooredResult + 1n;
   }
 }
