@@ -14,7 +14,7 @@ import {
 } from '../utils/type/type';
 import { Blockchain, ConfirmOutcome } from '../blockchain/abstract-base';
 import { BridgeTxnActionName } from '..';
-import { BridgeError, ERRORS } from '../utils/errors';
+import { BridgeError, ERRORS } from '../utils/bridge-error';
 
 import { db } from '../database/db';
 import { stringifyBigintInObj } from '../utils/formatter';

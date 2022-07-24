@@ -22,7 +22,7 @@ import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/bridge-const';
-import { BridgeError, ERRORS } from '../utils/errors';
+import { BridgeError, ERRORS } from '../utils/bridge-error';
 import {
   AlgoAssetTransferTxnOutcome,
   AlgoTxnParam,

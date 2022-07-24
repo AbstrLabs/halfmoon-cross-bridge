@@ -39,7 +39,7 @@ export {
 export { ApiCallParam } from './shared-types/api';
 import { z } from 'zod';
 import { TOKEN_TABLE } from '../../bridge/token-table';
-import { BridgeError, ErrorTemplate, ERRORS } from '../errors';
+import { BridgeError, ErrorTemplate, ERRORS } from '../bridge-error';
 import { logger } from '../logger';
 import { ApiCallParam } from './shared-types/api';
 import { TokenId } from './shared-types/token';
