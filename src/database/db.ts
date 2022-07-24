@@ -37,6 +37,33 @@ if (
 }
 const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
 
+/* DECORATOR */
+
+function requireConnected(
+  target: Database,
+  key: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
+) {
+  const originalMethod = descriptor.value;
+  if (originalMethod === undefined) {
+    throw new BridgeError(ERRORS.INTERNAL.TS_ENGINE_ERROR, {
+      method: key,
+    });
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  descriptor.value = function (this: Database, ...args: any[]) {
+    if (!this.isConnected) {
+      throw new BridgeError(ERRORS.INTERNAL.DB_NOT_CONNECTED, {
+        at: `${target.constructor.name}.${key}`,
+      });
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return originalMethod.apply(this, args);
+  };
+  return descriptor;
+}
+
 /**
  * A database class to handle all database requests. Should be used as a singleton.
  */
@@ -116,18 +143,16 @@ class Database {
 
   /**
    * Create a new {@link BridgeTxn} in the database.
-   *
+   * Will assign and return a dbId on creation.
+
+   * @decorator `@requireConnected`
    * @param bridgeTxn - A {@link BridgeTxn} to be inserted into the database
    * @returns Promise of {@link D8bId} of the created {@link BridgeTxn}
    */
+  @requireConnected
   public async createTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
-    // will assign and return a dbId on creation.
-    if (!this.isConnected) {
-      logger.error('db is not connected while it should be');
-      await this.connect();
-    }
-    // const bridgeTxnObj = bridgeTxn.toObject();
-    const query = `
+    const // const bridgeTxnObj = bridgeTxn.toObject();
+      query = `
       INSERT INTO ${this.requestTableName} 
       (
         txn_status, 
@@ -179,15 +204,14 @@ class Database {
    * @throws if the database query result was not unique
    * @throws if the database query failed
 
+   * @decorator `@requireConnected`
    * @param dbId - database primary key
    * @returns Promise of list of {@link DbItem} of the query result
+   * @todo - split to readTxnByDbID and readTxnByUid
    */
+  @requireConnected
   public async readTxn(dbId: DbId): Promise<DbItem> {
-    // this should always be unique with a dbId
-
-    if (!this.isConnected) {
-      await this.connect();
-    }
+    // at most one  with a dbId
 
     const query = `
       SELECT * FROM ${this.requestTableName} WHERE db_id = $1;
@@ -200,12 +224,16 @@ class Database {
     return parseDbItem(result);
   }
 
+  /**
+   * Read all {@link BridgeTxn} from the database.
+   *
+   * @todo [DB_IND] use index to speed up query
+   *
+   * @decorator `@requireConnected`
+   * @returns Promise of list of {@link DbItem} of the query result
+   */
+  @requireConnected
   public async readAllTxn(): Promise<DbItem[]> {
-    // TODO: these 3 lines below needs refactor to a new decorator
-    if (!this.isConnected) {
-      await this.connect();
-    }
-
     const query = `
       SELECT * FROM ${this.requestTableName};
     `;
@@ -225,10 +253,11 @@ class Database {
    * This action will update "request_status"(txnStatus) and "algo_txn_id"(toTxnId)
    * They are the only two fields that are allowed to change after created.
    * Will raise err if other fields mismatch.
-   *
+   * @decorator `@requireConnected`
    * @param bridgeTxn - the {@link BridgeTxn} to be updated in the database
    * @returns Promise of the updated dbId
    */
+  @requireConnected
   public async updateTxn(bridgeTxn: BridgeTxn): Promise<DbId> {
     // ensure bridgeTxn is created
     if (bridgeTxn.dbId === undefined) {
@@ -239,9 +268,6 @@ class Database {
       });
     }
 
-    if (!this.isConnected) {
-      await this.connect();
-    }
     // todo: separate this txnStatus and toTxnId update into 2 separate queries
     const query = `
       UPDATE ${this.requestTableName} SET
@@ -299,14 +325,12 @@ class Database {
   /**
    * Read all {@link BridgeTxn} from the database with a `fromTxnId`. Result can be empty.
    *
+   * @decorator `@requireConnected`
    * @param fromTxnId - the `fromTxnId` of the {@link BridgeTxn} to be read
    * @returns Promise of the list of {@link DbItem} of the query result, list can be `[]`.
    */
+  @requireConnected
   public async readTxnFromTxnId(fromTxnId: string): Promise<DbItem[]> {
-    if (!this.isConnected) {
-      await this.connect();
-    }
-
     const query = `
       SELECT * FROM ${this.requestTableName} WHERE from_txn_id = $1;
     `;

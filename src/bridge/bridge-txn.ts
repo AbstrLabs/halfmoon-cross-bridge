@@ -45,9 +45,7 @@ interface BridgeTxnObjBase {
   createdTime?: bigint;
 }
 
-// TODO: purge this extend
 interface BridgeTxnObj extends BridgeTxnObjBase {
-  dbId?: number;
   fixedFeeAtom: bigint;
   marginFeeAtom: bigint;
   createdTime: bigint;
