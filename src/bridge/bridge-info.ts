@@ -55,7 +55,7 @@ const ALGO_wALGO: BridgeInfo = {
   toMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
   fixedFee: ENV.MINT_FIX_FEE,
   marginBips: ENV.MINT_MARGIN_FEE_BIPS,
-  amountParser: toGoNearAtom, // TODO: amount parse method. This is a placeholder.
+  amountParser: toGoNearAtom, // TODO [wALGO]: amount parse method. This is a placeholder.
 };
 
 const wALGO_ALGO: BridgeInfo = {
@@ -65,7 +65,7 @@ const wALGO_ALGO: BridgeInfo = {
   toMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
   fixedFee: ENV.BURN_FIX_FEE,
   marginBips: ENV.BURN_MARGIN_FEE_BIPS,
-  amountParser: toGoNearAtom, // TODO: amount parse method. This is a placeholder.
+  amountParser: toGoNearAtom, // TODO [wALGO]: amount parse method. This is a placeholder.
 };
 
 // JS Map will not work since [] != [].

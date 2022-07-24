@@ -74,7 +74,7 @@ describe('AlgorandBlockchain', () => {
     const algoTxnId = await algoBlockchain.makeOutgoingTxn(newTxnParam);
     newTxnParam.txnId = algoTxnId;
     console.info('algoTxnId : ', algoTxnId);
-    toGoNearAtom;
+
     //verify the txn
     const rcpt = await algoBlockchain.getTxnStatus({
       txnId: algoTxnId,

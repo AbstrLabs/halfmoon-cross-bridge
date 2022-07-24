@@ -7,11 +7,11 @@ export { verifyBlockchainTxn };
 import { ApiCallParam, TxnParam } from '../utils/type/type';
 
 import { BlockchainName } from '..';
-import { toGoNearAtom } from '../utils/formatter';
 import { ConfirmOutcome, type Blockchain } from './abstract-base';
 import { nearBlockchain } from './near';
 import { algoBlockchain } from './algorand';
 import { TOKEN_TABLE } from '../bridge/token-table';
+import { getBridgeInfo } from '../bridge/bridge-info';
 
 async function verifyBlockchainTxn(
   apiCallParam: ApiCallParam
@@ -33,7 +33,10 @@ async function verifyBlockchainTxn(
   const txnParam: TxnParam = {
     fromAddr: apiCallParam.from_addr,
     toAddr: blockchain.centralizedAddr,
-    atomAmount: toGoNearAtom(apiCallParam.amount),
+    atomAmount: getBridgeInfo(
+      apiCallParam.from_token,
+      apiCallParam.to_token
+    ).amountParser(apiCallParam.amount),
     txnId: apiCallParam.txn_id,
   };
 
