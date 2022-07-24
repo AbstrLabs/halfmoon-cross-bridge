@@ -18,7 +18,7 @@ import {
 } from '../utils/config-once/asa';
 
 import { AlgoAcc, Blockchain } from './abstract-base';
-import { ENV } from '../utils/dotenv';
+import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { BlockchainName } from '..';
 import { logger } from '../utils/logger';
 import { literals } from '../utils/literals';
@@ -430,7 +430,7 @@ let clientParam: ClientParam,
   indexerParam: IndexerParam,
   bridgeConfig: BridgeConfig;
 
-if (ENV.ALGO_NETWORK === 'testnet') {
+if (ENV.ALGO_NETWORK === NETWORK_INSTANCE.TESTNET) {
   clientParam = PURE_STAKE_DAEMON_CLIENT_TESTNET;
   indexerParam = PURE_STAKE_INDEXER_CLIENT_TESTNET;
   bridgeConfig = {
@@ -442,7 +442,7 @@ if (ENV.ALGO_NETWORK === 'testnet') {
   throw new BridgeError(ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED, {
     blockchainName: BlockchainName.ALGO,
     network: ENV.ALGO_NETWORK,
-    currentSupportedNetworks: ['testnet'], // TODO: make this a constant
+    currentSupportedNetworks: Object.values(NETWORK_INSTANCE),
   });
 }
 
