@@ -8,7 +8,7 @@
 
 export { ENV, loadDotEnv, NETWORK_INSTANCE };
 
-import { BridgeError, ERRORS } from './errors';
+import { BridgeError, ERRORS } from './bridge-error';
 import { literals } from './bridge-const';
 
 import { config } from 'dotenv';

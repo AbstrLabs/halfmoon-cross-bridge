@@ -9,7 +9,7 @@ export {
   stringifyBigintInObj,
 };
 
-import { BridgeError, ERRORS } from './errors';
+import { BridgeError, ERRORS } from './bridge-error';
 
 import { ENV } from './dotenv';
 import { literals } from './bridge-const';

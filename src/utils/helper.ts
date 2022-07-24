@@ -1,7 +1,7 @@
 export { ensureString, setImmediateInterval, pause, bigintBips };
 
 import BigNumber from 'bignumber.js';
-import { BridgeError, ERRORS } from './errors';
+import { BridgeError, ERRORS } from './bridge-error';
 
 /**
  * Ensure that the given value is a string.

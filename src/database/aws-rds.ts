@@ -4,7 +4,7 @@
 
 export { postgres, type Postgres };
 
-import { BridgeError, ERRORS } from '../utils/errors';
+import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { Pool, PoolClient } from 'pg';
 
 import { ENV } from '../utils/dotenv';

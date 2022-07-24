@@ -5,7 +5,7 @@
  */
 
 export { db, type Database };
-import { BridgeError, ERRORS } from '../utils/errors';
+import { BridgeError, ERRORS } from '../utils/bridge-error';
 
 import { type BridgeTxn } from '../bridge';
 import {
