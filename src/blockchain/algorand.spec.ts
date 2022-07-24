@@ -2,7 +2,7 @@ import { ENV } from '../utils/dotenv';
 import { TxnParam } from '../utils/type/type';
 import { algoBlockchain } from './algorand';
 import { literals } from '../utils/bridge-const';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { toGoNearAtom } from '../utils/formatter';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';

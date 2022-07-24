@@ -1,6 +1,6 @@
 import { db } from '../../database/db';
 import { loadDotEnv } from '../../utils/dotenv';
-import { logger } from '../../utils/logger';
+import { logger } from '../../utils/log/logger';
 
 loadDotEnv({ isTest: true }); // better than calling `ENV`.
 logger.level = 'verbose';

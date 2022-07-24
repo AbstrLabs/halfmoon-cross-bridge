@@ -10,7 +10,7 @@ import { db, type Database } from '../database/db';
 import { emailServer } from '../utils/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { TxnUid } from '../utils/type/type';
 import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 

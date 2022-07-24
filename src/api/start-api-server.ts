@@ -7,7 +7,7 @@ import express, { Request, Response } from 'express';
 import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { docsRoute } from './routes/docs';
 
 async function homePageTest() {

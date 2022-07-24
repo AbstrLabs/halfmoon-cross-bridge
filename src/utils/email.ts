@@ -1,5 +1,5 @@
 import { BridgeTxnSafeObj } from '../bridge';
-import { logger } from './logger';
+import { logger } from './log/logger';
 import { TxnUid } from './type/type';
 
 type EmailAddr = string; // TODO: type this with zod regex
