@@ -4,7 +4,7 @@ import { PostReturn } from '../../api/routes/txn-route';
 import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,
-  EXAMPLE_TXN_FROM_DB,
+  EXAMPLE_BURN_TXN_FROM_DB,
 } from '../test-helper/test-examples';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 import { BridgeTxn } from '../../bridge';
@@ -43,10 +43,10 @@ describe('/algorand-near API (GET)', () => {
   it('/algorand-near returns result JSON on VALID-param-ed GET', async () => {
     const res = await axios.get(
       'http://localhost:4190/algorand-near?uid=' +
-        BridgeTxn.fromObject(EXAMPLE_TXN_FROM_DB).uid
+        BridgeTxn.fromObject(EXAMPLE_BURN_TXN_FROM_DB).uid
     );
 
-    expect(res.data).toStrictEqual(EXAMPLE_TXN_FROM_DB);
+    expect(res.data).toStrictEqual(EXAMPLE_BURN_TXN_FROM_DB);
     expect(res.status).toBe(200);
     expect(res.statusText).toBe('OK');
   });
