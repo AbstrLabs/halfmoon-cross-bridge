@@ -1,5 +1,6 @@
 export { TableName };
 
+// TODO [new table]: use new tables
 enum TableName {
   MINT_ACTIVE = `mint_request`,
   BURN_ACTIVE = `burn_request`,

@@ -1,4 +1,4 @@
-// TODO: purge logger. too many info on Mint/burn
+// TODO [LOG]: purge logger. too many info on Mint/burn
 export {
   BlockchainName,
   BridgeTxnStatusTree,
@@ -20,7 +20,7 @@ enum BlockchainName {
   ALGO = 'ALGO',
 }
 
-// TODO: [BTST] ref: move BridgeTxnStatusTree to a new file
+// TODO [BTST] ref: move BridgeTxnStatusTree to a new file
 // TODO: use symbolic name or enum
 type ActionName = 'MANUAL' | BridgeTxnActionName | null;
 /**
@@ -115,8 +115,8 @@ const BridgeTxnStatusTree = {
     previous: BridgeTxnStatusEnum.DONE_INCOMING,
     actionName: BridgeTxnActionName.verifyOutgoingTxn,
   }),
-  // TODO: should move DONE_OUTGOING here and add a DONE_VERIFY status
-  // TODO: +Currently using DOING_OUTGOING as DONE_OUTGOING
+  // TODO [BTST]: should move DONE_OUTGOING here and add a DONE_VERIFY status
+  // TODO [BTST]: +Currently using DOING_OUTGOING as DONE_OUTGOING
   [BridgeTxnStatusEnum.ERR_MAKE_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.ERR_MAKE_OUTGOING,
     previous: BridgeTxnStatusEnum.DOING_OUTGOING,
@@ -135,7 +135,7 @@ const BridgeTxnStatusTree = {
   [BridgeTxnStatusEnum.DONE_OUTGOING]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.DONE_OUTGOING,
     previous: BridgeTxnStatusEnum.DOING_VERIFY,
-    actionName: null, // TODO: send email to user, if no email or no confirm in X days, move to USER_CONFIRMED
+    actionName: null, // TODO [EMAIL]: send email to user, if no email or no confirm in X days, move to USER_CONFIRMED
   }),
   [BridgeTxnStatusEnum.USER_CONFIRMED]: new BridgeTxnStatus({
     status: BridgeTxnStatusEnum.USER_CONFIRMED,

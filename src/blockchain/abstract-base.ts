@@ -54,7 +54,7 @@ type AlgoTxnOutcome =
       };
     }
   | AlgoAssetTransferTxnOutcome;
-// TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+// TODO [TNFT]: Type FinalExecutionOutcome.transaction.
 type NearTxnOutcome = providers.FinalExecutionOutcome;
 type TxnOutcome = NearTxnOutcome | AlgoTxnOutcome;
 
@@ -109,7 +109,7 @@ abstract class Blockchain {
             resolve(ConfirmOutcome.WRONG_INFO);
           }
         } catch (err) {
-          // TODO: use BridgeError
+          // TODO [ERR]: use BridgeError
           // TODO: this system cannot handle the three cases. need rework.
           clearTimeout(timeout);
           clearInterval(interval);
