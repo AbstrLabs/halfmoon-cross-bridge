@@ -45,6 +45,7 @@ interface BridgeTxnObjBase {
   createdTime?: bigint;
 }
 
+// TODO: purge this extend
 interface BridgeTxnObj extends BridgeTxnObjBase {
   dbId?: number;
   fixedFeeAtom: bigint;
@@ -550,9 +551,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
     const marginFee: bigint = bigintBips(
       this.fromAmountAtom,
-      BigInt(10000) - BigInt(marginBips)
+      BigInt(marginBips)
     );
     this.marginFeeAtom = marginFee;
+
     return marginFee;
   }
 
