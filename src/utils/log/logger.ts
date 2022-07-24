@@ -9,7 +9,7 @@ import { createLogger, format, transports } from 'winston';
 // Calling `ENV` or `loadDotEnv()` here would cause `error: uncaughtException: (0 , dotenv_1.loadDotEnv) is not a function`
 // Because of circular reference: `logger` is imported in `errors` which is imported in `dotenv.ts` which is imported here.
 import { config } from 'dotenv';
-import { NodeEnvEnum } from '..';
+import { NodeEnvEnum } from '../..';
 const { combine, timestamp, prettyPrint, colorize, errors, printf } = format;
 
 const level =

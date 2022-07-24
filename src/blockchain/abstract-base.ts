@@ -35,7 +35,7 @@ import {
   AlgoAssetTransferTxnOutcome,
 } from '../utils/type/type';
 import { setImmediateInterval } from '../utils/helper';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { BlockchainName } from '..';
 
 type AlgoAcc = algosdk.Account;

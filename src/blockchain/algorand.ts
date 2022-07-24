@@ -20,7 +20,7 @@ import {
 import { AlgoAcc, Blockchain } from './abstract-base';
 import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { BlockchainName } from '..';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import {

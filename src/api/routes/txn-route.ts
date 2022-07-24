@@ -19,7 +19,7 @@ import express, { Request, Response } from 'express';
 
 import { BridgeTxn } from '../../bridge';
 import { WELCOME_JSON } from '..';
-import { logger } from '../../utils/logger';
+import { logger } from '../../utils/log/logger';
 import { verifyBlockchainTxn } from '../../blockchain/verify';
 import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';

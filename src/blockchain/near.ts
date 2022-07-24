@@ -20,7 +20,7 @@ import {
 import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
 import { BlockchainName } from '..';
 import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import { Blockchain } from './abstract-base';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';

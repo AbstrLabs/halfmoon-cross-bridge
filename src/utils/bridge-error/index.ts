@@ -5,7 +5,7 @@
  * - https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/errors/errors-list.ts
  */
 
-import { logger } from '../logger';
+import { logger } from '../log/logger';
 import { stringifyObjWithBigint } from '../formatter';
 
 export { ErrorTemplate, ErrorGroup, BridgeError };

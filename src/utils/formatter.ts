@@ -13,7 +13,7 @@ import { BridgeError, ERRORS } from './bridge-error';
 
 import { ENV } from './dotenv';
 import { literals } from './bridge-const';
-import { logger } from './logger';
+import { logger } from './log/logger';
 import { utils } from 'near-api-js';
 
 /* UNIT CONVERSION OF goNear */

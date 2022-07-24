@@ -10,7 +10,7 @@ import {
   parseCriticalApiCallParam,
 } from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 import ObjectSet from 'object-set-type';
 
 class ApiWorker {

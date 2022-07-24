@@ -8,7 +8,7 @@ import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { Pool, PoolClient } from 'pg';
 
 import { ENV } from '../utils/dotenv';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/log/logger';
 
 interface PgConfig {
   host: string;
