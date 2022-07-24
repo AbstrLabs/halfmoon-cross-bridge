@@ -63,19 +63,15 @@ const wALGO_ALGO: BridgeInfo = {
   marginBips: ENV.BURN_MARGIN_FEE_BIPS,
 };
 
-// Mapping this way will not work since [] != [].
+// JS Map will not work since [] != [].
 // const BRIDGE_INFO_MAP: Map<[TokenId, TokenId], BridgeInfo> = new Map([
 //   [[TokenId.NEAR, TokenId.goNEAR], NEAR_goNEAR],
 //   [[TokenId.goNEAR, TokenId.NEAR], goNEAR_NEAR],
-//   [[TokenId.ALGO, TokenId.wALGO], ALGO_wALGO],
-//   [[TokenId.wALGO, TokenId.ALGO], wALGO_ALGO],
 // ]);
 
-// backup
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type BridgeInfoMap = Record<TokenId, Partial<Record<TokenId, BridgeInfo>>>;
 
-// Maybe make it a Class with get method, returning a defined value / throw error.
+// TODO: Maybe make it a Class with get method, returning a defined value / throw error.
 const BRIDGE_INFO_MAP: BridgeInfoMap = {
   [TokenId.NEAR]: {
     [TokenId.goNEAR]: NEAR_goNEAR,
@@ -92,15 +88,8 @@ const BRIDGE_INFO_MAP: BridgeInfoMap = {
 }; // as const;
 
 function getBridgeInfo(fromToken: TokenId, toToken: TokenId): BridgeInfo {
+  // help TS to get infer right types
   const fromTree = BRIDGE_INFO_MAP[fromToken];
-  // TS seems not knowing this
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (fromTree === undefined) {
-    throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-      true_message: `No bridge info found for ${fromToken}`,
-      at: 'bridge-info :getBridgeInfo',
-    });
-  }
   if (!(toToken in fromTree)) {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       true_message: `No bridge info found for ${fromToken}`,
