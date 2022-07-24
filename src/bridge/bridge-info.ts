@@ -92,28 +92,28 @@ const BRIDGE_INFO_MAP: BridgeInfoMap = {
 }; // as const;
 
 function getBridgeInfo(fromToken: TokenId, toToken: TokenId): BridgeInfo {
-  const a = BRIDGE_INFO_MAP[fromToken];
+  const fromTree = BRIDGE_INFO_MAP[fromToken];
   // TS seems not knowing this
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (a === undefined) {
+  if (fromTree === undefined) {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       true_message: `No bridge info found for ${fromToken}`,
       at: 'bridge-info :getBridgeInfo',
     });
   }
-  if (!(toToken in a)) {
+  if (!(toToken in fromTree)) {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
-      true_message: `No bridge info found for ${fromToken} -> ${toToken}`,
+      true_message: `No bridge info found for ${fromToken}`,
       at: 'bridge-info :getBridgeInfo',
     });
   }
-  const b = a[toToken];
-  if (b === undefined) {
+  const bridgeInfo = fromTree[toToken];
+  if (bridgeInfo === undefined) {
     throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_TXN_TYPE, {
       true_message: `No bridge info found for ${fromToken} -> ${toToken}`,
       at: 'bridge-info :getBridgeInfo',
     });
   }
 
-  return b;
+  return bridgeInfo;
 }
