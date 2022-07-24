@@ -23,6 +23,7 @@ enum BridgeTxnStatusEnum {
 }
 
 interface BridgeTxnSafeObj {
+  // TODO: move to zod
   // TODO: type better (addr,txnId)
   dbId: number | string;
   fixedFeeAtom: string;
