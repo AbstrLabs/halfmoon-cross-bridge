@@ -17,7 +17,7 @@ import { BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/errors';
 
 import { db } from '../database/db';
-import { stringifyBigintInObj, toGoNearAtom } from '../utils/formatter';
+import { stringifyBigintInObj } from '../utils/formatter';
 import { literals } from '../utils/literals';
 import { logger } from '../utils/logger';
 import { getTokenImplBlockchain } from './token-table';
@@ -167,7 +167,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       dbId: undefined,
       fixedFeeAtom: undefined,
       fromAddr: from_addr,
-      fromAmountAtom: toGoNearAtom(amount),
+      fromAmountAtom: getBridgeInfo(from_token, to_token).amountParser(amount),
       fromTokenId: from_token,
       fromTxnId: txn_id,
       marginFeeAtom: undefined,
@@ -532,11 +532,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns The fixedFeeAtom as a bigint
    */
   private _readFixedFeeAtom(): bigint {
-    const fixedFee: number = getBridgeInfo(
-      this.fromTokenId,
-      this.toTokenId
-    ).fixedFee;
-    this.fixedFeeAtom = toGoNearAtom(fixedFee);
+    const fixedFee: number = this.bridgeInfo.fixedFee;
+    this.fixedFeeAtom = this.bridgeInfo.amountParser(fixedFee);
     return this.fixedFeeAtom;
   }
 
@@ -548,10 +545,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * @returns The marginFeeAtom
    */
   private _calculateMarginFeeAtom(): bigint {
-    const marginBips: number = getBridgeInfo(
-      this.fromTokenId,
-      this.toTokenId
-    ).marginBips;
+    const marginBips: number = this.bridgeInfo.marginBips;
 
     const marginFee: bigint = bigintBips(
       this.fromAmountAtom,
