@@ -18,7 +18,7 @@ import { BridgeError, ERRORS } from '../utils/errors';
 
 import { db } from '../database/db';
 import { stringifyBigintInObj } from '../utils/formatter';
-import { literals } from '../utils/literals';
+import { literals } from '../utils/bridge-const';
 import { logger } from '../utils/logger';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
