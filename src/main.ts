@@ -4,6 +4,7 @@ import { db } from './database/db';
 import { logger } from './utils/log/logger';
 import { startApiServer } from './api/start-api-server';
 import { startBridgeTxnWorker } from './bridge/bridge-worker';
+import { log } from './utils/log/log-template';
 
 async function main() {
   /* SETUP ENV */
@@ -20,8 +21,7 @@ function setupLocalEnv() {
   loadDotEnv();
 }
 function showWelcome() {
-  logger.info(`log level: ${logger.level}`);
-  // logger.info(`process.env.TS_NODE_DEV: ${process.env.TS_NODE_DEV}`);
+  log.MAIN.loggerLevel();
   // TODO [LOG]: show some settings like network (testnet/mainnet), accounts, database, etc.
 }
 async function setupRemoteEnv() {
