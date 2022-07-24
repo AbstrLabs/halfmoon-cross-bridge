@@ -14,6 +14,7 @@ export { BRIDGE_INFO_MAP, getBridgeInfo };
 
 import { ENV } from '../utils/dotenv';
 import { BridgeError, ERRORS } from '../utils/errors';
+import { toGoNearAtom } from '../utils/formatter';
 import { TokenId } from '../utils/type/shared-types/token';
 import { Addr } from '../utils/type/type';
 
@@ -24,7 +25,7 @@ interface BridgeInfo {
   toMaster: Addr;
   fixedFee: number;
   marginBips: number;
-  // TODO: conversion method. now only toGoNearAtom
+  amountParser: (amount: string | number) => bigint;
 }
 
 const NEAR_goNEAR: BridgeInfo = {
@@ -34,6 +35,7 @@ const NEAR_goNEAR: BridgeInfo = {
   toMaster: ENV.ALGO_MASTER_ADDR,
   fixedFee: ENV.MINT_FIX_FEE,
   marginBips: ENV.MINT_MARGIN_FEE_BIPS,
+  amountParser: toGoNearAtom,
 };
 
 const goNEAR_NEAR: BridgeInfo = {
@@ -43,6 +45,7 @@ const goNEAR_NEAR: BridgeInfo = {
   toMaster: ENV.NEAR_MASTER_ADDR,
   fixedFee: ENV.BURN_FIX_FEE,
   marginBips: ENV.BURN_MARGIN_FEE_BIPS,
+  amountParser: toGoNearAtom,
 };
 
 const ALGO_wALGO: BridgeInfo = {
@@ -52,6 +55,7 @@ const ALGO_wALGO: BridgeInfo = {
   toMaster: ENV.NEAR_MASTER_ADDR, // TODO [wMaster]: create and use new account
   fixedFee: ENV.MINT_FIX_FEE,
   marginBips: ENV.MINT_MARGIN_FEE_BIPS,
+  amountParser: toGoNearAtom, // TODO: amount parse method. This is a placeholder.
 };
 
 const wALGO_ALGO: BridgeInfo = {
@@ -61,6 +65,7 @@ const wALGO_ALGO: BridgeInfo = {
   toMaster: ENV.ALGO_MASTER_ADDR, // TODO [wMaster]: create and use new account
   fixedFee: ENV.BURN_FIX_FEE,
   marginBips: ENV.BURN_MARGIN_FEE_BIPS,
+  amountParser: toGoNearAtom, // TODO: amount parse method. This is a placeholder.
 };
 
 // JS Map will not work since [] != [].
