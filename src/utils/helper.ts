@@ -59,7 +59,7 @@ function bigintBips(
   if (typeof bips === 'number') {
     ratio = new BigNumber(bips / 10000);
   } else if (typeof bips === 'bigint') {
-    ratio = new BigNumber((bips / 10000n).toString());
+    ratio = new BigNumber(bips.toString()).div(10000);
   } else {
     ratio = bips.div(10000);
   }
