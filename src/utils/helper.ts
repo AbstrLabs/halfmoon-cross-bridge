@@ -52,8 +52,8 @@ function bigintBips(
   bigint: bigint,
   bips: number | bigint | BigNumber,
   option: {
-    rounding: 'floor' | 'ceil'; // | 'round'
-  } = { rounding: 'floor' }
+    rounding: 'FLOOR' | 'CEIL'; // | 'round'
+  } = { rounding: 'CEIL' }
 ): bigint {
   let ratio: BigNumber;
   if (typeof bips === 'number') {
@@ -67,7 +67,7 @@ function bigintBips(
   const multi = bn.times(ratio);
   const [integer, fractional] = multi.toString().split('.');
   const flooredResult = BigInt(integer);
-  if (option.rounding === 'floor') {
+  if (option.rounding === 'FLOOR') {
     return flooredResult;
   } else {
     //if (option.rounding === 'ceil') {
