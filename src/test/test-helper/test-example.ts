@@ -7,8 +7,8 @@ import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
 
 const FAKE_TXN_ID = 'some_fake_txn_id';
 
-// TODO(test): use realistic data.
-// TODO(test): fix this. use test-examples. ref better name. like test-data.
+// TODO [TEST]: use realistic data.
+// TODO [TEST]: fix this. use test-examples. ref better name. like test-data.
 const exampleBridgeTxn: BridgeTxn = new BridgeTxn({
   fromAmountAtom: BigInt(10000000000), // big int jest err read on top. // should be 0?
   fixedFeeAtom: BigInt(123456),

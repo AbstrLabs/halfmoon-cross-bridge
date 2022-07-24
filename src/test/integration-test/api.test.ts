@@ -52,7 +52,7 @@ describe('/algorand-near API (GET)', () => {
   });
 
   it('/algorand-near returns 406 invalid-param-ed GET', async () => {
-    // TODO: [TEST-CONST]
+    // TODO [TEST]: use TEST-CONST
 
     await expect(
       axios.get(
@@ -104,7 +104,7 @@ describe('/algorand-near API (POST)', () => {
   });
   // rejects something
 
-  /* TODO: More tests:
+  /* TODO [TEST]: More tests:
    * - wrong amount,
    * - wrong txnId
    * - malformed address

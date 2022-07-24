@@ -24,7 +24,7 @@ async function simulatedFrontendNearToGoNear(
     amountInNEAR
   );
 
-  // TODO(#TNFT): Type FinalExecutionOutcome.transaction.
+  // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
   const nearTxnId = mintResponse?.transaction?.hash as NearTxnId | undefined; // or mintResponse.transaction_outcome.id;
 
