@@ -3,7 +3,7 @@
  * All logs should be defined here.
  */
 
-export { newLog };
+export { log };
 
 import { logger } from './logger';
 
@@ -35,7 +35,7 @@ const template /* : Record<ModuleName, Record<LogName, Log>> */ = {
   },
 } as const;
 
-const newLog: {
+const log: {
   [ModuleName in keyof typeof template]: {
     [LogName in keyof typeof template[ModuleName]]: () => void;
   };
@@ -53,7 +53,7 @@ for (const moduleName in template) {
   const _moduleName = moduleName as keyof typeof template;
   for (const logName in template[_moduleName]) {
     const _logName = logName as keyof typeof template[typeof _moduleName];
-    (newLog[_moduleName][_logName] as () => void) = () => {
+    (log[_moduleName][_logName] as () => void) = () => {
       logger[template[_moduleName][_logName].level](
         template[_moduleName][_logName].message
       );
