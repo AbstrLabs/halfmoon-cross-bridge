@@ -141,7 +141,7 @@
     "near": "yarn test:near",
     "postinstall": "husky install; yarn doc",
     "prepare": "husky install",
-    "start": "ts-node src/main.ts",
+    "start": "NODE_ENV=production ts-node src/main.ts",
     "test": "yarn test:unit-test ; yarn test:integration-test",
     "test:algo": "jest src/blockchain/algorand",
     "test:bridge": "jest src/bridge",

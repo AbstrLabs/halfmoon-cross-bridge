@@ -34,12 +34,6 @@ function parseDotEnv(): dpv.ParsedVariables {
   }
 
   // ts-node compatibility
-  // TODO: not sure if this is working!
-  // TODO: this is not working with jest, got TS_NODE_DEV undefined.
-  // process.env.NODE_ENV = process.env.NODE_ENV ?? process.env.TS_NODE_DEV;
-  // process.env.TS_NODE_DEV = process.env.TS_NODE_DEV ?? process.env.TS_NODE_DEV;
-  // TODO: next line returns undefined
-  // console.warn('process.env.TS_NODE_DEV : ', process.env.TS_NODE_DEV);
 
   return dpv(env.parsed, {
     assignToProcessEnv: true,
