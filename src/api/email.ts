@@ -14,8 +14,7 @@ class EmailServer {
   /**
    * fake interface to send email
    *
-   * @param  {Email} email
-   * @returns void
+   * @param email - An email object of type {@link Email}
    */
 
   sendEmail(email: Email): void {

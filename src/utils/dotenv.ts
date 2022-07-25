@@ -18,8 +18,8 @@ import { NodeEnvEnum } from '..';
 /**
  * Load and Parse .env file.
  *
- * @throws {BridgeError} - {@link ERRORS.INTERNAL.CANNOT_DOTENV_LOAD} if cannot load .env file
- * @returns {dpv.ParsedVariables} parsed .env variables
+ * @throws {@link ERRORS.INTERNAL.CANNOT_DOTENV_LOAD} if cannot load .env file
+ * @returns Parsed .env variables
  */
 function parseDotEnv(): dpv.ParsedVariables {
   const env = config();

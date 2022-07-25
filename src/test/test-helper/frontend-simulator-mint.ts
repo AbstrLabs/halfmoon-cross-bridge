@@ -13,9 +13,9 @@ import { NearTxnId } from '../../blockchain';
 import { TokenId } from '../../utils/type/shared-types/token';
 
 /**
- * Simulate frontend: make NEAR -> goNEAR mint txn, returning an API call param.
- * @param amountInNEAR amount in NEAR
- * @returns - {@link: ApiCallParam}
+ * Simulate frontend: make NEAR to goNEAR mint txn, returning an API call param.
+ * @param amountInNEAR - Amount in NEAR
+ * @returns An {@link ApiCallParam}
  */
 async function simulatedFrontendNearToGoNear(
   amountInNEAR: string
@@ -45,11 +45,8 @@ async function simulatedFrontendNearToGoNear(
 
 /**
  * Transfer testnet NEAR faucet from example account to master account.
- * @inheritdoc {@Link Blockchain}
- *
- * @async
- * @param  {string} amountInNEAR
- * @returns {Promise<FinalExecutionOutcome>} promise of outcome of the transaction
+ * @param amountInNEAR - Amount in NEAR
+ * @returns Promise of outcome of the transaction
  */
 async function transferOnNearTestnetFromExampleToMaster(
   amountInNEAR: string
@@ -65,12 +62,11 @@ async function transferOnNearTestnetFromExampleToMaster(
 /**
  * Transfer testnet NEAR faucet from one account to another.
  *
- * @async
- * @param  {string} fromPrivKey
- * @param  {string} fromAddr
- * @param  {string} toAddr
- * @param  {string} amountInNEAR
- * @returns {Promise<FinalExecutionOutcome>} promise of outcome of the transaction
+ * @param fromPrivKey - Private key of the sender
+ * @param fromAddr - Address of the sender
+ * @param toAddr - Address of the receiver
+ * @param amountInNEAR - Amount in NEAR
+ * @returns Promise of outcome of the transaction
  */
 async function transferOnNearTestnet(
   fromPrivKey: string,

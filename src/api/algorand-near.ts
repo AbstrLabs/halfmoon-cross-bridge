@@ -18,7 +18,6 @@ import express, { Request, Response } from 'express';
 import { BridgeTxn } from '../bridge';
 import { WELCOME_JSON } from '.';
 import { logger } from '../utils/logger';
-import { stringifyBigintInObj } from '../utils/formatter';
 import { verifyBlockchainTxn } from '../blockchain/verify';
 import { apiWorker } from './api-worker';
 import { db } from '../database/db';
@@ -39,8 +38,8 @@ export interface PostReturn {
  * Handle GET call on /algorand-near
  * return WELCOME_JSON if no uid is provided.
  *
- * @param  {Request} req
- * @param  {Response} res
+ * @param req - Express request
+ * @param res - Express response
  * @returns
  */
 async function handleGetCall(req: Request, res: Response) {
@@ -72,10 +71,7 @@ async function handleGetCall(req: Request, res: Response) {
       logger.warn('[API]: handled GET /algorand-near with invalid UID');
       return res.status(406).send('Transaction not found in database');
     }
-    // TODO: [SAFE_JSON] add a toSafeObj() function to BridgeTxn
-    const safeObj = stringifyBigintInObj(
-      BridgeTxn.fromDbItem(dbItem).toObject()
-    );
+    const safeObj = BridgeTxn.fromDbItem(dbItem).toSafeObject();
     logger.warn('[API]: handled GET /algorand-near with valid UID');
     return res.json(safeObj);
   } catch (err) {
@@ -88,8 +84,8 @@ async function handleGetCall(req: Request, res: Response) {
  * Handle POST call on /algorand-near
  * return WELCOME_JSON if no uid is provided.
  *
- * @param  {Request} req
- * @param  {Response} res
+ * @param req - Express request
+ * @param res - Express response
  */
 async function handlePostCall(req: Request, res: Response) {
   const apiCallParam = verifyApiCallParamWithResp(req, res);
@@ -134,8 +130,8 @@ function verifyApiCallParamWithResp(
  *
  * @todo - verify within both ram and db.
  *
- * @param apiCallParam
- * @param res
+ * @param apiCallParam - ApiCallParam
+ * @param res - Express response
  * @returns
  */
 async function verifyBlockchainTxnWithResp(

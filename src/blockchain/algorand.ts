@@ -1,8 +1,8 @@
 /**
  * Algorand functionalities wrapped up with our centralized account
  *
- * @throws {BridgeError} - {@link BridgeError.ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} - if network is not supported
- * @todo: master acc should be dynamic, or create a new instance per unidirectional bridge.
+ * @throws {@link BridgeError.ERRORS.INTERNAL.NETWORK_NOT_SUPPORTED} - if network is not supported
+ * @todo master acc should be dynamic, or create a new instance per unidirectional bridge.
  */
 
 export { algoBlockchain, type AlgorandBlockchain, testAlgo };
@@ -48,11 +48,11 @@ interface BridgeConfig {
 }
 
 /**
- * @classdesc Algorand blockchain wrapper, with centralized account. Implements {@link Blockchain}.
+ * Algorand blockchain wrapper, with centralized account. Implements {@link Blockchain}.
  *
- * @param  {ClientParam} clientParam
- * @param  {IndexerParam} indexerParam
- * @param  {BridgeConfig} bridgeConfig
+ * @param clientParam - The algod client parameters of type {@link ClientParam}
+ * @param indexerParam - The algod indexer parameters of type {@link IndexerParam}
+ * @param  bridgeConfig - The bridge configuration of type {@link BridgeConfig}
  */
 class AlgorandBlockchain extends Blockchain {
   public readonly client: AlgodClient;
@@ -94,12 +94,11 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Get the status of a transaction. Implements the abstract method in {@link Blockchain}.
    *
-   * @async
-   * @inheritdoc {@link Blockchain}
-   * @param  {AlgoTxnParam} txnParam - transaction parameters on algorand blockchain
-   * @returns {Promise<AlgoAssetTransferTxnOutcome>} transaction outcome
+   * @override
+   * @param txnParam - Transaction parameters on algorand blockchain
+   * @returns - Promise of transaction outcome
    *
-   * @todo: unhandled error `Received status 400: invalid input: unable to parse base32 digest data 'txid': illegal base32 data at input byte 0`
+   * @todo unhandled error `Received status 400: invalid input: unable to parse base32 digest data 'txid': illegal base32 data at input byte 0`
    */
   async getTxnStatus(
     txnParam: AlgoTxnParam
@@ -138,16 +137,16 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Verify the correctness of a transaction. Implements the abstract method in {@link Blockchain}.
    *
-   * @inheritdoc {@link Blockchain}
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_NOT_CONFIRMED} if transaction not confirmed
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_ASSET_ID_NOT_MATCH} if transaction asset id not match
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_ID_MISMATCH} if transaction id mismatch
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_SENDER_MISMATCH} if transaction sender mismatch
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if transaction receiver mismatch
-   * @throws {BridgeError} - {@link ERRORS.API.TXN_AMOUNT_MISMATCH} if transaction amount mismatch
-   * @param  {AlgoAssetTransferTxnOutcome} txnOutcome - transaction outcome
-   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
-   * @returns boolean - true if transaction is verified
+   * @override
+   * @throws {@link ERRORS.API.TXN_NOT_CONFIRMED} if transaction not confirmed
+   * @throws {@link ERRORS.API.TXN_ASSET_ID_NOT_MATCH} if transaction asset id not match
+   * @throws {@link ERRORS.API.TXN_ID_MISMATCH} if transaction id mismatch
+   * @throws {@link ERRORS.API.TXN_SENDER_MISMATCH} if transaction sender mismatch
+   * @throws {@link ERRORS.API.TXN_RECEIVER_MISMATCH} if transaction receiver mismatch
+   * @throws {@link ERRORS.API.TXN_AMOUNT_MISMATCH} if transaction amount mismatch
+   * @param  txnOutcome - Algorand transaction outcome
+   * @param  algoTxnParam - Transaction parameters on algorand blockchain
+   * @returns A boolean if transaction is verified
    */
   verifyCorrectness(
     txnOutcome: AlgoAssetTransferTxnOutcome,
@@ -218,10 +217,9 @@ class AlgorandBlockchain extends Blockchain {
    * Send a transaction of the amount in `AlgoTxnParam` from centralized account to target in `AlgoTxnParam`.
    * Implements the abstract method in {@link Blockchain}.
    *
-   * @async
-   * @inheritdoc {@link Blockchain}
-   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
-   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
+   * @override
+   * @param  algoTxnParam - Transaction parameters on algorand blockchain
+   * @returns Promise of algorand transaction id
    */
   async makeOutgoingTxn(algoTxnParam: AlgoTxnParam): Promise<AlgoTxnId> {
     // abstract class implementation.
@@ -232,9 +230,8 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Send a transaction of goNEAR from admin to the target address.
    *
-   * @async
-   * @param  {AlgoTxnParam} algoTxnParam - transaction parameters on algorand blockchain
-   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
+   * @param  algoTxnParam - transaction parameters on algorand blockchain
+   * @returns Promise of algorand transaction id
    */
   protected async _makeGoNearTxnFromAdmin(
     algoTxnParam: AlgoTxnParam
@@ -261,16 +258,15 @@ class AlgorandBlockchain extends Blockchain {
 
   /**
    * Send a transaction of ASA. Using example from algorand documentation (modified).
-   * @tutorial https://developer.algorand.org/docs/sdks/javascript/#complete-example
+   * @see Official doc {@link https://developer.algorand.org/docs/sdks/javascript/#complete-example}
    *
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if transaction failed
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if transaction failed
+   * @throws {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if transaction failed
+   * @throws {@link ERRORS.EXTERNAL.MAKE_TXN_FAILED} if transaction failed
    *
-   * @async
-   * @param  {AlgoTxnParam} algoTxnParam
-   * @param  {AlgoAcc} senderAccount
-   * @param  {number} asaId
-   * @returns {Promise<AlgoTxnId>} promise of algorand transaction id
+   * @param algoTxnParam - Transaction parameters on algorand blockchain
+   * @param senderAccount - Full algorand account of type {@link AlgoAcc} to send transaction
+   * @param asaId - Asset ID of ASA
+   * @returns Promise of algorand transaction id
    */
   protected async _makeAsaTxn(
     algoTxnParam: AlgoTxnParam,
@@ -351,8 +347,7 @@ class AlgorandBlockchain extends Blockchain {
   /**
    *  Create a new asset on algorand.
    *
-   * @async
-   * @returns {Promise<void>} promise of void
+   * @returns Promise of void
    */
   protected async _createGoNearWithAdmin(): Promise<void> {
     await this._createAsaWithAccount(noParamGoNearConfig, this.centralizedAcc);
@@ -361,8 +356,7 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Create a new account on algorand.
    *
-   * @async
-   * @returns {Promise<AlgoAcc>} promise of {@link AlgoAcc} account created
+   * @returns Promise of {@link AlgoAcc} account created
    */
   protected _genAcc(): AlgoAcc {
     // tested, used only once
@@ -379,15 +373,16 @@ class AlgorandBlockchain extends Blockchain {
   /**
    * Create a new asset on algorand with the given account.
    * Used once and from algorand docs. Not caring typing in this function.
-   *
-   * @async
-   * @param  {NoParamAsaConfig} noParamAsaConfig
-   * @param  {AlgoAcc} creatorAccount
-   * @returns {Promise<NoParamAsaConfig>} the asa config created
+   * @internal
+   * @see origin of this function {@link https://developer.algorand.org/docs/get-details/asa/}
+   * @see variant of the origin {@link https://developer.algorand.org/docs/sdks/javascript/#create-an-asset}
+   * @param noParamAsaConfig - Configuration of ASA
+   * @param creatorAccount - Account to create ASA
+   * @returns Promise of the created asa config without params
    */
   protected async _createAsaWithAccount(
     // tested, used once
-    // modified from https://developer.algorand.org/docs/get-details/asa/
+    // modified from
     noParamAsaConfig: NoParamAsaConfig,
     creatorAccount: AlgoAcc
   ): Promise<NoParamAsaConfig> {
@@ -458,11 +453,12 @@ const algoBlockchain = new AlgorandBlockchain(
 );
 
 /**
- * @classdesc AlgorandBlockchain subclass only for jest, to expose _makeAsaTxn
+ * AlgorandBlockchain subclass only for jest, to expose _makeAsaTxn
  *
- * @param  {ClientParam} clientParam
- * @param  {IndexerParam} indexerParam
- * @param  {BridgeConfig} bridgeConfig
+ * @internal
+ * @param clientParam - ClientParam
+ * @param indexerParam - IndexerParam
+ * @param bridgeConfig - BridgeConfig
  *
  * @todo move to test helper
  */

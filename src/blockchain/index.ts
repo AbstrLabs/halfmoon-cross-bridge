@@ -68,14 +68,13 @@ enum ConfirmOutcome {
 }
 
 /**
- * All blockchain functionalities wrapped up with
+ * Abstract base class of all Blockchain classes, wrapping up all following functionalities of a blockchain
  *
  * 1. our centralized account (private key / passphrase)
  * 2. client (to make transaction)
  * 3. indexer (to confirm transaction)
  *
- * @abstract
- * @classdesc Abstract of all Blockchain classes.
+ * @virtual
  */
 abstract class Blockchain {
   async confirmTxn(txnParam: TxnParam): Promise<ConfirmOutcome> {
@@ -122,16 +121,21 @@ abstract class Blockchain {
   }
 
   /* ABSTRACT */
+  /** @virtual */
   public abstract readonly centralizedAddr: Addr;
+  /** @virtual */
   public abstract readonly confirmTxnConfig: ConfirmTxnConfig;
+  /** @virtual */
   public abstract readonly name: BlockchainName;
+  /** @virtual */
   protected abstract indexer: Indexer;
+  /** @virtual */
   protected abstract readonly centralizedAcc: GenericAcc;
   /**
-   * @param  {TxnOutcome} txnOutcome
-   * @param  {TxnParam} txnParam
+   * @param txnOutcome - Transaction outcome
+   * @param txnParam - Transaction parameter
    *
-   * @todo: rename var names to expected, received.
+   * @todo rename var names to expected, received.
    * @returns boolean
    */
   public abstract verifyCorrectness(

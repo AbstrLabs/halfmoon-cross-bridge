@@ -33,6 +33,7 @@
     "express": "^4.17.3",
     "lodash": "^4.17.21",
     "near-api-js": "^0.44.2",
+    "typedoc": "^0.23.7",
     "typescript": "^4.6.4",
     "zod": "^3.14.4"
   },
@@ -48,6 +49,7 @@
     "@typescript-eslint/eslint-plugin": "^5.25.0",
     "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^8.16.0",
+    "eslint-plugin-tsdoc": "^0.2.16",
     "husky": "^7.0.0",
     "jest": "^27.5.1",
     "json-bigint": "^1.0.0",
@@ -78,9 +80,13 @@
       ]
     },
     "plugins": [
-      "@typescript-eslint"
+      "@typescript-eslint",
+      "eslint-plugin-tsdoc"
     ],
-    "root": true
+    "root": true,
+    "rules": {
+      "tsdoc/syntax": "error"
+    }
   },
   "eslintConfig.env.node-COMMENT": "https://stackoverflow.com/questions/49789177/module-is-not-defined-and-process-is-not-defined-in-eslint-in-visual-studio-code",
   "jest": {
@@ -125,12 +131,13 @@
     "build": "tsc",
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
+    "doc": "yarn typedoc src/* --logLevel Error --out ./TSdoc",
     "handler": "yarn test:handler",
     "int": "yarn test:integration-test",
     "integration-test": "yarn test:integration-test",
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",
-    "postinstall": "husky install",
+    "postinstall": "husky install; yarn doc",
     "prepare": "husky install",
     "start": "ts-node src/main.ts",
     "test": "yarn test:unit-test ; yarn test:integration-test",
@@ -142,8 +149,8 @@
     "test:near": "jest src/blockchain/near",
     "test:unit-test": "jest --testPathIgnorePatterns=src/test",
     "test:util": "jest src/utils",
-    "unit-test": "yarn test:unit-test",
     "unit": "yarn test:unit-test",
+    "unit-test": "yarn test:unit-test",
     "util": "yarn test:util"
   },
   "version": "0.1.4"

@@ -1,5 +1,6 @@
 /**
  * @todo - maybe split bridge and bridge-txn
+ * @todo docs: alternative constructors not marked
  */
 export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
 
@@ -59,10 +60,10 @@ type BridgeTxnAction = {
 };
 
 /**
- * @classdesc BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
+ * BridgeTxn is a transaction that is used to transfer tokens between two different blockchains.
  *
- * @param  {BridgeTxnObjBase} bridgeTxnObject
- * @param  {InitializeOptions} initializeOptions
+ * @param bridgeTxnObject - Transaction JSON,
+ * @param initializeOptions -
  */
 class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   dbId?: number;
@@ -91,10 +92,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Initialize a {@link BridgeTxn} from the given {@link ApiCallParam}. Will use system time as default.
    *
-   * @static
-   * @param  {ApiCallParam} apiCallParam - The API call parameter to initialize the {@link BridgeTxn} from.
-   * @param  {bigint} createdTime - optional, if not provided, will use system time
-   * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
+   * @param apiCallParam - The API call parameter to initialize the {@link BridgeTxn} from.
+   * @param createdTime - optional, if not provided, will use system time
+   * @returns the {@link BridgeTxn} constructed
    */
   static fromApiCallParam(
     apiCallParam: ApiCallParam,
@@ -123,9 +123,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Initialize a {@link BridgeTxn} from the given {@link DbItem}.
    *
-   * @static
-   * @param  {DbItem} dbItem
-   * @returns {BridgeTxn} - the {@link BridgeTxn} constructed
+   * @param dbItem - The {@link DbItem} to initialize the {@link BridgeTxn} from.
+   * @returns The {@link BridgeTxn} constructed
    */
   static fromDbItem(dbItem: DbItem): BridgeTxn {
     const _dbItem = parseDbItem(dbItem);
@@ -232,10 +231,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    *
    * @deprecated - use new state pattern instead
    *
-   * @async
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @returns {Promise<BridgeTxnObj>} - the {@link BridgeTxnObj} representing the {@link BridgeTxn}
+   * @throws 8{@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
+   * @throws 8{@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
+   * @returns - Promise of {@link BridgeTxnObj} representing the {@link BridgeTxn}
    */
   async runWholeBridgeTxn(): Promise<BridgeTxnObj> {
     // TODO: should not create in db automatically
@@ -261,11 +259,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
   /**
    * Confirm the incoming transaction of the {@link BridgeTxn}.
+   * Change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
    *
-   * @async
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DONE_INITIALIZE} to {@link BridgeTxnStatusEnum.DONE_CONFIRM_INCOMING_TXN} or the corresponding errors.
-   * @returns {Promise<void>} promise of void
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
+   * @returns Promise of void
    */
   async confirmIncomingTxn(): Promise<void> {
     logger.verbose('[BTX]: running confirmIncomingTxn.');
@@ -310,12 +307,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
   /**
    * Make the outgoing transaction of the {@link BridgeTxn}.
+   * Change the txnStatus from {@link BridgeTxnStatusEnum.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatusEnum.DOING_OUTGOING} or the corresponding errors.
    *
-   * @async
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
-   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.CONFIRM_INCOMING_TXN} to {@link BridgeTxnStatusEnum.DOING_OUTGOING} or the corresponding errors.
-   * @returns {Promise<void>} promise of void
+   * @throws {@link ERRORS.EXTERNAL.EMPTY_NEW_TXN_ID} if the {@link BridgeTxn#toTxnId} is empty.
+   * @throws {@link ERRORS.EXTERNAL.MAKE_OUTGOING_TXN_FAILED} if the {@link BridgeTxn#toBlockchainName} fails to make the outgoing transaction.
+   * @returns Promise of void
    */
   async makeOutgoingTxn(): Promise<void> {
     this._checkStatus(BridgeTxnStatusEnum.DONE_INCOMING, 'makeOutgoingTxn');
@@ -348,11 +344,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
 
   /**
    * Verify the outgoing transaction of the {@link BridgeTxn}.
+   * Change the txnStatus from {@link BridgeTxnStatusEnum.DOING_OUTGOING} to {@link BridgeTxnStatusEnum.DONE_OUTGOING} or the corresponding errors.
    *
-   * @async
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
-   * @emit change the txnStatus from {@link BridgeTxnStatusEnum.DOING_OUTGOING} to {@link BridgeTxnStatusEnum.DONE_OUTGOING} or the corresponding errors.
-   * @returns {Promise<void>} promise of void
+   * @throws {@link ERRORS.EXTERNAL.CONFIRM_OUTGOING_TXN_FAILED} if the verification fails
+   * @returns Promise of void
    */
   async verifyOutgoingTxn(): Promise<void> {
     this._checkStatus(BridgeTxnStatusEnum.DOING_OUTGOING, 'verifyOutgoingTxn');
@@ -380,10 +375,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Determine if two instances of {@link BridgeTxn} are equal.
    *
-   * @param  {BridgeTxn} other
-   * @returns {boolean} true if the two BridgeTxn are considered same
+   * @param other - The other instance of {@link BridgeTxn} to compare with
+   * @returns Boolean if the two BridgeTxn are considered same
    *
-   * @todo: Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
+   * @todo Bigint with jest https://github.com/facebook/jest/issues/11617#issuecomment-1068732414
    */
   public equals(other: BridgeTxn): boolean {
     return (
@@ -410,7 +405,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Transform the {@link BridgeTxn} to an object with all info, wrapping up all important fields.
    *
-   * @returns {BridgeTxnObj} the object representation of the {@link BridgeTxn}
+   * @returns The object representation of the {@link BridgeTxn}
    */
   public toObject(): BridgeTxnObj {
     const bridgeTxnObject: BridgeTxnObj = {
@@ -435,7 +430,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Transform the {@link BridgeTxn} to a JSON string.
    *
-   * @returns {string} the JSON string representation of the {@link BridgeTxn}
+   * @returns The JSON string representation of the {@link BridgeTxn}
    */
   public toString(): string {
     return JSON.stringify(this.toSafeObject());
@@ -444,7 +439,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /* GETTERS */
 
   /**
-   * UID {DbId}.{TxnId}
+   * UID of form \{DbId\}.\{TxnId\}
+   *
+   * @returns The UID of the {@link BridgeTxn}
    */
   get uid(): string {
     if (this.dbId === undefined) {
@@ -462,9 +459,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Get a defined dbId of the {@link BridgeTxn} for TS type checking.
    *
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
-   * @returns {number} the dbId of the {@link BridgeTxn}
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn.dbId} is not defined
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_NOT_INITIALIZED} if the {@link BridgeTxn} is not initialized
+   * @returns The dbId of the {@link BridgeTxn} as a number
    */
   public getDbId(): number {
     if (this.dbId === undefined) {
@@ -485,10 +482,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Not check if it's already in the database, because it's async. This check happens in {@link createInDb}.
    * This is one step of the initialization.
    *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM} if the {@link BridgeTxn.txnParam} is invalid
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.INVALID_AMOUNT} if the {@link BridgeTxn.fromAmountAtom} is less than fixed fee
-   * @returns {BridgeTxn} the {@link BridgeTxn} itself
+   * @throws {@link ERRORS.INTERNAL.INVALID_BRIDGE_TXN_PARAM} if the {@link BridgeTxn.txnParam} is invalid
+   * @throws {@link ERRORS.INTERNAL.INVALID_AMOUNT} if the {@link BridgeTxn.fromAmountAtom} is less than fixed fee
+   * @returns The {@link BridgeTxn} itself
    */
   private _selfValidate(): this {
     // if (this.fromBlockchain === undefined || this.toBlockchain === undefined) {
@@ -513,9 +509,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Hook the blockchains of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
-   * @returns void
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.UNKNOWN_BLOCKCHAIN_NAME} if the {@link BridgeTxn} blockchain names is invalid
+   * @returns A {@link Blockchain}, should be a singleton
    */
   private _getBlockchain(blockchainName: BlockchainName): Blockchain {
     switch (blockchainName) {
@@ -534,9 +530,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Get the {@link fixedFeeAtom} of the {@link BridgeTxn}.
    *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
-   * @returns {bigint} the fixedFeeAtom
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
+   * @returns The fixedFeeAtom as a bigint
    */
   private _readFixedFeeAtom(): bigint {
     const fixedFee: number = getBridgeInfo(
@@ -550,9 +546,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Calculate the {@link marginFeeAtom} of the {@link BridgeTxn}.
    *
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
-   * @returns {bigint} the marginFeeAtom
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.UNKNOWN_TXN_TYPE} if the {@link BridgeTxn.txnType} is invalid
+   * @returns The marginFeeAtom
    *
    * @todo use a better algorithm to calculate the marginFeeAtom, not fake rounding up. (99.8% first, then minus)
    */
@@ -576,8 +572,8 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Calculate the {@link toAmountAtom} of the {@link BridgeTxn}.
    * This is one step of the initialization.
    *
-   * @private
-   * @returns {bigint} the totalFeeAtom
+   * @internal
+   * @returns The totalFeeAtom as a bigint
    */
   private _calculateToAmountAtom(): bigint {
     const toAmount: bigint =
@@ -593,12 +589,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * Create the {@link BridgeTxn} in the database after checking if it already exists.
    * This is the last step of the initialization.
    *
-   * @async
    * @public
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
-   * @throws {BridgeError} - {@link ERRORS.API.REUSED_INCOMING_TXN} if the incoming txn is already used
-   * @throws {BridgeError} - {@link ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED} if the database create txn failed
-   * @returns {Promise<DbId>} the id of the created {@link BridgeTxn}
+   * @throws {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
+   * @throws {@link ERRORS.API.REUSED_INCOMING_TXN} if the incoming txn is already used
+   * @throws {@link ERRORS.EXTERNAL.DB_CREATE_TXN_FAILED} if the database create txn failed
+   * @returns Promise the dbId of the created {@link BridgeTxn}
    */
   public async createInDb(): Promise<DbId> {
     if (!this.#db.isConnected) {
@@ -647,10 +642,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
    * This wraps the {@link db.updateTxn} method.
    * Only called in two places: {@link BridgeTxn._updateTxnStatus} and {@link BridgeTxn._updateToTxnId}.
    *
-   * @async
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR} if the {@link BridgeTxn} is not initialized
+   * @throws {@link ERRORS.INTERNAL.DB_NOT_CONNECTED} if the database is not connected
    * @returns Promise
    */
   private async _updateTxn(): Promise<DbId> {
@@ -679,11 +673,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Update the {@link BridgeTxn.txnStatus} field in the instance and database.
    * Throw error if current txnStatus is already error.
-   * @async
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
-   * @param  {BridgeTxnStatusEnum} newStatus
-   * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.OVERWRITE_ERROR_TXN_STATUS} if the {@link BridgeTxn.txnStatus} is already set
+   * @param newStatus - New status {@link BridgeTxnStatusEnum} of the {@link BridgeTxn}
+   * @returns Promise the primary key of table {@link DbId} of the updated {@link BridgeTxn}
    */
   private async _updateTxnStatus(
     newStatus: BridgeTxnStatusEnum
@@ -725,11 +718,10 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Update the {@link BridgeTxn.toTxnId} field in the instance and database.
    *
-   * @async
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.OVERWRITE_TO_TXN_ID} if the {@link BridgeTxn.toTxnId} is already set
-   * @param  {TxnId} toTxnId
-   * @returns {Promise<DbId>} the database primary key of the updated {@link BridgeTxn}
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.OVERWRITE_TO_TXN_ID} if the {@link BridgeTxn.toTxnId} is already set
+   * @param toTxnId - New {@link BridgeTxn.toTxnId} of the {@link BridgeTxn}
+   * @returns Promise of the primary key of table {@link DbId}  of the updated {@link BridgeTxn}
    */
   private async _updateToTxnId(toTxnId: TxnId): Promise<DbId> {
     const isOverwriting =
@@ -760,12 +752,11 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   /**
    * Helper to throw an error if the {@link BridgeTxn.txnStatus} is not equal to the expected status.
    *
-   * @todo: make this a decorator.
-   * @private
-   * @throws {BridgeError} - {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
-   * @param  {BridgeTxnStatusEnum} expected
-   * @param  {string} at
-   * @returns void
+   * @todo make this a decorator.
+   * @internal
+   * @throws {@link ERRORS.INTERNAL.ILLEGAL_TXN_STATUS} if the txnStatus is not equal to the expected status
+   * @param expected - Expected {@link BridgeTxnStatusEnum} of the {@link BridgeTxn}
+   * @param at - Location of the call
    */
   private _checkStatus(expected: BridgeTxnStatusEnum, at: string): void {
     if (!(this.txnStatus === expected)) {
