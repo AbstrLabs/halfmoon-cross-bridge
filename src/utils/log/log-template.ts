@@ -2,7 +2,11 @@
  * Here we define all the logs.
  * All logs should be defined here.
  *
- * logs are called by log.\{ModuleName\}.\{LogName\}(\{parameters\})
+ * @todo how to call logs
+ * `log.ModuleName.LogName(parameters)` - Proxy, no auto completion, better than next like
+ * - worse, passing str. log('ModuleName.LogName as string', parameters)
+ * `log(ModuleName.LogName,parameters)` - Wrap logger, too many exports
+ * `log(logTemplate.ModuleName.LogName,parameters)` - Wrap logger, less exports, too long
  */
 
 export { log };
@@ -51,7 +55,7 @@ declare global {
 
 const log = new Proxy<
   Record<ModuleName, Record<LogName, Log>>,
-  Record<ModuleName, Record<LogName, () => void>>
+  Record<keyof typeof template, Record<LogName, () => void>>
 >(template, {
   set() // _target: Record<ModuleName, Record<LogName, Log>>,
   // _key: ModuleName,
