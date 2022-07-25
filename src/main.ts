@@ -22,7 +22,7 @@ function setupLocalEnv() {
 }
 function showWelcome() {
   log.MAIN.loggerLevel();
-  logger.info(ENV.NODE_ENV);
+  logger.info(`NODE_ENV: ${ENV.NODE_ENV}`);
   // TODO [LOG]: show some settings like network (testnet/mainnet), accounts, database, etc.
 }
 async function setupRemoteEnv() {

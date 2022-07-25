@@ -34,10 +34,7 @@ function startApiServer() {
 
   /* API */
   app.get('/', (req: Request, res: Response) => {
-    if (
-      process.env.TS_NODE_DEV === undefined ||
-      process.env.TS_NODE_DEV === 'development'
-    ) {
+    if (process.env.NODE_ENV === 'development') {
       void homePageTest();
     }
     res.json(WELCOME_JSON);

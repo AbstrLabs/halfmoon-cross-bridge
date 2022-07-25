@@ -74,7 +74,7 @@ const default_ENV = {
   PGPORT: literals.NOT_LOADED_FROM_ENV_NUM,
   // default
   NODE_ENV: 'development',
-  TS_NODE_DEV: 'development',
+  TS_NODE_DEV: true,
 };
 
 const secret_ENV = {
