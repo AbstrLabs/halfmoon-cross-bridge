@@ -46,9 +46,6 @@ function startApiServer() {
   app.use(express.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
   app.use(express.json()); // parse application/json
 
-  // TODO: move API to a new file of new folder server/api
-
-  // is it better to write "/algorand-near" here or in "algorand-near.ts"?
   app.use('/', txnRoute);
 
   if (ENV.NODE_ENV === 'development') {
