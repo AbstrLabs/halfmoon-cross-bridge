@@ -1,9 +1,8 @@
 import { newLog } from './log-template';
 
 describe('log proxy should', () => {
-  it('should return function', () => {
+  it('should return function (being called 3 times)', () => {
     const ll = newLog.MAIN.loggerLevel;
-    newLog.MA.G;
     expect(ll).toBeInstanceOf(Function);
     ll();
     ll();
