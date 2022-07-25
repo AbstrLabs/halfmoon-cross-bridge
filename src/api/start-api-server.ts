@@ -51,7 +51,10 @@ function startApiServer() {
 
   // is it better to write "/algorand-near" here or in "algorand-near.ts"?
   app.use('/', algorandNear);
-  app.use('/', docsRoute);
+
+  if (ENV.NODE_ENV === 'development') {
+    app.use('/docs', docsRoute);
+  }
 
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
