@@ -9,6 +9,7 @@ import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
 import { logger } from '../utils/log/logger';
 import { docsRoute } from './routes/docs';
+import { NodeEnvEnum } from '..';
 
 async function homePageTest() {
   /* Used once code */
@@ -47,10 +48,10 @@ function startApiServer() {
   app.use(express.json()); // parse application/json
 
   app.use('/', txnRoute);
-  app.use('/', docsRoute);
 
-  // if (ENV.NODE_ENV === 'development') {
-  // }
+  if (ENV.NODE_ENV === NodeEnvEnum.DEVELOPMENT) {
+    app.use('/', docsRoute);
+  }
 
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
