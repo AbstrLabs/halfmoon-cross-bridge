@@ -17,8 +17,9 @@ import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
 // TBD3: add config to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;
 const UPDATE_INTERVAL_MS = 5_000;
-
 // TBD4: [SYM] ref: prefer Enum or Symbol?
+// TBD4: {ENUM.}
+
 const LOAD = Symbol('LOAD');
 const UPDATE = Symbol('UPDATE');
 const FetchAction = { LOAD, UPDATE } as const;

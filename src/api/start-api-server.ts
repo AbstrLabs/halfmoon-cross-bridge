@@ -47,10 +47,10 @@ function startApiServer() {
   app.use(express.json()); // parse application/json
 
   app.use('/', txnRoute);
+  app.use('/', docsRoute);
 
-  if (ENV.NODE_ENV === 'development') {
-    app.use('/', docsRoute);
-  }
+  // if (ENV.NODE_ENV === 'development') {
+  // }
 
   app.use('/', (req: Request, res: Response) => {
     return res.status(404).end('404 Not found');
