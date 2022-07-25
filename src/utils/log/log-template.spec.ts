@@ -1,8 +1,9 @@
-import { log } from './log-template';
+import { newLog } from './log-template';
 
 describe('log proxy should', () => {
   it('should return function', () => {
-    const ll = log.MAIN.loggerLevel;
+    const ll = newLog.MAIN.loggerLevel;
+    newLog.MA.G;
     expect(ll).toBeInstanceOf(Function);
     ll();
     ll();
