@@ -32,16 +32,23 @@ const template /* : Record<ModuleName, Record<LogName, Log>> */ = {
       level: WinstonLevels.info,
       message: `log level: ${logger.level}`,
     },
+    generalError: {
+      level: WinstonLevels.error,
+      message: (err: unknown) => `general error ${JSON.stringify(err)}`,
+    },
   },
 } as const;
 
 const log: {
   [ModuleName in keyof typeof template]: {
-    [LogName in keyof typeof template[ModuleName]]: () => void;
+    [LogName in keyof typeof template[ModuleName]]: (
+      ...args: unknown[]
+    ) => void;
   };
 } = {
   MAIN: {
     loggerLevel: () => null,
+    generalError: () => null,
   },
   // NotExist: {
   //   NotExist: () => null,
