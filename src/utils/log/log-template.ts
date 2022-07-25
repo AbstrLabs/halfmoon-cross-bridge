@@ -9,7 +9,7 @@
  * `log(logTemplate.ModuleName.LogName,parameters)` - Wrap logger, less exports, too long
  */
 
-export { log };
+export { log, newLog };
 
 import { Stringer } from '../type/type';
 import { logger } from './logger';
@@ -53,6 +53,27 @@ declare global {
   }
 }
 
+const newLog: {
+  [ModuleName in keyof typeof template]: {
+    [LogName in keyof typeof template[ModuleName]]: () => void;
+  };
+} = {
+  MAIN: {
+    loggerLevel: () => null,
+  },
+  NotExist: {
+    NotExist: () => null,
+  },
+};
+for (const moduleName in template) {
+  for (const logName in template[moduleName]) {
+    newLog[moduleName][logName] = () => {
+      logger[template[moduleName][logName].level](
+        template[moduleName][logName].message
+      );
+    };
+  }
+}
 const log = new Proxy<
   Record<ModuleName, Record<LogName, Log>>,
   Record<keyof typeof template, Record<LogName, () => void>>
