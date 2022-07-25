@@ -39,8 +39,15 @@ class ApiWorker {
       BigInt(Date.now())
     );
 
-    // TODO: compare then create
-    await bridgeTxn.createInDb();
+    try {
+      // BTX.createInDb compares BTX.fromTxnId with DbItem.from_txn_id and wil throw err
+      await bridgeTxn.createInDb();
+    } catch (err) {
+      logger.error('[AWK]: Double mint: from_txn_id existed in db.');
+      logger.error(err);
+      this._remove(criticalApiCallParam);
+      throw err;
+    }
 
     // TODO: should we add more coupling to save execution time?
     // bridgeWorker._push(bridgeTxn);
