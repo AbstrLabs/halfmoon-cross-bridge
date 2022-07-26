@@ -3,7 +3,7 @@ import { db } from '../../database/db';
 import { loadDotEnv } from '../../utils/dotenv';
 import { logger } from '../../utils/log/logger';
 
-loadDotEnv({ nodeEnvOverride: NodeEnvEnum.TEST }); // better than calling `ENV`.
+loadDotEnv({ nodeEnvOverride: NodeEnvEnum.TEST }); // initiate `ENV`.
 logger.level = 'verbose';
 
 const SECOND = 1000;

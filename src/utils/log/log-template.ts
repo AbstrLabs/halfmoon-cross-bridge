@@ -5,6 +5,7 @@
 
 export { log };
 
+import { ENV } from '../dotenv';
 import { logger } from './logger';
 
 enum WinstonLevels {
@@ -36,6 +37,10 @@ const template /* : Record<ModuleName, Record<LogName, Log>> */ = {
       level: WinstonLevels.error,
       message: (err: unknown) => `general error ${JSON.stringify(err)}`,
     },
+    nodeEnv: {
+      level: WinstonLevels.info,
+      message: `NODE_ENV: ${ENV.NODE_ENV}`,
+    },
   },
 } as const;
 
@@ -49,6 +54,7 @@ const log: {
   MAIN: {
     loggerLevel: () => null,
     generalError: () => null,
+    nodeEnv: () => null,
   },
   // NotExist: {
   //   NotExist: () => null,
