@@ -19,13 +19,13 @@ import express, { Request, Response } from 'express';
 
 import { BridgeTxn } from '../../bridge';
 import { WELCOME_JSON } from '..';
-import { logger } from '../../utils/log/logger';
 import { verifyBlockchainTxn } from '../../blockchain/verify';
 import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';
 import { TokenId } from '../../utils/type/shared-types/token';
 import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
 import { TXN_ROUTE_PATH } from '../../config';
+import { log } from '../../utils/log/log-template';
 
 const txnRoute = express.Router();
 
@@ -47,7 +47,7 @@ export interface PostReturn {
  */
 async function handleGetCall(req: Request, res: Response) {
   if (req.query.uid === undefined) {
-    logger.info('[API]: handled GET /algorand-near without UID');
+    log.APIS.handledGetWithoutUid();
     res.json(WELCOME_JSON);
     return;
   }
@@ -57,7 +57,7 @@ async function handleGetCall(req: Request, res: Response) {
   try {
     parseTxnUid(uid);
   } catch (err) {
-    logger.info('[API]: handled GET /algorand-near with malformed UID');
+    log.APIS.handledGetWithMalformedUid(uid);
     res.status(406).send('Wrong GET param format');
     return;
   }
@@ -71,14 +71,14 @@ async function handleGetCall(req: Request, res: Response) {
     const dbItem: DbItem = await db.readTxn(dbId);
     // here the error handling is not good., because readTxn throws on fetch error and {0,>1} result.
     if (dbItem.from_txn_id !== txnId) {
-      logger.warn('[API]: handled GET /algorand-near with invalid UID');
+      log.APIS.handledGetWithInvalidUid();
       return res.status(406).send('Transaction not found in database');
     }
     const safeObj = BridgeTxn.fromDbItem(dbItem).toSafeObject();
-    logger.warn('[API]: handled GET /algorand-near with valid UID');
+    log.APIS.handledGetWithValidUid();
     return res.json(safeObj);
   } catch (err) {
-    logger.error(err);
+    log.APIS.generalError(err);
     return res.status(406).send('Internal server error.');
   }
 }
@@ -99,8 +99,7 @@ async function handlePostCall(req: Request, res: Response) {
 
   const bridgeTxn = await createBridgeTxnWithResp(apiCallParam, res);
   if (bridgeTxn === null) return;
-
-  logger.info('Handled API call: ' + JSON.stringify(apiCallParam));
+  log.APIS.handledPost(apiCallParam);
 
   const postReturn: PostReturn = {
     BridgeTxnStatus: bridgeTxn.txnStatus,
@@ -151,7 +150,6 @@ async function verifyBlockchainTxnWithResp(
 
   switch (verifyResult) {
     case ConfirmOutcome.SUCCESS:
-      logger.silly('verifyBlockchainTxnWithResp: passed');
       return ConfirmOutcome.SUCCESS;
     case ConfirmOutcome.WRONG_INFO:
       res.status(406).send('Invalid transaction');
@@ -172,10 +170,9 @@ async function createBridgeTxnWithResp(
     const bridgeTxn: BridgeTxn = await apiWorker.create(apiCallParam);
     return bridgeTxn;
   } catch (err) {
-    logger.error('unknown error, maybe db?');
+    log.APIS.unknownError(err);
     // db error happened once when I push.
     //06:54:51Z error : (ERR_CODE: ANB301): Cannot query in database service: {"connected":true,"err":{"errno":-60,"code":"ETIMEDOUT","syscall":"read"},"query":"\n      SELECT * FROM anb_request WHERE db_id = $1;\n    ","params":{"0":57}}
-    logger.error(err);
     res.status(500).send('Internal server error.');
     return null;
   }

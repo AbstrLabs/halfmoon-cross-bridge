@@ -6,7 +6,7 @@
 export { log };
 
 import { ENV } from '../dotenv';
-import { TxnUid } from '../type/type';
+import { ApiCallParam, TxnUid } from '../type/type';
 import { logger } from './logger';
 
 enum WinstonLevels {
@@ -61,6 +61,42 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
         `bridge txn created with uid: ${uid.toString()}`,
     },
   },
+  APIS: {
+    //API Server
+    // TODO: /algorand-near
+    handledGetWithoutUid: {
+      level: WinstonLevels.verbose,
+      message: 'handled GET /algorand-near without UID',
+    },
+    handledGetWithMalformedUid: {
+      level: WinstonLevels.verbose,
+      message: (uid: TxnUid) =>
+        `handled GET /algorand-near with bad UID: ${uid.toString()}`,
+    },
+    handledGetWithInvalidUid: {
+      level: WinstonLevels.warn,
+      message: (uid: TxnUid) =>
+        `handled GET /algorand-near with invalid UID: ${uid.toString()}`,
+    },
+    handledGetWithValidUid: {
+      level: WinstonLevels.verbose,
+      message: (uid: TxnUid) =>
+        `handled GET /algorand-near with valid UID: ${uid.toString()}`,
+    },
+    handledPost: {
+      level: WinstonLevels.verbose,
+      message: (apiCallParam: ApiCallParam) =>
+        `Handled API POST call: ${JSON.stringify(apiCallParam)}`,
+    },
+    generalError: {
+      level: WinstonLevels.error,
+      message: (err: unknown) => `general error ${JSON.stringify(err)}`,
+    },
+    unknownError: {
+      level: WinstonLevels.error,
+      message: (err: unknown) => `unknown error: ${JSON.stringify(err)}`,
+    },
+  },
 } as const;
 
 const log: {
@@ -77,6 +113,15 @@ const log: {
     apiWorkerStarted: () => null,
     doubleMintError: () => null,
     apiWorkerCreatedBridgeTxn: () => null,
+  },
+  APIS: {
+    handledGetWithoutUid: () => null,
+    handledGetWithMalformedUid: () => null,
+    handledGetWithInvalidUid: () => null,
+    handledGetWithValidUid: () => null,
+    handledPost: () => null,
+    generalError: () => null,
+    unknownError: () => null,
   },
   // NotExist: {
   //   NotExist: () => null,
