@@ -90,12 +90,15 @@ const parsed_ENV = parseDotEnv();
 
 const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
 
-const loadDotEnv = ({ isTest } = { isTest: false }) => {
-  if (isTest) {
-    ENV.NODE_ENV = NodeEnvEnum.TEST;
-  }
+const loadDotEnv = ({
+  nodeEnvOverride,
+}: { nodeEnvOverride?: NodeEnvEnum } = {}) => {
   if (process.env.TS_NODE_DEV) {
     ENV.NODE_ENV = 'development';
+  }
+  // override > TS_NODE_DEV > default
+  if (nodeEnvOverride !== undefined) {
+    ENV.NODE_ENV = nodeEnvOverride;
   }
   Object.freeze(ENV);
   return ENV;

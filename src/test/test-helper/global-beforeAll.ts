@@ -1,8 +1,9 @@
+import { NodeEnvEnum } from '../..';
 import { db } from '../../database/db';
 import { loadDotEnv } from '../../utils/dotenv';
 import { logger } from '../../utils/log/logger';
 
-loadDotEnv({ isTest: true }); // better than calling `ENV`.
+loadDotEnv({ nodeEnvOverride: NodeEnvEnum.TEST }); // better than calling `ENV`.
 logger.level = 'verbose';
 
 const SECOND = 1000;
