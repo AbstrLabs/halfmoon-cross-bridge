@@ -133,7 +133,7 @@
     "build": "tsc",
     "db": "yarn test:db",
     "dev": "tsnd --respawn src/main.ts --inspector --debug",
-    "doc": "yarn typedoc src/* --logLevel Error --out ./TSdoc",
+    "doc": "yarn typedoc src/* --logLevel Error --out ./TSDoc",
     "handler": "yarn test:handler",
     "int": "yarn test:integration-test",
     "integration-test": "yarn test:integration-test",

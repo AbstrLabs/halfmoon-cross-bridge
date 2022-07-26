@@ -16,4 +16,4 @@ docsRoute
 
 docsRoute.use('/docs', express.static(`${__dirname}/../../../TSDoc`));
 
-// docsRoute.use('/docs', express.static(`${__dirname}/../../TSdoc`));
+// docsRoute.use('/docs', express.static(`${__dirname}/../../TSDoc`));
