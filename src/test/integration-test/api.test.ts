@@ -25,6 +25,7 @@ describe('root API (GET)', () => {
   });
 });
 
+// TODO : dynamic /algorand-near from TXN_ROUTE_PATH
 describe('/algorand-near API (GET)', () => {
   it('/algorand-near returns welcome JSON on no-param GET', async () => {
     const res = await axios.get('http://localhost:4190/algorand-near');
@@ -99,6 +100,8 @@ describe('/algorand-near API (POST)', () => {
     expect(res.statusText).toBe('OK');
     const data = res.data as PostReturn;
     expect(() => {
+      console.log('data.uid : ', data.uid); // DEV_LOG_TO_REMOVE
+
       parseTxnUid(data.uid);
     }).not.toThrow(); // starts with 2 digits
   });

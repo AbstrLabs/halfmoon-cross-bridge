@@ -12,6 +12,7 @@ import {
 import { BridgeTxn } from '../bridge';
 import ObjectSet from 'object-set-type';
 import { log } from '../utils/log/log-template';
+import { logger } from '../utils/log/logger';
 
 class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
@@ -25,6 +26,7 @@ class ApiWorker {
    */
   public async create(apiCallParam: ApiCallParam) {
     if (this._has(apiCallParam)) {
+      logger.error('Txn already in creation queue ' + apiCallParam.txn_id);
       throw new Error('Txn already in creation queue ' + apiCallParam.txn_id);
     }
     this._add(apiCallParam);
@@ -50,11 +52,11 @@ class ApiWorker {
   }
 
   private _delete(criticalApiCallParam: CriticalApiCallParam) {
-    if (!this._has(criticalApiCallParam)) {
+    if (!this._has(parseCriticalApiCallParam(criticalApiCallParam))) {
       throw new Error('Txn not in creation queue');
     }
 
-    return this.#queue.delete(criticalApiCallParam);
+    return this.#queue.delete(parseCriticalApiCallParam(criticalApiCallParam));
   }
 
   /* GETTERS & SETTER */
@@ -69,7 +71,7 @@ class ApiWorker {
   /* PRIVATE METHOD */
 
   private _has(criticalApiCallParam: CriticalApiCallParam) {
-    return this.#queue.has(criticalApiCallParam);
+    return this.#queue.has(parseCriticalApiCallParam(criticalApiCallParam));
   }
   private _add(criticalApiCallParam: CriticalApiCallParam) {
     this.#queue.add(parseCriticalApiCallParam(criticalApiCallParam));
