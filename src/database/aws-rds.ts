@@ -8,7 +8,7 @@ import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { Pool, PoolClient } from 'pg';
 
 import { ENV } from '../utils/dotenv';
-import { logger } from '../utils/log/logger';
+import { log } from '../utils/log/log-template';
 
 interface PgConfig {
   host: string;
@@ -39,7 +39,7 @@ class Postgres {
    */
   async connect(): Promise<void> {
     if (this.isConnected) {
-      logger.verbose('db is already connected');
+      log.ARDS.onDoubleConnect();
       return;
     }
     try {
@@ -50,7 +50,7 @@ class Postgres {
       });
     }
     this.isConnected = true;
-    logger.info('[DB ]: database connected');
+    log.ARDS.onConnect();
   }
 
   /**

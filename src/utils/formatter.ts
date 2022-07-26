@@ -13,8 +13,8 @@ import { BridgeError, ERRORS } from './bridge-error';
 
 import { ENV } from './dotenv';
 import { literals } from './bridge-const';
-import { logger } from './log/logger';
 import { utils } from 'near-api-js';
+import { log } from './log/log-template';
 
 /* UNIT CONVERSION OF goNear */
 
@@ -54,8 +54,7 @@ function toGoNearAtom(goNearPlain: string | number): bigint {
   const atomAmount = BigInt(
     trimLeadingZeroes(wholePart + fracPart.padEnd(ENV.GO_NEAR_DECIMALS, '0'))
   );
-  logger.debug({
-    at: 'toGoNearAtom',
+  log.UTIL.toGoNearAtomDebug({
     goNearPlain: goNearString,
     wholePart,
     fracPart,
@@ -122,7 +121,7 @@ function yoctoNearToAtom(yoctoNear: string | number | bigint): bigint {
   // rounding
   // TODO(test): with '0987654321098765432109876543210987654321' -> '0987654321098765432109876500000000000000'
   if (!yoctoNearStr.endsWith(literals.FOURTEEN_ZEROS)) {
-    logger.warn('yoctoNearToAtom: rounding DOWN to nearest atom');
+    log.UTIL.yoctoNearToAtomFloor();
     yoctoNearStr = yoctoNearStr.slice(0, -14) + literals.FOURTEEN_ZEROS;
   }
 
@@ -162,7 +161,6 @@ function atomToYoctoNear(atom: bigint): string {
  */
 function stringifyObjWithBigint(obj?: object): string {
   if (!obj) {
-    logger.warn('stringifyObjWithBigint: no obj');
     return '';
     // TODO: should raise error?
   }

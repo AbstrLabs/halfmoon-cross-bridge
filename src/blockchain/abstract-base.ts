@@ -35,8 +35,8 @@ import {
   AlgoAssetTransferTxnOutcome,
 } from '../utils/type/type';
 import { setImmediateInterval } from '../utils/helper';
-import { logger } from '../utils/log/logger';
 import { BlockchainName } from '..';
+import { log } from '../utils/log/log-template';
 
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;
@@ -76,11 +76,12 @@ enum ConfirmOutcome {
  * 2. client (to make transaction)
  * 3. indexer (to confirm transaction)
  *
+ * @todo this implementation seems correct but it had an error.
  * @virtual
  */
 abstract class Blockchain {
   async confirmTxn(txnParam: TxnParam): Promise<ConfirmOutcome> {
-    logger.silly('Blockchain: confirmTransaction()', txnParam);
+    log.BLCH.confirmTxn(this.name, txnParam);
     const outcome = new Promise<ConfirmOutcome>((resolve) => {
       // let interval:NodeJS.Timer;
       let txnOutcome: TxnOutcome | undefined;
@@ -94,7 +95,7 @@ abstract class Blockchain {
         try {
           txnOutcome = await this.getTxnStatus(txnParam);
         } catch (err) {
-          logger.error('Blockchain: confirmTransaction()', { err, txnParam });
+          log.BLCH.confirmTxnError(this.name, txnParam, err);
           return; // run next interval
         }
         try {

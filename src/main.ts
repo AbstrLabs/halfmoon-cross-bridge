@@ -1,7 +1,6 @@
 import { loadDotEnv } from './utils/dotenv';
 
 import { db } from './database/db';
-import { logger } from './utils/log/logger';
 import { startApiServer } from './api/start-api-server';
 import { startBridgeTxnWorker } from './bridge/bridge-worker';
 import { log } from './utils/log/log-template';
@@ -31,5 +30,5 @@ async function setupRemoteEnv() {
 }
 
 main().catch((err) => {
-  logger.error(err);
+  log.MAIN.generalError(err);
 });

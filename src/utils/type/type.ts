@@ -40,7 +40,7 @@ export { ApiCallParam } from './shared-types/api';
 import { z } from 'zod';
 import { TOKEN_TABLE } from '../../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from '../bridge-error';
-import { logger } from '../log/logger';
+import { logger } from '../log/logger'; // log-template will cause circular reference
 import { ApiCallParam } from './shared-types/api';
 import { TokenId } from './shared-types/token';
 import { BridgeTxnStatusEnum } from './shared-types/txn';

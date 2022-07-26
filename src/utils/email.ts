@@ -1,5 +1,5 @@
 import { BridgeTxnSafeObj } from '../bridge';
-import { logger } from './log/logger';
+import { log } from './log/log-template';
 import { TxnUid } from './type/type';
 
 type EmailAddr = string; // TODO: type this with zod regex
@@ -18,8 +18,10 @@ class EmailServer {
    */
 
   sendEmail(email: Email): void {
-    logger.warn(
-      `[EMS]: FAKE! Sending email to ${email.to}, title: ${email.title}, body: ${email.body}`
+    log.EMLS.onSendEmail(
+      email.to,
+      email.title,
+      `[FAKE] No email is sent here. body: ${email.body}`
     );
   }
   sendErrEmail(uid: TxnUid, bridgeTxnSafeObj: BridgeTxnSafeObj): void {

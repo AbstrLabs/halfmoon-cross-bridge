@@ -14,11 +14,10 @@ import {
   parseDbItem,
   parseDbId,
 } from '../utils/type/type';
-import { literals } from '../utils/bridge-const';
-import { logger } from '../utils/log/logger';
 import { type Postgres, postgres } from './aws-rds';
 import { ENV } from '../utils/dotenv';
 import { NodeEnvEnum } from '..';
+import { log } from '../utils/log/log-template';
 
 let _TABLE_NAME;
 if (
@@ -26,10 +25,10 @@ if (
   ENV.NODE_ENV === NodeEnvEnum.TEST
 ) {
   _TABLE_NAME = 'request_dev';
-  logger.info('[DB ]: using development database');
+  log.DB.devMode();
 } else if (ENV.NODE_ENV === NodeEnvEnum.PRODUCTION) {
   _TABLE_NAME = 'request_test';
-  logger.info('[DB ]: using testnet database');
+  log.DB.testMode();
 } else {
   throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV, {
     current_ENV: ENV.NODE_ENV,
@@ -193,9 +192,7 @@ class Database {
 
     const dbId = parseDbId(result.db_id);
     bridgeTxn.dbId = dbId;
-    logger.info(
-      literals.DB_ENTRY_CREATED(this.requestTableName, bridgeTxn.uid)
-    );
+    log.DB.itemCreated(this.requestTableName, dbId);
     return dbId;
   }
 
@@ -238,12 +235,7 @@ class Database {
       SELECT * FROM ${this.requestTableName};
     `;
     const dbItems = await this.query(query);
-
-    logger.silly(
-      `[DB ]: readAllTxn: fetched ${dbItems.length} items:\n ${JSON.stringify(
-        dbItems
-      )}`
-    );
+    log.DB.onReadAllFinished(this.requestTableName, dbItems);
     // parseDbItem for validation
     return dbItems.map((dbItem) => parseDbItem(dbItem as DbItem));
   }
@@ -316,9 +308,7 @@ class Database {
       params,
     }) as { db_id: DbId };
 
-    logger.debug(
-      `[DB ]: Updated bridge txn with dbId ${bridgeTxn.dbId} to ${bridgeTxn.txnStatus}`
-    );
+    log.DB.onUpdateTxnFinished(bridgeTxn.dbId, bridgeTxn.txnStatus);
     return parseDbId(result.db_id);
   }
 

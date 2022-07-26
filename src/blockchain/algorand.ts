@@ -20,7 +20,6 @@ import {
 import { AlgoAcc, Blockchain } from './abstract-base';
 import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
 import { BlockchainName } from '..';
-import { logger } from '../utils/log/logger';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import {
@@ -28,6 +27,7 @@ import {
   AlgoTxnParam,
   parseBigInt,
 } from '../utils/type/type';
+import { log } from '../utils/log/log-template';
 
 interface ClientParam {
   token: { 'X-API-Key': string };
@@ -108,22 +108,10 @@ class AlgorandBlockchain extends Blockchain {
       const outcome = (await this.indexer
         .lookupTransactionByID(txnParam.txnId)
         .do()) as AlgoAssetTransferTxnOutcome;
-
-      logger.verbose(
-        literals.TXN_CONFIRMED(
-          txnParam.fromAddr,
-          txnParam.toAddr,
-          this.name,
-          txnParam.atomAmount,
-          txnParam.txnId,
-          'round unknown'
-        )
-      );
-
       return outcome;
-    } catch (e) {
-      logger.error(e);
-      throw e;
+    } catch (err) {
+      log.BLCH.getTxnStatusFailed(err);
+      throw err;
     }
 
     // the following method only checks new blocks
@@ -250,8 +238,7 @@ class AlgorandBlockchain extends Blockchain {
       );
       return algoTxnId;
     } catch (e) {
-      logger.error('error in algorand blockchain:');
-      logger.error(e);
+      log.ALGO.failedToMakeAsaTxn(e);
       throw e;
     }
   }
@@ -313,7 +300,8 @@ class AlgorandBlockchain extends Blockchain {
     interface ConfirmedTxn extends Record<string, unknown> {
       'confirmed-round': string;
     }
-    const confirmedTxn: ConfirmedTxn = (await algosdk.waitForConfirmation(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const confirmedTxn = (await algosdk.waitForConfirmation(
       this.client,
       txnId,
       10
@@ -329,16 +317,7 @@ class AlgorandBlockchain extends Blockchain {
     }
 
     //Get the completed Transaction
-    logger.verbose(
-      literals.TXN_CONFIRMED(
-        algoTxnParam.fromAddr,
-        algoTxnParam.toAddr,
-        this.name,
-        algoTxnParam.atomAmount,
-        txnId,
-        confirmedTxn['confirmed-round']
-      )
-    );
+    log.ALGO.asaTransferTxnCreated(algoTxnParam);
     return txnId;
   }
 
@@ -361,12 +340,9 @@ class AlgorandBlockchain extends Blockchain {
   protected _genAcc(): AlgoAcc {
     // tested, used only once
     const algoAcc: AlgoAcc = algosdk.generateAccount();
-    logger.warn('Account Address = ' + algoAcc.addr);
     const account_mnemonic = algosdk.secretKeyToMnemonic(algoAcc.sk);
-    logger.warn('Account Mnemonic = ' + account_mnemonic);
-    logger.warn('Account created. Save off Mnemonic and address');
-    logger.warn('Add funds to account using the TestNet Dispenser: ');
-    logger.warn('https://dispenser.testnet.aws.algodev.network/ ');
+    algoAcc.addr, account_mnemonic;
+    log.ALGO.algoAccCreated(algoAcc.addr, account_mnemonic);
     return algoAcc;
   }
 
@@ -401,14 +377,14 @@ class AlgorandBlockchain extends Blockchain {
     const ptx = await algosdk.waitForConfirmation(this.client, tx.txId, 4);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     noParamAsaConfig.assetId = ptx['asset-index'];
-    logger.info(
-      literals.ASA_CREATED(
-        noParamAsaConfig.assetName,
-        // eslint-disable-next-line
-        tx.txId,
-        noParamAsaConfig.assetId! // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      )
+    log.ALGO.asaCreated(
+      noParamAsaConfig.assetName,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      tx.txId,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      noParamAsaConfig.assetId!
     );
+
     return noParamAsaConfig;
   }
 }

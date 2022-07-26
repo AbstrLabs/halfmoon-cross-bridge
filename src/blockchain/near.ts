@@ -20,12 +20,11 @@ import {
 import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
 import { BlockchainName } from '..';
 import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
-import { logger } from '../utils/log/logger';
 import { Blockchain } from './abstract-base';
-import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
 import { NearTxnParam } from '../utils/type/type';
+import { log } from '../utils/log/log-template';
 
 interface ClientParam {
   networkId: string;
@@ -118,20 +117,9 @@ class NearBlockchain extends Blockchain {
    * @returns NEAR Transaction outcome
    */
   async getTxnStatus(txnParam: NearTxnParam): Promise<NearTxnOutcome> {
-    logger.silly('nearIndexer: getTxnStatus()');
     const result = await this.indexer.txStatus(
       txnParam.txnId,
       txnParam.fromAddr
-    );
-    logger.info(
-      literals.TXN_CONFIRMED(
-        txnParam.fromAddr,
-        txnParam.toAddr,
-        this.name,
-        txnParam.atomAmount,
-        txnParam.txnId,
-        'round unknown'
-      )
     );
     return result;
   }
@@ -155,7 +143,7 @@ class NearBlockchain extends Blockchain {
     nearTxnParam: NearTxnParam
   ): boolean {
     const { fromAddr, toAddr, atomAmount, txnId } = nearTxnParam;
-    logger.debug(literals.NEAR_VERIFY_OUTCOME(txnOutcome));
+    log.NEAR.nearVerifyOutcome(txnOutcome);
     if (txnOutcome.status instanceof Object) {
       if (txnOutcome.status.Failure !== undefined) {
         throw new BridgeError(ERRORS.EXTERNAL.MAKE_TXN_FAILED, {

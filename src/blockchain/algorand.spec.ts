@@ -2,7 +2,6 @@ import { ENV } from '../utils/dotenv';
 import { TxnParam } from '../utils/type/type';
 import { algoBlockchain } from './algorand';
 import { literals } from '../utils/bridge-const';
-import { logger } from '../utils/log/logger';
 import { toGoNearAtom } from '../utils/formatter';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
@@ -49,11 +48,12 @@ describe('AlgorandBlockchain', () => {
     expect(algoBlockchain).toBeDefined();
   });
   it('manually check ENV VARS', () => {
-    logger.warn({
+    console.warn({
       why: 'manually check ENV VARS',
       ALGO_MASTER_ADDR: ENV.ALGO_MASTER_ADDR,
       TEST_NET_GO_NEAR_ASSET_ID: ENV.TEST_NET_GO_NEAR_ASSET_ID,
     });
+    // expect(ENV.ALGO_MASTER_ADDR).toBeDefined(); // it has a default value.
     expect(ENV.ALGO_MASTER_ADDR).not.toBe(literals.NOT_LOADED_FROM_ENV_STR);
     expect(typeof ENV.TEST_NET_GO_NEAR_ASSET_ID).toBe('number');
   });

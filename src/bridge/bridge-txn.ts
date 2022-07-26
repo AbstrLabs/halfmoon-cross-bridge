@@ -19,7 +19,6 @@ import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { db } from '../database/db';
 import { stringifyBigintInObj } from '../utils/formatter';
 import { literals } from '../utils/bridge-const';
-import { logger } from '../utils/log/logger';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../utils/type/shared-types/token';
@@ -28,6 +27,7 @@ import {
   BridgeTxnStatusEnum,
 } from '../utils/type/shared-types/txn';
 import { bigintBips } from '../utils/helper';
+import { log } from '../utils/log/log-template';
 
 interface BridgeTxnObjBase {
   dbId?: number;
@@ -292,7 +292,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
   @requireCreatedInDb
   @requireStatus(BridgeTxnStatusEnum.DONE_INITIALIZE)
   async confirmIncomingTxn(): Promise<void> {
-    logger.verbose('[BTX]: running confirmIncomingTxn.');
+    log.BTXN.onConfirmIncome();
     await this._updateTxnStatus(BridgeTxnStatusEnum.DOING_INCOMING);
 
     let confirmOutcome;
@@ -642,10 +642,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     try {
       return await this.#db.updateTxn(this);
     } catch (e) {
-      logger.error('error at _updateTxn', e);
       throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
         at: 'BridgeTxn._updateTxn',
-        error: e,
+        error: JSON.stringify(e),
         bridgeTxn: this,
       });
     }
@@ -679,18 +678,15 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         bridgeTxn: this,
       });
     }
-    logger.debug(`[BTX]: updating status of txn ${this.uid} to: ${newStatus}`);
+    log.BTXN.onUpdateStatus(this.uid, newStatus);
     this.txnStatus = newStatus;
-    logger.debug(
-      `[BTX]: updated status of txn ${this.uid} to: ${this.txnStatus}`
-    );
+    log.BTXN.onUpdateStatusDone(this.uid, newStatus);
     try {
       return await this._updateTxn();
     } catch (e) {
-      logger.error('error at _updateTxnStatus', e);
       throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
         at: 'BridgeTxn._updateTxnStatus',
-        error: e,
+        error: JSON.stringify(e),
         bridgeTxn: this,
       });
     }
@@ -719,10 +715,9 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     try {
       return await this._updateTxn();
     } catch (e) {
-      logger.error('error at _updateToTxnId', e);
       throw new BridgeError(ERRORS.EXTERNAL.DB_UPDATE_TXN_FAILED, {
         at: 'BridgeTxn._updateToTxnId',
-        error: e,
+        error: JSON.stringify(e),
         bridgeTxn: this,
       });
     }

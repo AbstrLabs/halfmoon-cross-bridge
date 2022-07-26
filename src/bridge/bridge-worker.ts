@@ -10,9 +10,9 @@ import { db, type Database } from '../database/db';
 import { emailServer } from '../utils/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
-import { logger } from '../utils/log/logger';
 import { TxnUid } from '../utils/type/type';
 import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
+import { log } from '../utils/log/log-template';
 
 // TBD3: add config to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;
@@ -37,7 +37,7 @@ class BridgeWorker {
   }
 
   public async run() {
-    logger.info('[BW ]: Start running.');
+    log.BWKR.onStart();
     await this.fetchTasksFromDb(LOAD);
     // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
     while (true) {
@@ -46,7 +46,7 @@ class BridgeWorker {
         await this.handleOneTask();
         await pause(EXECUTE_INTERVAL_MS);
       }
-      logger.info(`[BW ]: No task left, fetching new tasks.`);
+      log.BWKR.onIdle();
       await this.fetchTasksFromDb(UPDATE);
     }
   }
@@ -65,16 +65,11 @@ class BridgeWorker {
       const bridgeTxn = BridgeTxn.fromDbItem(item);
       // later this won't be needed since all finished items will be removed from that table.
       if (BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName === null) {
-        logger.silly(`[BW ]: Skipping finished task ${bridgeTxn.uid}`);
+        log.BWKR.skipTxn(bridgeTxn.uid);
         // TODO: [FDB] change this back to debug, and filter in db.
         continue;
       }
-      logger.silly(
-        // 57 = 52 max len + 1 for '.' + 3 for dbId + 1 for backup
-        `Loaded bridgeTxn with uid,txnStatus: ${bridgeTxn.uid.padEnd(57)},${
-          bridgeTxn.txnStatus
-        }`
-      );
+      log.BWKR.loadTxn(bridgeTxn.uid, bridgeTxn.txnStatus);
       switch (fetchAction) {
         case LOAD:
           this._add(bridgeTxn);
@@ -88,7 +83,7 @@ class BridgeWorker {
   async handleOneTask() {
     const newTask = this._getRandomOne();
     if (newTask === undefined) {
-      logger.info('[BW ]: No task to handle.');
+      log.BWKR.onEmptyQueue();
       return;
     }
     await this.handleTask(newTask);
@@ -157,20 +152,18 @@ class BridgeWorker {
    * @returns
    */
   private async handleTask(bridgeTxn: BridgeTxn) {
-    logger.info(
-      `[BW ]: Handling task with uid, status: ${bridgeTxn.uid}, ${bridgeTxn.txnStatus}`
-    );
+    log.BWKR.handleTask(bridgeTxn.uid, bridgeTxn.txnStatus);
     if (
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.DONE_OUTGOING ||
       bridgeTxn.txnStatus === BridgeTxnStatusEnum.USER_CONFIRMED
     ) {
-      logger.verbose(`[BW ]: Moved finished task ${bridgeTxn.uid}.`);
+      log.BWKR.finishedTask(bridgeTxn.uid);
       await this._finishTask(bridgeTxn);
       return;
     } else {
       const actionName = BridgeTxnStatusTree[bridgeTxn.txnStatus].actionName;
       if (actionName === 'MANUAL') {
-        logger.verbose(`[BW ]: Sent error mail for ${bridgeTxn.uid}.`);
+        log.BWKR.onTaskErrorEmail(bridgeTxn.uid);
         emailServer.sendErrEmail(bridgeTxn.uid, bridgeTxn.toSafeObject());
         await this._dropTask(bridgeTxn);
         return;
@@ -179,17 +172,17 @@ class BridgeWorker {
           `[BW ]: actionName is null for ${bridgeTxn.uid} no action's needed.`
         );
       } else {
-        logger.verbose(
-          `[BW ]: Executing ${actionName} on ${bridgeTxn.uid} with status ${bridgeTxn.txnStatus}.`
-        );
+        log.BWKR.executingTask(actionName, bridgeTxn.uid, bridgeTxn.txnStatus);
         try {
           await bridgeTxn[actionName]();
           await this._finishTask(bridgeTxn);
         } catch (e) {
-          logger.error(
-            `[BW ]: Error executing ${actionName} on ${bridgeTxn.uid}.`
+          log.BWKR.executingTaskError(
+            actionName,
+            bridgeTxn.uid,
+            bridgeTxn.txnStatus,
+            e
           );
-          logger.error(e);
           await this._dropTask(bridgeTxn);
           return;
         }
@@ -203,7 +196,7 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    logger.warn('[BW ]: FAKE! (not) moved manual task to error table.');
+    // logger.warn('[BW ]: FAKE! (not) moved manual task to error table.');
     this._delete(bridgeTxn);
   }
 
@@ -212,7 +205,7 @@ class BridgeWorker {
     await new Promise<void>((resolve) => {
       resolve();
     });
-    logger.warn('[BW ]: FAKE! (not) moved finished task to finished table.');
+    // logger.warn('[BW ]: FAKE! (not) moved finished task to finished table.');
     this._delete(bridgeTxn);
   }
 
@@ -253,6 +246,6 @@ const bridgeWorker = new BridgeWorker(db);
 
 function startBridgeTxnWorker() {
   bridgeWorker.run().catch((err) => {
-    logger.error(err);
+    log.BWKR.generalError(err);
   });
 }

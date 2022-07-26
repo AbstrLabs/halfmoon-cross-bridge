@@ -7,9 +7,9 @@ import express, { Request, Response } from 'express';
 import { ENV } from '../utils/dotenv';
 import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
-import { logger } from '../utils/log/logger';
 import { docsRoute } from './routes/docs';
 import { NodeEnvEnum } from '..';
+import { log } from '../utils/log/log-template';
 
 async function homePageTest() {
   /* Used once code */
@@ -55,9 +55,7 @@ function startApiServer() {
   });
 
   app.listen(ENV.PORT, () => {
-    logger.info(
-      `Application started on port ${ENV.PORT}! http://localhost:${ENV.PORT}/`
-    );
+    log.APIS.appStarted();
   });
 }
 
