@@ -3,4 +3,4 @@
 
 # unit tests and integration tests
 yarn unit-test --bail
-yarn integration-test --bail
+yarn integration-test
