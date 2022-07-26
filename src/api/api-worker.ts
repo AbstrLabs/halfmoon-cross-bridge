@@ -10,8 +10,8 @@ import {
   parseCriticalApiCallParam,
 } from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
-import { logger } from '../utils/log/logger';
 import ObjectSet from 'object-set-type';
+import { log } from '../utils/log/log-template';
 
 class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
@@ -40,16 +40,12 @@ class ApiWorker {
       // TBD1: less coupling vs less execution cost (to fetch db)?
       // bridgeWorker.addTask(bridgeTxn);
     } catch (err) {
-      logger.error('[AWK]: Double mint: from_txn_id existed in db.');
-      logger.error(err);
+      log.APIW.doubleMintError(err);
       throw err;
     } finally {
       apiWorker._delete(apiCallParam);
     }
-    logger.verbose(
-      `[ApiWorker]: bridge txn created with uid: ${bridgeTxn.uid.toString()}`
-    );
-
+    log.APIW.apiWorkerCreatedBridgeTxn(bridgeTxn.uid);
     return bridgeTxn;
   }
 
