@@ -1,7 +1,7 @@
 export { docsRoute };
 import express, { NextFunction, Request, Response } from 'express';
 import { NodeEnvEnum } from '../..';
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../../utils/env';
 
 const docsRoute = express.Router();
 

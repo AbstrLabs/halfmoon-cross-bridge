@@ -12,7 +12,7 @@
 
 export { BRIDGE_INFO_MAP, getBridgeInfo };
 
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { toGoNearAtom } from '../utils/formatter';
 import { TokenId } from '../common/src/type/token';

@@ -8,7 +8,7 @@ export {
 };
 
 import { BridgeTxn } from '../../bridge';
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../../utils/env';
 import { TokenId } from '../../common/src/type/token';
 import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 import { type ApiCallParam } from '../../utils/type/type';

@@ -1,4 +1,4 @@
-import { loadDotEnv } from './utils/dotenv';
+import { loadDotEnv } from './utils/env';
 
 import { db } from './database/db';
 import { startApiServer } from './api/start-api-server';

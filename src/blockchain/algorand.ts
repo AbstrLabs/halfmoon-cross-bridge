@@ -18,7 +18,7 @@ import {
 } from '../utils/config-once/asa';
 
 import { AlgoAcc, Blockchain } from './abstract-base';
-import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
+import { ENV, NETWORK_INSTANCE } from '../utils/env';
 import { BlockchainName } from '..';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';

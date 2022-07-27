@@ -4,7 +4,7 @@ export { startApiServer };
 
 import express, { Request, Response } from 'express';
 
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { WELCOME_JSON } from '.';
 import { txnRoute } from './routes/txn-route';
 import { docsRoute } from './routes/docs';

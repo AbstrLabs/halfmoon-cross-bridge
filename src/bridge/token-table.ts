@@ -9,7 +9,7 @@ export { TOKEN_TABLE, getTokenImplBlockchain };
 import { BlockchainName } from '..';
 import { BLOCKCHAIN_MAP } from '../blockchain';
 import { Blockchain } from '../blockchain/abstract-base';
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { TokenId } from '../common/src/type/token';
 import { Addr } from '../utils/type/type';
 

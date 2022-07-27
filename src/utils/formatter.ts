@@ -11,7 +11,7 @@ export {
 
 import { BridgeError, ERRORS } from './bridge-error';
 
-import { ENV } from './dotenv';
+import { ENV } from './env';
 import { literals } from './bridge-const';
 import { utils } from 'near-api-js';
 import { log } from './log/log-template';

@@ -8,7 +8,7 @@ import { BridgeTxn } from '.';
 import { BridgeTxnStatusTree, NodeEnvEnum } from '..';
 import { db, type Database } from '../database/db';
 import { emailServer } from '../utils/email';
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { pause } from '../utils/helper';
 import { TxnUid } from '../utils/type/type';
 import { BridgeTxnStatusEnum } from '../common/src/type/txn';

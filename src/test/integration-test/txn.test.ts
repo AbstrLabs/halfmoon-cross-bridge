@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { PostReturn } from '../../api/routes/txn-route';
 import { testAlgo } from '../../blockchain/algorand';
 import { BridgeTxnSafeObj } from '../../bridge';
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../../utils/env';
 import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
 import { TokenId } from '../../common/src/type/token';

@@ -1,6 +1,6 @@
 import { NodeEnvEnum } from '../..';
 import { db } from '../../database/db';
-import { loadDotEnv } from '../../utils/dotenv';
+import { loadDotEnv } from '../../utils/env';
 import { logger } from '../../utils/log/logger';
 
 loadDotEnv({ nodeEnvOverride: NodeEnvEnum.TEST }); // initiate `ENV`.

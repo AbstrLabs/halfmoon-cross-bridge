@@ -1,5 +1,5 @@
 import { ConfirmOutcome } from './abstract-base';
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { literals } from '../utils/bridge-const';
 import { nearBlockchain } from './near';
 import { toGoNearAtom } from '../utils/formatter';

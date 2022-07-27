@@ -6,7 +6,7 @@ export { simulatedFrontendNearToGoNear };
 
 import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 
-import { ENV } from '../../utils/dotenv';
+import { ENV } from '../../utils/env';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { ApiCallParam } from '../../utils/type/type';
 import { NearTxnId } from '../../blockchain/abstract-base';

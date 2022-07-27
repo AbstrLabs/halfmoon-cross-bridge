@@ -1,4 +1,4 @@
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import { TxnParam } from '../utils/type/type';
 import { algoBlockchain } from './algorand';
 import { literals } from '../utils/bridge-const';

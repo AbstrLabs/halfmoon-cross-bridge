@@ -1,4 +1,4 @@
-import { ENV } from '../utils/dotenv';
+import { ENV } from '../utils/env';
 import fs from 'fs';
 import { postgres } from './aws-rds';
 import { getNonce } from '../utils/bridge-const';

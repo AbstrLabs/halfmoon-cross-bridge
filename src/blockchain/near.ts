@@ -19,7 +19,7 @@ import {
 
 import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
 import { BlockchainName } from '..';
-import { ENV, NETWORK_INSTANCE } from '../utils/dotenv';
+import { ENV, NETWORK_INSTANCE } from '../utils/env';
 import { Blockchain } from './abstract-base';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
