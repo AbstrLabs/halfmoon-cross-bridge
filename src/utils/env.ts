@@ -69,6 +69,8 @@ const default_ENV = {
   // default
   NODE_ENV: 'development',
   TS_NODE_DEV: true,
+  // TODO: document this
+  OVERRIDE_DB_TABLE_NAME: undefined,
 };
 
 const secret_ENV = {

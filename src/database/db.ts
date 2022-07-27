@@ -19,22 +19,34 @@ import {
   parseDbItem,
 } from '../common/src/type/database';
 
+enum TableName {
+  DEV = 'request_dev',
+  TEST = 'request_test',
+  TESTNET = 'request_testnet', // not used yet
+  PRODUCTION = 'request_production', // not used yet
+}
 let _TABLE_NAME;
 if (
   ENV.NODE_ENV === NodeEnvEnum.DEVELOPMENT ||
   ENV.NODE_ENV === NodeEnvEnum.TEST
 ) {
-  _TABLE_NAME = 'request_dev';
+  _TABLE_NAME = TableName.DEV;
   log.DB.devMode();
 } else if (ENV.NODE_ENV === NodeEnvEnum.PRODUCTION) {
-  _TABLE_NAME = 'request_test';
+  _TABLE_NAME = TableName.TEST;
   log.DB.testMode();
 } else {
   throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV, {
     current_ENV: ENV.NODE_ENV,
   });
 }
-const TABLE_NAME = _TABLE_NAME as NodeEnvEnum;
+
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+if (ENV.OVERRIDE_DB_TABLE_NAME !== undefined) {
+  _TABLE_NAME = ENV.OVERRIDE_DB_TABLE_NAME;
+}
+
+const TABLE_NAME: TableName = _TABLE_NAME;
 
 /* DECORATOR */
 
