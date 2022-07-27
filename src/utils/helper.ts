@@ -1,4 +1,4 @@
-export { setImmediateInterval, pause, bigintBips, optionalBigint };
+export { setImmediateInterval, pause, bigintBips, optionalBigInt };
 
 import BigNumber from 'bignumber.js';
 import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
@@ -64,10 +64,8 @@ function bigintBips(
   }
 }
 
-function optionalBigint(
-  value: Biginter | undefined | null
-): bigint | undefined | null {
-  if (value === undefined || value === null) {
+function optionalBigInt(value: Biginter | undefined): bigint | undefined {
+  if (value === undefined) {
     return value;
   }
   return BigInt(parseBigInt(value));
