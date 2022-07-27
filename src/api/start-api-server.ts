@@ -55,7 +55,7 @@ function startApiServer() {
   });
 
   app.listen(ENV.PORT, () => {
-    log.APIS.appStarted();
+    log.APIS.appStarted(ENV.PORT);
   });
 }
 

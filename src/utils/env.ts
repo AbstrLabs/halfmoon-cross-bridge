@@ -88,7 +88,12 @@ const secret_ENV = {
 };
 const parsed_ENV = parseDotEnv();
 
-const ENV = { ...secret_ENV, ...default_ENV, ...process.env, ...parsed_ENV };
+const ENV = {
+  ...secret_ENV,
+  ...default_ENV,
+  ...process.env,
+  ...parsed_ENV,
+};
 
 const loadDotEnv = ({
   nodeEnvOverride,

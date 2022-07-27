@@ -3,11 +3,11 @@
  * All logs should be defined here.
  */
 
+// TODO: why cannot import ENV from './env' HERE?
 export { log };
 
-import { BlockchainName, BridgeTxnActionName } from '../..';
+import { BlockchainName, BridgeTxnActionName, NodeEnvEnum } from '../..';
 import { TableName } from '../../database';
-import { ENV } from '../env';
 import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 import { logger } from './logger';
 import {
@@ -43,7 +43,7 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
   MAIN: {
     loggerLevel: {
       level: WinstonLevels.info,
-      message: `log level: ${logger.level}`,
+      message: (level: WinstonLevels) => `log level: ${level}`,
     },
     generalError: {
       level: WinstonLevels.error,
@@ -51,7 +51,7 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     },
     nodeEnv: {
       level: WinstonLevels.info,
-      message: `NODE_ENV: ${ENV.NODE_ENV}`,
+      message: (nodeEnv: NodeEnvEnum) => `NODE_ENV: ${nodeEnv}`,
     },
   },
   APIW: {
@@ -108,7 +108,8 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     },
     appStarted: {
       level: WinstonLevels.info,
-      message: `Bridge application started on http://localhost:${ENV.PORT}/`,
+      message: (port: number) =>
+        `Bridge application started on http://localhost:${port}/`,
     },
   },
   BLCH: {
