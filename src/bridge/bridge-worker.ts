@@ -10,8 +10,9 @@ import { db, type Database } from '../database/db';
 import { emailServer } from '../utils/email';
 import { ENV } from '../utils/env';
 import { pause } from '../utils/helper';
-import { BridgeTxnStatusEnum, TxnUid } from '../common/src/type/txn';
+import { BridgeTxnStatusEnum } from '../common/src/type/txn';
 import { log } from '../utils/log/log-template';
+import { TxnUid } from '../common/src/type/cross-module';
 
 // TBD3: add config to setting (maybe .env)
 const EXECUTE_INTERVAL_MS = 1_000;

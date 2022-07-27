@@ -5,8 +5,8 @@
 export { type AsaConfig, type NoParamAsaConfig, noParamGoNearConfig };
 
 import { SuggestedParams } from 'algosdk';
+import { NearAddr } from '../../common/src/type/blockchain';
 
-import { NearAddr } from '../../blockchain/abstract-base';
 import { ENV } from '../env';
 
 interface AsaConfig {
