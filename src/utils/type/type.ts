@@ -36,14 +36,14 @@ export {
   fullyParseApiParam,
 };
 
-export { ApiCallParam } from '../../common/type/api';
+export { ApiCallParam } from '../../common/src/type/api';
 import { z } from 'zod';
 import { TOKEN_TABLE } from '../../bridge/token-table';
 import { BridgeError, ErrorTemplate, ERRORS } from '../bridge-error';
 import { logger } from '../log/logger'; // log-template will cause circular reference
-import { ApiCallParam } from '../../common/type/api';
-import { TokenId } from '../../common/type/token';
-import { BridgeTxnStatusEnum } from '../../common/type/txn';
+import { ApiCallParam } from '../../common/src/type/api';
+import { TokenId } from '../../common/src/type/token';
+import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 
 /* NON-ZOD TYPES */
 

@@ -21,8 +21,8 @@ import { stringifyBigintInObj } from '../utils/formatter';
 import { literals } from '../utils/bridge-const';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
-import { TokenId } from '../common/type/token';
-import { BridgeTxnSafeObj, BridgeTxnStatusEnum } from '../common/type/txn';
+import { TokenId } from '../common/src/type/token';
+import { BridgeTxnSafeObj, BridgeTxnStatusEnum } from '../common/src/type/txn';
 import { bigintBips } from '../utils/helper';
 import { log } from '../utils/log/log-template';
 

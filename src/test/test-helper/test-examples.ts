@@ -9,8 +9,8 @@ export {
 
 import { BridgeTxn } from '../../bridge';
 import { ENV } from '../../utils/dotenv';
-import { TokenId } from '../../common/type/token';
-import { BridgeTxnStatusEnum } from '../../common/type/txn';
+import { TokenId } from '../../common/src/type/token';
+import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 import { type ApiCallParam } from '../../utils/type/type';
 
 const EXAMPLE_MALFORMED_UID_FROM_DB =

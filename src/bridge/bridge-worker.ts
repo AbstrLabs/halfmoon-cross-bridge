@@ -11,7 +11,7 @@ import { emailServer } from '../utils/email';
 import { ENV } from '../utils/dotenv';
 import { pause } from '../utils/helper';
 import { TxnUid } from '../utils/type/type';
-import { BridgeTxnStatusEnum } from '../common/type/txn';
+import { BridgeTxnStatusEnum } from '../common/src/type/txn';
 import { log } from '../utils/log/log-template';
 
 // TBD3: add config to setting (maybe .env)

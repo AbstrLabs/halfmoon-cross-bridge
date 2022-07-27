@@ -5,7 +5,7 @@ import { BridgeTxnSafeObj } from '../../bridge';
 import { ENV } from '../../utils/dotenv';
 import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
-import { TokenId } from '../../common/type/token';
+import { TokenId } from '../../common/src/type/token';
 import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 

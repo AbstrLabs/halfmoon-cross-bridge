@@ -6,7 +6,7 @@ export {
   NodeEnvEnum,
 };
 
-import { BridgeTxnStatusEnum } from './common/type/txn';
+import { BridgeTxnStatusEnum } from './common/src/type/txn';
 
 enum BridgeTxnActionName {
   // create in DB

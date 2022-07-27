@@ -10,7 +10,7 @@ import { ENV } from '../../utils/dotenv';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { ApiCallParam } from '../../utils/type/type';
 import { NearTxnId } from '../../blockchain/abstract-base';
-import { TokenId } from '../../common/type/token';
+import { TokenId } from '../../common/src/type/token';
 
 /**
  * Simulate frontend: make NEAR to goNEAR mint txn, returning an API call param.

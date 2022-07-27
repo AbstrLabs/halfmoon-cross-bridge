@@ -2,8 +2,8 @@
 export { exampleBridgeTxn };
 
 import { BridgeTxn } from '../../bridge';
-import { TokenId } from '../../common/type/token';
-import { BridgeTxnStatusEnum } from '../../common/type/txn';
+import { TokenId } from '../../common/src/type/token';
+import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 
 const FAKE_TXN_ID = 'some_fake_txn_id';
 

@@ -10,7 +10,7 @@ import { BlockchainName } from '..';
 import { BLOCKCHAIN_MAP } from '../blockchain';
 import { Blockchain } from '../blockchain/abstract-base';
 import { ENV } from '../utils/dotenv';
-import { TokenId } from '../common/type/token';
+import { TokenId } from '../common/src/type/token';
 import { Addr } from '../utils/type/type';
 
 interface TokenBase {

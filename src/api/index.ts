@@ -1,5 +1,5 @@
-import { TokenId } from '../common/type/token';
-import { BridgeTxnStatusEnum } from '../common/type/txn';
+import { TokenId } from '../common/src/type/token';
+import { BridgeTxnStatusEnum } from '../common/src/type/txn';
 
 export { WELCOME_JSON };
 
