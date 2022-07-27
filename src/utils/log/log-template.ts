@@ -394,8 +394,13 @@ for (const moduleName in template) {
     const _logName = logName as keyof typeof template[typeof _moduleName];
     const logTemplate: Log = template[_moduleName][_logName];
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (log[_moduleName][_logName] as () => void) = () => {
-      logger[logTemplate.level](logTemplate.message);
+    (log[_moduleName][_logName] as () => void) = (...args: unknown[]) => {
+      if (typeof logTemplate.message === 'string') {
+        logger[logTemplate.level](logTemplate.message);
+      } else {
+        // () => string
+        logger[logTemplate.level](logTemplate.message(...args));
+      }
     };
   }
 }
