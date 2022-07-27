@@ -22,17 +22,18 @@ import { DbId, DbItem, parseDbItem } from '../common/src/type/database';
 import { TxnId } from '../common/src/type/blockchain';
 import { ApiCallParam } from '../common/src/type/api';
 import { parseTxnUid } from '../common/src/type/cross-module';
+import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
 
 interface BridgeTxnObjBase {
   dbId?: number;
-  fixedFeeAtom?: bigint;
-  marginFeeAtom?: bigint;
+  fixedFeeAtom?: Biginter;
+  marginFeeAtom?: Biginter;
   fromAddr: string;
-  fromAmountAtom: bigint;
+  fromAmountAtom: Biginter;
   fromTokenId: TokenId;
   fromTxnId: string;
   toAddr: string;
-  toAmountAtom?: bigint;
+  toAmountAtom?: Biginter;
   toTokenId: TokenId;
   txnStatus?: BridgeTxnStatusEnum;
   toTxnId?: string | null;
@@ -243,19 +244,22 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
     this.toTokenId = toTokenId;
 
     this.fromTxnId = fromTxnId;
-    this.fromAmountAtom = fromAmountAtom;
+    this.fromAmountAtom = parseBigInt(fromAmountAtom);
     this.fromAddr = fromAddr;
-    this.fromAmountAtom = fromAmountAtom;
+    this.fromAmountAtom = parseBigInt(fromAmountAtom);
     this.toAddr = toAddr;
     this.toTxnId = toTxnId;
     this.dbId = dbId;
 
     try {
       // TODO: (ANB-114) v0.3, Below will be overwritten if instantiated with value.
-      this.fixedFeeAtom = fixedFeeAtom ?? this._readFixedFeeAtom();
-      this.marginFeeAtom = marginFeeAtom ?? this._calculateMarginFeeAtom();
+      this.fixedFeeAtom =
+        optionalBigInt(fixedFeeAtom) ?? this._readFixedFeeAtom();
+      this.marginFeeAtom =
+        optionalBigInt(marginFeeAtom) ?? this._calculateMarginFeeAtom();
       this.createdTime = createdTime ?? BigInt(+Date.now());
-      this.toAmountAtom = toAmountAtom ?? this._calculateToAmountAtom();
+      this.toAmountAtom =
+        optionalBigInt(toAmountAtom) ?? this._calculateToAmountAtom();
       // next line seems not needed, consider removing it.
       this.txnStatus = txnStatus ?? BridgeTxnStatusEnum.DOING_INITIALIZE;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -264,7 +268,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn._initialize',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-        err: err.toString(),
+        err: { message: err, stack: err.stack, name: err.name },
       });
     }
     this._selfValidate();

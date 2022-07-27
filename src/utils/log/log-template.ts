@@ -18,6 +18,7 @@ import {
 import { DbId, DbItem } from '../../common/src/type/database';
 import { TxnUid } from '../../common/src/type/cross-module';
 import { ApiCallParam } from '../../common/src/type/api';
+import { stringifyObjWithBigint } from '../formatter';
 
 enum WinstonLevels {
   error = 'error',
@@ -194,7 +195,7 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
       message: `No task left, fetching new tasks.`,
     },
     skipTxn: {
-      level: WinstonLevels.debug,
+      level: WinstonLevels.silly,
       message: (txnUid: TxnUid) => `Skipping finished task ${txnUid}`,
     },
     loadTxn: {
@@ -296,8 +297,8 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
   UTIL: {
     toGoNearAtomDebug: {
       level: WinstonLevels.debug,
-      message: (debugObj: Record<string, string>) =>
-        `toGoNearAtomDebug: ${JSON.stringify(debugObj)}`,
+      message: (debugObj: object) =>
+        `toGoNearAtomDebug: ${stringifyObjWithBigint(debugObj)}`,
     },
     yoctoNearToAtomFloor: {
       level: WinstonLevels.warn,

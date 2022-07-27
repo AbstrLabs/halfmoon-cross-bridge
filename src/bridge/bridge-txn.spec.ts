@@ -15,15 +15,15 @@ describe('Class BridgeTxn should', () => {
     };
     const bridgeTxn = new BridgeTxn({
       fromAddr: txn.fromAddr,
-      fromAmountAtom: BigInt(txn.fromAmountAtom),
+      fromAmountAtom: txn.fromAmountAtom,
       fromTokenId: txn.fromTokenId,
       toAddr: txn.toAddr,
-      toAmountAtom: BigInt(txn.toAmountAtom),
+      toAmountAtom: txn.toAmountAtom,
       toTokenId: txn.toTokenId,
       fixedFeeAtom: undefined,
       marginFeeAtom: undefined,
       fromTxnId: txn.fromTxnId,
     });
-    expect(bridgeTxn.marginFeeAtom.toString()).toBe(txn.marginFeeAtom);
+    expect(bridgeTxn.toSafeObject().marginFeeAtom).toBe(txn.marginFeeAtom);
   });
 });
