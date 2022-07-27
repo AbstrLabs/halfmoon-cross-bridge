@@ -16,7 +16,7 @@ import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../common/src/type/token';
 import { BridgeTxnSafeObj, BridgeTxnStatusEnum } from '../common/src/type/txn';
-import { bigintBips } from '../utils/helper';
+import { bigintBips, optionalBigInt } from '../utils/helper';
 import { log } from '../utils/log/log-template';
 import { DbId, DbItem, parseDbItem } from '../common/src/type/database';
 import { TxnId } from '../common/src/type/blockchain';
@@ -206,15 +206,15 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
         typeof safeObj.dbId === 'number'
           ? safeObj.dbId
           : parseInt(safeObj.dbId),
-      fixedFeeAtom: BigInt(safeObj.fixedFeeAtom),
+      fixedFeeAtom: optionalBigInt(safeObj.fixedFeeAtom),
       fromAddr: safeObj.fromAddr,
       fromAmountAtom: BigInt(safeObj.fromAmountAtom),
       fromTokenId: safeObj.fromTokenId,
       fromTxnId: safeObj.fromTxnId,
-      marginFeeAtom: BigInt(safeObj.marginFeeAtom),
-      createdTime: BigInt(safeObj.createdTime),
+      marginFeeAtom: optionalBigInt(safeObj.marginFeeAtom),
+      createdTime: optionalBigInt(safeObj.createdTime),
       toAddr: safeObj.toAddr,
-      toAmountAtom: BigInt(safeObj.toAmountAtom),
+      toAmountAtom: optionalBigInt(safeObj.toAmountAtom),
       toTokenId: safeObj.toTokenId,
       toTxnId: safeObj.toTxnId,
       txnStatus: safeObj.txnStatus,

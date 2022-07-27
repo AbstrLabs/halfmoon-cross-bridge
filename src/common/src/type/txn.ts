@@ -30,8 +30,8 @@ interface BridgeTxnSafeObj {
   // TODO: move to zod
   // TODO: type better (addr,txnId)
   dbId: number | string;
-  fixedFeeAtom: string;
-  marginFeeAtom: string;
+  fixedFeeAtom?: string;
+  marginFeeAtom?: string;
   createdTime: string;
   fromAddr: string;
   fromAmountAtom: string;
