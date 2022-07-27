@@ -1,6 +1,13 @@
-export { ensureString, setImmediateInterval, pause, bigintBips };
+export {
+  ensureString,
+  setImmediateInterval,
+  pause,
+  bigintBips,
+  optionalBigint,
+};
 
 import BigNumber from 'bignumber.js';
+import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
 import { BridgeError, ERRORS } from './bridge-error';
 
 /**
@@ -81,4 +88,13 @@ function bigintBips(
     }
     return flooredResult + 1n;
   }
+}
+
+function optionalBigint(
+  value: Biginter | undefined | null
+): bigint | undefined | null {
+  if (value === undefined || value === null) {
+    return value;
+  }
+  return BigInt(parseBigInt(value));
 }
