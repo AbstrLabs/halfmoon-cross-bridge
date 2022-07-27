@@ -159,7 +159,9 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     asaTransferTxnCreated: {
       level: WinstonLevels.verbose,
       message: (algoTxnParam: AlgoTxnParam) =>
-        `ASA transaction created with id ${JSON.stringify(algoTxnParam)}`,
+        `ASA transaction created with id ${stringifyObjWithBigint(
+          algoTxnParam
+        )}`,
     },
     algoAccCreated: {
       level: WinstonLevels.warn,
