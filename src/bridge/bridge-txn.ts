@@ -16,7 +16,7 @@ import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../common/src/type/token';
 import { BridgeTxnSafeObj, BridgeTxnStatusEnum } from '../common/src/type/txn';
-import { bigintBips, optionalBigInt } from '../utils/helper';
+import { bigintBips, expandError, optionalBigInt } from '../utils/helper';
 import { log } from '../utils/log/log-template';
 import { DbId, DbItem, parseDbItem } from '../common/src/type/database';
 import { TxnId } from '../common/src/type/blockchain';
@@ -268,7 +268,7 @@ class BridgeTxn implements BridgeTxnObjBase, BridgeTxnAction {
       throw new BridgeError(ERRORS.INTERNAL.BRIDGE_TXN_INITIALIZATION_ERROR, {
         at: 'BridgeTxn._initialize',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-        err: { message: err, stack: err.stack, name: err.name },
+        err: expandError(err),
       });
     }
     this._selfValidate();

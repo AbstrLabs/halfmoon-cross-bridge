@@ -1,4 +1,4 @@
-export { setImmediateInterval, pause, bigintBips, optionalBigInt };
+export { setImmediateInterval, pause, bigintBips, optionalBigInt, expandError };
 
 import BigNumber from 'bignumber.js';
 import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
@@ -69,4 +69,10 @@ function optionalBigInt(value: Biginter | undefined): bigint | undefined {
     return value;
   }
   return BigInt(parseBigInt(value));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function expandError(err: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  return { name: err.name, message: err.message, stack: err.stack };
 }
