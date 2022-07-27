@@ -3,7 +3,7 @@ import { BridgeTxn } from '../bridge';
 import { db } from './db';
 import { exampleBridgeTxn } from '../test/test-helper/test-example';
 import { EXAMPLE_TXN_FOR_CREATE_TEST } from '../test/test-helper/test-examples';
-import { BridgeTxnStatusEnum } from '../utils/type/shared-types/txn';
+import { BridgeTxnStatusEnum } from '../common/type/txn';
 
 describe('DATABASE test', () => {
   describe('CRUD test with Bridge Txn', () => {

@@ -1,6 +1,6 @@
 export type { ApiCallParam };
 import { TokenId } from './token';
-import { Addr, ApiAmount, TxnId } from '../type';
+import { Addr, ApiAmount, TxnId } from '../../utils/type/type';
 
 // new API Call Param, not in docs yet.
 // removed "type", its unclear when we have more than one token.

@@ -3,7 +3,7 @@ import {
   EXAMPLE_ALGO_ADDR,
   EXAMPLE_NEAR_ADDR,
 } from '../test/test-helper/test-examples';
-import { TokenId } from '../utils/type/shared-types/token';
+import { TokenId } from '../common/type/token';
 import { ApiCallParam } from '../utils/type/type';
 import { apiWorker } from './api-worker';
 

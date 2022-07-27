@@ -22,8 +22,8 @@ import { WELCOME_JSON } from '..';
 import { verifyBlockchainTxn } from '../../blockchain/verify';
 import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';
-import { TokenId } from '../../utils/type/shared-types/token';
-import { BridgeTxnStatusEnum } from '../../utils/type/shared-types/txn';
+import { TokenId } from '../../common/type/token';
+import { BridgeTxnStatusEnum } from '../../common/type/txn';
 import { TXN_ROUTE_PATH } from '../../config';
 import { log } from '../../utils/log/log-template';
 

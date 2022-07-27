@@ -8,7 +8,7 @@ export { log };
 import { BlockchainName, BridgeTxnActionName } from '../..';
 import { TableName } from '../../database';
 import { ENV } from '../dotenv';
-import { BridgeTxnStatusEnum } from '../type/shared-types/txn';
+import { BridgeTxnStatusEnum } from '../../common/type/txn';
 import {
   AlgoAddr,
   AlgoTxnParam,
