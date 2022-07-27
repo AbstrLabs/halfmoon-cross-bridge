@@ -17,14 +17,18 @@ import {
   providers,
 } from 'near-api-js';
 
-import { NearTxnOutcome, type AlgoTxnId, type NearAddr } from './abstract-base';
+import { NearTxnOutcome } from './abstract-base';
 import { BlockchainName } from '..';
 import { ENV, NETWORK_INSTANCE } from '../utils/env';
 import { Blockchain } from './abstract-base';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { atomToYoctoNear, yoctoNearToAtom } from '../utils/formatter';
-import { NearTxnParam } from '../utils/type/type';
 import { log } from '../utils/log/log-template';
+import {
+  AlgoTxnId,
+  NearAddr,
+  NearTxnParam,
+} from '../common/src/type/blockchain';
 
 interface ClientParam {
   networkId: string;

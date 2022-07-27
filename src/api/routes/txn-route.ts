@@ -5,15 +5,7 @@
  */
 export { txnRoute };
 
-import {
-  ApiCallParam,
-  DbId,
-  DbItem,
-  fullyParseApiParam,
-  TxnId,
-  TxnUid,
-} from '../../utils/type/type';
-import { parseTxnUid } from '../../utils/type/type';
+import { ApiCallParam } from '../../utils/type/type';
 import { ConfirmOutcome } from '../../blockchain/abstract-base';
 import express, { Request, Response } from 'express';
 
@@ -23,9 +15,16 @@ import { verifyBlockchainTxn } from '../../blockchain/verify';
 import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';
 import { TokenId } from '../../common/src/type/token';
-import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
+import {
+  BridgeTxnStatusEnum,
+  parseTxnUid,
+  TxnUid,
+} from '../../common/src/type/txn';
 import { TXN_ROUTE_PATH } from '../../config';
 import { log } from '../../utils/log/log-template';
+import { DbId, DbItem } from '../../common/src/type/database';
+import { TxnId } from '../../common/src/type/blockchain';
+import { fullyParseApiParam } from '../../common/src/type/api';
 
 const txnRoute = express.Router();
 

@@ -1,8 +1,9 @@
+import { fullyParseApiParam } from '../../common/src/type/api';
+import { parseAlgoAddr } from '../../common/src/type/blockchain';
 import {
   EXAMPLE_ALGO_ADDR,
   EXAMPLE_API_PARAM,
 } from '../../test/test-helper/test-examples';
-import { fullyParseApiParam, parseAlgoAddr } from './type';
 
 describe('type.ts', () => {
   describe('Zod Parsers', () => {

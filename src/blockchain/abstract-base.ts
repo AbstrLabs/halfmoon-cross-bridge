@@ -1,17 +1,15 @@
 /**
  * Type definitions for the blockchain module.
  * Abstract class {@link Blockchain}.
+ *
+ * @todo Move types to src/common/src/type/blockchain.ts
  */
 
 export type {
   AlgoAcc,
-  AlgoAddr,
-  AlgoTxnId,
   AlgoTxnOutcome,
   GenericAcc,
   NearAcc,
-  NearAddr,
-  NearTxnId,
   NearTxnOutcome,
   TxnOutcome,
 };
@@ -24,19 +22,15 @@ import algosdk from 'algosdk';
 import AnyTransaction from 'algosdk/dist/types/src/types/transactions';
 import { type Account, providers } from 'near-api-js';
 
-import {
-  type Addr,
-  type AlgoTxnId,
-  type NearTxnId,
-  type TxnId,
-  type AlgoAddr,
-  type NearAddr,
-  TxnParam,
-  AlgoAssetTransferTxnOutcome,
-} from '../utils/type/type';
 import { setImmediateInterval } from '../utils/helper';
 import { BlockchainName } from '..';
 import { log } from '../utils/log/log-template';
+import {
+  Addr,
+  AlgoAssetTransferTxnOutcome,
+  TxnId,
+  TxnParam,
+} from '../common/src/type/blockchain';
 
 type AlgoAcc = algosdk.Account;
 type NearAcc = Account;

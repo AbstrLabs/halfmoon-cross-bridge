@@ -4,15 +4,15 @@
  */
 export { type ApiWorker, apiWorker };
 
-import {
-  ApiCallParam,
-  CriticalApiCallParam,
-  parseCriticalApiCallParam,
-} from '../utils/type/type';
 import { BridgeTxn } from '../bridge';
 import ObjectSet from 'object-set-type';
 import { log } from '../utils/log/log-template';
 import { logger } from '../utils/log/logger';
+import {
+  ApiCallParam,
+  parseCriticalApiCallParam,
+  CriticalApiCallParam,
+} from '../common/src/type/api';
 
 class ApiWorker {
   /* private */ #queue: ObjectSet<CriticalApiCallParam> =
@@ -26,8 +26,8 @@ class ApiWorker {
    */
   public async create(apiCallParam: ApiCallParam) {
     if (this._has(apiCallParam)) {
-      logger.error('Txn already in creation queue ' + apiCallParam.txn_id);
-      throw new Error('Txn already in creation queue ' + apiCallParam.txn_id);
+      logger.error(`Txn already in creation queue ${apiCallParam.txn_id}`);
+      throw new Error(`Txn already in creation queue ${apiCallParam.txn_id}`);
     }
     this._add(apiCallParam);
 

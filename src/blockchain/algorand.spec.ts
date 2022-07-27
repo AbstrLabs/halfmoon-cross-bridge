@@ -1,8 +1,8 @@
 import { ENV } from '../utils/env';
-import { TxnParam } from '../utils/type/type';
 import { algoBlockchain } from './algorand';
 import { literals } from '../utils/bridge-const';
 import { toGoNearAtom } from '../utils/formatter';
+import { TxnParam } from '../common/src/type/blockchain';
 
 const exampleAlgoTxnId = 'NARFYHMI5SDJFNZNXO4NOTNVMXSMRRG2NWPMHTT3GBBKSB5KF4AQ';
 // exampleAlgoTxnId === exampleRcpt.transaction.id;

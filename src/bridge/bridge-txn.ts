@@ -3,14 +3,7 @@
  */
 export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
 
-import {
-  ApiCallParam,
-  DbId,
-  DbItem,
-  TxnId,
-  parseDbItem,
-  parseTxnUid,
-} from '../utils/type/type';
+import { ApiCallParam } from '../utils/type/type';
 import type { Override } from '../utils/type/type-operator';
 
 import { Blockchain, ConfirmOutcome } from '../blockchain/abstract-base';
@@ -23,9 +16,15 @@ import { literals } from '../utils/bridge-const';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
 import { TokenId } from '../common/src/type/token';
-import { BridgeTxnSafeObj, BridgeTxnStatusEnum } from '../common/src/type/txn';
+import {
+  BridgeTxnSafeObj,
+  BridgeTxnStatusEnum,
+  parseTxnUid,
+} from '../common/src/type/txn';
 import { bigintBips } from '../utils/helper';
 import { log } from '../utils/log/log-template';
+import { DbId, DbItem, parseDbItem } from '../common/src/type/database';
+import { TxnId } from '../common/src/type/blockchain';
 
 interface BridgeTxnObjBase {
   dbId?: number;

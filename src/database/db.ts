@@ -8,16 +8,16 @@ export { db, type Database };
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 
 import { type BridgeTxn } from '../bridge';
-import {
-  type DbId,
-  type DbItem,
-  parseDbItem,
-  parseDbId,
-} from '../utils/type/type';
 import { type Postgres, postgres } from './aws-rds';
 import { ENV } from '../utils/env';
 import { NodeEnvEnum } from '..';
 import { log } from '../utils/log/log-template';
+import {
+  DbId,
+  DbItem,
+  parseDbId,
+  parseDbItem,
+} from '../common/src/type/database';
 
 let _TABLE_NAME;
 if (

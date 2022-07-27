@@ -1,13 +1,14 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { WELCOME_JSON } from '../../api';
 import { PostReturn } from '../../api/routes/txn-route';
-import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
+import { ApiCallParam } from '../../utils/type/type';
 import {
   EXAMPLE_MALFORMED_UID_FROM_DB,
   EXAMPLE_BURN_TXN_FROM_DB,
 } from '../test-helper/test-examples';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 import { BridgeTxn } from '../../bridge';
+import { parseTxnUid } from '../../common/src/type/txn';
 
 describe('root API (GET)', () => {
   it('hosted API root server returns welcome JSON on GET', async () => {

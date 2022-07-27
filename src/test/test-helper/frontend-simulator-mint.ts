@@ -9,8 +9,8 @@ import { KeyPair, connect, keyStores, utils } from 'near-api-js';
 import { ENV } from '../../utils/env';
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { ApiCallParam } from '../../utils/type/type';
-import { NearTxnId } from '../../blockchain/abstract-base';
 import { TokenId } from '../../common/src/type/token';
+import { NearTxnId } from '../../common/src/type/blockchain';
 
 /**
  * Simulate frontend: make NEAR to goNEAR mint txn, returning an API call param.
@@ -26,7 +26,7 @@ async function simulatedFrontendNearToGoNear(
 
   // TODO [TNFT]: Type FinalExecutionOutcome.transaction.
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
-  const nearTxnId = mintResponse?.transaction?.hash as NearTxnId | undefined; // or mintResponse.transaction_outcome.id;
+  const nearTxnId: NearTxnId | undefined = mintResponse?.transaction?.hash; // or mintResponse.transaction_outcome.id;
 
   if (nearTxnId === undefined) {
     throw Error('no transaction hash');

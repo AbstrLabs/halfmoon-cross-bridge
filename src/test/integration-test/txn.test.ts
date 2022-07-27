@@ -6,8 +6,9 @@ import { ENV } from '../../utils/env';
 import { toGoNearAtom } from '../../utils/formatter';
 import { pause } from '../../utils/helper';
 import { TokenId } from '../../common/src/type/token';
-import { ApiCallParam, parseTxnUid } from '../../utils/type/type';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
+import { ApiCallParam } from '../../common/src/type/api';
+import { parseTxnUid } from '../../common/src/type/txn';
 
 describe('Txn should', () => {
   it('execute whole MINT correctly', async () => {

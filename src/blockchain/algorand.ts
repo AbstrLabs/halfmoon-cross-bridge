@@ -9,7 +9,6 @@ export { algoBlockchain, type AlgorandBlockchain, testAlgo };
 
 import * as algosdk from 'algosdk';
 
-import { AlgoAddr, AlgoTxnId } from './../utils/type/type';
 import { Algodv2 as AlgodClient, Indexer } from 'algosdk';
 import {
   AsaConfig,
@@ -22,12 +21,14 @@ import { ENV, NETWORK_INSTANCE } from '../utils/env';
 import { BlockchainName } from '..';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
-import {
-  AlgoAssetTransferTxnOutcome,
-  AlgoTxnParam,
-  parseBigInt,
-} from '../utils/type/type';
+import { parseBigInt } from '../utils/type/type';
 import { log } from '../utils/log/log-template';
+import {
+  AlgoAddr,
+  AlgoAssetTransferTxnOutcome,
+  AlgoTxnId,
+  AlgoTxnParam,
+} from '../common/src/type/blockchain';
 
 interface ClientParam {
   token: { 'X-API-Key': string };
