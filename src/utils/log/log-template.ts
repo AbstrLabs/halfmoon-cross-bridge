@@ -8,8 +8,7 @@ export { log };
 import { BlockchainName, BridgeTxnActionName } from '../..';
 import { TableName } from '../../database';
 import { ENV } from '../env';
-import { BridgeTxnStatusEnum, TxnUid } from '../../common/src/type/txn';
-import { ApiCallParam } from '../type/type';
+import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 import { logger } from './logger';
 import {
   AlgoAddr,
@@ -17,6 +16,8 @@ import {
   TxnParam,
 } from '../../common/src/type/blockchain';
 import { DbId, DbItem } from '../../common/src/type/database';
+import { TxnUid } from '../../common/src/type/cross-module';
+import { ApiCallParam } from '../../common/src/type/api';
 
 enum WinstonLevels {
   error = 'error',

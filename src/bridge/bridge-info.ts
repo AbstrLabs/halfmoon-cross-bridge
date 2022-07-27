@@ -16,7 +16,7 @@ import { ENV } from '../utils/env';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 import { toGoNearAtom } from '../utils/formatter';
 import { TokenId } from '../common/src/type/token';
-import { Addr } from '../utils/type/type';
+import { Addr } from '../common/src/type/blockchain';
 
 interface BridgeInfo {
   fromToken: TokenId;

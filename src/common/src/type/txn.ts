@@ -1,23 +1,10 @@
 // TODO: ren to bridge
-export type { TxnUid };
-export {
-  BridgeTxnSafeObj,
-  BridgeTxnStatusEnum,
-  parseTxnUid,
-  zBridgeTxnStatus,
-  zTokenId,
-  zTxnUid,
-};
+export { BridgeTxnSafeObj, BridgeTxnStatusEnum, zBridgeTxnStatus, zTokenId };
 
 import { z } from 'zod';
-import { ERRORS } from '../../../utils/bridge-error';
-import { parseWithZod } from '../../../utils/type/type';
-import { parseTxnId } from './blockchain';
-import { parseDbId } from './database';
 import { TokenId } from './token';
 
 // Class BridgeTxn
-type TxnUid = z.infer<typeof zTxnUid>;
 
 enum BridgeTxnStatusEnum {
   // By order
@@ -59,21 +46,3 @@ interface BridgeTxnSafeObj {
 const zTokenId = z.nativeEnum(TokenId);
 
 const zBridgeTxnStatus = z.nativeEnum(BridgeTxnStatusEnum);
-const zTxnUid = z.string().refine((str: string) => {
-  const splitted = str.split('.');
-  if (splitted.length !== 2) {
-    return false;
-  }
-  const [dbId, txnId] = splitted;
-  try {
-    parseDbId(+dbId);
-    parseTxnId(txnId);
-  } catch (e) {
-    return false;
-  }
-  return true;
-});
-
-function parseTxnUid(txnUid: TxnUid): TxnUid {
-  return parseWithZod(txnUid, zTxnUid, ERRORS.INTERNAL.TYPE_PARSING_ERROR);
-}

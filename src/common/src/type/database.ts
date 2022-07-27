@@ -4,7 +4,7 @@ export { parseDbItem, parseDbId };
 
 import { z } from 'zod';
 import { ERRORS } from '../../../utils/bridge-error';
-import { zBiginter, parseWithZod } from '../../../utils/type/type';
+import { zBiginter, parseWithZod } from './zod-basic';
 import { zAddr, zTxnId } from './blockchain';
 import { zBridgeTxnStatus, zTokenId } from './txn';
 

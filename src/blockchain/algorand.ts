@@ -21,7 +21,7 @@ import { ENV, NETWORK_INSTANCE } from '../utils/env';
 import { BlockchainName } from '..';
 import { literals } from '../utils/bridge-const';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
-import { parseBigInt } from '../utils/type/type';
+import { parseBigInt } from '../common/src/type/zod-basic';
 import { log } from '../utils/log/log-template';
 import {
   AlgoAddr,

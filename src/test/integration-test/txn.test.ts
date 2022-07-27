@@ -8,7 +8,7 @@ import { pause } from '../../utils/helper';
 import { TokenId } from '../../common/src/type/token';
 import { simulatedFrontendNearToGoNear } from '../test-helper/frontend-simulator-mint';
 import { ApiCallParam } from '../../common/src/type/api';
-import { parseTxnUid } from '../../common/src/type/txn';
+import { parseTxnUid } from '../../common/src/type/cross-module';
 
 describe('Txn should', () => {
   it('execute whole MINT correctly', async () => {

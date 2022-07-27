@@ -13,7 +13,7 @@ export type {
 export { ADDR_MAP, zAddr, zTxnId, parseAlgoAddr, parseTxnId };
 import { z } from 'zod';
 import { ERRORS } from '../../../utils/bridge-error';
-import { parseWithZod, zBiginter } from '../../../utils/type/type';
+import { parseWithZod, zBiginter } from './zod-basic';
 
 // Zod -> TS
 type AlgoAddr = z.infer<typeof zAlgoAddr>;

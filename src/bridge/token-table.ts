@@ -11,7 +11,7 @@ import { BLOCKCHAIN_MAP } from '../blockchain';
 import { Blockchain } from '../blockchain/abstract-base';
 import { ENV } from '../utils/env';
 import { TokenId } from '../common/src/type/token';
-import { Addr } from '../utils/type/type';
+import { Addr } from '../common/src/type/blockchain';
 
 interface TokenBase {
   tokenId: TokenId; // our way to call it, usually same as tokenName

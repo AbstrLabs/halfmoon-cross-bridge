@@ -4,8 +4,8 @@ import {
   EXAMPLE_NEAR_ADDR,
 } from '../test/test-helper/test-examples';
 import { TokenId } from '../common/src/type/token';
-import { ApiCallParam } from '../utils/type/type';
 import { apiWorker } from './api-worker';
+import { ApiCallParam } from '../common/src/type/api';
 
 describe('API Worker should', () => {
   /** skipped for txn_id is added and would cause problem */

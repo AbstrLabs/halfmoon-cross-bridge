@@ -2,7 +2,7 @@ export type { ApiAmount, ApiCallParam, CriticalApiCallParam };
 export { fullyParseApiParam, parseCriticalApiCallParam, zTokenId };
 
 import { TokenId } from './token';
-import { parseWithZod } from '../../../utils/type/type';
+import { parseWithZod } from './zod-basic';
 
 /* API CALL PARAMS */
 

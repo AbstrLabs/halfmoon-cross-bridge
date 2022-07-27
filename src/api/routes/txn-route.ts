@@ -5,7 +5,6 @@
  */
 export { txnRoute };
 
-import { ApiCallParam } from '../../utils/type/type';
 import { ConfirmOutcome } from '../../blockchain/abstract-base';
 import express, { Request, Response } from 'express';
 
@@ -15,16 +14,13 @@ import { verifyBlockchainTxn } from '../../blockchain/verify';
 import { apiWorker } from '../api-worker';
 import { db } from '../../database/db';
 import { TokenId } from '../../common/src/type/token';
-import {
-  BridgeTxnStatusEnum,
-  parseTxnUid,
-  TxnUid,
-} from '../../common/src/type/txn';
+import { BridgeTxnStatusEnum } from '../../common/src/type/txn';
 import { TXN_ROUTE_PATH } from '../../config';
 import { log } from '../../utils/log/log-template';
 import { DbId, DbItem } from '../../common/src/type/database';
 import { TxnId } from '../../common/src/type/blockchain';
-import { fullyParseApiParam } from '../../common/src/type/api';
+import { ApiCallParam, fullyParseApiParam } from '../../common/src/type/api';
+import { parseTxnUid, TxnUid } from '../../common/src/type/cross-module';
 
 const txnRoute = express.Router();
 
@@ -90,6 +86,7 @@ async function handleGetCall(req: Request, res: Response) {
  * @param res - Express response
  */
 async function handlePostCall(req: Request, res: Response) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const apiCallParam = verifyApiCallParamWithResp(req, res);
   if (apiCallParam === null) return;
 

@@ -4,12 +4,11 @@
 
 export { verifyBlockchainTxn };
 
-import { ApiCallParam } from '../utils/type/type';
-
 import { ConfirmOutcome } from './abstract-base';
 import { getTokenImplBlockchain } from '../bridge/token-table';
 import { getBridgeInfo } from '../bridge/bridge-info';
 import { TxnParam } from '../common/src/type/blockchain';
+import { ApiCallParam } from '../common/src/type/api';
 
 async function verifyBlockchainTxn(
   apiCallParam: ApiCallParam

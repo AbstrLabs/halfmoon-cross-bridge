@@ -9,10 +9,13 @@ export type { Biginter, Stringer };
 
 export { zBiginter, parseBigInt, parseWithZod };
 
-export { ApiCallParam } from '../../common/src/type/api';
 import { z } from 'zod';
-import { BridgeError, ErrorTemplate, ERRORS } from '../bridge-error';
-import { logger } from '../log/logger'; // log-template will cause circular reference
+import {
+  BridgeError,
+  ErrorTemplate,
+  ERRORS,
+} from '../../../utils/bridge-error';
+import { logger } from '../../../utils/log/logger'; // log-template will cause circular reference
 
 /* NON-ZOD TYPES */
 
