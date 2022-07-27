@@ -10,8 +10,9 @@ import {
   TxnId,
   parseDbItem,
   parseTxnUid,
-  Override,
 } from '../utils/type/type';
+import type { Override } from '../utils/type/type-operator';
+
 import { Blockchain, ConfirmOutcome } from '../blockchain/abstract-base';
 import { BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
