@@ -66,11 +66,11 @@ async function handleGetCall(req: Request, res: Response) {
     const dbItem: DbItem = await db.readTxn(dbId);
     // here the error handling is not good., because readTxn throws on fetch error and {0,>1} result.
     if (dbItem.from_txn_id !== txnId) {
-      log.APIS.handledGetWithInvalidUid();
+      log.APIS.handledGetWithInvalidUid(uid);
       return res.status(406).send('Transaction not found in database');
     }
     const safeObj = BridgeTxn.fromDbItem(dbItem).toSafeObject();
-    log.APIS.handledGetWithValidUid();
+    log.APIS.handledGetWithValidUid(uid);
     return res.json(safeObj);
   } catch (err) {
     log.APIS.generalError(err);
