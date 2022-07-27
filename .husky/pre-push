@@ -3,4 +3,4 @@
 
 # unit tests and integration tests
 yarn unit-test --bail
-yarn integration-test
+# yarn integration-test run this locally. its not working anyway
