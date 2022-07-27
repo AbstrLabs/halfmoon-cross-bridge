@@ -21,6 +21,7 @@ import { DbId, DbItem } from '../../common/src/type/database';
 import { TxnUid } from '../../common/src/type/cross-module';
 import { ApiCallParam } from '../../common/src/type/api';
 import { stringifyObjWithBigint } from '../formatter';
+import { expandError } from '../helper';
 
 enum WinstonLevels {
   error = 'error',
@@ -50,7 +51,8 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     },
     generalError: {
       level: WinstonLevels.error,
-      message: (err: unknown) => `general error ${JSON.stringify(err)}`,
+      message: (err: unknown) =>
+        `general error ${JSON.stringify(expandError(err))}`,
     },
     nodeEnv: {
       level: WinstonLevels.info,
@@ -66,7 +68,9 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     doubleMintError: {
       level: WinstonLevels.error,
       message: (err: unknown) =>
-        `double mint, from_txn_id existed in DB. Error: ${JSON.stringify(err)}`,
+        `double mint, from_txn_id existed in DB. Error: ${JSON.stringify(
+          expandError(err)
+        )}`,
     },
     apiWorkerCreatedBridgeTxn: {
       level: WinstonLevels.verbose,
@@ -103,11 +107,13 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     },
     generalError: {
       level: WinstonLevels.error,
-      message: (err: unknown) => `general error ${JSON.stringify(err)}`,
+      message: (err: unknown) =>
+        `general error ${JSON.stringify(expandError(err))}`,
     },
     unknownError: {
       level: WinstonLevels.error,
-      message: (err: unknown) => `unknown error: ${JSON.stringify(err)}`,
+      message: (err: unknown) =>
+        `unknown error: ${JSON.stringify(expandError(err))}`,
     },
     appStarted: {
       level: WinstonLevels.info,
@@ -131,12 +137,14 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
       ) =>
         `${blockchainName} failed to confirm transaction ${JSON.stringify(
           txnParam
-        )}. Error: ${JSON.stringify(err)}`,
+        )}. Error: ${JSON.stringify(expandError(err))}`,
     },
     getTxnStatusFailed: {
       level: WinstonLevels.error,
       message: (err: unknown) =>
-        `Failed to get transaction status. Error: ${JSON.stringify(err)}`,
+        `Failed to get transaction status. Error: ${JSON.stringify(
+          expandError(err)
+        )}`,
     },
   },
   ALGO: {
@@ -144,7 +152,9 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     failedToMakeAsaTxn: {
       level: WinstonLevels.error,
       message: (err: unknown) =>
-        `Failed to make ASA transaction. Error: ${JSON.stringify(err)}`,
+        `Failed to make ASA transaction. Error: ${JSON.stringify(
+          expandError(err)
+        )}`,
     },
     asaTransferTxnCreated: {
       level: WinstonLevels.verbose,
@@ -246,7 +256,7 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
     },
     generalError: {
       level: WinstonLevels.error,
-      message: (err: unknown) => `Error: ${JSON.stringify(err)}`,
+      message: (err: unknown) => `Error: ${JSON.stringify(expandError(err))}`,
     },
   },
   ARDS: {
