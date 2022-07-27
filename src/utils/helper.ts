@@ -1,33 +1,7 @@
-export {
-  ensureString,
-  setImmediateInterval,
-  pause,
-  bigintBips,
-  optionalBigint,
-};
+export { setImmediateInterval, pause, bigintBips, optionalBigint };
 
 import BigNumber from 'bignumber.js';
 import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
-import { BridgeError, ERRORS } from './bridge-error';
-
-/**
- * Ensure that the given value is a string.
- *
- * @deprecated - Use zod types instead.
- * @throws {@link ERRORS.INTERNAL.TYPE_ERROR} If the value is not a string
- * @param value - The value to check
- * @returns The same value of {@link value} as a string
- */
-function ensureString(value: unknown): string {
-  if (typeof value !== 'string') {
-    throw new BridgeError(ERRORS.INTERNAL.TYPE_ERROR, {
-      expected: 'string',
-      actual: typeof value,
-      value,
-    });
-  }
-  return value;
-}
 
 /**
  * Asynchronously function pause for a certain time in milliseconds.
