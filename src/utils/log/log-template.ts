@@ -1,9 +1,11 @@
 /**
  * Here we define all the logs.
  * All logs should be defined here.
+ *
+ * It's recommended to use every log only once.
  */
 
-// TODO: why cannot import ENV from './env' HERE?
+// TODO: research why cannot import ENV from './env' HERE?
 export { log };
 
 import { BlockchainName, BridgeTxnActionName, NodeEnvEnum } from '../..';
@@ -260,13 +262,10 @@ const template /* : Record<ModuleName, Record<LogName, Log>>  */ = {
   },
   DB: {
     // Database
-    devMode: {
+    onInstantiate: {
       level: WinstonLevels.info,
-      message: `Using development database in dev mode.`,
-    },
-    testMode: {
-      level: WinstonLevels.info,
-      message: `Using test database in test mode.`,
+      message: (tableName: TableName) =>
+        `Initialized DB singleton with table name ${tableName}`,
     },
     itemCreated: {
       level: WinstonLevels.verbose,
@@ -370,8 +369,7 @@ const log: {
     onConnect: () => null,
   },
   DB: {
-    devMode: () => null,
-    testMode: () => null,
+    onInstantiate: () => null,
     itemCreated: () => null,
     onReadAllFinished: () => null,
     onUpdateTxnFinished: () => null,

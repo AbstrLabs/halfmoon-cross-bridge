@@ -31,10 +31,8 @@ if (
   ENV.NODE_ENV === NodeEnvEnum.TEST
 ) {
   _TABLE_NAME = TableName.DEV;
-  log.DB.devMode();
 } else if (ENV.NODE_ENV === NodeEnvEnum.PRODUCTION) {
   _TABLE_NAME = TableName.TEST;
-  log.DB.testMode();
 } else {
   throw new BridgeError(ERRORS.INTERNAL.UNKNOWN_NODE_ENV, {
     current_ENV: ENV.NODE_ENV,
@@ -80,6 +78,7 @@ function requireConnected(
  */
 class Database {
   private instance;
+  // todo: ren to tableName
   private requestTableName;
 
   /**
@@ -90,6 +89,7 @@ class Database {
   constructor(instance: Postgres) {
     this.instance = instance;
     this.requestTableName = TABLE_NAME;
+    log.DB.onInstantiate(this.requestTableName);
   }
 
   /**
