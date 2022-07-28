@@ -141,6 +141,7 @@
     "lint": "eslint . --ext .ts",
     "near": "yarn test:near",
     "postinstall": "husky install; yarn doc",
+    "preinstall": "git submodule init; git submodule update",
     "prepare": "husky install",
     "start": "NODE_ENV=production ts-node src/main.ts",
     "test": "yarn test:unit-test # disabled: ; yarn test:integration-test",
