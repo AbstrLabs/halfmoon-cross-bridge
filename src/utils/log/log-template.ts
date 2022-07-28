@@ -406,12 +406,15 @@ for (const moduleName in template) {
     const logTemplate: Log = template[_moduleName][_logName];
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (log[_moduleName][_logName] as () => void) = (...args: unknown[]) => {
+      const logTag = `[${_moduleName.padEnd(4)}]:`;
+      let logMsg: string;
       if (typeof logTemplate.message === 'string') {
-        logger[logTemplate.level](logTemplate.message);
+        logMsg = logTemplate.message;
       } else {
         // () => string
-        logger[logTemplate.level](logTemplate.message(...args));
+        logMsg = logTemplate.message(...args);
       }
+      logger[logTemplate.level](`${logTag} ${logMsg}`);
     };
   }
 }
