@@ -42,7 +42,6 @@ describe('DATABASE test', () => {
     const res = await db.readAllTxn();
     expect(typeof res).toBe('object');
     expect(Array.isArray(res)).toBe(true);
-    console.log(res);
     // expect(res.length).toBeGreaterThan(0);
   });
 });

@@ -20,8 +20,8 @@ import {
 import { DbId, DbItem } from '../../common/src/type/database';
 import { TxnUid } from '../../common/src/type/cross-module';
 import { ApiCallParam } from '../../common/src/type/api';
-import { stringifyObjWithBigint } from '../formatter';
 import { expandError } from '../helper';
+import { stringifyObjWithBigint } from '../js-enhance';
 
 enum WinstonLevels {
   error = 'error',

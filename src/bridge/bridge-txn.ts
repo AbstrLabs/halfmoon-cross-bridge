@@ -10,7 +10,6 @@ import { BridgeTxnActionName } from '..';
 import { BridgeError, ERRORS } from '../utils/bridge-error';
 
 import { db } from '../database/db';
-import { stringifyBigintInObj } from '../utils/formatter';
 import { literals } from '../utils/bridge-const';
 import { getTokenImplBlockchain } from './token-table';
 import { getBridgeInfo } from './bridge-info';
@@ -23,6 +22,7 @@ import { TxnId } from '../common/src/type/blockchain';
 import { ApiCallParam } from '../common/src/type/api';
 import { parseTxnUid } from '../common/src/type/cross-module';
 import { Biginter, parseBigInt } from '../common/src/type/zod-basic';
+import { stringifyBigintInObj } from '../utils/js-enhance';
 
 interface BridgeTxnObjBase {
   dbId?: number;
