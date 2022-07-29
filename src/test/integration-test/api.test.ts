@@ -101,8 +101,6 @@ describe('/algorand-near API (POST)', () => {
     expect(res.statusText).toBe('OK');
     const data = res.data as PostReturn;
     expect(() => {
-      console.log('data.uid : ', data.uid); // DEV_LOG_TO_REMOVE
-
       parseTxnUid(data.uid);
     }).not.toThrow(); // starts with 2 digits
   });
