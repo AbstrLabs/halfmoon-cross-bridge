@@ -1,5 +1,6 @@
 /**
  * Helper function to convert between different formats, like units of NEAR, type of object, etc.
+ * @todo TBD: rename to convert?
  */
 export { toGoNearAtom, yoctoNearToAtom, atomToYoctoNear };
 
