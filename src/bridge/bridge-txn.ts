@@ -3,7 +3,7 @@
  */
 export { type BridgeTxnObj, type BridgeTxnSafeObj, BridgeTxn };
 
-import type { Override } from '../utils/type/type-operator';
+import type { Override } from '../common/src/type/type-operator';
 
 import { Blockchain, ConfirmOutcome } from '../blockchain/abstract-base';
 import { BridgeTxnActionName } from '..';
