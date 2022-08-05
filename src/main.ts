@@ -1,7 +1,7 @@
 import { ENV, loadDotEnv } from './utils/env';
 
 import { db } from './database/db';
-import { startApiServer } from './api/start-api-server';
+import { startApiServer } from './api/app';
 import { startBridgeTxnWorker } from './bridge/bridge-worker';
 import { log } from './utils/log/log-template';
 import { logger } from './utils/log/logger';

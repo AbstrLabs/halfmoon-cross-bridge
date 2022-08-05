@@ -210,7 +210,6 @@ class Database {
 
   /**
    * Read a {@link BridgeTxn} from the database with its ID.
-   * @throws if the database query result was not unique
    * @throws if the database query failed
 
    * @decorator `@requireConnected`
@@ -226,11 +225,8 @@ class Database {
       SELECT * FROM ${this.requestTableName} WHERE db_id = $1;
     `;
     const params = [dbId];
-    const queryResult = await this.query(query, params);
-    const result = this._verifyResultUniqueness(queryResult, {
-      at: 'db.readTxn',
-    }) as DbItem;
-    return parseDbItem(result);
+    const queryResult = (await this.query(query, params))[0] as DbItem;
+    return parseDbItem(queryResult);
   }
 
   /**
