@@ -1,19 +1,17 @@
 -- createRequest
 INSERT INTO request 
 (
-  txn_status, 
   from_addr, from_amount_atom, from_token_id, from_txn_id,
   to_addr, to_amount_atom, to_token_id, to_txn_id,
   created_time, fixed_fee_atom, margin_fee_atom,
   txn_comment
 )
 VALUES (
-  :txn_status, 
   :from_addr, :from_amount_atom, :from_token_id, :from_txn_id,
   :to_addr, :to_amount_atom, :to_token_id, :to_txn_id,
   :created_time, :fixed_fee_atom, :margin_fee_atom,
   :txn_comment
-) 
+)
 RETURNING db_id;
 
 -- readRequest

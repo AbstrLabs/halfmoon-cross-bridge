@@ -2,8 +2,22 @@ import { BridgeTxn } from '../bridge';
 // import { ENV } from '../utils/dotenv'; // not sure if we can initialize DB without ENV
 import { db } from './db';
 import { exampleBridgeTxn } from '../test/test-helper/test-example';
-import { EXAMPLE_TXN_FOR_CREATE_TEST } from '../test/test-helper/test-examples';
+import { EXAMPLE_TXN_FOR_CREATE_TEST } from '../src/test/test-helper/test-examples';
 import { BridgeTxnStatusEnum } from '../common/src/type/txn';
+
+const EXAMPLE_TXN_FOR_CREATE_TEST = {
+  createdTime: 1656171676417n,
+  fixedFeeAtom: 10000000000n,
+  fromAddr: 'ACCSSTKTJDSVP4JPTJWNCGWSDAPHR66ES2AZUAH7MUULEY43DHQSDNR7DA',
+  fromAmountAtom: 12345678901n,
+  fromTokenId: TokenId.goNEAR,
+  fromTxnId: '2HXYPGDY2EDVERXXQH6UKAT22EQGXWGWPWSJFY3G22AQLNZYTTDA',
+  marginFeeAtom: 24691358n,
+  toAddr: 'abstrlabs-test.testnet',
+  toAmountAtom: 2320987543n,
+  toTokenId: TokenId.NEAR,
+  toTxnId: '2VE7QxZZ92PKGkzJzbhf44MTeoxU4LBGXSgXVVAYHNee',
+}
 
 describe('DATABASE test', () => {
   describe('CRUD test with Bridge Txn', () => {
