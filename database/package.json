@@ -1,0 +1,15 @@
+{
+  "name": "algorand-near-bridge-database",
+  "version": "0.0.1",
+  "description": "Artificio network bridge database",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "db-migrate": "^0.11.13",
+    "db-migrate-pg": "^1.2.2",
+    "pg": "^8.7.3",
+    "yesql": "^5.0.0"
+  }
+}

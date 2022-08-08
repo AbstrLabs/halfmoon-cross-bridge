@@ -1,0 +1,25 @@
+{
+  "dev": {
+      "driver": "pg",
+      "host": "localhost",
+      "database": "bridge_dev",
+      "user": "bridge",
+      "password": "bridge"
+  },
+
+  "test": {
+      "driver": "pg",
+      "host": "localhost",
+      "database": "bridge_test",
+      "user": "bridge",
+      "password": "bridge"
+  },
+
+  "production": {
+      "driver": "pg",
+      "host": {"ENV": "PGHOST"},
+      "database": {"ENV": "PGDATABASE"},
+      "user": {"ENV": "PGUSER"},
+      "password": {"ENV": "PGPASSWORD"}
+  }
+}
