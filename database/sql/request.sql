@@ -1,36 +1,48 @@
 -- createRequest
 INSERT INTO request 
 (
-  from_addr, from_amount_atom, from_token_id, from_txn_id,
+  from_addr, from_amount_atom, from_token_id, from_txn_hash,
   to_addr, to_amount_atom, to_token_id, to_txn_id,
-  created_time, fixed_fee_atom, margin_fee_atom,
-  txn_comment
+  fixed_fee_atom, margin_fee_atom,
+  comment
 )
 VALUES (
-  :from_addr, :from_amount_atom, :from_token_id, :from_txn_id,
+  :from_addr, :from_amount_atom, :from_token_id, :from_txn_hash,
   :to_addr, :to_amount_atom, :to_token_id, :to_txn_id,
-  :created_time, :fixed_fee_atom, :margin_fee_atom,
-  :txn_comment
+  :fixed_fee_atom, :margin_fee_atom,
+  :comment
 )
-RETURNING db_id;
+RETURNING id;
 
 -- readRequest
-SELECT * FROM request WHERE db_id = :db_id;
+SELECT * FROM request WHERE id = :id;
 
 -- readRequests
-SELECT * FROM request ORDER_BY db_id LIMIT :n OFFSET :start;
+SELECT * FROM request ORDER_BY id LIMIT :n OFFSET :start;
 
 -- updateRequest
 UPDATE request SET
-  txn_status=:txn_status, to_txn_id = :to_txn_id
+  request_status=:request_status, to_txn_hash = :to_txn_hash
     WHERE (
-      db_id=:db_id
+      id=:id
     )
-RETURNING db_id;
+RETURNING id;
 
 -- readRequestByFromTxnId
-SELECT * FROM request WHERE from_txn_id = :from_txn_id;
-
+SELECT * FROM request WHERE from_txn_hash = :from_txn_hash;
 
 -- deleteRequest
-DELETE FROM ${this.requestTableName} WHERE db_id = :db_id;
+DELETE FROM ${this.requestTableName} WHERE id = :id;
+
+-- createToken
+INSERT INTO token
+(
+  name, blockchain, addr
+)
+VALUES (
+  :name, :blockchain, :addr
+)
+RETURNING id;
+
+-- readTokens
+SELECT * FROM token;

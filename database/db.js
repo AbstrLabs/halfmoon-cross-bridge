@@ -1,10 +1,11 @@
+const pg = require('pg')
 const sql = require('yesql')('./sql/',  {type: 'pg'})
 const dbConfigName = process.env.DB_ENV || "dev"
+const fs = require('fs')
 
-let pg = require('pg')
 const pool = (dbConfigName == "production") ?
              new pg.Pool() :
-             new pg.Pool(require("./database.json")[dbConfigName])
+             new pg.Pool(JSON.parse(fs.readFileSync("./database.json"))[dbConfigName])
 
 const txn = async (actions) => {
   // note: we don't try/catch this because if connecting throws an exception
