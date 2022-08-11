@@ -17,7 +17,7 @@ CREATE TYPE request_status_enum AS ENUM (
   'USER_CONFIRMED'
 );
 
-CREATE TYPE request_type_enum AS ENUM (
+CREATE TYPE bridge_type_enum AS ENUM (
   'MINT',
   'BURN'
 );
@@ -31,10 +31,19 @@ CREATE TABLE token (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   blockchain blockchain_enum NOT NULL,
-  addr VARCHAR(63)
+  addr VARCHAR(63),
+  UNIQUE(name, blockchain)
 );
-
 CREATE UNIQUE INDEX only_one_native_token_each_chain ON token (blockchain, (addr IS NULL)) WHERE addr IS NULL;
+
+CREATE TABLE fee (
+  from_token_id INT REFERENCES token,
+  to_token_id INT REFERENCES token CHECK(to_token_id <> from_token_id),
+  bridge_type bridge_type_enum NOT NULL,
+  fixed_fee_atom BIGINT NOT NULL,
+  margin_fee_atom BIGINT NOT NULL,
+  PRIMARY KEY (from_token_id, to_token_id)
+);
 
 COMMENT ON COLUMN token.addr IS 'if null, it means the native token of the blockchain';
 
@@ -50,9 +59,7 @@ CREATE TABLE request (
   to_token_id INT NOT NULL REFERENCES token,
   to_txn_hash VARCHAR(63),
   created_time TIMESTAMPTZ NOT NULL DEFAULT now(),
-  comment VARCHAR(255),
-  fixed_fee_atom BIGINT NOT NULL,
-  margin_fee_atom BIGINT NOT NULL
+  comment VARCHAR(255)
 );
 
 CREATE INDEX index_request_from_txn_hash ON request (from_txn_hash);

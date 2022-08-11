@@ -1,13 +1,10 @@
-// TODO: CORS '*'
-
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-
-import { ENV } from '../utils/env';
-import { txnRoute } from './routes/txn';
-import { docsRoute } from './routes/docs';
-import { statusRoute } from './routes/status';
-import { log } from '../utils/log/log-template';
+const express = require('express');
+const cors = require('cors');
+const ENV = require('../utils/env').ENV;
+const txnRoute = require('./routes/txn').txnRoute;
+const docsRoute = require('./routes/docs').docsRoute;
+const statusRoute = require('./routes/status').statusRoute;
+const log = require('../utils/log/log-template').log;
 
 export const app = express();
 
@@ -18,7 +15,7 @@ app.use(express.json()); // parse application/json
 app.use('/', txnRoute);
 app.use('/docs', docsRoute);
 app.use('/status', statusRoute);
-app.use('/', (_req: Request, res: Response) => {
+app.use('/', (_req, res) => {
   return res.status(404).end('404 Not found');
 });
 

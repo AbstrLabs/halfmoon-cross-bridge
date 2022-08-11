@@ -2,14 +2,12 @@
 INSERT INTO request 
 (
   from_addr, from_amount_atom, from_token_id, from_txn_hash,
-  to_addr, to_amount_atom, to_token_id, to_txn_id,
-  fixed_fee_atom, margin_fee_atom,
+  to_addr, to_amount_atom, to_token_id,
   comment
 )
 VALUES (
   :from_addr, :from_amount_atom, :from_token_id, :from_txn_hash,
-  :to_addr, :to_amount_atom, :to_token_id, :to_txn_id,
-  :fixed_fee_atom, :margin_fee_atom,
+  :to_addr, :to_amount_atom, :to_token_id,
   :comment
 )
 RETURNING id;
@@ -46,3 +44,12 @@ RETURNING id;
 
 -- readTokens
 SELECT * FROM token;
+
+-- createFee
+INSERT INTO fee
+(
+  from_token_id, to_token_id, bridge_type, fixed_fee_atom, margin_fee_atom
+)
+VALUES (
+  :from_token_id, :to_token_id, :bridge_type, :fixed_fee_atom, :margin_fee_atom
+);

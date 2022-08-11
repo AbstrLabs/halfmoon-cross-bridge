@@ -1,5 +1,5 @@
 {
-  "name": "algorand-near-bridge-database",
+  "name": "artificio-bridge-database",
   "version": "0.0.1",
   "description": "Artificio network bridge database",
   "main": "index.js",
