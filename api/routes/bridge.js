@@ -35,17 +35,11 @@ async function handleGetCall(req, res) {
 }
  
 async function handlePostCall(req, res) {
-  let {from_addr, from_amount_atom, from_token_id, from_txn_hash,
-    to_addr, to_amount_atom, to_token_id,
-    comment} = req.body;
+  let {from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, to_addr, to_token_id, comment} = req.body;
     
   let result;
   try {
-    await pool.query(sql.createRequest({
-      from_addr, from_amount_atom, from_token_id, from_txn_hash,
-      to_addr, to_amount_atom, to_token_id,
-      comment
-    }))
+    await pool.query(sql.createRequest({from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, to_addr, to_token_id, comment}))
   } catch (err) {
     // database itself error
 
