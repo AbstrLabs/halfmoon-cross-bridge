@@ -1,20 +1,11 @@
 CREATE TYPE request_status_enum AS ENUM (
   'CREATED',
-  'ERR_SERVER_INTERNAL',
-  'ERR_AWS_RDS_DB',
-  'DOING_INITIALIZE',
-  'DONE_INITIALIZE',
-  'ERR_INITIALIZE',
-  'DOING_INCOMING',
-  'ERR_VERIFY_INCOMING',
-  'ERR_TIMEOUT_INCOMING',
-  'DONE_INCOMING',
-  'ERR_MAKE_OUTGOING',
+  'INVALID',
+  'DONE_VERIFY',
+  'ERROR_IN_VERIFY',
   'DOING_OUTGOING',
-  'DOING_VERIFY',
-  'ERR_CONFIRM_OUTGOING',
   'DONE_OUTGOING',
-  'USER_CONFIRMED'
+  'ERROR_IN_OUTGOING'
 );
 
 CREATE TYPE bridge_type_enum AS ENUM (
@@ -62,6 +53,8 @@ CREATE TABLE request (
   to_txn_hash VARCHAR(255),
   created_time TIMESTAMPTZ NOT NULL DEFAULT now(),
   comment VARCHAR(255),
+  invalid_reason VARCHAR(255),
+  err_msg VARCHAR(255),
   UNIQUE(from_txn_hash, from_txn_hash_sig)
 );
 
