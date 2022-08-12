@@ -12,7 +12,7 @@ async function readTokens(_req, res) {
       result = await pool.query(sql.readTokens())
     } catch (err) {
       log.error(err)
-      return res.status(400).json({msg: 'failed to query database'});
+      return res.status(500).json({msg: 'failed to query database'});
     }
     return res.json(result.rows)
 }

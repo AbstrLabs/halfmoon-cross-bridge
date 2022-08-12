@@ -10,12 +10,16 @@ txnRoute.route('/')
   .post(handlePostCall);
  
 async function handleGetCall(req, res) {
-  let param = req.query
-  let v = validate(param, {
+  let params = req.query
+  let v = validate(params, {
     "type": "object",
     "properties": {
-      "id": "number"
-    }
+      "id": {
+        "type": "number"
+      }
+    },
+    "required": ["id"],
+    "additionalProperties": false
   })
   if (!v.valid) {
     return res.status(400).json({errors: v.errors.map(e => e.toString())});
@@ -26,7 +30,7 @@ async function handleGetCall(req, res) {
     result = await pool.query(sql.readRequest({id}))
   } catch (err) {
     log.error(err)
-    return res.status(400).json({msg: 'failed to query database'});
+    return res.status(500).json({msg: 'failed to query database'});
   }
 
   let row
@@ -40,15 +44,39 @@ async function handleGetCall(req, res) {
 }
  
 async function handlePostCall(req, res) {
-  let {from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, to_addr, to_token_id, comment} = req.body;
-    
+  let params = req.body;
+  let v = validate(params, {
+    "type": "object",
+    "properties": {
+      "from_addr": {"type": "string"},
+      "from_amount_atom": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      },
+      "from_token_id": {"type": "number"},
+      "from_txn_hash": {"type": "string"},
+      "from_txn_hash_sig": {"type": "string"},
+      "to_addr": {"type": "string"},
+      "to_token_id": {"type": "number"},
+      "comment": {"type": "string"}
+    },
+    "required": ["from_addr", "from_amount_atom", "from_token_id", "from_txn_hash", "from_txn_hash_sig", "to_addr", "to_token_id"],
+    "additionalProperties": false
+  })
+
+  if (!v.valid) {
+    return res.status(400).json({errors: v.errors.map(e => e.toString())});
+  }
+      
   let result;
   try {
-    await pool.query(sql.createRequest({from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, to_addr, to_token_id, comment}))
+    await pool.query(sql.createRequest(params))
   } catch (err) {
-
     // insertion rejected by database due to constraint does not satisfy
 
+    // or it's a connection error
+    log.error(err)
+    return res.status(500).json({msg: 'failed to query database'});
   }
 
   let row
