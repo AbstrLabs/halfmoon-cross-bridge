@@ -1,4 +1,5 @@
 const express = require('express');
+const validate = require('jsonschema').validate;
 
 const {pool, sql} = require('artificio-bridge-database/db');
 const log = require('artificio-bridge-common/logger');
@@ -9,11 +10,15 @@ txnRoute.route('/')
   .post(handlePostCall);
  
 async function handleGetCall(req, res) {
-  let id
-  try {
-    id = Number(req.query.id);
-  } catch (err) {
-    return res.status(400).json({msg: 'expect number id in query string to get'});
+  let param = req.query
+  let v = validate(param, {
+    "type": "object",
+    "properties": {
+      "id": "number"
+    }
+  })
+  if (!v.valid) {
+    return res.status(400).json({errors: v.errors.map(e => e.toString())});
   }
 
   let result
@@ -41,7 +46,6 @@ async function handlePostCall(req, res) {
   try {
     await pool.query(sql.createRequest({from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, to_addr, to_token_id, comment}))
   } catch (err) {
-    // database itself error
 
     // insertion rejected by database due to constraint does not satisfy
 

@@ -53,3 +53,12 @@ INSERT INTO fee
 VALUES (
   :from_token_id, :to_token_id, :bridge_type, :fixed_fee_atom, :margin_fee_atom
 );
+
+-- readFee
+SELECT * FROM fee WHERE
+(
+  from_token_id, to_token_id
+)
+VALUES (
+  :from_token_id, :to_token_id
+);

@@ -9,7 +9,7 @@ tokensRouter.route('/')
 async function readTokens(_req, res) {
     let result
     try {
-      result = await pool.query(sql.readTokens({id}))
+      result = await pool.query(sql.readTokens())
     } catch (err) {
       log.error(err)
       return res.status(400).json({msg: 'failed to query database'});
