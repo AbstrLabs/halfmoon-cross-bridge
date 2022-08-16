@@ -30,7 +30,10 @@ RETURNING id;
 SELECT * FROM request WHERE from_txn_hash = :from_txn_hash;
 
 -- deleteRequest
-DELETE FROM ${this.requestTableName} WHERE id = :id;
+DELETE FROM request WHERE id = :id;
+
+-- deleteAllRequests
+DELETE FROM request;
 
 -- createToken
 INSERT INTO token

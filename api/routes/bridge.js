@@ -27,16 +27,14 @@ async function handleGetCall(req, res) {
 
   let result
   try {
-    result = await pool.query(sql.readRequest({id}))
+    result = await pool.query(sql.readRequest(params))
   } catch (err) {
     log.error(err)
     return res.status(500).json({msg: 'failed to query database'});
   }
 
-  let row
-  try {
-    row = result.rows[0]
-  } catch (err) {
+  let row = result.rows[0];
+  if (!row) {
     return res.status(404).json({msg: 'bridge transaction not exist'});
   }
   

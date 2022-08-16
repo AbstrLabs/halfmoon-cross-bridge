@@ -15,6 +15,19 @@ describe('GET /fees', () => {
         console.log(body)
         expect(status).toBe(200)
         expect(body).toEqual([])
+    })
 
+    test('should error if param is wrong', async () => {
+        const {status, body} = await request(app).get('/fees?from_token_id=2&blabla=4')
+        console.log(body)
+        expect(status).toBe(400)
+        expect(body).toEqual({"errors": ["instance requires property \"to_token_id\"", "instance is not allowed to have the additional property \"blabla\""]})
+    })
+
+    test('should error if param is not number', async () => {
+        const {status, body} = await request(app).get('/fees?from_token_id=a&to_token_id=b')
+        console.log(body)
+        expect(status).toBe(400)
+        expect(body).toEqual({"errors": ["instance.from_token_id is not of a type(s) number","instance.to_token_id is not of a type(s) number"]})
     })
 })
