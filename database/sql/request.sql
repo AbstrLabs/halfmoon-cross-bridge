@@ -55,10 +55,5 @@ VALUES (
 );
 
 -- readFee
-SELECT * FROM fee WHERE
-(
-  from_token_id, to_token_id
-)
-VALUES (
-  :from_token_id, :to_token_id
-);
+SELECT * FROM fee WHERE 
+from_token_id = :from_token_id AND to_token_id = :to_token_id;

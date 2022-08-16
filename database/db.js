@@ -1,6 +1,6 @@
 const pg = require('pg')
 const sql = require('yesql')(__dirname + '/sql/',  {type: 'pg'})
-const dbConfigName = process.env.DB_ENV || "dev"
+const dbConfigName = process.env.NODE_ENV || "dev"
 const fs = require('fs')
 
 const pool = (dbConfigName == "production") ?

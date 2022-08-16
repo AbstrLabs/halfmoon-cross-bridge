@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "description": "Artificio network bridge database",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "migrate": "db-migrate up",
+    "migrate:down": "db-migrate down",
+    "migrate:test": "db-migrate up -e test",
+    "migrate:test:down": "db-migrate down -e test",
+    "migrate:prod": "db-migrate up -e production",
+    "migrate:prod:down": "db-migrate down -e production"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

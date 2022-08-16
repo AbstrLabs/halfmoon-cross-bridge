@@ -29,7 +29,7 @@ async function readFee(req, res) {
     
     let result
     try {
-      result = await pool.query(sql.readFee({from_token_id, to_token_id}))
+      result = await pool.query(sql.readFee(params))
     } catch (err) {
       log.error(err)
       return res.status(500).json({msg: 'failed to query database'});
@@ -37,4 +37,4 @@ async function readFee(req, res) {
     return res.json(result.rows)
 }
 
-module.exports = tokensRouter
+module.exports = feesRouter
