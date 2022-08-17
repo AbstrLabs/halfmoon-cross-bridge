@@ -65,10 +65,13 @@ async function handlePostCall(req, res) {
   if (!v.valid) {
     return res.status(400).json({errors: v.errors.map(e => e.toString())});
   }
+  if (!params.comment) {
+    params.comment = null
+  }
       
   let result;
   try {
-    await pool.query(sql.createRequest(params))
+    result = await pool.query(sql.createRequest(params))
   } catch (err) {
     // insertion rejected by database due to constraint does not satisfy
 
@@ -77,13 +80,12 @@ async function handlePostCall(req, res) {
     return res.status(500).json({msg: 'failed to query database'});
   }
 
-  let row
-  try {
-    row = result.rows[0]
-  } catch (err) {
-    log.crit('expected one row in createRequest')
+  let row = result.rows[0]
+  if (!row) {
+    log.crit('expected one row in createRequest return')
     return res.status(500).json({msg: 'server bug'});
   }
+
   return res.status(201).json(row)
 }
 

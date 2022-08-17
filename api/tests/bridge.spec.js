@@ -59,13 +59,36 @@ describe('GET /bridge', () => {
 
     test('should 404 if txn does not exist', async () => {
         const {status, body} = await request(app).get(`/bridge?id=${firstId+100}`)
-        console.log(body)
         expect(status).toBe(404)
-        console.log(body)
+    })
+
+    test('should 400 if id is not provided', async () => {
+        const {status, body} = await request(app).get(`/bridge`)
+        expect(status).toBe(400)
+    })
+
+    test('should 400 if id is not in right format', async () => {
+        const {status, body} = await request(app).get(`/bridge?id=a`)
+        expect(status).toBe(400)
     })
 })
 
 describe('POST /bridge', () => {
-
+    test('should succsess if everything right, no comment', async () => {
+        let req = {
+            from_addr: 'zxcvn.testnet',
+            from_amount_atom: '30000',
+            from_token_id: 2,
+            from_txn_hash: '6vLJvWEfkWHASppZE5mcYmaCPnHPoVAGz1WzuDkV6Pij',
+            from_txn_hash_sig: '5KHJVcNvNQuezWbGpbHqf3fo1qsHFVzPZHBbFSn8UP413DhZKAYVcnWppPjvgj4BtcHykcQDZCpBokPjqAXLAmKj',
+            to_addr: 'NY5PBXI4JAC6AL4SJ4L43ZF3A2LVTP5IQQSVLANGOPTAF3FNSM5OQXRRVI',
+            to_token_id: 3
+        }
+        const {status, body} = await request(app).post(`/bridge`)
+            .send(req)
+        console.log(body)
+        expect(status).toBe(201)
+        expect(body.id).toBeDefined()
+    })
 })
 

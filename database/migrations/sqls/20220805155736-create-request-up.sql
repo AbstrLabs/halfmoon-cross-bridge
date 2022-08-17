@@ -49,7 +49,7 @@ CREATE TABLE request (
   from_txn_hash_sig VARCHAR(255) NOT NULL,
   to_addr VARCHAR(255) NOT NULL,
   to_amount_atom BIGINT,
-  to_token_id INT NOT NULL REFERENCES token,
+  to_token_id INT NOT NULL REFERENCES token CHECK(to_token_id <> from_token_id),
   to_txn_hash VARCHAR(255),
   created_time TIMESTAMPTZ NOT NULL DEFAULT now(),
   comment VARCHAR(255),
