@@ -3,7 +3,6 @@ const validate = require('jsonschema').validate;
 
 const {pool, sql} = require('artificio-bridge-database/db');
 const log = require('artificio-bridge-common/logger');
-const { DatabaseError } = require('pg');
 const { unreachable } = require('../utils');
 
 const txnRoute = express.Router();
