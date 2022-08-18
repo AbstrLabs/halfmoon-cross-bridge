@@ -31,7 +31,7 @@ jobs:
         run: cd database && npm run migrate:test
       
       - name: Init tokens
-        run: cd database && scripts/0-init-tokens.sh
+        run: cd database && NODE_ENV=test scripts/0-init-tokens.sh
       
       - name: Install API dependencies
         run: cd api && npm ci
