@@ -28,7 +28,7 @@ jobs:
         run: cd database && npm ci
 
       - name: DB migrate
-        run: cd database && npm run db:migrate:test
+        run: cd database && npm run migrate:test
       
       - name: Init tokens
         run: cd database && scripts/0-init-tokens.sh
