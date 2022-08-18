@@ -3,6 +3,8 @@ const validate = require('jsonschema').validate;
 
 const {pool, sql} = require('artificio-bridge-database/db');
 const log = require('artificio-bridge-common/logger');
+const { DatabaseError } = require('pg');
+const { unreachable } = require('../utils');
 
 const txnRoute = express.Router();
 txnRoute.route('/')
@@ -74,8 +76,19 @@ async function handlePostCall(req, res) {
     result = await pool.query(sql.createRequest(params))
   } catch (err) {
     // insertion rejected by database due to constraint does not satisfy
-
+    if (err.code == '23505') {
+      if(err.constraint == 'request_from_txn_hash_from_txn_hash_sig_key') {
+        return res.status(400).json({msg: 'duplicate transaction'});
+      }
+      unreachable()
+    } else if (err.code == '23514') {
+      if(err.constraint == ' request_check') {
+        return res.status(400).json({msg: 'from_token and to_token must be different'})
+      }
+      unreachable()
+    }
     // or it's a connection error
+    console.log(err)
     log.error(err)
     return res.status(500).json({msg: 'failed to query database'});
   }
