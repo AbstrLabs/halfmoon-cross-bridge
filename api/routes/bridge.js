@@ -81,7 +81,7 @@ async function handlePostCall(req, res) {
       }
       unreachable()
     } else if (err.code == '23514') {
-      if(err.constraint == ' request_check') {
+      if(err.constraint == 'request_check') {
         return res.status(400).json({msg: 'from_token and to_token must be different'})
       }
       unreachable()

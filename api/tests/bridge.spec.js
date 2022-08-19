@@ -200,7 +200,7 @@ describe('POST /bridge', () => {
             .send(req)
         console.log(body)
         expect(status).toBe(400)
-        expect(body).toEqual({msg: 'duplicate transaction'})
+        expect(body).toEqual({msg: 'from_token and to_token must be different'})
     })
 })
 
