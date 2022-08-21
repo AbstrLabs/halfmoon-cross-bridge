@@ -18,13 +18,62 @@ SELECT * FROM request WHERE id = :id;
 -- readRequests
 SELECT * FROM request ORDER_BY id LIMIT :n OFFSET :start;
 
--- updateRequest
+-- updateRequestCreatedToInvalid
 UPDATE request SET
-  request_status=:request_status, to_txn_hash = :to_txn_hash
+  request_status='INVALID', invalid_reason=:reason
     WHERE (
-      id=:id
+      id=:id,
+      status='CREATED'
     )
 RETURNING id;
+
+-- updateRequestCreatedToDoneVerify
+UPDATE request SET
+  request_status='DONE_VERIFY'
+    WHERE (
+      id=:id,
+      status='CREATED'
+    )
+RETURNING id;
+
+-- updateRequestCreatedToErrorInVerify
+UPDATE request SET
+  request_status='ERROR_IN_VERIFY', err_msg=:errorMsg
+    WHERE (
+      id=:id,
+      status='CREATED'
+    )
+RETURNING id;
+
+-- updateRequestDoneVerifyToDoingOutgoing
+UPDATE request SET
+  request_status='DOING_OUTGOING'
+    WHERE (
+      id=:id,
+      status='DONE_VERIFY'
+    )
+RETURNING id;
+
+-- updateRequestDoingOutgoingToDoneOutgoing
+UPDATE request SET
+  request_status='DONE_OUTGOING', to_txn_hash=:toTxnHash
+    WHERE (
+      id=:id,
+      status='DOING_OUTGOING'
+    )
+RETURNING id;
+
+-- updateRequestDoingOutgoingToErrorInOutgoing
+UPDATE request SET
+  request_status='DONE_OUTGOING', err_msg=:errorMsg
+    WHERE (
+      id=:id,
+      status='DOING_OUTGOING'
+    )
+RETURNING id;
+
+-- readRequestToProcess
+SELECT * FROM request WHERE request_status='CREATED' OR request_status='DONE_VERIFY' OR request_status='DOING_OUTGOING' FOR UPDATE SKIP LOCKED LIMIT 1;
 
 -- readRequestByFromTxnId
 SELECT * FROM request WHERE from_txn_hash = :from_txn_hash;

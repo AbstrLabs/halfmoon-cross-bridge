@@ -14,8 +14,9 @@ const txn = async (actions) => {
 
   try {
     await client.query('BEGIN')
-    await actions(client)
+    let result = await actions(client)
     await client.query('COMMIT')
+    return result
   } catch (e) {
     await client.query('ROLLBACK')
     throw e
