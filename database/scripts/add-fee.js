@@ -1,4 +1,4 @@
-const {pool, sql} = require('../db.js');
+const {pool, sql} = require('..');
 const yargs = require('yargs/yargs');
 const hideBin = require('yargs/helpers').hideBin;
 

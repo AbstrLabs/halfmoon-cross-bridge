@@ -1,5 +1,5 @@
 const express = require('express');
-const {pool, sql} = require('artificio-bridge-database/db');
+const {pool, sql} = require('artificio-bridge-database');
 const log = require('artificio-bridge-common/logger');
 
 const tokensRouter = express.Router()

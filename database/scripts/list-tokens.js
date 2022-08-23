@@ -1,4 +1,4 @@
-const {pool, sql} = require('../db.js');
+const {pool, sql} = require('..');
 
 async function main() {
     let r = await pool.query(sql.readTokens())

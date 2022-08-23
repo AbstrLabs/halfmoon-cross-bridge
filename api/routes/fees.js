@@ -1,6 +1,6 @@
 const express = require('express');
 const validate = require('jsonschema').validate;
-const {pool, sql} = require('artificio-bridge-database/db');
+const {pool, sql} = require('artificio-bridge-database');
 const log = require('artificio-bridge-common/logger');
 
 const feesRouter = express.Router()

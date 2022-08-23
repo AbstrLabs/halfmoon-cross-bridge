@@ -16,11 +16,11 @@ RETURNING id;
 SELECT * FROM request WHERE id = :id;
 
 -- readRequests
-SELECT * FROM request ORDER_BY id LIMIT :n OFFSET :start;
+SELECT * FROM request ORDER BY id LIMIT :n OFFSET :start;
 
 -- updateRequestCreatedToInvalid
 UPDATE request SET
-  request_status='INVALID', invalid_reason=:reason
+  request_status='INVALID', invalid_reason=:invalid_reason
     WHERE (
       id=:id,
       status='CREATED'
@@ -29,7 +29,7 @@ RETURNING id;
 
 -- updateRequestCreatedToDoneVerify
 UPDATE request SET
-  request_status='DONE_VERIFY'
+  request_status='DONE_VERIFY', to_amount_atom=:to_amount_atom
     WHERE (
       id=:id,
       status='CREATED'
@@ -38,7 +38,7 @@ RETURNING id;
 
 -- updateRequestCreatedToErrorInVerify
 UPDATE request SET
-  request_status='ERROR_IN_VERIFY', err_msg=:errorMsg
+  request_status='ERROR_IN_VERIFY', err_msg=:err_msg
     WHERE (
       id=:id,
       status='CREATED'
@@ -47,7 +47,11 @@ RETURNING id;
 
 -- updateRequestDoneVerifyToDoingOutgoing
 UPDATE request SET
-  request_status='DOING_OUTGOING'
+  request_status='DOING_OUTGOING', to_txn_hash=:to_txn_hash, to_txn_bytes=:to_txn_bytes
+    WHERE (
+      id=:id,
+      status='DONE_VERIFY'
+    )
     WHERE (
       id=:id,
       status='DONE_VERIFY'
@@ -56,7 +60,7 @@ RETURNING id;
 
 -- updateRequestDoingOutgoingToDoneOutgoing
 UPDATE request SET
-  request_status='DONE_OUTGOING', to_txn_hash=:toTxnHash
+  request_status='DONE_OUTGOING'
     WHERE (
       id=:id,
       status='DOING_OUTGOING'
@@ -65,7 +69,7 @@ RETURNING id;
 
 -- updateRequestDoingOutgoingToErrorInOutgoing
 UPDATE request SET
-  request_status='DONE_OUTGOING', err_msg=:errorMsg
+  request_status='ERROR_IN_OUTGOING', err_msg=:err_msg
     WHERE (
       id=:id,
       status='DOING_OUTGOING'
@@ -106,6 +110,12 @@ VALUES (
   :from_token_id, :to_token_id, :bridge_type, :fixed_fee_atom, :margin_fee_atom
 );
 
--- readFee
-SELECT * FROM fee WHERE 
-from_token_id = :from_token_id AND to_token_id = :to_token_id;
+-- readTokenAndFee
+select 
+	from_token_id, from_token.name as from_token_name, from_token.blockchain as from_token_blockchain, from_token.addr as from_token_addr,
+	to_token_id, to_token.name as to_token_name, to_token.blockchain as to_token_blockchain, to_token.addr as to_token_addr,
+	fixed_fee_atom, margin_fee_atom
+from fee 
+	join token from_token on fee.from_token_id=from_token.id 
+	join token to_token on fee.to_token_id=to_token.id 
+	where from_token_id=:from_token_id and to_token_id=:to_token_id;

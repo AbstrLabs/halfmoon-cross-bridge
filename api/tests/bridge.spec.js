@@ -1,7 +1,7 @@
 
 const request = require('supertest')
 const app = require('../app')
-const {pool, sql} = require('artificio-bridge-database/db')
+const {pool, sql} = require('artificio-bridge-database')
 
 let firstId
 
