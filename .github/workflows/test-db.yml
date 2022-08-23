@@ -1,0 +1,38 @@
+name: Bridge API test
+on: push
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: bridge
+          POSTGRES_PASSWORD: bridge
+          POSTGRES_DB: bridge_dev
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      
+      - name: Install dependencies for common
+        run: cd common && npm ci
+
+      - name: Install dependencies for database
+        run: cd database && npm ci
+
+      - name: DB migrate
+        run: cd database && npm run migrate
+      
+      - name: DB migrate down
+        run: cd database && npm run migrate:down
