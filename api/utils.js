@@ -1,26 +1,5 @@
 const log = require('artificio-bridge-common/logger')
-
-class Unreachable extends Error {}
-class AssertFail extends Error {
-    constructor(message) {
-        super()
-        if (message) {
-            this.message = message
-        } else {
-            this.message = 'assertion failed'
-        }
-    }
-}
-
-function unreachable() {
-    throw new Unreachable()
-}
-
-function assert(condition, message) {
-    if (!condition) {
-        throw new AssertFail(message)
-    }
-}
+const {Unreachable, AssertFail, unreachable, assert} = require('artificio-bridge-common/error')
 
 function errorHandler(err, _req, res, _next) {
     log.crit(err)

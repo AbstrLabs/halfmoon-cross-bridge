@@ -125,7 +125,8 @@
     "semi": true,
     "singleQuote": true,
     "tabWidth": 2,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "printWidth": 120
   },
   "private": true,
   "repository": "git@github.com:AbstrLabs/Algorand-NEAR-bridge.git",
