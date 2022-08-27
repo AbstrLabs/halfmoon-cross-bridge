@@ -24,16 +24,19 @@ class AlgoBlockchain extends Blockchain{
       env('ALGO_MASTER_PASS')
     ).sk;
 
-    async verifyIncomingTransaction(fromTxn: FromTxn, fromToken: FromToken): Promise<VerifyResult> {
-        let outcome;
-        try {
-            outcome = (await this.indexer
-              .lookupTransactionByID(fromTxn.from_txn_hash)
-              .do())
-        } catch (err) {
-            throw err;
-        }
+    private async getTransaction(txn_hash: string): Promise<any> {
+      try {
+        const outcome = (await this.indexer
+          .lookupTransactionByID(txn_hash)
+          .do());
+        return outcome;
+      } catch (err) {
+        throw err;
+      }
+    }
 
+    async verifyIncomingTransaction(fromTxn: FromTxn, fromToken: FromToken): Promise<VerifyResult> {
+        let outcome = await this.getTransaction(fromTxn.from_txn_hash);
         const currentRound = outcome['current-round'];
         const txn = outcome.transaction;
         const confirmedRound = txn['confirmed-round'];
@@ -104,11 +107,29 @@ class AlgoBlockchain extends Blockchain{
     }
     
     async sendTransaction(t: Uint8Array): Promise<void> {
-        
+      await this.client.sendRawTransaction(t).do()
     }
-    
+
     async checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
-        return TransactionStatus.NotExist;
+
+      let info = await this.client.pendingTransactionInformation(txn_hash).do()
+      if(info['confirmed-round']) {
+        return TransactionStatus.Confirmed
+      } else if (info['pool-error'] == '') {
+        return TransactionStatus.Pending
+      } else {
+        return TransactionStatus.Failed
+      }
+
+      // based on api schema, 404 indicate it's not in the pending pool, then it is in indexer
+      // if check if response is 404. TODO: how to check? does `do` throw an error, if so, differentiate between network error vs really 404
+      try {
+        await this.getTransaction(txn_hash);
+        return TransactionStatus.Confirmed
+      } catch (e) {
+        // if indexer is down the transaction can be success, in this case throw an error, only we're sure it's really not exist we return that result
+        return TransactionStatus.NotExist
+      }
     }
 }
 

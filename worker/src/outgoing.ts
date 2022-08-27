@@ -20,6 +20,7 @@ export async function sendOutgoing(request: RequestForSendingOutgoing, tokenAndF
         } else if (status == TransactionStatus.Confirmed) {
             return { success: true };
         } else {
+            // pending
             throw new Error('not finished');
         }
     }, tokenAndFee.to_token_blockchain.txnGoThroughTime * 1000);
