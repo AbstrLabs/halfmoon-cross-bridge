@@ -1,4 +1,6 @@
 import { RequestForVerify, TokenAndFee, VerifyResult } from "./types";
+import bs58 from "bs58";
+import crypto from 'crypto'
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
     // check incoming transaction valid
@@ -11,8 +13,13 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
     }
 
     // check signature
-    let {from_txn_hash, from_txn_hash_sig}
-
+    let signerPublicKey = verifyResult
+    if (!verifySignature(signerPublicKey, request.from_txn_hash, request.from_txn_hash_sig)) {
+        return {
+            valid: false,
+            invalidReason: 'invalid transaction hash signature',
+        };
+    }
 
     // check fee
     let feeAmount = BigInt(request.from_amount_atom) * BigInt(tokenAndFee.margin_fee_atom) + BigInt(tokenAndFee.fixed_fee_atom);
@@ -32,10 +39,26 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
         };
     }
 
-
-
     return {
         valid: true,
         to_amount_atom: to_amount_atom.toString()
     };
+}
+
+function verifySignature(signerPublicKey: string, from_txn_hash: string, from_txn_hash_sig: string): boolean {
+    try {
+        let [keyType, keyData] = signerPublicKey.split(':');
+        switch (keyType) {
+            case 'ed25519':
+                let bytes = bs58.decode(keyData)
+                const prefix = Buffer.from('302a300506032b6570032100', 'hex')
+                let key = Buffer.concat([prefix, bytes])
+                let pk = crypto.createPublicKey({key, format: "der", type: "spki"})
+                return crypto.verify(null, bs58.decode(from_txn_hash), pk, bs58.decode(from_txn_hash_sig))
+            default:
+                return false
+        }
+    } catch (err) {
+        return false
+    }
 }
