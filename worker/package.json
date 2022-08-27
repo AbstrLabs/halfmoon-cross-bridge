@@ -11,9 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bs58": "^5.0.0",
+    "algosdk": "^1.19.1",
+    "aritficio-bridge-common": "file:../common",
     "artificio-bridge-database": "file:../database",
-    "aritficio-bridge-common": "file:../common"
+    "bs58": "^5.0.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

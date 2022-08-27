@@ -16,13 +16,28 @@ export interface TransactionParams {
     to_token_addr: string | null;
 }
 
-export type SignerPublicKey = string;
-export type VerifyResult = SignerPublicKey | null;
+export type VerifyResult = {
+    valid: boolean;
+    invalidReason?: string;
+    signerPk?: string;
+}
+
+export interface FromToken {
+    from_token_id: number;
+    from_token_name: string;
+    from_token_addr: string | null;
+}
+
+export interface FromTxn {
+    from_amount_atom: string;
+    from_addr: string;
+    from_txn_hash: string;
+}
 
 export abstract class Blockchain {
     abstract txnGoThroughTime: number;
     // used in verify
-    abstract verifyIncomingTransaction(txHash: string): Promise<VerifyResult>;
+    abstract verifyIncomingTransaction(fromTxn: FromTxn, fromToken: FromToken): Promise<VerifyResult>;
     abstract addressIsValid(addr: string): Promise<boolean>;
     // used in createOutgoing
     abstract createTransactionObject(params: TransactionParams): Promise<Transaction>;

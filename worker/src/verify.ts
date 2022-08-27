@@ -4,16 +4,16 @@ import crypto from 'crypto'
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
     // check incoming transaction valid
-    let verifyResult = await tokenAndFee.from_token_blockchain.verifyIncomingTransaction(request.from_txn_hash)
-    if (!verifyResult) {
+    let verifyResult = await tokenAndFee.from_token_blockchain.verifyIncomingTransaction(request, tokenAndFee)
+    if (!verifyResult.valid) {
         return {
             valid: false,
-            invalidReason: 'invalid incoming transaction',
+            invalidReason: 'invalid incoming transaction: ' + verifyResult.invalidReason
         };
     }
 
     // check signature
-    let signerPublicKey = verifyResult
+    let signerPublicKey = verifyResult.signerPk as string;
     if (!verifySignature(signerPublicKey, request.from_txn_hash, request.from_txn_hash_sig)) {
         return {
             valid: false,
