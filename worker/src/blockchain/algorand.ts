@@ -1,7 +1,7 @@
 import { Blockchain, FromToken, FromTxn, Transaction, TransactionParams, TransactionStatus, VerifyResult } from "./base";
 import { Algodv2 as AlgodClient, Indexer, decodeAddress } from 'algosdk';
 import { env } from "../utils";
-import base58 from "bs58";
+import base58, { decode } from "bs58";
 
 class AlgoTransaction extends Transaction {
 
@@ -58,8 +58,14 @@ class AlgoBlockchain extends Blockchain{
     }
 
     async addressIsValid(addr: string): Promise<boolean> {
+        try {
+          decodeAddress(addr)
+        } catch (e) {
+          return false
+        }
         return true
     }
+    
     async createTransactionObject(params: TransactionParams): Promise<AlgoTransaction> {
       return new AlgoTransaction();
     }
