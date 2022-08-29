@@ -61,12 +61,9 @@ class NearBlockchain extends Blockchain {
     }
 
     async checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
-        let near = await this.connect();
-        let provider = near.connection.provider as JsonRpcProvider;
         let txnOutcome;
         try {
-            txnOutcome = await provider.txStatus(txn_hash, this.centralizedAccount);
-
+            txnOutcome = await this.getTransaction(txn_hash, this.centralizedAccount);
         } catch (err: any) {
             if(/Transaction .*? doesn't exist/.test(err.message)) {
                 return TransactionStatus.NotExist
@@ -88,10 +85,43 @@ class NearBlockchain extends Blockchain {
             }
             unreachable()
           }
+          return unreachable() // hack ts
     }
 
     async verifyIncomingTransaction(fromTxn: FromTxn, fromToken: FromToken): Promise<VerifyResult> {
-        throw new Error("Method not implemented.");
+        let txnOutcome = await this.getTransaction(fromTxn.from_txn_hash, fromTxn.from_addr);
+        if (txnOutcome.status instanceof Object) {
+          if (txnOutcome.status.Failure !== undefined) {
+            return {valid: false, invalidReason: 'transaction failed'}
+          }
+        } else {
+          if (
+            txnOutcome.status === providers.FinalExecutionStatusBasic.NotStarted ||
+            txnOutcome.status === providers.FinalExecutionStatusBasic.Started
+          ) {
+            return {valid: false, invalidReason: 'transaction not confirmed'}
+          } else if (txnOutcome.status === providers.FinalExecutionStatusBasic.Failure) {
+            return {valid: false, invalidReason: 'transaction failed'}
+          }
+        }
+
+        // check from address
+        if (txnOutcome.transaction.signer_id !== fromTxn.from_addr) {
+            return {valid: false, invalidReason: 'transaction signer does not match'}
+        }
+    
+        // check to address
+        if (txnOutcome.transaction.receiver_id !== this.centralizedAccount) {
+            return {valid: false, invalidReason: 'transaction receiver is not custody'}
+        }
+
+        // check amount
+        let receivedAtom = txnOutcome.transaction.actions[0].Transfer.deposit
+        // precision digit conversion happens at outcoming side
+        if (receivedAtom !== fromToken.from_token_addr) {
+            return {valid: false, invalidReason: 'transaction amount does not match'}
+        }
+        return {valid: true, signerPk: txnOutcome.transaction.signer_id};
     }
 
     private async connect() {
@@ -99,6 +129,12 @@ class NearBlockchain extends Blockchain {
         const keyPair = KeyPair.fromString(centralizedAccPrivKey);
         await this.keyStore.setKey(env('NEAR_NETWORK'), this.centralizedAccount, keyPair);
         return await connect(this.config);
+    }
+
+    private async getTransaction(txn_hash: string, sender: string) {
+        let near = await this.connect();
+        let provider = near.connection.provider as JsonRpcProvider;
+        return await provider.txStatus(txn_hash, sender);
     }
 }
 
