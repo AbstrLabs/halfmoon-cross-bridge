@@ -29,7 +29,7 @@ async function readFee(req, res) {
     
     let result
     try {
-      result = await pool.query(sql.readFee(params))
+      result = await pool.query(sql.readTokenAndFee(params))
     } catch (err) {
       log.error(err)
       return res.status(500).json({msg: 'failed to query database'});

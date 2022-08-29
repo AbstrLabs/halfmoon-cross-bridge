@@ -112,9 +112,9 @@ VALUES (
 
 -- readTokenAndFee
 select 
-	from_token_id, from_token.name as from_token_name, from_token.blockchain as from_token_blockchain, from_token.addr as from_token_addr,
-	to_token_id, to_token.name as to_token_name, to_token.blockchain as to_token_blockchain, to_token.addr as to_token_addr,
-	fixed_fee_atom, margin_fee_atom
+	from_token_id, from_token.name as from_token_name, from_token.blockchain as from_token_blockchain, from_token.addr as from_token_addr, from_token.atoms as from_token_atoms,
+	to_token_id, to_token.name as to_token_name, to_token.blockchain as to_token_blockchain, to_token.addr as to_token_addr, to_token.atoms as to_token_atoms,
+	bridge_type, fixed_fee_atom, margin_fee_atom
 from fee 
 	join token from_token on fee.from_token_id=from_token.id 
 	join token to_token on fee.to_token_id=to_token.id 
