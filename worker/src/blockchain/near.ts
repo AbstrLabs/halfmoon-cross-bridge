@@ -11,7 +11,8 @@ import {
   } from 'near-api-js';
 import { NearConfig } from "near-api-js/lib/near";
 import base58 from "bs58";
-import { JsonRpcProvider } from "near-api-js/lib/providers";
+import { JsonRpcProvider, TypedError } from "near-api-js/lib/providers";
+const { unreachable } = require('artificio-bridge-common/error');
 
 class NearAccount extends Account {
     public signTx(receiverId: string, actions: transactions.Action[]): Promise<[Uint8Array, transactions.SignedTransaction]> {
@@ -59,9 +60,36 @@ class NearBlockchain extends Blockchain {
         await provider.sendJsonRpc('broadcast_tx_async', [Buffer.from(t).toString('base64')]);
     }
 
-    checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
-        throw new Error("Method not implemented.");
+    async checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
+        let near = await this.connect();
+        let provider = near.connection.provider as JsonRpcProvider;
+        let txnOutcome;
+        try {
+            txnOutcome = await provider.txStatus(txn_hash, this.centralizedAccount);
+
+        } catch (err: any) {
+            if(/Transaction .*? doesn't exist/.test(err.message)) {
+                return TransactionStatus.NotExist
+            }
+            throw err;
+        }
+        if (txnOutcome.status instanceof Object) {
+            if (txnOutcome.status.Failure !== undefined) {
+                return TransactionStatus.Failed
+            } else {
+                return TransactionStatus.Confirmed
+            }
+          } else {
+            if (txnOutcome.status === providers.FinalExecutionStatusBasic.NotStarted ||
+                txnOutcome.status === providers.FinalExecutionStatusBasic.Started) {
+                return TransactionStatus.Pending
+            } else if (txnOutcome.status === providers.FinalExecutionStatusBasic.Failure) {
+                return TransactionStatus.Failed
+            }
+            unreachable()
+          }
     }
+
     async verifyIncomingTransaction(fromTxn: FromTxn, fromToken: FromToken): Promise<VerifyResult> {
         throw new Error("Method not implemented.");
     }
