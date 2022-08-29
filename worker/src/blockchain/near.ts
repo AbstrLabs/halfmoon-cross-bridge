@@ -11,6 +11,7 @@ import {
   } from 'near-api-js';
 import { NearConfig } from "near-api-js/lib/near";
 import base58 from "bs58";
+import { JsonRpcProvider } from "near-api-js/lib/providers";
 
 class NearAccount extends Account {
     public signTx(receiverId: string, actions: transactions.Action[]): Promise<[Uint8Array, transactions.SignedTransaction]> {
@@ -51,10 +52,13 @@ class NearBlockchain extends Blockchain {
         let [txn_hash_bytes, signed_txn] = await account.signTx(params.to_addr, [transactions.transfer(params.to_amount_atom)])
         return new NearTransaction(base58.encode(txn_hash_bytes), signed_txn.encode())
     }
-    
-    sendTransaction(t: Uint8Array): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async sendTransaction(t: Uint8Array): Promise<void> {
+        let near = await this.connect();
+        let provider = near.connection.provider as JsonRpcProvider;
+        await provider.sendJsonRpc('broadcast_tx_async', [Buffer.from(t).toString('base64')]);
     }
+
     checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
         throw new Error("Method not implemented.");
     }
