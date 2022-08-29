@@ -13,6 +13,7 @@ class AlgoTransaction extends Transaction {
 
 class AlgoBlockchain extends Blockchain{
     txnGoThroughTime = 5;
+    
     client = new AlgodClient({
       'X-API-KEY': env('PURE_STAKE_API_KEY')
     }, env('PURE_STAKE_ALGOD_URL'), '');
