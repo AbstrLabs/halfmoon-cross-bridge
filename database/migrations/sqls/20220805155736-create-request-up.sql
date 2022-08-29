@@ -23,6 +23,7 @@ CREATE TABLE token (
   name VARCHAR(255) NOT NULL,
   blockchain blockchain_enum NOT NULL,
   addr VARCHAR(63),
+  atoms INTEGER NOT NULL,
   UNIQUE(name, blockchain)
 );
 COMMENT ON COLUMN token.addr IS 'if null, it means the native token of the blockchain';
@@ -36,7 +37,6 @@ CREATE TABLE fee (
   margin_fee_atom BIGINT NOT NULL,
   PRIMARY KEY (from_token_id, to_token_id)
 );
-
 
 CREATE TABLE request (
   id SERIAL PRIMARY KEY,

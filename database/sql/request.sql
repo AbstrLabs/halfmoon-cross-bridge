@@ -91,10 +91,10 @@ DELETE FROM request;
 -- createToken
 INSERT INTO token
 (
-  name, blockchain, addr
+  name, blockchain, addr, atoms
 )
 VALUES (
-  :name, :blockchain, :addr
+  :name, :blockchain, :addr, :atoms
 )
 RETURNING id;
 

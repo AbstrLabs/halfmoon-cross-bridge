@@ -16,7 +16,7 @@ const { unreachable } = require('artificio-bridge-common/error');
 
 class NearAccount extends Account {
     public signTx(receiverId: string, actions: transactions.Action[]): Promise<[Uint8Array, transactions.SignedTransaction]> {
-        return this.signTransaction(receiverId, actions)
+        return this.signTransaction(receiverId, actions);
     }
 }
 
@@ -24,7 +24,8 @@ class NearTransaction extends Transaction {
     constructor(public txn_hash: string, public txn_bytes: Uint8Array) {
       super();
     }
-  }
+}
+
 class NearBlockchain extends Blockchain {
     txnGoThroughTime = 3;
     centralizedAccount = env('NEAR_MASTER_ADDR')
