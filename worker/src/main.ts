@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 import { pause } from './utils'
 import {worker} from './worker'
 

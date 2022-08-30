@@ -12,11 +12,12 @@ export async function worker(): Promise<boolean> {
   try {
     return await txn(async (client: any) => {
       let request = await clientQuery1(client, { readRequestToProcess: {} });
-      let s = new StateMachine(client);
       if (request === undefined) {
         log.info('No requests to process');
         return false;
       }
+      let s = new StateMachine(client, request.id);
+
       let tokenAndFee = await poolQuery1({
         readTokenAndFee: {
           from_token_id: request.from_token_id,
@@ -62,8 +63,9 @@ export async function worker(): Promise<boolean> {
           unreachable();
       }
     });
-  } catch (err) {
+  } catch (err: any) {
     log.error('Error in worker: ', err);
+    console.error(err)
     return false;
   }
 }

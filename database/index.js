@@ -8,12 +8,12 @@ const pool = (dbConfigName == "production") ?
              new pg.Pool(JSON.parse(fs.readFileSync(__dirname + "/database.json"))[dbConfigName])
 
 const poolQuery1 = async(query) => {
-  let res = await pool.query(sql[Object.keys(query)[0]], Object.values(query)[0])
+  let res = await pool.query(sql[Object.keys(query)[0]](Object.values(query)[0]))
   return res.rows[0]
 }
 
 const clientQuery1 = async(client, query) => {
-  let res = await client.query(sql[Object.keys(query)[0]], Object.values(query)[0])
+  let res = await client.query(sql[Object.keys(query)[0]](Object.values(query)[0]))
   return res.rows[0]
 }
 

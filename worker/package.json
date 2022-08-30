@@ -14,7 +14,8 @@
     "algosdk": "^1.19.1",
     "aritficio-bridge-common": "file:../common",
     "artificio-bridge-database": "file:../database",
-    "bs58": "^5.0.0"
+    "bs58": "^5.0.0",
+    "dotenv": "^16.0.1"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

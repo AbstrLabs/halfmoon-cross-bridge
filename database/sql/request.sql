@@ -22,8 +22,8 @@ SELECT * FROM request ORDER BY id LIMIT :n OFFSET :start;
 UPDATE request SET
   request_status='INVALID', invalid_reason=:invalid_reason
     WHERE (
-      id=:id,
-      status='CREATED'
+      id=:id AND
+      request_status='CREATED'
     )
 RETURNING id;
 
@@ -31,8 +31,8 @@ RETURNING id;
 UPDATE request SET
   request_status='DONE_VERIFY', to_amount_atom=:to_amount_atom
     WHERE (
-      id=:id,
-      status='CREATED'
+      id=:id AND
+      request_status='CREATED'
     )
 RETURNING id;
 
@@ -40,8 +40,8 @@ RETURNING id;
 UPDATE request SET
   request_status='ERROR_IN_VERIFY', err_msg=:err_msg
     WHERE (
-      id=:id,
-      status='CREATED'
+      id=:id AND
+      request_status='CREATED'
     )
 RETURNING id;
 
@@ -49,12 +49,8 @@ RETURNING id;
 UPDATE request SET
   request_status='DOING_OUTGOING', to_txn_hash=:to_txn_hash, to_txn_bytes=:to_txn_bytes
     WHERE (
-      id=:id,
-      status='DONE_VERIFY'
-    )
-    WHERE (
-      id=:id,
-      status='DONE_VERIFY'
+      id=:id AND
+      request_status='DONE_VERIFY'
     )
 RETURNING id;
 
@@ -62,8 +58,8 @@ RETURNING id;
 UPDATE request SET
   request_status='DONE_OUTGOING'
     WHERE (
-      id=:id,
-      status='DOING_OUTGOING'
+      id=:id AND
+      request_status='DOING_OUTGOING'
     )
 RETURNING id;
 
@@ -71,8 +67,8 @@ RETURNING id;
 UPDATE request SET
   request_status='ERROR_IN_OUTGOING', err_msg=:err_msg
     WHERE (
-      id=:id,
-      status='DOING_OUTGOING'
+      id=:id AND
+      request_status='DOING_OUTGOING'
     )
 RETURNING id;
 
