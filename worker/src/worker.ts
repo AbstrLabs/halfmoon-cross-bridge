@@ -64,7 +64,7 @@ export async function worker(): Promise<boolean> {
       }
     });
   } catch (err: any) {
-    log.error('Error in worker: ', err);
+    log.error('Error in worker: ');
     console.error(err)
     return false;
   }
