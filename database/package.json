@@ -1,7 +1,7 @@
 {
-  "name": "artificio-bridge-database",
+  "name": "halfmoon-cross-bridge-database",
   "version": "0.0.1",
-  "description": "Artificio network bridge database",
+  "description": "halfmoon-cross network bridge database",
   "main": "index.js",
   "scripts": {
     "migrate": "db-migrate up",

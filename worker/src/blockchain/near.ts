@@ -12,7 +12,7 @@ import {
 import { NearConfig } from "near-api-js/lib/near";
 import base58 from "bs58";
 import { JsonRpcProvider, TypedError } from "near-api-js/lib/providers";
-const { unreachable } = require('artificio-bridge-common/error');
+const { unreachable } = require('halfmoon-cross-bridge-common/error');
 
 class NearAccount extends Account {
     public signTx(receiverId: string, actions: transactions.Action[]): Promise<[Uint8Array, transactions.SignedTransaction]> {

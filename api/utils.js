@@ -1,5 +1,5 @@
-const log = require('artificio-bridge-common/logger')
-const {Unreachable, AssertFail, unreachable, assert} = require('artificio-bridge-common/error')
+const log = require('halfmoon-cross-bridge-common/logger')
+const {Unreachable, AssertFail, unreachable, assert} = require('halfmoon-cross-bridge-common/error')
 
 function errorHandler(err, _req, res, _next) {
     log.crit(err)

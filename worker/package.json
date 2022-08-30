@@ -1,5 +1,5 @@
 {
-  "name": "artificio-bridge-worker",
+  "name": "halfmoon-cross-bridge-worker",
   "version": "1.0.0",
   "description": "",
   "main": "worker.js",
@@ -12,8 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "algosdk": "^1.19.1",
-    "aritficio-bridge-common": "file:../common",
-    "artificio-bridge-database": "file:../database",
+    "halfmoon-cross-bridge-common": "file:../common",
+    "halfmoon-cross-bridge-database": "file:../database",
     "bs58": "^5.0.0",
     "dotenv": "^16.0.1"
   },

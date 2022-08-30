@@ -1,6 +1,6 @@
 const express = require('express');
-const {pool, sql} = require('artificio-bridge-database');
-const log = require('artificio-bridge-common/logger');
+const {pool, sql} = require('halfmoon-cross-bridge-database');
+const log = require('halfmoon-cross-bridge-common/logger');
 
 const tokensRouter = express.Router()
 tokensRouter.route('/')

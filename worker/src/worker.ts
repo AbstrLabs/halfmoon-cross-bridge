@@ -4,8 +4,8 @@ import { StateMachine } from './StateMachine';
 import { verify } from './verify';
 import { createOutgoing, sendOutgoing } from './outgoing';
 
-const { txn, poolQuery1, clientQuery1 } = require('artificio-bridge-database');
-const { unreachable } = require('artificio-bridge-common/error');
+const { txn, poolQuery1, clientQuery1 } = require('halfmoon-cross-bridge-database');
+const { unreachable } = require('halfmoon-cross-bridge-common/error');
 const log = require('aritficio-bridge-common/logger');
 
 export async function worker(): Promise<boolean> {

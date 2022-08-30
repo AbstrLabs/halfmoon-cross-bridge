@@ -1,4 +1,4 @@
-const { sql } = require('artificio-bridge-database');
+const { sql } = require('halfmoon-cross-bridge-database');
 
 export class StateMachine {
     constructor(private client: any, private id: number) { }
