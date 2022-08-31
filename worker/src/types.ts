@@ -12,13 +12,13 @@ export interface RequestForVerify {
 
 export interface VerifyResult {
     valid: boolean;
-    to_amount_atom?: string;
+    to_amount_atom?: bigint;
     invalidReason?: string;
 }
 
 export interface RequestForCreatingOutgoing {
     to_addr: string;
-    to_amount_atom: string;
+    to_amount_atom: bigint;
 }
 
 export interface RequestForSendingOutgoing {
@@ -40,6 +40,8 @@ export interface TokenAndFee {
     to_token_blockchain: Blockchain;
     from_token_addr: string | null;
     to_token_addr: string | null;
+    from_token_atoms: number;
+    to_token_atoms: number;
     fixed_fee_atom: string;
     margin_fee_atom: string;
 }

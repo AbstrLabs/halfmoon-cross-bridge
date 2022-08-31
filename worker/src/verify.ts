@@ -1,6 +1,6 @@
 import { RequestForVerify, TokenAndFee, VerifyResult } from "./types";
 import bs58 from "bs58";
-import crypto from 'crypto'
+import crypto, { sign } from 'crypto'
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
     // check incoming transaction valid
@@ -23,7 +23,7 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
 
     // check fee
     let feeAmount = BigInt(request.from_amount_atom) * BigInt(tokenAndFee.margin_fee_atom) + BigInt(tokenAndFee.fixed_fee_atom);
-    let to_amount_atom = BigInt(request.from_amount_atom) - feeAmount;
+    let to_amount_atom = BigInt(request.from_amount_atom) * BigInt(10) ** BigInt(tokenAndFee.to_token_atoms) / (BigInt(10) ** BigInt(tokenAndFee.from_token_atoms) ) - feeAmount;
     if (to_amount_atom <= 0n) {
         return {
             valid: false,
@@ -41,12 +41,13 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
 
     return {
         valid: true,
-        to_amount_atom: to_amount_atom.toString()
+        to_amount_atom,
     };
 }
 
 function verifySignature(signerPublicKey: string, from_txn_hash: string, from_txn_hash_sig: string): boolean {
     try {
+        console.log(signerPublicKey)
         let [keyType, keyData] = signerPublicKey.split(':');
         switch (keyType) {
             case 'ed25519':

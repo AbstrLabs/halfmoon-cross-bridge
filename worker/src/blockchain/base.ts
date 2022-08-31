@@ -12,7 +12,7 @@ export enum TransactionStatus {
 
 export interface TransactionParams {
     to_addr: string;
-    to_amount_atom: string;
+    to_amount_atom: bigint;
     to_token_addr: string | null;
 }
 

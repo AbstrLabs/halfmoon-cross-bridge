@@ -33,8 +33,8 @@ CREATE TABLE fee (
   from_token_id INT REFERENCES token,
   to_token_id INT REFERENCES token CHECK(to_token_id <> from_token_id),
   bridge_type bridge_type_enum NOT NULL,
-  fixed_fee_atom BIGINT NOT NULL,
-  margin_fee_atom BIGINT NOT NULL,
+  fixed_fee_atom DECIMAL NOT NULL,
+  margin_fee_atom DECIMAL NOT NULL,
   PRIMARY KEY (from_token_id, to_token_id)
 );
 
@@ -42,13 +42,13 @@ CREATE TABLE request (
   id SERIAL PRIMARY KEY,
   request_status request_status_enum NOT NULL DEFAULT 'CREATED', 
   from_addr VARCHAR(255) NOT NULL,
-  from_amount_atom BIGINT NOT NULL,
+  from_amount_atom DECIMAL NOT NULL,
   from_token_id INT NOT NULL REFERENCES token,
   from_txn_hash VARCHAR(255) NOT NULL,
 -- prevent use other's from_txn_hash attack  
   from_txn_hash_sig VARCHAR(255) NOT NULL,
   to_addr VARCHAR(255) NOT NULL,
-  to_amount_atom BIGINT,
+  to_amount_atom DECIMAL,
   to_token_id INT NOT NULL REFERENCES token CHECK(to_token_id <> from_token_id),
   to_txn_bytes BYTEA, 
   to_txn_hash VARCHAR(255),

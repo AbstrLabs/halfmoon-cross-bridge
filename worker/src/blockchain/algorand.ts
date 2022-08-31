@@ -113,23 +113,29 @@ class AlgoBlockchain extends Blockchain{
 
     async checkTransactionStatus(txn_hash: string): Promise<TransactionStatus> {
 
-      let info = await this.client.pendingTransactionInformation(txn_hash).do()
+      let info 
+      try {
+        info = await this.client.pendingTransactionInformation(txn_hash).do()
+      } catch (err: any) {
+        if (err.status === 404) {
+          // based on api schema, 404 indicate it's not in the pending pool, then it is in indexer
+          try {
+            await this.getTransaction(txn_hash);
+            return TransactionStatus.Confirmed
+          } catch (e) {
+            // if indexer is down the transaction can be success, in this case throw an error, only we're sure it's really not exist we return that result
+            return TransactionStatus.NotExist
+          }
+        } else {
+          throw err
+        }
+      }
       if(info['confirmed-round']) {
         return TransactionStatus.Confirmed
       } else if (info['pool-error'] == '') {
         return TransactionStatus.Pending
       } else {
         return TransactionStatus.Failed
-      }
-
-      // based on api schema, 404 indicate it's not in the pending pool, then it is in indexer
-      // if check if response is 404. TODO: how to check? does `do` throw an error, if so, differentiate between network error vs really 404
-      try {
-        await this.getTransaction(txn_hash);
-        return TransactionStatus.Confirmed
-      } catch (e) {
-        // if indexer is down the transaction can be success, in this case throw an error, only we're sure it's really not exist we return that result
-        return TransactionStatus.NotExist
       }
     }
 }

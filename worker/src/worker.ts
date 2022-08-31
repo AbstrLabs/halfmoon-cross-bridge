@@ -16,8 +16,11 @@ export async function worker(): Promise<boolean> {
         log.info('No requests to process');
         return false;
       }
-      let s = new StateMachine(client, request.id);
+      
+      log.debug('Processing request:')
+      log.debug(JSON.stringify(request, null, 2));
 
+      let s = new StateMachine(client, request.id);
       let tokenAndFee = await poolQuery1({
         readTokenAndFee: {
           from_token_id: request.from_token_id,
@@ -33,13 +36,12 @@ export async function worker(): Promise<boolean> {
           try {
             verifyResult = await verify(request, tokenAndFee);
           } catch (err) {
-            log.error('Error in verify: ', err);
             await s.verifyError((err as Error).message);
             return true;
           }
 
           if (verifyResult.valid) {
-            await s.verifySuccess(verifyResult.to_amount_atom as string);
+            await s.verifySuccess(verifyResult.to_amount_atom as bigint);
           } else {
             await s.verifyInvalid(verifyResult.invalidReason as string);
           }

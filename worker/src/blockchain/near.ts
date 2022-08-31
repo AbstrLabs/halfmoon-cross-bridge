@@ -119,10 +119,10 @@ class NearBlockchain extends Blockchain {
         // check amount
         let receivedAtom = txnOutcome.transaction.actions[0].Transfer.deposit
         // precision digit conversion happens at outcoming side
-        if (receivedAtom !== fromToken.from_token_addr) {
+        if (receivedAtom !== fromTxn.from_amount_atom) {
             return {valid: false, invalidReason: 'transaction amount does not match'}
         }
-        return {valid: true, signerPk: txnOutcome.transaction.signer_id};
+        return {valid: true, signerPk: txnOutcome.transaction.public_key};
     }
 
     private async connect() {
@@ -135,6 +135,7 @@ class NearBlockchain extends Blockchain {
     private async getTransaction(txn_hash: string, sender: string) {
         let near = await this.connect();
         let provider = near.connection.provider as JsonRpcProvider;
+        // TODO: near-api-js isn't reliable, network failure can cause it return transaction doesn't exit (!)
         return await provider.txStatus(txn_hash, sender);
     }
 }
