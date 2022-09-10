@@ -44,9 +44,7 @@ CREATE TABLE request (
   from_addr VARCHAR(255) NOT NULL,
   from_amount_atom DECIMAL NOT NULL,
   from_token_id INT NOT NULL REFERENCES token,
-  from_txn_hash VARCHAR(255) NOT NULL,
--- prevent use other's from_txn_hash attack  
-  from_txn_hash_sig VARCHAR(255) NOT NULL,
+  from_txn_hash VARCHAR(255) NOT NULL UNIQUE,
   to_addr VARCHAR(255) NOT NULL,
   to_amount_atom DECIMAL,
   to_token_id INT NOT NULL REFERENCES token CHECK(to_token_id <> from_token_id),
@@ -55,8 +53,7 @@ CREATE TABLE request (
   created_time TIMESTAMPTZ NOT NULL DEFAULT now(),
   comment VARCHAR(255),
   invalid_reason VARCHAR(255),
-  err_msg VARCHAR(255),
-  UNIQUE(from_txn_hash, from_txn_hash_sig)
+  err_msg VARCHAR(255)
 );
 
 CREATE INDEX index_request_from_txn_hash ON request (from_txn_hash);

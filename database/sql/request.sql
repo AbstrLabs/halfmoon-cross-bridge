@@ -1,12 +1,12 @@
 -- createRequest
 INSERT INTO request 
 (
-  from_addr, from_amount_atom, from_token_id, from_txn_hash, from_txn_hash_sig, 
+  from_addr, from_amount_atom, from_token_id, from_txn_hash, 
   to_addr, to_token_id, 
   comment
 )
 VALUES (
-  :from_addr, :from_amount_atom, :from_token_id, :from_txn_hash, :from_txn_hash_sig,
+  :from_addr, :from_amount_atom, :from_token_id, :from_txn_hash,
   :to_addr, :to_token_id,
   :comment
 )

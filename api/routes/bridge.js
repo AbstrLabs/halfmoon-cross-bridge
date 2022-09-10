@@ -54,12 +54,11 @@ async function handlePostCall(req, res) {
       },
       "from_token_id": {"type": "number"},
       "from_txn_hash": {"type": "string"},
-      "from_txn_hash_sig": {"type": "string"},
       "to_addr": {"type": "string"},
       "to_token_id": {"type": "number"},
       "comment": {"type": "string"}
     },
-    "required": ["from_addr", "from_amount_atom", "from_token_id", "from_txn_hash", "from_txn_hash_sig", "to_addr", "to_token_id"],
+    "required": ["from_addr", "from_amount_atom", "from_token_id", "from_txn_hash", "to_addr", "to_token_id"],
     "additionalProperties": false
   })
 
@@ -76,7 +75,7 @@ async function handlePostCall(req, res) {
   } catch (err) {
     // insertion rejected by database due to constraint does not satisfy
     if (err.code == '23505') {
-      if(err.constraint == 'request_from_txn_hash_from_txn_hash_sig_key') {
+      if(err.constraint == 'request_from_txn_hash_key') {
         return res.status(400).json({msg: 'duplicate transaction'});
       }
       unreachable()
