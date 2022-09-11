@@ -6,7 +6,7 @@ import { createOutgoing, sendOutgoing } from './outgoing';
 
 const { txn, poolQuery1, clientQuery1 } = require('halfmoon-cross-bridge-database');
 const { unreachable } = require('halfmoon-cross-bridge-common/error');
-const log = require('aritficio-bridge-common/logger');
+const log = require('halfmoon-cross-bridge-common/logger');
 
 export async function worker(): Promise<boolean> {
   try {

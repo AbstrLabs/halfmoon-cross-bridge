@@ -4,8 +4,6 @@ export interface RequestForVerify {
     from_amount_atom: string;
     from_addr: string;
     from_txn_hash: string;
-    from_txn_hash_sig: string;
-    from_pk: string;
 
     to_addr: string;
 }

@@ -116,8 +116,12 @@ class NearBlockchain extends Blockchain {
             return {valid: false, invalidReason: 'transaction receiver is not custody'}
         }
 
+        if (txnOutcome.transaction.actions[0].FunctionCall?.method_name != 'add_bridge_request') {
+            return {valid: false, invalidReason: 'expect to call add_bridge_request'}
+        }
+
         // check amount
-        let receivedAtom = txnOutcome.transaction.actions[0].Transfer.deposit
+        let receivedAtom = txnOutcome.transaction.actions[0].FunctionCall.deposit
         // precision digit conversion happens at outcoming side
         if (receivedAtom !== fromTxn.from_amount_atom) {
             return {valid: false, invalidReason: 'transaction amount does not match'}

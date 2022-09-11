@@ -1,7 +1,7 @@
-const {keyStores, KeyPair, connect, utils} = require('near-api-js')
+const {keyStores, KeyPair, connect, utils, transactions} = require('near-api-js')
 const {env} = require('../dist/utils')
 
-async function transferOnNearTestnet(fromPrivKey, fromAddr, toAddr, amountInNEAR) {
+async function depositOnNearTestnet(fromPrivKey, fromAddr, toAddr, amountInNEAR) {
     const keyStore = new keyStores.InMemoryKeyStore();
     const keyPair = KeyPair.fromString(fromPrivKey);
     await keyStore.setKey('testnet', fromAddr, keyPair);
@@ -15,16 +15,29 @@ async function transferOnNearTestnet(fromPrivKey, fromAddr, toAddr, amountInNEAR
   
     const near = await connect(config);
     const account = await near.account(fromAddr);
-    const response = await account.sendMoney(
-      toAddr, // receiver account
-      utils.format.parseNearAmount(amountInNEAR) // amount in yoctoNEAR
-    );
+    let amount = utils.format.parseNearAmount(amountInNEAR) // amount in yoctoNEAR
+
+    const result = await account.signAndSendTransaction({
+      receiverId: toAddr,
+      actions: [
+          transactions.functionCall(
+              "add_bridge_request",
+              Buffer.from(JSON.stringify({
+                to_blockchain: "Algorand",
+                to_token: "goNEAR",
+                to_address: "83251085",
+              })),
+              "300000000000000",
+              amount
+          ),
+      ],
+  });
   
-    return response;
+    return result;
   }
 
-  async function transferOnNearTestnetFromExampleToMaster(amountInNEAR) {
-    return transferOnNearTestnet(
+  async function depositOnNearTestnetFromExampleToMaster(amountInNEAR) {
+    return depositOnNearTestnet(
       env('NEAR_EXAMPL_PRIV'),
       env('NEAR_EXAMPL_ADDR'),
       env('NEAR_MASTER_ADDR'),
@@ -32,4 +45,4 @@ async function transferOnNearTestnet(fromPrivKey, fromAddr, toAddr, amountInNEAR
     );
   }
 
-  module.exports = {transferOnNearTestnet, transferOnNearTestnetFromExampleToMaster}
+  module.exports = {depositOnNearTestnet, depositOnNearTestnetFromExampleToMaster}

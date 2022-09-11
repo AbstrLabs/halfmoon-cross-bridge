@@ -12,10 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "algosdk": "^1.19.1",
+    "bs58": "^5.0.0",
+    "dotenv": "^16.0.1",
     "halfmoon-cross-bridge-common": "file:../common",
     "halfmoon-cross-bridge-database": "file:../database",
-    "bs58": "^5.0.0",
-    "dotenv": "^16.0.1"
+    "near-api-js": "^1.0.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

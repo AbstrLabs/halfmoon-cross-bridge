@@ -12,15 +12,6 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
         };
     }
 
-    // check signature
-    let signerPublicKey = verifyResult.signerPk as string;
-    if (!verifySignature(signerPublicKey, request.from_txn_hash, request.from_txn_hash_sig)) {
-        return {
-            valid: false,
-            invalidReason: 'invalid transaction hash signature',
-        };
-    }
-
     // check fee
     let feeAmount = BigInt(request.from_amount_atom) * BigInt(tokenAndFee.margin_fee_atom) + BigInt(tokenAndFee.fixed_fee_atom);
     let to_amount_atom = BigInt(request.from_amount_atom) * BigInt(10) ** BigInt(tokenAndFee.to_token_atoms) / (BigInt(10) ** BigInt(tokenAndFee.from_token_atoms) ) - feeAmount;
