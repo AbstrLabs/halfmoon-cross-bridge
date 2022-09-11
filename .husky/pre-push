@@ -1,6 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# unit tests and integration tests
-# yarn unit-test --bail
-# yarn integration-test run this locally. its not working anyway
