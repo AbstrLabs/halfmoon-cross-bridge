@@ -1,3 +1,0 @@
-- update `WELCOME_JSON` with version and HTTPS
-- add a try catch for `getTxnStatus` error
-- add a interval stop for `confirmTxn`
