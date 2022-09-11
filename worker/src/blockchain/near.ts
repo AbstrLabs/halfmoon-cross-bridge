@@ -75,9 +75,10 @@ class NearBlockchain extends Blockchain {
     if (params.to_token_addr != null) {
       throw new Error('NEP-141 tokens not yet supported');
     }
-    let [txn_hash_bytes, signed_txn] = await account.signTx(params.to_addr, [
-      transactions.transfer(params.to_amount_atom),
-    ]);
+    let [txn_hash_bytes, signed_txn] = await (account as any).signTransaction(
+      params.to_addr,
+      [transactions.transfer(params.to_amount_atom)]
+    );
     return new NearTransaction(
       base58.encode(txn_hash_bytes),
       signed_txn.encode()
@@ -193,7 +194,7 @@ class NearBlockchain extends Blockchain {
         invalidReason: 'transaction amount does not match',
       };
     }
-    return { valid: true, signerPk: txnOutcome.transaction.public_key };
+    return { valid: true };
   }
 
   private async connect() {

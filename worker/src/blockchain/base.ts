@@ -21,7 +21,6 @@ export interface TransactionParams {
 export type VerifyResult = {
   valid: boolean;
   invalidReason?: string;
-  signerPk?: string;
 };
 
 export interface FromToken {

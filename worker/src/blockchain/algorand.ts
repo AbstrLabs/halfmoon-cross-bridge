@@ -60,14 +60,14 @@ class AlgoBlockchain extends Blockchain {
     const sender = txn.sender;
     const receiver = txn['asset-transfer-transaction'].receiver;
     const assetId = txn['asset-transfer-transaction']['asset-id'];
-    const pk = algosdk.decodeAddress(sender).publicKey;
+    const note = txn.note;
 
     // verify confirmed
     if (!(currentRound >= confirmedRound)) {
       return { valid: false, invalidReason: 'not confirmed' };
     }
-    // compare assetId
-    if (assetId !== fromToken.from_token_addr) {
+
+    if (assetId != fromToken.from_token_addr) {
       return { valid: false, invalidReason: 'assetId not match' };
     }
     // compare sender
@@ -82,8 +82,17 @@ class AlgoBlockchain extends Blockchain {
     if (amount !== fromTxn.from_amount_atom) {
       return { valid: false, invalidReason: 'amount not match' };
     }
+    // compare bridge to account
+    console.log(Buffer.from(note, 'base64').toString('utf8'));
+    console.log(fromTxn.to_addr);
+    if (Buffer.from(note, 'base64').toString('utf8') !== fromTxn.to_addr) {
+      return {
+        valid: false,
+        invalidReason: 'bridge to address does not match',
+      };
+    }
     // algorand always use ed25519 public key
-    return { valid: true, signerPk: 'ed25519:' + base58.encode(pk) };
+    return { valid: true };
   }
 
   async addressIsValid(addr: string): Promise<boolean> {
