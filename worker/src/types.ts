@@ -1,18 +1,34 @@
 import { Blockchain } from "./blockchain/base";
 
 export interface RequestForVerify {
-    from_amount_atom: string;
     from_addr: string;
     from_txn_hash: string;
-
-    to_addr: string;
 }
 
-export interface VerifyResult {
+export type VerifyIncomingResult = {
     valid: boolean;
-    to_amount_atom?: bigint;
     invalidReason?: string;
-}
+    successData?: VerifyIncomingSuccessData;
+};
+
+export type VerifyIncomingSuccessData = {
+    from_amount_atom: bigint;
+    from_token_addr: string | null;
+    to_blockchain: string;
+    to_addr: string;
+};
+
+export type VerifyResult = {
+    valid: boolean;
+    invalidReason?: string;
+    successData?: VerifySuccessData;
+};
+
+export type VerifySuccessData = {
+    from_amount_atom: bigint;
+    to_amount_atom: bigint;
+    to_addr: string;
+};
 
 export interface RequestForCreatingOutgoing {
     to_addr: string;

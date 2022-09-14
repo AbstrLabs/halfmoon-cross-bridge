@@ -1,13 +1,13 @@
 -- createRequest
 INSERT INTO request 
 (
-  from_addr, from_amount_atom, from_token_id, from_txn_hash, 
-  to_addr, to_token_id, 
+  from_addr, from_token_id, from_txn_hash, 
+  to_token_id, 
   comment
 )
 VALUES (
-  :from_addr, :from_amount_atom, :from_token_id, :from_txn_hash,
-  :to_addr, :to_token_id,
+  :from_addr, :from_token_id, :from_txn_hash,
+  :to_token_id,
   :comment
 )
 RETURNING id;
@@ -29,7 +29,7 @@ RETURNING id;
 
 -- updateRequestCreatedToDoneVerify
 UPDATE request SET
-  request_status='DONE_VERIFY', to_amount_atom=:to_amount_atom
+  request_status='DONE_VERIFY', to_amount_atom=:to_amount_atom, from_amount_atom=:from_amount_atom, to_addr=:to_addr
     WHERE (
       id=:id AND
       request_status='CREATED'
