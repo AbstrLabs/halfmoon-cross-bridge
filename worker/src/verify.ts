@@ -20,14 +20,16 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
         };
     }
 
+    let to_amount_atom_before_fee =
+        (verifyIncomingResult.successData!.from_amount_atom * 10n ** BigInt(tokenAndFee.to_token_atoms)) /
+        10n ** BigInt(tokenAndFee.from_token_atoms)
     // check fee
-    let feeAmount =
-        verifyIncomingResult.successData!.from_amount_atom * BigInt(tokenAndFee.margin_fee_atom) +
+    let feeAmount = to_amount_atom_before_fee * BigInt(tokenAndFee.margin_fee_atom) / 10000n +
         BigInt(tokenAndFee.fixed_fee_atom);
-    let to_amount_atom =
-        (verifyIncomingResult.successData!.from_amount_atom * BigInt(10) ** BigInt(tokenAndFee.to_token_atoms)) /
-            BigInt(10) ** BigInt(tokenAndFee.from_token_atoms) -
-        feeAmount;
+    console.log(to_amount_atom_before_fee)
+    console.log(tokenAndFee)
+    console.log(feeAmount)
+    let to_amount_atom = to_amount_atom_before_fee - feeAmount;
     if (to_amount_atom <= 0n) {
         return {
             valid: false,
