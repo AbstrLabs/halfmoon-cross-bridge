@@ -136,7 +136,6 @@ class NearBlockchain extends Blockchain {
     private async getTransaction(txn_hash: string, sender: string) {
         let near = await this.connect();
         let provider = near.connection.provider as JsonRpcProvider;
-        // TODO: near-api-js isn't reliable, network failure can cause it return transaction doesn't exit (!)
         return await provider.txStatus(txn_hash, sender);
     }
 }
