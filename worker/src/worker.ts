@@ -13,7 +13,7 @@ export async function worker(): Promise<boolean> {
         return await txn(async (client: any) => {
             let request = await clientQuery1(client, { readRequestToProcess: {} });
             if (request === undefined) {
-                log.info("No requests to process");
+                log.debug("No requests to process");
                 return false;
             }
 

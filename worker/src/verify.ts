@@ -22,13 +22,10 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
 
     let to_amount_atom_before_fee =
         (verifyIncomingResult.successData!.from_amount_atom * 10n ** BigInt(tokenAndFee.to_token_atoms)) /
-        10n ** BigInt(tokenAndFee.from_token_atoms)
+        10n ** BigInt(tokenAndFee.from_token_atoms);
     // check fee
-    let feeAmount = to_amount_atom_before_fee * BigInt(tokenAndFee.margin_fee_atom) / 10000n +
-        BigInt(tokenAndFee.fixed_fee_atom);
-    console.log(to_amount_atom_before_fee)
-    console.log(tokenAndFee)
-    console.log(feeAmount)
+    let feeAmount =
+        (to_amount_atom_before_fee * BigInt(tokenAndFee.margin_fee_atom)) / 10000n + BigInt(tokenAndFee.fixed_fee_atom);
     let to_amount_atom = to_amount_atom_before_fee - feeAmount;
     if (to_amount_atom <= 0n) {
         return {
@@ -61,23 +58,4 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
             to_amount_atom,
         },
     };
-}
-
-function verifySignature(signerPublicKey: string, from_txn_hash: string, from_txn_hash_sig: string): boolean {
-    try {
-        console.log(signerPublicKey);
-        let [keyType, keyData] = signerPublicKey.split(":");
-        switch (keyType) {
-            case "ed25519":
-                let bytes = bs58.decode(keyData);
-                const prefix = Buffer.from("302a300506032b6570032100", "hex");
-                let key = Buffer.concat([prefix, bytes]);
-                let pk = crypto.createPublicKey({ key, format: "der", type: "spki" });
-                return crypto.verify(null, bs58.decode(from_txn_hash), pk, bs58.decode(from_txn_hash_sig));
-            default:
-                return false;
-        }
-    } catch (err) {
-        return false;
-    }
 }

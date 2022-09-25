@@ -79,7 +79,6 @@ async function handlePostCall(req, res) {
             unreachable();
         }
         // or it's a connection error
-        console.log(err);
         log.error(err);
         return res.status(500).json({ msg: "failed to query database" });
     }

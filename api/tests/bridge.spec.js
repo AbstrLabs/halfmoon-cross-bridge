@@ -36,9 +36,7 @@ afterAll(async () => {
 
 describe("GET /bridge", () => {
     test("should get bridge txn", async () => {
-        console.log(firstId);
         const { status, body } = await request(app).get(`/bridge?id=${firstId}`);
-        console.log(body);
         expect(status).toBe(200);
         expect(body.id).toBe(firstId);
         expect(body.from_addr).toBe("zxcvn.testnet");
@@ -79,7 +77,6 @@ describe("POST /bridge", () => {
             to_token_id: 3,
         };
         const { status, body } = await request(app).post(`/bridge`).send(req);
-        console.log(body);
         expect(status).toBe(201);
         expect(body.id).toBeDefined();
     });
@@ -93,7 +90,6 @@ describe("POST /bridge", () => {
             comment: "haha",
         };
         const { status, body } = await request(app).post(`/bridge`).send(req);
-        console.log(body);
         expect(status).toBe(201);
         expect(body.id).toBeDefined();
     });
@@ -107,7 +103,6 @@ describe("POST /bridge", () => {
             comment: "haha",
         };
         const { status, body } = await request(app).post(`/bridge`).send(req);
-        console.log(body);
         expect(status).toBe(400);
         expect(body).toEqual({ msg: "duplicate transaction" });
     });
@@ -139,7 +134,6 @@ describe("POST /bridge", () => {
             comment: "haha",
         };
         const { status, body } = await request(app).post(`/bridge`).send(req);
-        console.log(body);
         expect(status).toBe(400);
         expect(body).toEqual({ msg: "from_token and to_token must be different" });
     });
