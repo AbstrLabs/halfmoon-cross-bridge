@@ -101,20 +101,6 @@ class NearBlockchain extends Blockchain {
 
     async verifyIncomingTransaction(request: RequestForVerify): Promise<VerifyIncomingResult> {
         let txnOutcome = await this.getTransaction(request.from_txn_hash, request.from_addr);
-        if (txnOutcome.status instanceof Object) {
-            if (txnOutcome.status.Failure !== undefined) {
-                return { valid: false, invalidReason: "transaction failed" };
-            }
-        } else {
-            if (
-                txnOutcome.status === providers.FinalExecutionStatusBasic.NotStarted ||
-                txnOutcome.status === providers.FinalExecutionStatusBasic.Started
-            ) {
-                return { valid: false, invalidReason: "transaction not confirmed" };
-            } else if (txnOutcome.status === providers.FinalExecutionStatusBasic.Failure) {
-                return { valid: false, invalidReason: "transaction failed" };
-            }
-        }
 
         // check is send to custody
         if (txnOutcome.transaction.receiver_id !== this.centralizedAccount) {

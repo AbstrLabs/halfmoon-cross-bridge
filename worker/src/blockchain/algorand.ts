@@ -34,29 +34,17 @@ class AlgoBlockchain extends Blockchain {
     centralizedSk = algosdk.mnemonicToSecretKey(env("ALGO_MASTER_PASS")).sk;
 
     private async getTransaction(txn_hash: string): Promise<any> {
-        try {
-            const outcome = await this.indexer.lookupTransactionByID(txn_hash).do();
-            return outcome;
-        } catch (err) {
-            throw err;
-        }
+        return await this.indexer.lookupTransactionByID(txn_hash).do();
     }
 
     async verifyIncomingTransaction(fromTxn: RequestForVerify): Promise<VerifyIncomingResult> {
         let outcome = await this.getTransaction(fromTxn.from_txn_hash);
-        const currentRound = outcome["current-round"];
         const txn = outcome.transaction;
-        const confirmedRound = txn["confirmed-round"];
         const amount = `${txn["asset-transfer-transaction"].amount}`;
         const sender = txn.sender;
         const receiver = txn["asset-transfer-transaction"].receiver;
         const assetId = txn["asset-transfer-transaction"]["asset-id"];
         const note = txn.note;
-
-        // verify confirmed
-        if (!(currentRound >= confirmedRound)) {
-            return { valid: false, invalidReason: "not confirmed" };
-        }
 
         // compare sender
         if (sender !== fromTxn.from_addr) {
@@ -122,11 +110,15 @@ class AlgoBlockchain extends Blockchain {
             if (err.status === 404) {
                 // based on api schema, 404 indicate it's not in the pending pool, then it is in indexer
                 try {
+                    // if not exist in node, it can be too old or really doesn't exist, in that case check whether it exist in indexer
                     await this.getTransaction(txn_hash);
                     return TransactionStatus.Confirmed;
-                } catch (e) {
-                    // if indexer is down the transaction can be success, in this case throw an error, only we're sure it's really not exist we return that result
-                    return TransactionStatus.NotExist;
+                } catch (e: any) {
+                    if (e.status == 404) {
+                        return TransactionStatus.NotExist;
+                    } else {
+                        throw e;
+                    }
                 }
             } else {
                 throw err;

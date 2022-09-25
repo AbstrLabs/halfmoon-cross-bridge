@@ -1,9 +1,31 @@
+import { TransactionStatus } from "./blockchain/base";
 import { RequestForVerify, TokenAndFee, VerifyResult } from "./types";
-import bs58 from "bs58";
-import crypto from "crypto";
+import { backoff } from "./utils";
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
-    // check incoming transaction valid
+    // wait incoming transaction confirmed
+    let confirmResult = await backoff(
+        5,
+        async () => {
+            let status = await tokenAndFee.from_token_blockchain.checkTransactionStatus(request.from_txn_hash);
+            if (status == TransactionStatus.Failed) {
+                // todo: get the real reason
+                return { valid: false, invalidReason: "transaction invalid" };
+            } else if (status == TransactionStatus.Confirmed) {
+                return { valid: true };
+            } else {
+                // pending
+                throw new Error("transaction not finished");
+            }
+        },
+        tokenAndFee.to_token_blockchain.txnGoThroughTime * 1000
+    );
+    if (!confirmResult.valid) {
+        return confirmResult;
+    }
+
+    // At this point incoming transaction must be a successful blockchain transaction
+    // check incoming transaction is business-logically right: correct receiver, type, etc.
     let verifyIncomingResult = await tokenAndFee.from_token_blockchain.verifyIncomingTransaction(request);
     if (!verifyIncomingResult.valid) {
         return {
