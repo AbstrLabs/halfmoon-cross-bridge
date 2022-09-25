@@ -14,7 +14,7 @@ describe("GET /fees", () => {
                 to_token_addr: "83251085",
                 to_token_blockchain: "Algorand",
                 to_token_name: "goNEAR",
-                fixed_fee_atom: "1",
+                fixed_fee_atom: "10000000",
                 from_token_id: 2,
                 margin_fee_atom: "0",
                 to_token_id: 3,
