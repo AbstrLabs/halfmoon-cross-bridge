@@ -36,6 +36,7 @@ export async function worker(): Promise<boolean> {
                     try {
                         verifyResult = await verify(request, tokenAndFee);
                     } catch (err) {
+                        console.error(err)
                         await s.verifyError((err as Error).message);
                         return true;
                     }
