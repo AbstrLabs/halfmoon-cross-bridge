@@ -1,25 +1,48 @@
 import { TransactionStatus } from "./blockchain/base";
 import { RequestForVerify, TokenAndFee, VerifyResult } from "./types";
 import { backoff } from "./utils";
+const { unreachable } = require("halfmoon-cross-bridge-common/error");
+
+class TransactionNotExist extends Error {}
+class TransactionPending extends Error {}
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
     // wait incoming transaction confirmed
-    let confirmResult = await backoff(
-        5,
-        async () => {
-            let status = await tokenAndFee.from_token_blockchain.checkTransactionStatus(request.from_txn_hash);
-            if (status == TransactionStatus.Failed) {
-                // todo: get the real reason
-                return { valid: false, invalidReason: "transaction invalid" };
-            } else if (status == TransactionStatus.Confirmed) {
-                return { valid: true };
-            } else {
-                // pending
-                throw new Error("transaction not finished");
-            }
-        },
-        tokenAndFee.to_token_blockchain.txnGoThroughTime * 1000
-    );
+    let confirmResult;
+    try {
+        confirmResult = await backoff(
+            5,
+            async () => {
+                let status = await tokenAndFee.from_token_blockchain.checkTransactionStatus(request.from_txn_hash);
+                if (status == TransactionStatus.Failed) {
+                    // todo: get the real reason
+                    return { valid: false, invalidReason: "transaction invalid" };
+                } else if (status == TransactionStatus.Confirmed) {
+                    return { valid: true };
+                } else if (status == TransactionStatus.NotExist) {
+                    throw new TransactionNotExist();
+                } else if (status == TransactionStatus.Pending) {
+                    throw new TransactionPending();
+                }
+                unreachable();
+            },
+            tokenAndFee.to_token_blockchain.txnGoThroughTime * 1000
+        );
+    } catch (e) {
+        if (e instanceof TransactionNotExist) {
+            return {
+                valid: false,
+                invalidReason: "transaction not exist",
+            };
+        } else if (e instanceof TransactionPending) {
+            return {
+                valid: false,
+                invalidReason: "transaction pending too long",
+            };
+        } else {
+            throw e;
+        }
+    }
     if (!confirmResult.valid) {
         return confirmResult;
     }
