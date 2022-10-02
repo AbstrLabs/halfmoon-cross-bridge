@@ -10,11 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "halfmoon-cross-bridge-common": "file:../common",
-    "halfmoon-cross-bridge-database": "file:../database",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "express-query-parser": "^1.3.3",
+    "halfmoon-cross-bridge-common": "file:../common",
+    "halfmoon-cross-bridge-database": "file:../database",
     "jsonschema": "^1.4.1",
     "yargs": "^17.5.1"
   },
