@@ -36,7 +36,7 @@ export async function worker(): Promise<boolean> {
                     try {
                         verifyResult = await verify(request, tokenAndFee);
                     } catch (err) {
-                        console.error(err)
+                        console.error(err);
                         await s.verifyError((err as Error).message);
                         return true;
                     }
@@ -54,7 +54,13 @@ export async function worker(): Promise<boolean> {
                     return true;
                 }
                 case "DOING_OUTGOING": {
-                    let outgoingResult = await sendOutgoing(request, tokenAndFee);
+                    let outgoingResult;
+                    try {
+                        outgoingResult = await sendOutgoing(request, tokenAndFee);
+                    } catch (err: any) {
+                        await s.outgoingError((err as Error).message);
+                        return true;
+                    }
                     if (outgoingResult.success) {
                         await s.outgoingSuccess();
                     } else {
