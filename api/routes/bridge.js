@@ -56,7 +56,15 @@ async function handlePostCall(req, res) {
     });
 
     if (!v.valid) {
-        return res.status(400).json({ errors: v.errors.map((e) => e.toString()) });
+        return res.status(400).json({
+            errors: v.errors.map((e) => {
+                let msg = e.toString();
+                if (msg.startsWith("instance.from_txn_hash does not match pattern")) {
+                    return "from_txn_hash is invalid";
+                }
+                return msg;
+            }),
+        });
     }
     if (!params.comment) {
         params.comment = null;
