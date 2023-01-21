@@ -47,7 +47,7 @@ async function handlePostCall(req, res) {
         properties: {
             from_addr: { type: "string" },
             from_token_id: { type: "number" },
-            from_txn_hash: { type: "string" },
+            from_txn_hash: { type: "string", pattern: "^[a-zA-Z0-9]+$" },
             to_token_id: { type: "number" },
             comment: { type: "string" },
         },
