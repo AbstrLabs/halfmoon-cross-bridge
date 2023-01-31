@@ -61,7 +61,7 @@ export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee
     if (verifyIncomingResult.successData!.from_token_addr != tokenAndFee.from_token_addr) {
         return {
             valid: false,
-            invalidReason: "to token address does not match",
+            invalidReason: "from token address does not match",
         };
     }
 
