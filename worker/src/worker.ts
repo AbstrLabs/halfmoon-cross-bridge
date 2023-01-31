@@ -27,6 +27,10 @@ export async function worker(): Promise<boolean> {
                     to_token_id: request.to_token_id,
                 },
             });
+            if (!tokenAndFee) {
+                await s.verifyInvalid("Unsupported pair to bridge");
+                return true;
+            }
             tokenAndFee.from_token_blockchain = BlockchainNameToClass.get(tokenAndFee.from_token_blockchain);
             tokenAndFee.to_token_blockchain = BlockchainNameToClass.get(tokenAndFee.to_token_blockchain);
 
