@@ -40,7 +40,7 @@ class NearBlockchain extends Blockchain {
         };
     }
 
-    async addressIsValid(addr: string): Promise<boolean> {
+    addressIsValid(addr: string): boolean {
         if (
             addr.length < 2 ||
             addr.length > 64 ||
@@ -49,6 +49,16 @@ class NearBlockchain extends Blockchain {
             return false;
         }
         return true;
+    }
+
+    transactionHashIsValid(txn_hash: string): boolean {
+        let hash;
+        try {
+            hash = base58.decode(txn_hash);
+        } catch (e) {
+            return false;
+        }
+        return hash.length == 32;
     }
 
     async createTransactionObject(params: TransactionParams): Promise<Transaction> {

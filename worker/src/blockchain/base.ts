@@ -26,7 +26,9 @@ export abstract class Blockchain {
     abstract txnGoThroughTime: number;
     // used in verify
     abstract verifyIncomingTransaction(fromTxn: RequestForVerify): Promise<VerifyIncomingResult>;
-    abstract addressIsValid(addr: string): Promise<boolean>;
+    abstract addressIsValid(addr: string): boolean;
+    abstract transactionHashIsValid(txn_hash: string): boolean;
+
     // used in createOutgoing
     abstract createTransactionObject(params: TransactionParams): Promise<Transaction>;
     // used in sendOutgoing

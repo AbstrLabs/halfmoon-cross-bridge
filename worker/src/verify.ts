@@ -7,6 +7,9 @@ class TransactionNotExist extends Error {}
 class TransactionPending extends Error {}
 
 export async function verify(request: RequestForVerify, tokenAndFee: TokenAndFee): Promise<VerifyResult> {
+    if (!tokenAndFee.from_token_blockchain.transactionHashIsValid(request.from_txn_hash)) {
+        return { valid: false, invalidReason: "transaction hash invalid" };
+    }
     // wait incoming transaction confirmed
     let confirmResult;
     try {

@@ -63,13 +63,17 @@ class AlgoBlockchain extends Blockchain {
         };
     }
 
-    async addressIsValid(addr: string): Promise<boolean> {
+    addressIsValid(addr: string): boolean {
         try {
             algosdk.decodeAddress(addr);
         } catch (e) {
             return false;
         }
         return true;
+    }
+
+    transactionHashIsValid(txn_hash: string): boolean {
+        return Boolean(txn_hash.match(/[A-Z0-9]{52}/));
     }
 
     async createTransactionObject(algoTxnParam: TransactionParams): Promise<AlgoTransaction> {
