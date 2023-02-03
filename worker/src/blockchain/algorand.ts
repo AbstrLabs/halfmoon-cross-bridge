@@ -73,7 +73,7 @@ class AlgoBlockchain extends Blockchain {
     }
 
     transactionHashIsValid(txn_hash: string): boolean {
-        return Boolean(txn_hash.match(/[A-Z0-9]{52}/));
+        return Boolean(txn_hash.match(/^[A-Z0-9]{52}$/));
     }
 
     async createTransactionObject(algoTxnParam: TransactionParams): Promise<AlgoTransaction> {
